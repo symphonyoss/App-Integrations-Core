@@ -136,6 +136,7 @@
         <module>integration-trello</module>
         <module>integration-universal-whi</module>
         <module>integration-salesforce</module>
+        <module>integration-zapier</module>
     </modules>
 
     <repositories>
