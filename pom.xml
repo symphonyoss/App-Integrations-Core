@@ -131,6 +131,7 @@
         <module>integration-healthcheck</module>
         <module>integration-core</module>
         <module>integration-webhook</module>
+        <module>integration-jira</module>
     </modules>
 
     <repositories>
