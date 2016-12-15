@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+
+    <Properties>
+        <Property name="catalina.base">${sys:java.io.tmpdir}</Property>
+        <Property name="log4j2.logLevel">INFO</Property>
+        <Property name="log4j2.symphonyLogLevel">INFO</Property>
+        <Property name="log4j2.consoleLogThreshold">INFO</Property>
+        <Property name="log4j2.outputAllToConsole">false</Property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="${sys:log4j2.consoleLogThreshold}" onMatch="ACCEPT"
+                             onMismatch="DENY"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M %X{X-Trace-Id} - %m%n"/>
+        </Console>
+
+        <RollingFile name="error-rolling-file"
+                     fileName="${sys:catalina.base}/logs/integration-bridge-error.log"
+                     filePattern="${sys:catalina.base}/logs/integration-bridge-error-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <DefaultRolloverStrategy max="10"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="rolling-file"
+                     fileName="${sys:catalina.base}/logs/integration-bridge.log"
+                     filePattern="${sys:catalina.base}/logs/integration-bridge-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
+            <DefaultRolloverStrategy max="10"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <AsyncLogger name="com.symphony" level="${sys:log4j2.symphonyLogLevel}"
+                     additivity="${sys:log4j2.outputAllToConsole}">
+            <AppenderRef ref="rolling-file"/>
+            <AppenderRef ref="error-rolling-file"/>
+        </AsyncLogger>
+
+        <AsyncRoot level="${sys:log4j2.logLevel}">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="error-rolling-file"/>
+        </AsyncRoot>
+
+    </Loggers>
+
+</Configuration>
