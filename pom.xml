@@ -124,6 +124,10 @@
         </contributor>
     </contributors>
 
+    <modules>
+        <module>integration-commons</module>
+    </modules>
+
     <repositories>
         <repository>
             <id>symphony</id>
