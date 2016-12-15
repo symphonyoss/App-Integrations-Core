@@ -1,0 +1,34 @@
+<entity type="com.symphony.integration.trello.event.updateCard" version="1.0">
+<presentationML>Evandro Carrenho unarchived My Card 1 to My List 2 (in My Trello Board) (<a href="https://trello.com/b/t0hu7Ffx"/>)
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-08-05T16:55:37.032Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="ecarrenhosymphony"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Evandro Carrenho"/>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/b/t0hu7Ffx"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Trello Board"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b33b350eb2bcc1f42ca"/>
+</entity>
+<entity type="com.symphony.integration.trello.list" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="My List 2"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a4bf950a29af9d7ead8f02"/>
+</entity>
+<entity type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="thH8QUqG"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Card 1"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a4a5aad6759eba0f594ec2"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="7"/>
+<attribute name="closed" type="org.symphonyoss.string" value="false"/>
+</entity>
+<entity type="com.symphony.integration.trello.changelog" version="1.0">
+<entity type="com.symphony.integration.trello.change" version="1.0">
+<attribute name="fieldName" type="org.symphonyoss.string" value="closed"/>
+<attribute name="oldValue" type="org.symphonyoss.string" value="true"/>
+<attribute name="newValue" type="org.symphonyoss.string" value="false"/>
+</entity>
+</entity>
+</entity>
+</entity>

@@ -1,0 +1,35 @@
+<entity type="com.symphony.integration.trello.event.convertToCardFromCheckItem" version="1.0">
+<presentationML>Evandro Carrenho converted Comments entity builder from a checklist item on Need to add the ability to see comments (<a href="https://trello.com/b/t0hu7Ffx"/>)
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-09-13T16:18:38.654Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="ecarrenhosymphonytest"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Evandro Carrenho"/>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/b/t0hu7Ffx"/>
+<attribute name="name" type="org.symphonyoss.string" value="Symphony Innovate"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b33b350eb2bcc1f42ca"/>
+<entity type="com.symphony.integration.trello.prefs" version="1.0">
+<attribute name="background" type="org.symphonyoss.string" value="blue"/>
+<attribute name="backgroundColor" type="org.symphonyoss.string" value="#0079BF"/>
+</entity>
+</entity>
+<entity type="com.symphony.integration.trello.list" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="Do Trello Parsers"/>
+<attribute name="id" type="org.symphonyoss.string" value="57d6ec9303e4f6b21c1696a9"/>
+</entity>
+<entity name="card" type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="Comments entity builder"/>
+<attribute name="id" type="org.symphonyoss.string" value="57d826de3fbb7c89a046dfac"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="13"/>
+</entity>
+<entity name="cardSource" type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="woQM9Qqo"/>
+<attribute name="name" type="org.symphonyoss.string" value="Need to add the ability to see comments"/>
+<attribute name="id" type="org.symphonyoss.string" value="57d6ecdfcdddf493280e0d1b"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="11"/>
+</entity>
+</entity>
+</entity>

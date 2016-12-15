@@ -1,0 +1,37 @@
+{
+  "model": {
+    "id": "57a34b33b350eb2bcc1f42ca",
+    "name": "My Trello Board",
+    "shortUrl": "https://trello.com/t0hu7Ffx"
+  },
+  "action": {
+    "id": "57a3511547472729d39d59ff",
+    "idMemberCreator": "57a0fdef0f45592699722783",
+    "data": {
+      "list": {
+        "name": "My List 1",
+        "id": "57a34bdaa4050393a6f15a24"
+      },
+      "board": {
+        "shortLink": "t0hu7Ffx",
+        "name": "My Trello Board",
+        "id": "57a34b33b350eb2bcc1f42ca"
+      },
+      "card": {
+        "shortLink": "QazveT2S",
+        "idShort": 1,
+        "name": "My Card",
+        "id": "57a35009784b0df0be746cbc"
+      },
+      "text": "My comment on this card"
+    },
+    "type": "commentCard",
+    "date": "2016-08-04T14:28:37.415Z",
+    "memberCreator": {
+      "id": "57a0fdef0f45592699722783",
+      "fullName": "User Test",
+      "initials": "UT",
+      "username": "usertest"
+    }
+  }
+}

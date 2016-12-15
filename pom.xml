@@ -133,6 +133,7 @@
         <module>integration-webhook</module>
         <module>integration-jira</module>
         <module>integration-github</module>
+        <module>integration-trello</module>
     </modules>
 
     <repositories>

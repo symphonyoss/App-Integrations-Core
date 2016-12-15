@@ -1,0 +1,27 @@
+<entity type="com.symphony.integration.trello.event.commentCard" version="1.0">
+<presentationML>User Test on My Card<br/>"My comment on this card"
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-08-04T14:28:37.415Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="usertest"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="User Test"/>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<attribute name="comment" type="org.symphonyoss.string" value="My comment on this card"/>
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/t0hu7Ffx"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Trello Board"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b33b350eb2bcc1f42ca"/>
+</entity>
+<entity type="com.symphony.integration.trello.list" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="My List 1"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34bdaa4050393a6f15a24"/>
+</entity>
+<entity type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="QazveT2S"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Card"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a35009784b0df0be746cbc"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="1"/>
+</entity>
+</entity>
+</entity>

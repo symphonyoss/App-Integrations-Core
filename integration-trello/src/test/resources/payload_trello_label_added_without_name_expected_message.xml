@@ -1,0 +1,27 @@
+<entity type="com.symphony.integration.trello.event.addLabelToCard" version="1.0">
+<presentationML>Evandro Carrenho added the label "black" to My Card 1 (in My Trello Board) (<a href="https://trello.com/b/t0hu7Ffx"/>)
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-08-05T16:48:01.304Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="ecarrenhosymphony"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Evandro Carrenho"/>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/b/t0hu7Ffx"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Trello Board"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b33b350eb2bcc1f42ca"/>
+</entity>
+<entity type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="thH8QUqG"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Card 1"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a4a5aad6759eba0f594ec2"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="7"/>
+</entity>
+<entity type="com.symphony.integration.trello.label" version="1.0">
+<attribute name="color" type="org.symphonyoss.string" value="black"/>
+<attribute name="name" type="org.symphonyoss.string" value=""/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b3384e677fd36cc13b8"/>
+</entity>
+</entity>
+</entity>
