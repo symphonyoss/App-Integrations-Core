@@ -129,6 +129,7 @@
         <module>integration-auth</module>
         <module>integration-config</module>
         <module>integration-healthcheck</module>
+        <module>integration-core</module>
     </modules>
 
     <repositories>
