@@ -1,0 +1,31 @@
+<messageML>
+    <entity type="com.symphony.integration.github.event.issue_comment" version="1.0">
+        <presentationML>
+            Baxter The Hacker just commented on the issue "Test Issue with Special chars: ´ ` &apos; &quot; ^ ~ ç Ç á Á é É ü ê Ê ã Ã":<br/>
+            Testing special chars: ´ ` &apos; &quot; ^ ~ ç Ç á Á é É ü ê Ê ã Ã<br/>
+            You can check this on GitHub at <a href="https://github.com/baxterthehacker/public-repo/issues/2#issuecomment-99262140"/>
+        </presentationML>
+        <attribute name="action" type="org.symphonyoss.string" value="created"/>
+        <attribute name="body" type="org.symphonyoss.string" value="Testing special chars: ´ ` &amp;apos; &amp;quot; ^ ~ ç Ç á Á é É ü ê Ê ã Ã"/>
+        <attribute name="html_url" type="com.symphony.uri" value="https://github.com/baxterthehacker/public-repo/issues/2#issuecomment-99262140"/>
+        <attribute name="created_at" type="org.symphonyoss.time.rfc3339" value="2015-05-05T23:40:28Z"/>
+        <attribute name="updated_at" type="org.symphonyoss.time.rfc3339" value="2015-05-05T23:40:28Z"/>
+        <entity name="user" type="com.symphony.integration.github.user" version="1.0">
+            <attribute name="name" type="org.symphonyoss.string" value="Baxter The Hacker"/>
+            <attribute name="login" type="org.symphonyoss.string" value="baxterthehacker"/>
+            <attribute name="email" type="org.symphonyoss.string" value="baxterthehacker@users.noreply.github.com"/>
+            <attribute name="id" type="org.symphony.oss.number.long" value="6752317"/>
+        </entity>
+        <entity name="repository" type="com.symphony.integration.github.repository" version="1.0">
+            <attribute name="full_name" type="org.symphonyoss.string" value="baxterthehacker/public-repo"/>
+            <attribute name="id" type="org.symphony.oss.number.long" value="35129377"/>
+            <attribute name="html_url" type="com.symphony.uri" value="https://github.com/baxterthehacker/public-repo"/>
+        </entity>
+        <entity name="issue" type="com.symphony.integration.github.issue" version="1.0">
+            <attribute name="id" type="org.symphony.oss.number.long" value="73464126"/>
+            <attribute name="title" type="org.symphonyoss.string" value="Test Issue with Special chars: ´ ` &amp;apos; &amp;quot; ^ ~ ç Ç á Á é É ü ê Ê ã Ã"/>
+            <attribute name="url" type="com.symphony.uri" value="https://api.github.com/repos/baxterthehacker/public-repo/issues/2"/>
+            <attribute name="html_url" type="com.symphony.uri" value="https://github.com/baxterthehacker/public-repo/issues/2"/>
+        </entity>
+    </entity>
+</messageML>

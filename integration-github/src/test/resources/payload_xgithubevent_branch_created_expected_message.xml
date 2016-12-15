@@ -1,0 +1,22 @@
+<messageML>
+<entity type="com.symphony.integration.github.event.create" version="1.0">
+<presentationML>
+Branch "dev" created by Baxter The Hacker into "baxterthehacker/public-repo"
+</presentationML>
+<attribute name="ref" type="org.symphonyoss.string" value="dev"/>
+<attribute name="ref_type" type="org.symphonyoss.string" value="branch"/>
+<attribute name="master_branch" type="org.symphonyoss.string" value="master"/>
+<attribute name="pusher_type" type="org.symphonyoss.string" value="user"/>
+<entity name="repository" type="com.symphony.integration.github.repository" version="1.0">
+<attribute name="full_name" type="org.symphonyoss.string" value="baxterthehacker/public-repo"/>
+<attribute name="id" type="org.symphony.oss.number.long" value="35129377"/>
+<attribute name="html_url" type="com.symphony.uri" value="https://github.com/baxterthehacker/public-repo"/>
+</entity>
+<entity name="sender" type="com.symphony.integration.github.user" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="Baxter The Hacker"/>
+<attribute name="login" type="org.symphonyoss.string" value="baxterthehacker"/>
+<attribute name="email" type="org.symphonyoss.string" value="baxterthehacker@users.noreply.github.com"/>
+<attribute name="id" type="org.symphony.oss.number.long" value="6752317"/>
+</entity>
+</entity>
+</messageML>

@@ -132,6 +132,7 @@
         <module>integration-core</module>
         <module>integration-webhook</module>
         <module>integration-jira</module>
+        <module>integration-github</module>
     </modules>
 
     <repositories>
