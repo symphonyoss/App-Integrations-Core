@@ -134,6 +134,7 @@
         <module>integration-jira</module>
         <module>integration-github</module>
         <module>integration-trello</module>
+        <module>integration-universal-whi</module>
     </modules>
 
     <repositories>
