@@ -127,6 +127,7 @@
     <modules>
         <module>integration-commons</module>
         <module>integration-auth</module>
+        <module>integration-config</module>
     </modules>
 
     <repositories>
