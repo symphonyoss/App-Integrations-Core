@@ -130,6 +130,7 @@
         <module>integration-config</module>
         <module>integration-healthcheck</module>
         <module>integration-core</module>
+        <module>integration-webhook</module>
     </modules>
 
     <repositories>
