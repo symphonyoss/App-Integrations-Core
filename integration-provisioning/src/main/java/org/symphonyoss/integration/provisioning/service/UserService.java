@@ -1,0 +1,147 @@
+package org.symphonyoss.integration.provisioning.service;
+
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .DEFAULT_USER_ID;
+
+import com.symphony.api.pod.api.UserApi;
+import com.symphony.api.pod.api.UsersApi;
+import com.symphony.api.pod.client.ApiException;
+import com.symphony.api.pod.model.AvatarUpdate;
+import com.symphony.api.pod.model.UserAttributes;
+import com.symphony.api.pod.model.UserCreate;
+import com.symphony.api.pod.model.UserDetail;
+import com.symphony.api.pod.model.UserV2;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.PodApiClientDecorator;
+import org.symphonyoss.integration.provisioning.exception.CreateUserException;
+import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
+import org.symphonyoss.integration.provisioning.exception.UserSearchException;
+import org.symphonyoss.integration.provisioning.model.Application;
+import com.symphony.logging.ISymphonyLogger;
+import com.symphony.logging.SymphonyLoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+
+import javax.annotation.PostConstruct;
+
+/**
+ * Service class to perform user creation and retrieval from Symphony backend.
+ *
+ * Created by rsanchez on 18/10/16.
+ */
+@Service
+public class UserService {
+
+  private static final ISymphonyLogger LOGGER =
+      SymphonyLoggerFactory.getLogger(UserService.class);
+
+  private static final String EMAIL_DOMAIN = "@symphony.com";
+
+  private static final String[] BOT_ROLES = {"INDIVIDUAL", "ADMINISTRATOR"};
+
+  @Autowired
+  private AuthenticationProxy authenticationProxy;
+
+  @Autowired
+  private PodApiClientDecorator podApiClient;
+
+  private UsersApi usersApi;
+
+  private UserApi userApi;
+
+  @PostConstruct
+  public void init() {
+    this.usersApi = new UsersApi(podApiClient);
+    this.userApi = new UserApi(podApiClient);
+  }
+
+
+  public void setupBotUser(Application app) {
+    LOGGER.info("Setup new user: {}", app.getType());
+
+    String username = app.getType();
+    String name = app.getName();
+    String avatar = app.getAvatar();
+
+    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+    UserV2 user = getUser(username);
+
+    if (user == null) {
+      createNewUser(sessionToken, username, name, avatar);
+    } else {
+      updateUserAvatar(sessionToken, user.getId(), avatar);
+    }
+  }
+
+  /**
+   * Retrieves user information for the given username.
+   * @param username User login.
+   * @return User information (retrieved from the backend).
+   */
+  public UserV2 getUser(String username) {
+    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+
+    UserV2 user;
+    try {
+      user = usersApi.v2UserGet(sessionToken, null, null, username, true);
+    } catch (ApiException e) {
+      throw new UserSearchException("Fail to retrieve user information. Username: " + username, e);
+    }
+
+    return user;
+  }
+
+  /**
+   * Create a new user at the Symphony backend, using User API.
+   * @param sessionToken Token to access the User API.
+   * @param username User login.
+   * @param name User display name.
+   */
+  private void createNewUser(String sessionToken, String username, String name, String avatar) {
+    UserCreate userInfo = createUserInformation(username, name);
+
+    try {
+      UserDetail createdUser = userApi.v1AdminUserCreatePost(sessionToken, userInfo);
+      updateUserAvatar(sessionToken, createdUser.getUserSystemInfo().getId(), avatar);
+    } catch (ApiException e) {
+      throw new CreateUserException("Fail to create user " + username, e);
+    }
+  }
+
+  private void updateUserAvatar(String sessionToken, Long uid, String avatar) {
+    try {
+      AvatarUpdate avatarUpdate = new AvatarUpdate();
+      avatarUpdate.setImage(avatar);
+      userApi.v1AdminUserUidAvatarUpdatePost(sessionToken, uid, avatarUpdate);
+    } catch (ApiException e) {
+      throw new UpdateUserException("Failed to update user avatar", e);
+    }
+  }
+
+  /**
+   * Instantiates the data to create a user on the back end.
+   * @param username User login
+   * @param name User display name
+   * @return Data to create the user in the backend.
+   */
+  private UserCreate createUserInformation(String username, String name) {
+    String emailAddress = username + EMAIL_DOMAIN;
+
+    UserAttributes userAttributes = new UserAttributes();
+    userAttributes.setUserName(username);
+    userAttributes.setDisplayName(name);
+    userAttributes.setFirstName(name);
+    userAttributes.setLastName("BOT");
+    userAttributes.setEmailAddress(emailAddress);
+    userAttributes.setAccountType(UserAttributes.AccountTypeEnum.NORMAL);
+
+    UserCreate userCreate = new UserCreate();
+    userCreate.setUserAttributes(userAttributes);
+    userCreate.setRoles(Arrays.asList(BOT_ROLES));
+
+    return userCreate;
+  }
+}
