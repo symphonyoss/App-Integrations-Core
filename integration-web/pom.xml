@@ -20,7 +20,23 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${war.plugin.version}</version>
                 <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Build>${build.number}</Implementation-Build>
+                            <Implementation-GitHash>${git.hash}</Implementation-GitHash>
+                            <Symphony-Version>
+                                ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.${build.number}
+                            </Symphony-Version>
+                            <Implementation-Branch>${scmBranch}</Implementation-Branch>
+                        </manifestEntries>
+                    </archive>
                     <attachClasses>true</attachClasses>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                 </configuration>
             </plugin>
         </plugins>
