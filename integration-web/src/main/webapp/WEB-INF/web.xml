@@ -14,6 +14,10 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>com.ryantenney.metrics.spring.servlets.MetricsServletsContextListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>spring</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -29,6 +33,16 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>metrics</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>metrics</servlet-name>
+        <url-pattern>/metrics/*</url-pattern>
+    </servlet-mapping>
+
     <filter>
         <filter-name>encoding-filter</filter-name>
         <filter-class>
@@ -42,6 +56,24 @@
 
     <filter-mapping>
         <filter-name>encoding-filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>metricsFilter</filter-name>
+        <filter-class>org.symphonyoss.integration.web.filter.IntegrationMetricsFilter</filter-class>
+        <init-param>
+            <param-name>ignore-url</param-name>
+            <param-value>/metrics</param-value>
+        </init-param>
+        <init-param>
+            <param-name>webhook-url</param-name>
+            <param-value>/v1/whi/</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>metricsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

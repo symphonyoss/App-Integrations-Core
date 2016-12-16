@@ -22,6 +22,7 @@ import org.symphonyoss.integration.authentication.exception.UnregisteredSessionT
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.metrics.api.ApiMetricsController;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -62,6 +63,9 @@ public class AuthenticationProxy {
 
   private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
 
+  @Autowired
+  private ApiMetricsController metricsController;
+
   /**
    * Initialize HTTP clients.
    */
@@ -70,11 +74,11 @@ public class AuthenticationProxy {
     IAtlas atlas = integrationAtlas.getAtlas();
 
     String sbeUrl = getUrl(atlas, SESSION_AUTH_URL);
-    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this, metricsController);
     sbeClient.setBasePath(sbeUrl);
 
     String keyManagerUrl = getUrl(atlas, KEY_AUTH_URL);
-    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this, metricsController);
     keyManagerClient.setBasePath(keyManagerUrl);
 
     this.sbeAuthApi = new AuthenticationApiDecorator(sbeClient);

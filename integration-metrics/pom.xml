@@ -9,27 +9,24 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>integration-auth</artifactId>
+    <artifactId>integration-metrics</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-commons</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-metrics</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>agent-api-client</artifactId>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>auth-api-client</artifactId>
+            <groupId>com.ryantenney.metrics</groupId>
+            <artifactId>metrics-spring</artifactId>
         </dependency>
     </dependencies>
-
 </project>

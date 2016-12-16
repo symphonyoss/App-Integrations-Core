@@ -4,10 +4,12 @@ import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
 import static com.symphony.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,15 +19,19 @@ import com.symphony.api.agent.client.Pair;
 import com.symphony.api.agent.client.TypeRef;
 import com.symphony.logging.DistributedTracingUtils;
 
+import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.metrics.api.ApiMetricsController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +45,12 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
   protected TypeRef<String> returnType;
   protected List<Pair> queryParams = new ArrayList<Pair>();
 
+  @Mock
+  private Timer.Context context;
+
+  @Mock
+  private ApiMetricsController metricsController;
+
   @InjectMocks protected AgentApiClientDecorator apiClientDecorator = new AgentApiClientDecorator();
 
   @Before
@@ -49,6 +61,8 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     apiClientDecorator.init();
     MDC.clear();
+
+    doReturn(context).when(metricsController).startApiCall(PATH);
   }
 
   @Test
@@ -60,6 +74,9 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     assertEquals(respBody, RESPONSE_BODY);
     assertNull(headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -71,6 +88,9 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     assertEquals(respBody, RESPONSE_BODY);
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -88,6 +108,9 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
     assertNotEquals(randHeaderTraceId, headerParams.get(TRACE_ID));
     // current MDC is a composition of the original header trace ID and a random generated number.
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -103,6 +126,9 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
         .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(UNAUTHORIZED), any(ApiException.class));
     assertEquals(respBody, RESPONSE_BODY);
     assertEquals(headerParams.get("sessionToken"), SESSION_TOKEN2);
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -119,6 +145,8 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
           ACCEPT, CONTENT_TYPE, authNames, returnType);
       fail();
     } catch (ApiException e) {
+      verify(metricsController, times(1)).startApiCall(PATH);
+      verify(metricsController, times(1)).finishApiCall(context, PATH, false);
       verify(authenticationProxy, times(1))
           .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(UNAUTHORIZED), any(ApiException.class));
     }
@@ -140,6 +168,8 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
           ACCEPT, CONTENT_TYPE, authNames, returnType);
       fail();
     } catch (ApiException e) {
+      verify(metricsController, times(1)).startApiCall(PATH);
+      verify(metricsController, times(1)).finishApiCall(context, PATH, false);
       verify(authenticationProxy, times(1))
           .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(INTERNAL_SERVER_ERROR),
               any(ApiException.class));

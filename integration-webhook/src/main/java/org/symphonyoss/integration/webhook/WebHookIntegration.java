@@ -12,6 +12,7 @@ import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.V1Configuration;
 import com.symphony.logging.ISymphonyLogger;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.symphonyoss.integration.core.service.UserService;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.metrics.parser.ParserMetricsController;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationProperties;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
@@ -95,6 +97,9 @@ public abstract class WebHookIntegration extends BaseIntegration implements Inte
 
   @Autowired
   private IntegrationPropertiesReader propertiesReader;
+
+  @Autowired
+  private ParserMetricsController metricsController;
 
   /**
    * Local Configuration kept for faster processing.
@@ -232,12 +237,36 @@ public abstract class WebHookIntegration extends BaseIntegration implements Inte
       throws WebHookParseException {
     if (isAvailable()) {
       ConfigurationInstance instance = getConfigurationInstance(instanceId);
-      String message = parse(instance, input);
+      String message = parseRequest(instance, integrationUser, input);
       if (message != null) {
         List<String> streams = streamService.getStreams(instance);
         postMessage(instance, integrationUser, streams, message);
       }
     }
+  }
+
+  /**
+   * Wraps the parser execution and monitor the parser execution time.
+   * @param instance Configuration instance
+   * @param integrationUser Integration username
+   * @param input Webhook payload
+   * @return Formatted MessageML or null if the integration doesn't handle this specific event
+   */
+  private String parseRequest(ConfigurationInstance instance, String integrationUser,
+      WebHookPayload input) {
+    Timer.Context context = null;
+    boolean success = false;
+    String message = null;
+
+    try {
+      context = metricsController.startParserExecution(integrationUser);
+      message = parse(instance, input);
+      success = true;
+    } finally {
+      metricsController.finishParserExecution(context, integrationUser, success);
+    }
+
+    return message;
   }
 
   /**

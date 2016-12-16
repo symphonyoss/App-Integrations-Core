@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.pod.model.V1Configuration;
@@ -31,6 +33,7 @@ import org.symphonyoss.integration.config.ConfigurationService;
 import org.symphonyoss.integration.core.exception.RetryLifecycleException;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
+import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationProperties;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -75,6 +78,9 @@ public class IntegrationBootstrapContextTest {
 
   @Mock
   private IntegrationPropertiesReader propertiesReader;
+
+  @Mock
+  private IntegrationMetricsController metricsController;
 
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
@@ -216,6 +222,7 @@ public class IntegrationBootstrapContextTest {
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
     assertNotNull(integration);
     assertEquals(this.integration, integration);
+    verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
   }
 
   /**
@@ -233,6 +240,7 @@ public class IntegrationBootstrapContextTest {
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
     assertNotNull(integration);
     assertEquals(this.integration, integration);
+    verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
   }
 
   /**
