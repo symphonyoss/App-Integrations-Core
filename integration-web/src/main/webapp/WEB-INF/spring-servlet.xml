@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="org.symphonyoss.integration.web.resource"/>
+    <context:spring-configured/>
+    <context:annotation-config/>
+
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="useJaf" value="false"/>
+
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json"/>
+                <entry key="xml" value="application/xml"/>
+                <entry key="csv" value="text/csv"/>
+                <entry key="plain" value="text/plain"/>
+                <entry key="x-www-form-urlencoded" value="application/x-www-form-urlencoded"/>
+                <entry key="form-data" value="multipart/form-data"/>
+            </map>
+        </property>
+    </bean>
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+</beans>

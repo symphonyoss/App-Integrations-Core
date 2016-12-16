@@ -1,0 +1,80 @@
+{
+  "model": {
+    "id": "57a34b33b350eb2bcc1f42ca",
+    "name": "Symphony Innovate",
+    "desc": "",
+    "descData": null,
+    "closed": false,
+    "idOrganization": "57a10d35e68764461773a275",
+    "pinned": false,
+    "url": "https://trello.com/b/t0hu7Ffx/symphony-innovate",
+    "shortUrl": "https://trello.com/b/t0hu7Ffx",
+    "prefs": {
+      "permissionLevel": "org",
+      "voting": "disabled",
+      "comments": "members",
+      "invitations": "members",
+      "selfJoin": true,
+      "cardCovers": true,
+      "cardAging": "regular",
+      "calendarFeedEnabled": false,
+      "background": "blue",
+      "backgroundImage": null,
+      "backgroundImageScaled": null,
+      "backgroundTile": false,
+      "backgroundBrightness": "dark",
+      "backgroundColor": "#0079BF",
+      "canBePublic": true,
+      "canBeOrg": true,
+      "canBePrivate": true,
+      "canInvite": true
+    },
+    "labelNames": {
+      "green": "",
+      "yellow": "",
+      "orange": "",
+      "red": "",
+      "purple": "",
+      "blue": "",
+      "sky": "",
+      "lime": "",
+      "pink": "",
+      "black": ""
+    }
+  },
+  "action": {
+    "id": "57d82146ac957192f85bc7b9",
+    "idMemberCreator": "57a0fdef0f45592699722783",
+    "data": {
+      "checkItem": {
+        "state": "complete",
+        "name": "Comments renderer",
+        "id": "57d8007dd4b23351441c4cde"
+      },
+      "checklist": {
+        "name": "Subtasks for comments viewing",
+        "id": "57d7f618834f6a46c2badc0a"
+      },
+      "card": {
+        "shortLink": "woQM9Qqo",
+        "idShort": 11,
+        "name": "Need to add the ability to see comments",
+        "id": "57d6ecdfcdddf493280e0d1b"
+      },
+      "board": {
+        "shortLink": "t0hu7Ffx",
+        "name": "Symphony Innovate",
+        "id": "57a34b33b350eb2bcc1f42ca"
+      }
+    },
+    "type": "updateCheckItemStateOnCard",
+    "date": "2016-09-13T15:54:46.466Z",
+    "memberCreator": {
+      "id": "57a0fdef0f45592699722783",
+      "avatarHash": null,
+      "fullName": "Evandro Carrenho",
+      "initials": "ECSY",
+      "username": "ecarrenhosymphonytest"
+    }
+  }
+}

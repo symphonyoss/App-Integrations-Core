@@ -1,0 +1,27 @@
+<entity type="com.symphony.integration.trello.event.createCard" version="1.0">
+<presentationML>Joe Smith added My Card to My List (in My &lt;b&gt;Trello&lt;/b&gt;<br/><br/> Board) (<a href="https://trello.com/t0hu7Ffx"/>)
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-08-04T14:24:09.667Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="jsmith"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Joe Smith"/>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/t0hu7Ffx"/>
+<attribute name="name" type="org.symphonyoss.string" value="My &amp;lt;b&amp;gt;Trello&amp;lt;/b&amp;gt;&lt;br/&gt;&lt;br/&gt; Board"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34b33b350eb2bcc1f42ca"/>
+</entity>
+<entity type="com.symphony.integration.trello.list" version="1.0">
+<attribute name="name" type="org.symphonyoss.string" value="My List"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34bdaa4050393a6f15a24"/>
+</entity>
+<entity type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="thH8QUqG"/>
+<attribute name="name" type="org.symphonyoss.string" value="My Card"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a4a5aad6759eba0f594ec2"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="1"/>
+<attribute name="desc" type="org.symphonyoss.string" value="My Card Description"/>
+</entity>
+</entity>
+</entity>

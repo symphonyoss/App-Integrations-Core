@@ -1,0 +1,37 @@
+<entity type="com.symphony.integration.jira.event.updated" version="1.0">
+<presentationML>Test User updated Bug SAM-24, Sample Bug Blocker (<a href="https://whiteam1.atlassian.net/browse/SAM-24"/>) to <b>Done</b><br/>Assignee: Test2 User<br/>Labels: <hash tag="production"/><br/>Priority: Highest<br/>Status: Done<br/>Description: </presentationML>
+<entity name="user" type="com.symphony.integration.jira.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="test"/>
+<attribute name="emailAddress" type="org.symphonyoss.string" value="test@symphony.com"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Test User"/>
+</entity>
+<entity type="com.symphony.integration.jira.labels" version="1.0">
+<attribute name="#production" type="org.symphonyoss.string" value="#production"/>
+</entity>
+<entity type="com.symphony.integration.jira.issue" version="1.0">
+<attribute name="project" type="org.symphonyoss.string" value="Sample 1"/>
+<attribute name="key" type="org.symphonyoss.string" value="SAM-24"/>
+<attribute name="subject" type="org.symphonyoss.string" value="Sample Bug Blocker"/>
+<attribute name="type" type="org.symphonyoss.string" value="Bug"/>
+<attribute name="link" type="com.symphony.uri" value="https://whiteam1.atlassian.net/browse/SAM-24"/>
+<attribute name="priority" type="org.symphonyoss.string" value="Highest"/>
+<attribute name="status" type="org.symphonyoss.string" value="Done"/>
+<entity name="assignee" type="com.symphony.integration.jira.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="test2"/>
+<attribute name="emailAddress" type="org.symphonyoss.string" value="test2@symphony.com"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Test2 User"/>
+</entity>
+</entity>
+<entity type="com.symphony.integration.jira.changelog" version="1.0">
+<entity type="com.symphony.integration.jira.change" version="1.0">
+<attribute name="fieldName" type="org.symphonyoss.string" value="resolution"/>
+<attribute name="oldValue" type="org.symphonyoss.string" value="null"/>
+<attribute name="newValue" type="org.symphonyoss.string" value="Done"/>
+</entity>
+<entity type="com.symphony.integration.jira.change" version="1.0">
+<attribute name="fieldName" type="org.symphonyoss.string" value="status"/>
+<attribute name="oldValue" type="org.symphonyoss.string" value="To Do"/>
+<attribute name="newValue" type="org.symphonyoss.string" value="Done"/>
+</entity>
+</entity>
+</entity>

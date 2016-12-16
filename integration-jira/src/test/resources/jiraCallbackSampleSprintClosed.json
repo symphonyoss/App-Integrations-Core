@@ -1,0 +1,14 @@
+{
+  "timestamp": 1463428651129,
+  "webhookEvent": "sprint_closed",
+  "sprint": {
+    "id": 1,
+    "self": "https://whiteam1.atlassian.net/rest/agile/1.0/sprint/1",
+    "state": "closed",
+    "name": "Sample Sprint 2",
+    "startDate": "2016-05-09T07:21:05.375-03:00",
+    "endDate": "2016-05-23T07:41:05.375-03:00",
+    "completeDate": "2016-05-16T16:57:31.120-03:00",
+    "originBoardId": 1
+  }
+}

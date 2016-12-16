@@ -1,0 +1,37 @@
+<entity type="com.symphony.integration.trello.event.addAttachmentToCard" version="1.0">
+<presentationML>
+Evandro Carrenho add the attachment "How to use the Public folder.rtf" (
+<a href="https://www.dropbox.com/s/52ftsudpz665u5p/How%20to%20use%20the%20Public%20folder.rtf?dl=0"/>
+) to Renamed card in Another Trello Board (
+<a href="https://trello.com/b/N4sE9Ueu"/>
+)
+</presentationML>
+<attribute name="date" type="org.symphonyoss.time.rfc3339" value="2016-09-27T16:13:38.793Z"/>
+<entity name="memberCreator" type="com.symphony.integration.trello.user" version="1.0">
+<attribute name="username" type="org.symphonyoss.string" value="ecarrenhosymphonytest"/>
+<attribute name="emailAddress" type="org.symphonyoss.string" value="ecarrenhosymphonytest@symphony.com"/>
+<attribute name="displayName" type="org.symphonyoss.string" value="Evandro Carrenho"/>
+<entity type="com.symphony.mention" version="1.0">
+<attribute name="id" type="org.symphony.oss.number.long" value="699722783"/>
+<attribute name="name" type="org.symphonyoss.string" value="Evandro Carrenho"/>
+</entity>
+</entity>
+<entity type="com.symphony.integration.trello.data" version="1.0">
+<entity type="com.symphony.integration.trello.board" version="1.0">
+<attribute name="shortUrl" type="com.symphony.uri" value="https://trello.com/b/N4sE9Ueu"/>
+<attribute name="name" type="org.symphonyoss.string" value="Another Trello Board"/>
+<attribute name="id" type="org.symphonyoss.string" value="57a34f3e36e1e889b0dfca55"/>
+</entity>
+<entity type="com.symphony.integration.trello.card" version="1.0">
+<attribute name="shortLink" type="org.symphonyoss.string" value="dUz5fzV0"/>
+<attribute name="name" type="org.symphonyoss.string" value="Renamed card"/>
+<attribute name="id" type="org.symphonyoss.string" value="57ea99ab4e60503af5708af4"/>
+<attribute name="idShort" type="org.symphony.oss.number.int" value="1"/>
+</entity>
+<entity type="com.symphony.integration.trello.attachment" version="1.0">
+<attribute name="url" type="com.symphony.uri" value="https://www.dropbox.com/s/52ftsudpz665u5p/How%20to%20use%20the%20Public%20folder.rtf?dl=0"/>
+<attribute name="name" type="org.symphonyoss.string" value="How to use the Public folder.rtf"/>
+<attribute name="id" type="org.symphonyoss.string" value="57ea9b75d2198ee98e034d18"/>
+</entity>
+</entity>
+</entity>

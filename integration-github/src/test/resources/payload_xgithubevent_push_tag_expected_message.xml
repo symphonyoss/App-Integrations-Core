@@ -1,0 +1,27 @@
+<messageML>
+    <entity type="com.symphony.integration.github.event.push" version="1.0">
+        <presentationML>
+            mquilzini-daitan pushed a new tag on [rsanchez-daitan/SBE:TAG1], see details at: <a href="https://github.com/rsanchez-daitan/SBE/compare/TAG1"/>
+        </presentationML>
+        <attribute name="compare" type="com.symphony.uri" value="https://github.com/rsanchez-daitan/SBE/compare/TAG1"/>
+        <attribute name="ref" type="org.symphonyoss.string" value="refs/tags/TAG1"/>
+        <attribute name="ref_type" type="org.symphonyoss.string" value="tag"/>
+        <entity type="com.symphony.integration.github.commits" version="1.0"/>
+        <entity name="head_commit" type="com.symphony.integration.github.commit" version="1.0">
+            <attribute name="id" type="org.symphonyoss.string" value="954d2f8a75fad05538c952eab9320449ccd08510"/>
+        </entity>
+        <entity name="repository" type="com.symphony.integration.github.repository" version="1.0">
+            <attribute name="full_name" type="org.symphonyoss.string" value="rsanchez-daitan/SBE"/>
+            <attribute name="id" type="org.symphony.oss.number.long" value="56710845"/>
+            <attribute name="html_url" type="com.symphony.uri" value="https://github.com/rsanchez-daitan/SBE"/>
+        </entity>
+        <entity name="pusher" type="com.symphony.integration.github.user" version="1.0">
+            <attribute name="name" type="org.symphonyoss.string" value="mquilzini-daitan"/>
+            <attribute name="email" type="org.symphonyoss.string" value="mquilzini@daitangroup.com"/>
+        </entity>
+        <entity name="sender" type="com.symphony.integration.github.user" version="1.0">
+            <attribute name="login" type="org.symphonyoss.string" value="mquilzini-daitan"/>
+            <attribute name="id" type="org.symphony.oss.number.long" value="18399940"/>
+        </entity>
+    </entity>
+</messageML>

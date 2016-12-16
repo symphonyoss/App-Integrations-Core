@@ -1,0 +1,75 @@
+{
+  "model": {
+    "id": "57a34b33b350eb2bcc1f42ca",
+    "name": "Symphony Innovate",
+    "desc": "",
+    "descData": null,
+    "closed": false,
+    "idOrganization": "57a10d35e68764461773a275",
+    "pinned": false,
+    "url": "https://trello.com/b/t0hu7Ffx/symphony-innovate",
+    "shortUrl": "https://trello.com/b/t0hu7Ffx",
+    "prefs": {
+      "permissionLevel": "org",
+      "voting": "disabled",
+      "comments": "members",
+      "invitations": "members",
+      "selfJoin": true,
+      "cardCovers": true,
+      "cardAging": "regular",
+      "calendarFeedEnabled": false,
+      "background": "blue",
+      "backgroundImage": null,
+      "backgroundImageScaled": null,
+      "backgroundTile": false,
+      "backgroundBrightness": "dark",
+      "backgroundColor": "#0079BF",
+      "canBePublic": true,
+      "canBeOrg": true,
+      "canBePrivate": true,
+      "canInvite": true
+    },
+    "labelNames": {
+      "green": "",
+      "yellow": "",
+      "orange": "",
+      "red": "",
+      "purple": "",
+      "blue": "",
+      "sky": "",
+      "lime": "",
+      "pink": "",
+      "black": ""
+    }
+  },
+  "action": {
+    "id": "57d7f618834f6a46c2badc0b",
+    "idMemberCreator": "57a0fdef0f45592699722783",
+    "data": {
+      "board": {
+        "shortLink": "t0hu7Ffx",
+        "name": "Symphony Innovate",
+        "id": "57a34b33b350eb2bcc1f42ca"
+      },
+      "checklist": {
+        "name": "Subtasks for comments viewing",
+        "id": "57d7f618834f6a46c2badc0a"
+      },
+      "card": {
+        "shortLink": "woQM9Qqo",
+        "idShort": 11,
+        "name": "Need to add the ability to see comments",
+        "id": "57d6ecdfcdddf493280e0d1b"
+      }
+    },
+    "type": "addChecklistToCard",
+    "date": "2016-09-13T12:50:32.129Z",
+    "memberCreator": {
+      "id": "57a0fdef0f45592699722783",
+      "avatarHash": null,
+      "fullName": "Evandro Carrenho",
+      "initials": "ECSY",
+      "username": "ecarrenhosymphonytest"
+    }
+  }
+}

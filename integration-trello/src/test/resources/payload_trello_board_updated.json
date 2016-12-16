@@ -1,0 +1,68 @@
+{
+  "model": {
+    "id": "57a34b33b350eb2bcc1f42ca",
+    "name": "Board New Name",
+    "desc": "",
+    "descData": null,
+    "closed": false,
+    "idOrganization": "57a10d35e68764461773a275",
+    "pinned": false,
+    "url": "https://trello.com/b/t0hu7Ffx/board-new-name",
+    "shortUrl": "https://trello.com/b/t0hu7Ffx",
+    "prefs": {
+      "permissionLevel": "org",
+      "voting": "disabled",
+      "comments": "members",
+      "invitations": "members",
+      "selfJoin": true,
+      "cardCovers": true,
+      "cardAging": "regular",
+      "calendarFeedEnabled": false,
+      "background": "blue",
+      "backgroundImage": null,
+      "backgroundImageScaled": null,
+      "backgroundTile": false,
+      "backgroundBrightness": "dark",
+      "backgroundColor": "#0079BF",
+      "canBePublic": true,
+      "canBeOrg": true,
+      "canBePrivate": true,
+      "canInvite": true
+    },
+    "labelNames": {
+      "green": "Done",
+      "yellow": "Pending",
+      "orange": "",
+      "red": "Blocked",
+      "purple": "",
+      "blue": "",
+      "sky": "",
+      "lime": "",
+      "pink": "",
+      "black": ""
+    }
+  },
+  "action": {
+    "id": "57d6d0b2dca83530d300e338",
+    "idMemberCreator": "57a0fdef0f45592699722783",
+    "data": {
+      "board": {
+        "shortLink": "t0hu7Ffx",
+        "id": "57a34b33b350eb2bcc1f42ca",
+        "name": "Board New Name"
+      },
+      "old": {
+        "name": "Board renamed"
+      }
+    },
+    "type": "updateBoard",
+    "date": "2016-09-12T15:58:42.540Z",
+    "memberCreator": {
+      "id": "57a0fdef0f45592699722783",
+      "avatarHash": null,
+      "fullName": "Evandro Carrenho @symphony",
+      "initials": "ECSY",
+      "username": "ecarrenhosymphonytest"
+    }
+  }
+}

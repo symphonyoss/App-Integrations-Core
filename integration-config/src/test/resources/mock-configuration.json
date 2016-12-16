@@ -1,0 +1,49 @@
+{
+  "configurations": [
+    {
+      "configurationId": "575062074b54ba5e759c0fd9",
+      "type": "jiraWebHookIntegration",
+      "name": "Jira Webhook Integration",
+      "description": "Integrating JIRA with Symphony",
+      "enabled": true,
+      "visible": false
+    },
+    {
+      "configurationId": "575062074b54ba5e759c0fd0",
+      "type": "gitHubWebHookIntegration",
+      "name": "GitHub Webhook Integration",
+      "description": "Integrating GitHub with Symphony",
+      "enabled": false,
+      "visible": false
+    }
+  ],
+  "instances": [
+    {
+      "instanceId": "1234",
+      "configurationId": "575062074b54ba5e759c0fd9",
+      "name": "First JIRA integration",
+      "description": "Integrating JIRA Project Horizontal Apps with Symphony",
+      "creatorId": "test1",
+      "createdDate": 1462370323524,
+      "optionalProperties": "{\"owner\":\"test1\",\"streams\":[\"t7uufOOl8JXeDcamEVLvSn___qvMMOjEdA\",\"JHbxCfFqwResXmyVn3VGr3___qvU3O\"]}"
+    },
+    {
+      "instanceId": "5678",
+      "configurationId": "575062074b54ba5e759c0fd9",
+      "name": "Second JIRA integration",
+      "description": "Integrating JIRA Project Nexus with Symphony",
+      "creatorId": "test2",
+      "createdDate": 1462371010509,
+      "optionalProperties": "{\"owner\":\"test2\",\"streams\":[\"9lhJ8cIvaaifffLStN7XJH___rLUCrOndA\"]}"
+    },
+    {
+      "instanceId": "4321",
+      "configurationId": "575062074b54ba5e759c0fd0",
+      "name": "First GitHub integration",
+      "description": "Integrating GitHub Horizontal Apps with Symphony",
+      "creatorId": "test3",
+      "createdDate": 1462371116436,
+      "optionalProperties": "{\"owner\":\"test3\",\"streams\":[\"N/vad2Le4HDl8CbTo+lHrX___qwdHsUGdA\",\"t7uufOOl8JXeDcamEVLvSn___qvMMOjEdA\"],\"lastPostedDate\":1463165031800}"
+    }
+  ]
+}

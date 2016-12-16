@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+    <Properties>
+        <Property name="log.dir">logs</Property>
+        <Property name="log4j2.consoleLogLevel">INFO</Property>
+        <Property name="log4j2.outputAllToConsole">false</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="${sys:log4j2.consoleLogLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M - %m%n"/>
+        </Console>
+        <RollingFile name="error-rolling-file"
+                     fileName="${sys:log.dir}/integration-provisioning-error.log"
+                     filePattern="${sys:log.dir}/logs/integration-provisioning-error-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="%d %-5p [%c] (%t) %m%n"/>
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <DefaultRolloverStrategy max="10"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="rolling-file" fileName="${sys:log.dir}/integration-provisioning.log"
+                     filePattern="${sys:log.dir}/integration-provisioning-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="%d %-5p [%c] (%t) %m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <DefaultRolloverStrategy max="10"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <AsyncLogger name="org.symphonyoss.integration" level="${sys:log4j2.consoleLogLevel}"
+                     additivity="${sys:log4j2.outputAllToConsole}">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="rolling-file"/>
+            <AppenderRef ref="error-rolling-file"/>
+        </AsyncLogger>
+        <AsyncRoot level="WARN">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="error-rolling-file"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>

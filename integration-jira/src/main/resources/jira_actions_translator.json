@@ -1,0 +1,43 @@
+{
+  "jira:issue_created" : "created an issue",
+  "jira:issue_deleted" : "deleted an issue",
+  "jira:issue_updated" : "updated an issue",
+
+  "jira:worklog_updated" : "updated the issue worklog",
+
+  "worklog_created" : "created a worklog",
+  "worklog_updated" : "updated a worklog",
+  "worklog_deleted" : "deleted a worklog",
+
+  "sprint_started" : "started a sprint",
+  "sprint_created" : "created a sprint",
+  "sprint_closed" : "closed a sprint",
+  "sprint_updated" : "updated a sprint",
+  "sprint_deleted" : "deleted a sprint",
+
+  "jira:version_created" : "created a version",
+  "jira:version_updated" : "updated a version",
+  "jira:version_moved" : "moved a version",
+  "jira:version_deleted" : "deleted a version",
+  "jira:version_released" : "released a version",
+  "jira:version_unreleased" : "unreleased a version",
+
+  "project_created" : "created a project",
+  "project_updated" : "updated a project",
+  "project_deleted" : "deleted a project",
+
+  "board_created" : "created a board",
+  "board_updated" : "updated a board",
+  "board_deleted" : "deleted a board",
+  "board_configuration_changed" : "changed the configuration on a board",
+
+  "user_created" : "created a user",
+  "user_updated" : "updated a user",
+  "user_deleted" : "deleted a user",
+
+  "option_voting_changed" : "changed the voting option",
+  "option_watching_changed" : "changed the watching option",
+  "option_issuelinks_changed" : "changed the linking issues option",
+  "option_timetracking_changed" : "changed the time tracking option",
+  "option_unassigned_issues_changed" : "changed the possibility of unassigned issues option"
+}

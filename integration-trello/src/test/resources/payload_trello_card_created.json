@@ -1,0 +1,38 @@
+{
+  "model": {
+    "id": "57a34b33b350eb2bcc1f42ca",
+    "name": "My <b>Trello</b>\n\n Board",
+    "shortUrl": "https://trello.com/t0hu7Ffx"
+  },
+  "action": {
+    "id": "57a35009784b0df0be746cbd",
+    "idMemberCreator": "57a0fdef0f45592699722783",
+    "data": {
+      "board": {
+        "shortLink": "t0hu7Ffx",
+        "name": "My Trello Board",
+        "id": "57a34b33b350eb2bcc1f42ca"
+      },
+      "list": {
+        "name": "My List",
+        "id": "57a34bdaa4050393a6f15a24"
+      },
+      "card": {
+        "shortLink": "thH8QUqG",
+        "idShort": 1,
+        "name": "My Card",
+        "id": "57a4a5aad6759eba0f594ec2",
+        "desc": "My Card Description"
+      }
+    },
+    "type": "createCard",
+    "date": "2016-08-04T14:24:09.667Z",
+    "memberCreator": {
+      "id": "57a0fdef0f45592699722783",
+      "emailAddress": "jsmith@mycompany.com",
+      "fullName": "Joe Smith",
+      "initials": "JS",
+      "username": "jsmith"
+    }
+  }
+}
