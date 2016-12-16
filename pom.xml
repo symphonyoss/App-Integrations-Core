@@ -161,6 +161,7 @@
     <properties>
         <!-- plugins -->
         <build.number>0</build.number>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <build.helper.plugin.version>1.10</build.helper.plugin.version>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -169,6 +170,7 @@
         <surefire.plugin.version>2.19.1</surefire.plugin.version>
         <jar.plugin.version>2.4</jar.plugin.version>
         <war.plugin.version>2.6</war.plugin.version>
+        <rpm.plugin.version>2.1.4</rpm.plugin.version>
 
         <!-- compile -->
         <commons.lang3.version>3.4</commons.lang3.version>
@@ -183,6 +185,15 @@
         <junit.version>4.12</junit.version>
         <mockito.version>1.9.5</mockito.version>
         <powermock.version>1.6.1</powermock.version>
+
+        <!-- RPM properties -->
+        <rpm.deployment.prefix>/opt/symphony/ib/tomcat</rpm.deployment.prefix>
+        <rpm.name.prefix>symphony</rpm.name.prefix>
+        <rpm.name>integration-bridge</rpm.name>
+        <rpm.deployment.folder>${rpm.deployment.prefix}/webapps</rpm.deployment.folder>
+        <rpm.deployment.user>tomcat</rpm.deployment.user>
+        <rpm.deployment.filemode>755</rpm.deployment.filemode>
+        <rpm.type>single</rpm.type>
     </properties>
 
     <!-- Build Settings -->
@@ -421,6 +432,115 @@
         <developerConnection>scm:git:https://github.com/SymphonyOSF/Integration/</developerConnection>
         <url>scm:git:https://github.com/SymphonyOSF/Integration</url>
     </scm>
+
+    <profiles>
+        <profile>
+            <id>RPM</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <file>
+                    <exists>./src/main/webapp/WEB-INF/web.xml</exists>
+                </file>
+                <property>
+                    <name>build.rpm</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <version>${rpm.plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>generate-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+
+                        <configuration>
+                            <distribution>${rpm.name.prefix}-${rpm.type}</distribution>
+                            <name>${rpm.name}</name>
+                            <group>${rpm.name.prefix}-${rpm.type}</group>
+                            <version>${semantic.version}_${maven.compiler.target}</version>
+                            <release>${build.number}</release>
+                            <needarch>x86_64</needarch>
+                            <targetOS>linux</targetOS>
+                            <autoRequires>false</autoRequires>
+                            <repackJars>false</repackJars>
+
+                            <requires>
+                                <require>tomcat</require>
+                                <require>symphony-apps-base</require>
+                            </requires>
+
+                            <mappings>
+                                <mapping>
+                                    <directory>${rpm.deployment.folder}</directory>
+                                    <directoryIncluded>false</directoryIncluded>
+                                    <filemode>${rpm.deployment.filemode}</filemode>
+                                    <username>${rpm.deployment.user}</username>
+                                    <groupname>${rpm.deployment.user}</groupname>
+                                    <sources>
+                                        <source>
+                                            <location>
+                                                ${project.build.directory}/${project.build.finalName}.war
+                                            </location>
+                                        </source>
+                                    </sources>
+                                </mapping>
+                            </mappings>
+                            <postinstallScriptlet>
+                                <script>
+                                    if [ -d ${rpm.deployment.folder}/${project.build.finalName} ];
+                                    then
+                                    rm -rf ${rpm.deployment.folder}/${project.build.finalName}
+                                    fi
+                                </script>
+                            </postinstallScriptlet>
+                            <postremoveScriptlet>
+                                <script>
+                                    if [ -d ${rpm.deployment.folder}/${project.build.finalName} ];
+                                    then
+                                    rm -rf ${rpm.deployment.folder}/${project.build.finalName}
+                                    fi
+                                </script>
+                            </postremoveScriptlet>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>
+                                                ${project.build.directory}/rpm/${rpm.name}/RPMS/x86_64/${rpm.name}-${semantic.version}_${maven.compiler.target}-${build.number}.x86_64.rpm
+                                            </file>
+                                            <type>rpm</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>
