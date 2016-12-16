@@ -63,7 +63,7 @@ public abstract class BaseIntegration {
   private static final String APP_DEFAULT_PAGE = "controller.html";
 
   @Autowired
-  private IntegrationAtlas integrationAtlas;
+  protected IntegrationAtlas integrationAtlas;
 
   @Autowired
   protected AuthenticationProxy authenticationProxy;

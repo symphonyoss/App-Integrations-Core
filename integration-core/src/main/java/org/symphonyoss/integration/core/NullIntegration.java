@@ -8,6 +8,8 @@ import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.springframework.beans.factory.annotation.Configurable;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.IntegrationAtlas;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.exception.BootstrapException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
@@ -18,10 +20,15 @@ import java.util.Set;
  * Null pattern for integration.
  * Created by rsanchez on 21/11/16.
  */
-@Configurable(preConstruction = true)
 public class NullIntegration extends BaseIntegration implements Integration {
 
   private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(NullIntegration.class);
+
+  public NullIntegration(IntegrationAtlas integrationAtlas,
+      AuthenticationProxy authenticationProxy) {
+    this.integrationAtlas = integrationAtlas;
+    this.authenticationProxy = authenticationProxy;
+  }
 
   @Override
   public void onCreate(String integrationUser) {

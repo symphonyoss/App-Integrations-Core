@@ -47,7 +47,7 @@ public class NullIntegrationTest extends CommonIntegrationTest {
   }
 
   @InjectMocks
-  private NullIntegration integration = new NullIntegration();
+  private NullIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
 
   @Test
   public void testFailed() {

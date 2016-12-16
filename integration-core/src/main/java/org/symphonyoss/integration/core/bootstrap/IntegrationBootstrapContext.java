@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.IntegrationPropertiesReader;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.ConnectivityException;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.exception.RetryLifecycleException;
@@ -63,6 +65,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private IntegrationPropertiesReader propertiesReader;
+
+  @Autowired
+  private IntegrationAtlas integrationAtlas;
+
+  @Autowired
+  private AuthenticationProxy authenticationProxy;
 
   private Map<String, Integration> integrations = new ConcurrentHashMap<>();
 
@@ -122,7 +130,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     for (Application application : applications) {
       if (StringUtils.isEmpty(application.getType())) {
         String appId = application.getId();
-        NullIntegration integration = new NullIntegration();
+
+        NullIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
 
         try {
           integration.onCreate(appId);

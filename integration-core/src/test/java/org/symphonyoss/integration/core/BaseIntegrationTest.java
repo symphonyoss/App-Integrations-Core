@@ -64,7 +64,7 @@ public class BaseIntegrationTest extends CommonIntegrationTest {
   private Client client;
 
   @InjectMocks
-  private BaseIntegration integration = new NullIntegration();
+  private BaseIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
 
   @Before
   public void init() {
