@@ -148,12 +148,6 @@
         <module>integration-healthcheck</module>
         <module>integration-core</module>
         <module>integration-webhook</module>
-        <module>integration-jira</module>
-        <module>integration-github</module>
-        <module>integration-trello</module>
-        <module>integration-universal-whi</module>
-        <module>integration-salesforce</module>
-        <module>integration-zapier</module>
         <module>integration-web</module>
         <module>integration-provisioning</module>
     </modules>

@@ -4,3 +4,11 @@ target/
 # Intellij
 .idea
 *.iml
+
+# Applications
+integration-jira/
+integration-github/
+integration-trello/
+integration-salesforce/
+integration-universal-whi/
+integration-zapier/
