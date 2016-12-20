@@ -3,11 +3,11 @@ package org.symphonyoss.integration.webhook;
 import com.symphony.api.auth.client.ApiException;
 
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.authentication.exception.ForbiddenAuthException;
-import org.symphonyoss.integration.authentication.exception.UnauthorizedUserException;
-import org.symphonyoss.integration.authentication.exception.UnexpectedAuthException;
-import org.symphonyoss.integration.core.exception.ExceptionHandler;
-import org.symphonyoss.integration.core.exception.RetryLifecycleException;
+import org.symphonyoss.integration.exception.ExceptionHandler;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 
 /**
  * Created by rsanchez on 02/08/16.

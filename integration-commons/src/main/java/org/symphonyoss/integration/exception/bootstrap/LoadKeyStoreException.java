@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.exception;
+package org.symphonyoss.integration.exception.bootstrap;
 
 /**
  * Fail to load keystore file.

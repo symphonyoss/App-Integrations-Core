@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.config.exception;
+package org.symphonyoss.integration.exception.config;
 
 /**
  * Returned when trying to call external APIs and the user in use is not authorized do complete the

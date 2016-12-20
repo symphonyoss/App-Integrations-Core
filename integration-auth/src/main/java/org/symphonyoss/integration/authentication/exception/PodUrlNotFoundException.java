@@ -1,5 +1,7 @@
 package org.symphonyoss.integration.authentication.exception;
 
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
+
 /**
  * No atlas configuration to POD URL.
  *

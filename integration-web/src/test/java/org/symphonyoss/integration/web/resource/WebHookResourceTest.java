@@ -7,9 +7,9 @@ import com.symphony.api.pod.model.V1Configuration;
 
 import org.mockito.Mock;
 import org.symphonyoss.integration.IntegrationStatus;
-import org.symphonyoss.integration.config.ConfigurationService;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
-import org.symphonyoss.integration.core.bridge.IntegrationBridge;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
 import org.symphonyoss.integration.model.healthcheck.IntegrationBridgeHealth;
 import org.symphonyoss.integration.model.healthcheck.IntegrationBridgeHealthConnectivity;

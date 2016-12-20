@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
-import org.symphonyoss.integration.authentication.exception.ConnectivityException;
-import org.symphonyoss.integration.authentication.exception.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.authentication.exception.UnauthorizedUserException;
-import org.symphonyoss.integration.authentication.exception.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -40,10 +40,10 @@ import javax.ws.rs.core.Response.Status;
  * Created by rsanchez on 06/05/16.
  */
 @Component
-public class AuthenticationProxy {
+public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private static final ISymphonyLogger LOG =
-      IntegrationBridgeCloudLoggerFactory.getLogger(AuthenticationProxy.class);
+      IntegrationBridgeCloudLoggerFactory.getLogger(AuthenticationProxyImpl.class);
 
   private static final Long MAX_SESSION_TIME_MILLIS = TimeUnit.MINUTES.toMillis(3);
 
@@ -97,6 +97,7 @@ public class AuthenticationProxy {
    * @param userId
    * @throws ApiException
    */
+  @Override
   public void authenticate(String userId) throws ApiException {
     AuthenticationContext context = contextForUser(userId);
 
@@ -178,6 +179,7 @@ public class AuthenticationProxy {
         "Internal Integration Bridge error. Authentication invoked for unknown user - ID");
   }
 
+  @Override
   public boolean isAuthenticated(String user) {
     return contextForUser(user).isAuthenticated();
   }
@@ -186,6 +188,7 @@ public class AuthenticationProxy {
    * Invalidate user session token.
    * @param userId
    */
+  @Override
   public void invalidate(String userId) {
     contextForUser(userId).invalidateAuthentication();
     LOG.info("Invalidate session to {}", userId);
@@ -196,6 +199,7 @@ public class AuthenticationProxy {
    * @param configurationId
    * @return
    */
+  @Override
   public AuthenticationToken getToken(String configurationId) {
     return contextForUser(configurationId).getToken();
   }
@@ -205,6 +209,7 @@ public class AuthenticationProxy {
    * @param configurationId
    * @return
    */
+  @Override
   public String getSessionToken(String configurationId) {
     return contextForUser(configurationId).getToken().getSessionToken();
   }
@@ -218,6 +223,7 @@ public class AuthenticationProxy {
    * @throws ApiException an authorization exception thrown on FAILURE to re-auth
    * @throws com.symphony.api.agent.client.ApiException the original exception
    */
+  @Override
   public synchronized void reAuthOrThrow(String userId, int code, Exception e)
       throws RemoteApiException {
     if (validateResponseCode(Status.UNAUTHORIZED, code)) {
@@ -253,6 +259,7 @@ public class AuthenticationProxy {
     }
   }
 
+  @Override
   public synchronized AuthenticationToken reAuthSessionOrThrow(String sessionToken, int code, Exception e)
       throws RemoteApiException {
     AuthenticationContext authContext = contextForSessionToken(sessionToken);
@@ -276,6 +283,7 @@ public class AuthenticationProxy {
    * @param code response code
    * @return
    */
+  @Override
   public boolean sessionNoLongerEntitled(int code) {
     return validateResponseCode(Status.FORBIDDEN, code);
   }
@@ -286,6 +294,7 @@ public class AuthenticationProxy {
    * @param code response code
    * @return
    */
+  @Override
   public boolean sessionUnauthorized(int code) {
     return validateResponseCode(Status.UNAUTHORIZED, code);
   }
@@ -298,6 +307,7 @@ public class AuthenticationProxy {
   /**
    * Should be invoked by integration to register their users and the corresponding keystores.
    */
+  @Override
   public void registerUser(String userId, KeyStore keyStore, String keyStorePass) {
     authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass));
   }
@@ -305,6 +315,7 @@ public class AuthenticationProxy {
   /**
    * Retrieves a client build with the proper SSL context for the user.
    */
+  @Override
   public Client httpClientForUser(String userId) {
     return authContexts.get(userId).httpClientForContext();
   }
@@ -312,6 +323,7 @@ public class AuthenticationProxy {
   /**
    * Retrieves a client build with the proper SSL context for the user.
    */
+  @Override
   public Client httpClientForSessionToken(String sessionToken) {
     return contextForSessionToken(sessionToken).httpClientForContext();
   }

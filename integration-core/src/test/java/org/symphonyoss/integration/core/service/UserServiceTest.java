@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.service.UserService;
 
 /**
  * Class with unit tests for {@link UserService}

@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.bridge;
+package org.symphonyoss.integration.service;
 
 import com.symphony.api.agent.model.V2MessageList;
 import com.symphony.api.pod.model.ConfigurationInstance;

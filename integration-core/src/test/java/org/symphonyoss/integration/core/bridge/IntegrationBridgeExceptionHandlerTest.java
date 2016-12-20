@@ -3,7 +3,6 @@ package org.symphonyoss.integration.core.bridge;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -33,11 +32,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.config.ConfigurationService;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.config.exception.SaveConfigurationException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.service.StreamService;
 
 import java.io.IOException;
 import java.util.List;
@@ -93,17 +93,12 @@ public class IntegrationBridgeExceptionHandlerTest {
   public void testForbiddenConfigurationException() throws IntegrationConfigException, IOException {
     ConfigurationInstance instance = mockInstance();
 
-    mockAuthForbidden();
     when(configurationService.save(any(ConfigurationInstance.class), anyString())).thenThrow(
         SaveConfigurationException.class);
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
         instance, INTEGRATION_USER, "", STREAM);
     assertTrue(messagePosted.isEmpty());
-  }
-
-  private void mockAuthForbidden() {
-    when(authenticationProxy.sessionNoLongerEntitled(anyInt())).thenReturn(true);
   }
 
   private ConfigurationInstance mockInstance() throws JsonProcessingException {
@@ -122,7 +117,6 @@ public class IntegrationBridgeExceptionHandlerTest {
       IOException {
     ConfigurationInstance instance = mockInstance();
 
-    mockAuthForbidden();
     mockConfigurationService();
 
     doThrow(com.symphony.api.pod.client.ApiException.class).when(streamService)
@@ -155,7 +149,6 @@ public class IntegrationBridgeExceptionHandlerTest {
       com.symphony.api.pod.client.ApiException {
     ConfigurationInstance instance = mockInstance();
 
-    mockAuthForbidden();
     mockConfigurationService();
 
     when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(TOKEN);
@@ -201,8 +194,6 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Test
   public void testInternalServerException() {
-    when(authenticationProxy.sessionNoLongerEntitled(anyInt())).thenReturn(false);
-    when(authenticationProxy.sessionUnauthorized(anyInt())).thenReturn(false);
     exceptionHandler.handleRemoteApiException(new RemoteApiException(500, new ApiException()),
         new ConfigurationInstance(), INTEGRATION_USER, "", "");
   }

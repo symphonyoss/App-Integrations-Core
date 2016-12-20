@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.authentication.exception;
+package org.symphonyoss.integration.exception.authentication;
 
 /**
  * Certificate authentication is not allowed for the requested user.

@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-core</artifactId>
+            <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

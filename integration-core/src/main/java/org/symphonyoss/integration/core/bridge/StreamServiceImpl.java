@@ -17,9 +17,10 @@ import org.symphonyoss.integration.authentication.AgentApiClientDecorator;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils.StreamType;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.model.config.StreamType;
+import org.symphonyoss.integration.service.StreamService;
 
 import java.io.IOException;
 import java.util.Collections;

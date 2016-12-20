@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.authentication.exception;
+package org.symphonyoss.integration.exception.authentication;
 
 /**
  * Failed to process certificate login.

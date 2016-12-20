@@ -1,9 +1,9 @@
 package org.symphonyoss.integration.webhook;
 
-import static org.symphonyoss.integration.config.WebHookConfigurationUtils.LAST_POSTED_DATE;
 import static org.symphonyoss.integration.messageml.MessageMLFormatConstants.MESSAGEML_END;
 import static org.symphonyoss.integration.messageml.MessageMLFormatConstants.MESSAGEML_START;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
+import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.LAST_POSTED_DATE;
 
 import com.symphony.api.agent.model.V2BaseMessage;
 import com.symphony.api.agent.model.V2MessageList;
@@ -18,27 +18,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationPropertiesReader;
-import org.symphonyoss.integration.authentication.exception.ConnectivityException;
-import org.symphonyoss.integration.config.ConfigurationService;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils.StreamType;
-import org.symphonyoss.integration.config.exception.ForbiddenUserException;
-import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
-import org.symphonyoss.integration.core.BaseIntegration;
-import org.symphonyoss.integration.core.bridge.IntegrationBridge;
-import org.symphonyoss.integration.core.bridge.StreamService;
-import org.symphonyoss.integration.core.exception.BootstrapException;
-import org.symphonyoss.integration.core.exception.RetryLifecycleException;
-import org.symphonyoss.integration.core.exception.UnexpectedBootstrapException;
-import org.symphonyoss.integration.core.service.UserService;
+import org.symphonyoss.integration.BaseIntegration;
+import org.symphonyoss.integration.exception.config.ForbiddenUserException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
+import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
+import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.config.StreamType;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.StreamService;
+import org.symphonyoss.integration.service.UserService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 import org.symphonyoss.integration.webhook.exception.InvalidStreamTypeException;
 import org.symphonyoss.integration.webhook.exception.StreamTypeNotFoundException;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
@@ -484,7 +483,6 @@ public abstract class WebHookIntegration extends BaseIntegration implements Inte
    * Retrieve the configuration instance based on instanceId.
    * @param instanceId Configuration instance identifier
    * @return Configuration instance that contains information how to handle requests.
-   * @throws InstanceNotFoundException Instance not found
    */
   protected ConfigurationInstance getConfigurationInstance(String instanceId) {
     return configService.getInstanceById(config.getConfigurationId(), instanceId,

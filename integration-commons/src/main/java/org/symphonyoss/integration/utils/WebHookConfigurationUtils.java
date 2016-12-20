@@ -1,10 +1,11 @@
-package org.symphonyoss.integration.config;
+package org.symphonyoss.integration.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.symphonyoss.integration.model.config.StreamType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,15 +29,6 @@ public class WebHookConfigurationUtils {
   public static final String STREAM_TYPE = "streamType";
 
   private static final ObjectMapper mapper = new ObjectMapper();
-
-  /**
-   * Types of stream.
-   */
-  public enum StreamType {
-    NONE,
-    IM,
-    CHATROOM
-  }
 
   private WebHookConfigurationUtils() {
   }

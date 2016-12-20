@@ -1,9 +1,10 @@
-package org.symphonyoss.integration.config;
+package org.symphonyoss.integration.utils;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils.StreamType;
+import org.symphonyoss.integration.model.config.StreamType;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
 

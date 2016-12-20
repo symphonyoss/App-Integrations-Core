@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.exception;
+package org.symphonyoss.integration.exception.bootstrap;
 
 /**
  * Certificate not found:

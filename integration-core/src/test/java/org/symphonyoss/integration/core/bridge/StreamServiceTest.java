@@ -28,7 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils.StreamType;
+import org.symphonyoss.integration.model.config.StreamType;
 
 import java.util.List;
 

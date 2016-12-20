@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.bridge;
+package org.symphonyoss.integration.service;
 
 import com.symphony.api.agent.api.MessagesApi;
 import com.symphony.api.agent.client.ApiException;
@@ -8,7 +8,7 @@ import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.Stream;
 import com.symphony.api.pod.model.V2RoomDetail;
 
-import org.symphonyoss.integration.config.WebHookConfigurationUtils.StreamType;
+import org.symphonyoss.integration.model.config.StreamType;
 
 import java.util.List;
 

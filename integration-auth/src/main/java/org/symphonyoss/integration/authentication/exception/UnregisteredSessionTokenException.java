@@ -1,5 +1,7 @@
 package org.symphonyoss.integration.authentication.exception;
 
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
+
 /**
  * Failure to retrieve an HTTP client with the proper SSL context for the user based on
  * sessionToken.

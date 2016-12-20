@@ -1,9 +1,9 @@
-package org.symphonyoss.integration.config;
+package org.symphonyoss.integration.service;
 
 import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.V1Configuration;
 
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 
 /**
  * class that defines methods for querying the configurations of the integrations

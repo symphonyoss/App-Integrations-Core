@@ -74,6 +74,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>

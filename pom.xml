@@ -48,11 +48,6 @@
             </dependency>
             <dependency>
                 <groupId>com.symphony.sbe.core</groupId>
-                <artifactId>commoninterfaces</artifactId>
-                <version>${symphony.sbe.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.symphony.sbe.core</groupId>
                 <artifactId>sdk</artifactId>
                 <version>${symphony.sbe.version}</version>
             </dependency>
@@ -172,7 +167,7 @@
         <commons-net.version>3.5</commons-net.version>
         <jackson.version>2.7.3</jackson.version>
         <spring.version>4.3.1.RELEASE</spring.version>
-        <symphony.sbe.version>1.45.0-SNAPSHOT</symphony.sbe.version>
+        <symphony.sbe.version>1.44.0</symphony.sbe.version>
 
         <!-- test -->
         <symphonySkipUnitTests>false</symphonySkipUnitTests>

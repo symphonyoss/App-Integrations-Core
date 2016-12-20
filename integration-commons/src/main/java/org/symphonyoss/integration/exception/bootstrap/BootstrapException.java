@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.exception;
+package org.symphonyoss.integration.exception.bootstrap;
 
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 

@@ -1,7 +1,7 @@
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import org.slf4j.MDC;
 

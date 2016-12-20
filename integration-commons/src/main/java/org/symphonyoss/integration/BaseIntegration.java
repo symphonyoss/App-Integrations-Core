@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core;
+package org.symphonyoss.integration;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
@@ -16,11 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.symphonyoss.integration.IntegrationAtlas;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.core.exception.CertificateNotFoundException;
-import org.symphonyoss.integration.core.exception.LoadKeyStoreException;
+import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationBridge;
@@ -107,7 +105,7 @@ public abstract class BaseIntegration {
    * @param integrationUser Integration username
    * @return Application identifier
    */
-  protected String getApplicationId(String integrationUser) {
+  public String getApplicationId(String integrationUser) {
     Application application = propertiesReader.getProperties().getApplication(integrationUser);
 
     if ((application == null) || (StringUtils.isEmpty(application.getId()))) {
@@ -121,7 +119,7 @@ public abstract class BaseIntegration {
    * Read the key store and register the user with new SSL context.
    * @param integrationUser Integration username
    */
-  protected void registerUser(String integrationUser) {
+  public void registerUser(String integrationUser) {
     IAtlas atlas = integrationAtlas.getAtlas();
 
     String locationProperty = integrationUser + KEY_STORE_SUFFIX;
@@ -175,7 +173,7 @@ public abstract class BaseIntegration {
    * Retrieves the cached 'configurator installed' flag.
    * @param appType Application type
    */
-  protected IntegrationFlags.ValueEnum getCachedConfiguratorInstalledFlag(String appType) {
+  public IntegrationFlags.ValueEnum getCachedConfiguratorInstalledFlag(String appType) {
     return configuratorFlagsCache.getUnchecked(appType);
   }
 
@@ -183,7 +181,7 @@ public abstract class BaseIntegration {
    * Retrieves the 'configurator installed' flag.
    * @param appType Application type
    */
-  protected IntegrationFlags.ValueEnum getConfiguratorInstalledFlag(String appType) {
+  public IntegrationFlags.ValueEnum getConfiguratorInstalledFlag(String appType) {
     IntegrationProperties properties = propertiesReader.getProperties();
 
     Application application = properties.getApplication(appType);
@@ -226,4 +224,7 @@ public abstract class BaseIntegration {
     }
   }
 
+  public IntegrationHealthManager getHealthManager() {
+    return healthManager;
+  }
 }

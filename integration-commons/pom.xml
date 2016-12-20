@@ -14,6 +14,10 @@
     <dependencies>
         <dependency>
             <groupId>com.symphony.sbe.core</groupId>
+            <artifactId>agent-api-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.symphony.sbe.core</groupId>
             <artifactId>pod-api-client</artifactId>
         </dependency>
         <dependency>
@@ -31,10 +35,6 @@
         <dependency>
             <groupId>com.symphony.sbe.core</groupId>
             <artifactId>atlas-symphony</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>commoninterfaces</artifactId>
         </dependency>
         <dependency>
             <groupId>com.symphony.sbe.core</groupId>

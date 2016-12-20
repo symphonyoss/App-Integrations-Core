@@ -1,7 +1,5 @@
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -11,11 +9,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 
 import com.symphony.api.agent.client.ApiException;
 import com.symphony.api.agent.client.Pair;
 import com.symphony.api.agent.client.TypeRef;
-import com.symphony.logging.DistributedTracingUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -26,6 +25,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 import java.util.ArrayList;
 import java.util.List;

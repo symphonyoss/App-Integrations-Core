@@ -1,23 +1,15 @@
 package org.symphonyoss.integration.webhook;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
-
 import com.symphony.api.auth.client.ApiException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.exception.ForbiddenAuthException;
-import org.symphonyoss.integration.authentication.exception.UnauthorizedUserException;
-import org.symphonyoss.integration.authentication.exception.UnexpectedAuthException;
-import org.symphonyoss.integration.core.exception.RetryLifecycleException;
-import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
-
-import java.util.concurrent.ScheduledExecutorService;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 
 /**
  * Test class responsible to test the flows in the {@link WebHookExceptionHandler}.
@@ -26,17 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 @RunWith(MockitoJUnitRunner.class)
 public class WebHookExceptionHandlerTest {
 
-  @Mock
-  private AuthenticationProxy authenticationProxy;
-
   @InjectMocks
   private WebHookExceptionHandler exceptionHandler = new WebHookExceptionHandler();
-
-  @Mock
-  private ScheduledExecutorService scheduler;
-
-  @InjectMocks
-  private IntegrationHealthManager healthManager;
 
   @Test(expected = UnexpectedAuthException.class)
   public void testHandleAuthException() {
@@ -45,22 +28,20 @@ public class WebHookExceptionHandlerTest {
 
   @Test(expected = ForbiddenAuthException.class)
   public void testFailOnCreateForbiddenException() throws ApiException {
-    when(authenticationProxy.sessionNoLongerEntitled(anyInt())).thenReturn(true);
-    exceptionHandler.handleAuthenticationApiException("", new ApiException());
+    ApiException exception = new ApiException(403, "");
+    exceptionHandler.handleAuthenticationApiException("", exception);
   }
 
   @Test(expected = UnauthorizedUserException.class)
   public void testFailOnCreateUnauthorizedException() throws ApiException {
-    when(authenticationProxy.sessionNoLongerEntitled(anyInt())).thenReturn(false);
-    when(authenticationProxy.sessionUnauthorized(anyInt())).thenReturn(true);
-    exceptionHandler.handleAuthenticationApiException("", new ApiException());
+    ApiException exception = new ApiException(401, "");
+    exceptionHandler.handleAuthenticationApiException("", exception);
   }
 
   @Test(expected = RetryLifecycleException.class)
   public void testFailOnCreateApiException() throws ApiException {
-    when(authenticationProxy.sessionNoLongerEntitled(anyInt())).thenReturn(false);
-    when(authenticationProxy.sessionUnauthorized(anyInt())).thenReturn(false);
-    exceptionHandler.handleAuthenticationApiException("", new ApiException());
+    ApiException exception = new ApiException(500, "");
+    exceptionHandler.handleAuthenticationApiException("", exception);
   }
 
 }

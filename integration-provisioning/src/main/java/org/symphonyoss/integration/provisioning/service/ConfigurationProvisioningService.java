@@ -4,9 +4,9 @@ import static org.symphonyoss.integration.provisioning.properties.Authentication
     .DEFAULT_USER_ID;
 
 import com.symphony.api.pod.model.V1Configuration;
-import org.symphonyoss.integration.config.ConfigurationService;
+import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
 import org.symphonyoss.integration.provisioning.model.Application;
 import com.symphony.logging.ISymphonyLogger;

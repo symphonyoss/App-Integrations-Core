@@ -1,6 +1,6 @@
 package org.symphonyoss.integration.core.runnable;
 
-import com.symphony.logging.DistributedTracingUtils;
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 /**
  * Registers this thread process under MDC and delegates a call to "execute", which must be implemented by an inheritor

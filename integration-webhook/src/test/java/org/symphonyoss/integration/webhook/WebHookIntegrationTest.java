@@ -13,7 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.symphonyoss.integration.config.WebHookConfigurationUtils.LAST_POSTED_DATE;
+import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.LAST_POSTED_DATE;
 
 import com.symphony.api.agent.model.V2Message;
 import com.symphony.api.agent.model.V2MessageList;
@@ -30,7 +30,6 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -38,22 +37,22 @@ import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.config.ConfigurationService;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils;
-import org.symphonyoss.integration.config.exception.ForbiddenUserException;
-import org.symphonyoss.integration.core.bridge.IntegrationBridge;
-import org.symphonyoss.integration.core.bridge.StreamService;
-import org.symphonyoss.integration.core.bridge.StreamServiceImpl;
-import org.symphonyoss.integration.core.exception.CertificateNotFoundException;
-import org.symphonyoss.integration.core.exception.LoadKeyStoreException;
-import org.symphonyoss.integration.core.exception.UnexpectedBootstrapException;
-import org.symphonyoss.integration.core.service.UserService;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
+import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
+import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.model.AllowedOrigin;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.config.StreamType;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.StreamService;
+import org.symphonyoss.integration.service.UserService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 import org.symphonyoss.integration.webhook.exception.InvalidStreamTypeException;
 import org.symphonyoss.integration.webhook.exception.StreamTypeNotFoundException;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
@@ -100,8 +99,8 @@ public class WebHookIntegrationTest {
   @Mock
   private IntegrationBridge service;
 
-  @Spy
-  private StreamService streamService = new StreamServiceImpl();
+  @Mock
+  private StreamService streamService;
 
   @Mock
   private ConfigurationService configService;
@@ -152,6 +151,20 @@ public class WebHookIntegrationTest {
 
     this.atlas = mock(IAtlas.class);
     doReturn(atlas).when(integrationAtlas).getAtlas();
+
+    doAnswer(new Answer<StreamType>() {
+      @Override
+      public StreamType answer(InvocationOnMock invocationOnMock) throws Throwable {
+        ConfigurationInstance instance = (ConfigurationInstance) invocationOnMock.getArguments()[0];
+        return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
+      }
+    }).when(streamService).getStreams(any(ConfigurationInstance.class));
+
+    doAnswer(new GetStreamTypeAnswer()).when(streamService)
+        .getStreamType(any(ConfigurationInstance.class));
+    doAnswer(new GetStreamsAnswer()).when(streamService)
+        .getStreams(any(ConfigurationInstance.class));
+    doAnswer(new GetStreamsAnswer()).when(streamService).getStreams(any(String.class));
   }
 
   @Test
@@ -601,4 +614,36 @@ public class WebHookIntegrationTest {
 
   }
 
+  public static final class GetStreamTypeAnswer implements Answer<StreamType> {
+
+    @Override
+    public StreamType answer(InvocationOnMock invocationOnMock) throws Throwable {
+      ConfigurationInstance instance = (ConfigurationInstance) invocationOnMock.getArguments()[0];
+      return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
+    }
+
+  }
+
+  public static final class GetStreamsAnswer implements Answer<List<String>> {
+
+    @Override
+    public List<String> answer(InvocationOnMock invocationOnMock) throws Throwable {
+      String optionalProperties;
+      Object firstParam = invocationOnMock.getArguments()[0];
+
+      if (firstParam instanceof ConfigurationInstance) {
+        ConfigurationInstance instance = (ConfigurationInstance) firstParam;
+        optionalProperties = instance.getOptionalProperties();
+      } else {
+        optionalProperties = (String) firstParam;
+      }
+
+      try {
+        return WebHookConfigurationUtils.getStreams(optionalProperties);
+      } catch (IOException e) {
+        return Collections.emptyList();
+      }
+    }
+
+  }
 }

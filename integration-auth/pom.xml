@@ -19,10 +19,6 @@
         </dependency>
         <dependency>
             <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>agent-api-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
             <artifactId>auth-api-client</artifactId>
         </dependency>
     </dependencies>

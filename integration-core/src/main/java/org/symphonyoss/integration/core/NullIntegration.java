@@ -6,11 +6,11 @@ import com.symphony.api.pod.model.V1Configuration;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
-import org.springframework.beans.factory.annotation.Configurable;
+import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.core.exception.BootstrapException;
+import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.Collections;

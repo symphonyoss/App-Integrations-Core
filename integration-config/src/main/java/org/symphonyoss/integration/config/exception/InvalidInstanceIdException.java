@@ -1,5 +1,7 @@
 package org.symphonyoss.integration.config.exception;
 
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+
 /**
  * Exception to report failure when the caller tries to query configuration instance using invalid
  * identifier.

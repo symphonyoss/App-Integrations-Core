@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.exception;
+package org.symphonyoss.integration.exception.bootstrap;
 
 /**
  * Created by rsanchez on 01/08/16.

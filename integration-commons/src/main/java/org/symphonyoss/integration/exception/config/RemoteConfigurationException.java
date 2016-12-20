@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.config.exception;
+package org.symphonyoss.integration.exception.config;
 
 /**
  * Created by mquilzini on 31/05/16.

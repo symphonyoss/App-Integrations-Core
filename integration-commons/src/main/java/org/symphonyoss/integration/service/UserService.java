@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.core.service;
+package org.symphonyoss.integration.service;
 
 import org.symphonyoss.integration.entity.model.User;
 
