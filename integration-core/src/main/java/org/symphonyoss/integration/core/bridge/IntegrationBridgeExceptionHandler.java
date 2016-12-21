@@ -118,6 +118,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
           WebHookConfigurationUtils.fromJsonString(instance.getOptionalProperties()).path(ROOMS).iterator();
       while (rooms.hasNext()) {
         JsonNode room = rooms.next();
+        // removes url unsafe chars from the streamId field, so it can be compared to the stream being processed
         String roomStream = room.path(STREAM_ID).asText().replaceAll("/", "_").replace("==", "");
         if (stream.equals(roomStream)) {
           roomName = room.path(ROOM_NAME).asText();
