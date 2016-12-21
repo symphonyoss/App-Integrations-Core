@@ -56,7 +56,7 @@ public class NullIntegrationTest extends CommonIntegrationTest {
 
     integration.onCreate(APP_TYPE);
 
-    IntegrationHealth health = integration.healthManager.getHealth();
+    IntegrationHealth health = integration.getHealthManager().getHealth();
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
@@ -75,7 +75,7 @@ public class NullIntegrationTest extends CommonIntegrationTest {
 
     integration.onCreate(APP_TYPE);
 
-    IntegrationHealth health = integration.healthManager.getHealth();
+    IntegrationHealth health = integration.getHealthManager().getHealth();
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());

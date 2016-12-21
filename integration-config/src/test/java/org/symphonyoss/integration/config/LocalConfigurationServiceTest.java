@@ -1,7 +1,7 @@
 package org.symphonyoss.integration.config;
 
-import static org.symphonyoss.integration.config.WebHookConfigurationUtils.LAST_POSTED_DATE;
-import static org.symphonyoss.integration.config.WebHookConfigurationUtils.OWNER;
+import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.LAST_POSTED_DATE;
+import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.OWNER;
 
 import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.V1Configuration;
@@ -24,9 +24,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.config.exception.InitializationConfigException;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.config.exception.InvalidConfigurationIdException;
 import org.symphonyoss.integration.config.exception.InvalidInstanceIdException;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
 import java.util.HashMap;

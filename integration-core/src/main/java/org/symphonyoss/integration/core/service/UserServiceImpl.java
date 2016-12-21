@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.service.UserService;
 
 import javax.annotation.PostConstruct;
 

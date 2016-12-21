@@ -24,6 +24,8 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
 import java.util.Collections;

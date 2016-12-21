@@ -20,6 +20,7 @@ import org.symphonyoss.integration.config.exception.SaveConfigurationException;
 import org.symphonyoss.integration.config.exception.SaveInstanceException;
 import org.symphonyoss.integration.config.model.ConfigurationRepository;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.service.ConfigurationService;
 
 import java.io.Closeable;
 import java.io.FileInputStream;

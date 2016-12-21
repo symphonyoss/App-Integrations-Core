@@ -24,7 +24,7 @@ import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.authentication.exception.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
  * Created by rsanchez on 10/05/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AuthenticationProxyTest {
+public class AuthenticationProxyImplTest {
 
   private static final String JIRAWEBHOOK = "jirawebhook";
 
@@ -79,7 +79,7 @@ public class AuthenticationProxyTest {
   private KeyStore simpleKs;
 
   @InjectMocks
-  private AuthenticationProxy proxy = new AuthenticationProxy();
+  private AuthenticationProxyImpl proxy = new AuthenticationProxyImpl();
   private Token sessionToken = new Token();
   private Token kmToken = new Token();
   private Token sessionToken2 = new Token();

@@ -1,5 +1,7 @@
 package org.symphonyoss.integration.config.exception;
 
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+
 /**
  * Exception to report the failure to save the configuration instance in the datasource.
  *

@@ -1,11 +1,12 @@
 package org.symphonyoss.integration.web.filter;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
-import com.symphony.logging.DistributedTracingUtils;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
+
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 import java.io.IOException;
 

@@ -15,13 +15,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.config.ConfigurationService;
-import org.symphonyoss.integration.config.WebHookConfigurationUtils;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
-import org.symphonyoss.integration.core.exception.ExceptionHandler;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.exception.ExceptionHandler;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.service.StreamService;
 
 import java.io.IOException;
 import java.util.List;
