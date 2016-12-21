@@ -15,4 +15,8 @@ public class MessageMLParseException extends IntegrationRuntimeException {
     super(COMPONENT, message, cause);
   }
 
+  public MessageMLParseException(String message) {
+    super(COMPONENT, message);
+  }
+
 }
