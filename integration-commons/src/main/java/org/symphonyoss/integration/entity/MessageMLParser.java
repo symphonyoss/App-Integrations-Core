@@ -58,13 +58,18 @@ public class MessageMLParser {
    */
   public static MessageML parse(String xml) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(MessageML.class);
-    Unmarshaller unmarshaller = null;
+    Unmarshaller unmarshaller;
     unmarshaller = jaxbContext.createUnmarshaller();
 
     StringReader reader = new StringReader(xml);
 
     String presentation = ParserUtils.getPresentationMLContent(xml);
     MessageML messageML = (MessageML) unmarshaller.unmarshal(reader);
+
+    if (messageML.getEntity() == null) {
+      throw new MessageMLParseException("Invalid message format. At least one entity is needed to parse.");
+    }
+
     messageML.getEntity().setPresentationML(presentation);
     return messageML;
   }

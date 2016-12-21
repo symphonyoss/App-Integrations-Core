@@ -92,6 +92,12 @@ public class MessageMLParserTest {
   }
 
   @Test(expected = MessageMLParseException.class)
+  public void testParseWithoutEntity() throws JAXBException, EntityXMLGeneratorException {
+    String xml = "<messageML>simple message</messageML>";
+    parser.parse(xml);
+  }
+
+  @Test(expected = MessageMLParseException.class)
   public void testNullBody() {
     parser.validate(null);
   }
