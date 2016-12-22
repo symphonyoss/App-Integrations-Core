@@ -6,9 +6,7 @@ import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConst
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.CONFIGURATION_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.INSTANCE_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.MESSAGE_API;
-import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.OTHER_FAIL_COUNTER_API;
-import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.OTHER_SUCCESS_COUNTER_API;
-import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.OTHER_TIMER_API;
+import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.OTHER_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.USER_API;
 
 import com.codahale.metrics.Counter;
@@ -42,24 +40,6 @@ public class ApiMetricsController {
   private Counter activeApiCalls;
 
   /**
-   * Timer for the unknown API calls
-   */
-  @Metric(name = OTHER_TIMER_API, absolute = true)
-  private Timer otherApiTimer;
-
-  /**
-   * Counter for the unknown API calls was executed successfully
-   */
-  @Metric(name = OTHER_SUCCESS_COUNTER_API, absolute = true)
-  private Counter otherSuccessCounterApi;
-
-  /**
-   * Counter for the unknown API calls wasn't executed successfully
-   */
-  @Metric(name = OTHER_FAIL_COUNTER_API, absolute = true)
-  private Counter otherFailCounterApi;
-
-  /**
    * Timers for each API endpoint
    */
   private ConcurrentMap<String, Timer> timerByApi = new ConcurrentHashMap<>();
@@ -84,6 +64,7 @@ public class ApiMetricsController {
     initEndpoint(USER_API);
     initEndpoint(MESSAGE_API);
     initEndpoint(AUTH_API);
+    initEndpoint(OTHER_API);
   }
 
   /**
@@ -92,27 +73,34 @@ public class ApiMetricsController {
    * @param apiKey API identifier
    */
   private void initEndpoint(String apiKey) {
+    // Timer for API endpoint
     Timer apiTimer = metricsRegistry.timer(MetricRegistry.name(
         IntegrationMetricsConstants.BASE_METRIC_NAME, apiKey, API));
     timerByApi.put(apiKey, apiTimer);
 
+    // Counter for success calls
     Counter apiSuccessCounter = metricsRegistry.counter(MetricRegistry.name(
         IntegrationMetricsConstants.BASE_METRIC_NAME,
         apiKey, API, IntegrationMetricsConstants.SUCCESS));
     apiSuccessCounters.put(apiKey, apiSuccessCounter);
 
+    // Counter for failure calls
     Counter apiFailCounter = metricsRegistry.counter(MetricRegistry.name(
         IntegrationMetricsConstants.BASE_METRIC_NAME,
         apiKey, API, IntegrationMetricsConstants.FAIL));
     apiFailCounters.put(apiKey, apiFailCounter);
 
+    // Success ratio. This ratio is the number of success calls divided by the total of API calls.
     CounterRatio apiSuccessRatio = new CounterRatio(apiSuccessCounter, apiTimer);
     metricsRegistry.register(MetricRegistry.name(IntegrationMetricsConstants.BASE_METRIC_NAME,
         apiKey, API, IntegrationMetricsConstants.SUCCESS, IntegrationMetricsConstants.RATIO),
         apiSuccessRatio);
 
+    // Failure ratio. This ratio is the number of failure calls divided by the total of API calls.
     CounterRatio apiFailRatio = new CounterRatio(apiFailCounter, apiTimer);
-    metricsRegistry.register(MetricRegistry.name(IntegrationMetricsConstants.BASE_METRIC_NAME, apiKey, API, IntegrationMetricsConstants.FAIL, IntegrationMetricsConstants.RATIO),
+    metricsRegistry.register(
+        MetricRegistry.name(IntegrationMetricsConstants.BASE_METRIC_NAME, apiKey, API,
+            IntegrationMetricsConstants.FAIL, IntegrationMetricsConstants.RATIO),
         apiFailRatio);
   }
 
@@ -126,11 +114,7 @@ public class ApiMetricsController {
 
     String apiKey = getApiKey(requestPath);
 
-    if (apiKey != null) {
-      return timerByApi.get(apiKey).time();
-    }
-
-    return otherApiTimer.time();
+    return timerByApi.get(apiKey).time();
   }
 
   /**
@@ -149,7 +133,7 @@ public class ApiMetricsController {
       }
     }
 
-    return null;
+    return OTHER_API;
   }
 
   /**
@@ -164,18 +148,10 @@ public class ApiMetricsController {
 
     String apiKey = getApiKey(path);
 
-    if (apiKey == null) {
-      if (success) {
-        otherSuccessCounterApi.inc();
-      } else {
-        otherFailCounterApi.inc();
-      }
+    if (success) {
+      apiSuccessCounters.get(apiKey).inc();
     } else {
-      if (success) {
-        apiSuccessCounters.get(apiKey).inc();
-      } else {
-        apiFailCounters.get(apiKey).inc();
-      }
+      apiFailCounters.get(apiKey).inc();
     }
 
     if (context != null) {

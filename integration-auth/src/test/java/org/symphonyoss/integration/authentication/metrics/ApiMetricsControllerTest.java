@@ -30,15 +30,6 @@ public class ApiMetricsControllerTest {
   private Counter activeApiCalls;
 
   @Spy
-  private Timer otherApiTimer = new Timer();
-
-  @Spy
-  private Counter otherSuccessCounterApi;
-
-  @Spy
-  private Counter otherFailCounterApi;
-
-  @Spy
   private ConcurrentMap<String, Timer> timerByApi = new ConcurrentHashMap<>();
 
   @Spy
@@ -53,8 +44,13 @@ public class ApiMetricsControllerTest {
   @Before
   public void init() {
     timerByApi.put(ApiMetricsConstants.CONFIGURATION_API, new Timer());
+    timerByApi.put(ApiMetricsConstants.OTHER_API, new Timer());
+
     apiSuccessCounters.put(ApiMetricsConstants.CONFIGURATION_API, new Counter());
+    apiSuccessCounters.put(ApiMetricsConstants.OTHER_API, new Counter());
+
     apiFailCounters.put(ApiMetricsConstants.CONFIGURATION_API, new Counter());
+    apiFailCounters.put(ApiMetricsConstants.OTHER_API, new Counter());
   }
 
   @Test
@@ -75,10 +71,10 @@ public class ApiMetricsControllerTest {
     controller.finishApiCall(configurationContextSuccess, CONFIGURATON_REQUEST_PATH, true);
     controller.finishApiCall(configurationContextFailed, CONFIGURATON_REQUEST_PATH, false);
 
-    assertEquals(2, otherApiTimer.getCount());
+    assertEquals(2, timerByApi.get(ApiMetricsConstants.OTHER_API).getCount());
     assertEquals(2, timerByApi.get(ApiMetricsConstants.CONFIGURATION_API).getCount());
-    assertEquals(1, otherSuccessCounterApi.getCount());
-    assertEquals(1, otherFailCounterApi.getCount());
+    assertEquals(1, apiSuccessCounters.get(ApiMetricsConstants.OTHER_API).getCount());
+    assertEquals(1, apiFailCounters.get(ApiMetricsConstants.OTHER_API).getCount());
     assertEquals(1, apiSuccessCounters.get(ApiMetricsConstants.CONFIGURATION_API).getCount());
     assertEquals(1, apiFailCounters.get(ApiMetricsConstants.CONFIGURATION_API).getCount());
     assertEquals(0, activeApiCalls.getCount());

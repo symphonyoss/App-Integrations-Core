@@ -35,9 +35,9 @@ public class IntegrationMetricsFilter implements Filter {
   @Autowired
   private RequestMetricsController metricsController;
 
-  private String ignoreUrlParam;
-
   private String integrationUrlParam;
+
+  private List<String> ignoreList;
 
   /**
    * Inject spring components and retrieves the init params.
@@ -49,8 +49,10 @@ public class IntegrationMetricsFilter implements Filter {
         .getAutowireCapableBeanFactory()
         .autowireBean(this);
 
-    this.ignoreUrlParam = config.getInitParameter(IGNORE_URL_PARAM);
     this.integrationUrlParam = config.getInitParameter(WEBHOOK_URL_PARAM);
+
+    String ignoreUrlParam = config.getInitParameter(IGNORE_URL_PARAM);
+    this.ignoreList = getIgnoreList(ignoreUrlParam);
   }
 
   /**
@@ -99,8 +101,6 @@ public class IntegrationMetricsFilter implements Filter {
    * @return true if the request execution time should be logged or false otherwise.
    */
   private boolean shouldLogRequest(String pathInfo) {
-    List<String> ignoreList = getIgnoreList();
-
     if (ignoreList.isEmpty() || pathInfo == null) {
       return false;
     }
@@ -116,9 +116,10 @@ public class IntegrationMetricsFilter implements Filter {
 
   /**
    * Retrieves the ignore list based on the filter init params.
+   * @param ignoreUrlParam Ignore url param
    * @return List of urls patterns should be ignored.
    */
-  private List<String> getIgnoreList() {
+  private List<String> getIgnoreList(String ignoreUrlParam) {
     if (StringUtils.isEmpty(ignoreUrlParam)) {
       return Collections.emptyList();
     }
