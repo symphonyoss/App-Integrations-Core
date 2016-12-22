@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.exception.ConnectivityException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.StreamService;
 
 import java.util.List;
 

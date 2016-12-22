@@ -1,9 +1,8 @@
 package org.symphonyoss.integration.core.bootstrap;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import com.symphony.api.pod.model.V1Configuration;
-import com.symphony.logging.DistributedTracingUtils;
 import com.symphony.logging.ISymphonyLogger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,12 +14,13 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.exception.ConnectivityException;
 import org.symphonyoss.integration.core.NullIntegration;
-import org.symphonyoss.integration.core.exception.RetryLifecycleException;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.Application;

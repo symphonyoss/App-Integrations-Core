@@ -1,14 +1,12 @@
 package org.symphonyoss.integration.web.filter;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
-import com.symphony.logging.DistributedTracingUtils;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
@@ -18,6 +16,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.MDC;
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 import java.io.IOException;
 

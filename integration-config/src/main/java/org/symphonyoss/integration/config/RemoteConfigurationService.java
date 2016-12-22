@@ -17,8 +17,9 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
-import org.symphonyoss.integration.config.exception.ForbiddenUserException;
-import org.symphonyoss.integration.config.exception.RemoteConfigurationException;
+import org.symphonyoss.integration.exception.config.ForbiddenUserException;
+import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
+import org.symphonyoss.integration.service.ConfigurationService;
 
 import javax.annotation.PostConstruct;
 

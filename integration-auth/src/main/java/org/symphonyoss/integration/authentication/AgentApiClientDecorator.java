@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.metrics.api.ApiMetricsController;
 
 import java.io.File;
 import java.io.IOException;

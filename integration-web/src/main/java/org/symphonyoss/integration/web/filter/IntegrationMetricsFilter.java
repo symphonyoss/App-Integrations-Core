@@ -4,7 +4,7 @@ import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.symphonyoss.integration.metrics.request.RequestMetricsController;
+import org.symphonyoss.integration.web.metrics.RequestMetricsController;
 
 import java.io.IOException;
 import java.util.Arrays;

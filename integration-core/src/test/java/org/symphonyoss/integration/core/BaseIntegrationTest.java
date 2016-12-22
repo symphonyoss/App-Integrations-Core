@@ -13,11 +13,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.core.exception.CertificateNotFoundException;
-import org.symphonyoss.integration.core.exception.LoadKeyStoreException;
+import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationBridge;
 import org.symphonyoss.integration.model.IntegrationProperties;
@@ -108,7 +109,7 @@ public class BaseIntegrationTest extends CommonIntegrationTest {
 
     integration.registerUser(APP_TYPE);
 
-    IntegrationHealth health = integration.healthManager.getHealth();
+    IntegrationHealth health = integration.getHealthManager().getHealth();
     assertEquals(IntegrationFlags.ValueEnum.OK, health.getFlags().getCertificateInstalled());
   }
 

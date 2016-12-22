@@ -1,7 +1,5 @@
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID;
-import static com.symphony.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -10,12 +8,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 
 import com.symphony.api.auth.client.ApiException;
 import com.symphony.api.auth.client.Pair;
 import com.symphony.api.auth.client.TypeRef;
 import com.symphony.api.auth.model.Token;
-import com.symphony.logging.DistributedTracingUtils;
 
 import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,8 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.metrics.api.ApiMetricsController;
+import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 import java.util.ArrayList;
 import java.util.List;

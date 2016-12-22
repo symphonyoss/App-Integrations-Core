@@ -27,8 +27,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
-import org.symphonyoss.integration.config.exception.ForbiddenUserException;
-import org.symphonyoss.integration.config.exception.RemoteConfigurationException;
+import org.symphonyoss.integration.exception.config.ForbiddenUserException;
+import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
+import org.symphonyoss.integration.service.ConfigurationService;
 
 import javax.ws.rs.core.Response;
 

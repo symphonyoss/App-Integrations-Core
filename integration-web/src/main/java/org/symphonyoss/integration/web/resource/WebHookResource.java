@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.symphonyoss.integration.authentication.exception.ConnectivityException;
-import org.symphonyoss.integration.config.ConfigurationService;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.exception.config.ForbiddenUserException;
+import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
-import org.symphonyoss.integration.config.exception.IntegrationConfigException;
-import org.symphonyoss.integration.core.bridge.IntegrationBridge;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
@@ -115,7 +116,7 @@ public abstract class WebHookResource {
    * @param configurationType Configuration type
    * @return Configuration instance that contains information how to handle the request.
    * @throws InstanceNotFoundException Instance not found
-   * @throws org.symphonyoss.integration.config.exception.ForbiddenUserException
+   * @throws ForbiddenUserException
    */
   protected ConfigurationInstance getConfigurationInstance(String instanceId,
       String configurationId,

@@ -22,7 +22,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
-import org.symphonyoss.integration.metrics.request.RequestMetricsController;
+import org.symphonyoss.integration.web.metrics.RequestMetricsController;
 
 import java.io.IOException;
 

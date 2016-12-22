@@ -11,7 +11,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
-import org.symphonyoss.integration.metrics.api.ApiMetricsController;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 
 import java.io.File;
 import java.lang.reflect.Field;
