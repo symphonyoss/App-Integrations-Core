@@ -209,7 +209,6 @@ public class IntegrationBridgeExceptionHandlerTest {
       com.symphony.api.pod.client.ApiException {
     ConfigurationInstance instance = mockInstanceAlt();
 
-    mockAuthForbidden();
     mockConfigurationService();
 
     when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(TOKEN);
