@@ -17,16 +17,14 @@
 package org.symphonyoss.integration.healthcheck.verifier;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
-import org.symphonyoss.integration.model.ConnectionInfo;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ConnectionInfo;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
  * Test class to validate {@link AgentConnectivityVerifier}
@@ -39,8 +37,8 @@ public class AgentConnectivityVerifierTest {
 
   private static final String MOCK_PORT = "8444";
 
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
+  @Spy
+  private IntegrationProperties properties = new IntegrationProperties();
 
   @InjectMocks
   private AgentConnectivityVerifier verifier = new AgentConnectivityVerifier();
@@ -51,10 +49,7 @@ public class AgentConnectivityVerifierTest {
     agent.setHost(MOCK_HOST);
     agent.setPort(MOCK_PORT);
 
-    IntegrationProperties properties = new IntegrationProperties();
     properties.setAgent(agent);
-
-    doReturn(properties).when(propertiesReader).getProperties();
 
     assertEquals("https://test.symphony.com:8444/agent/v1/HealthCheck",
         verifier.getHealthCheckUrl());

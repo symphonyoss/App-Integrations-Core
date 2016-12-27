@@ -17,16 +17,14 @@
 package org.symphonyoss.integration.healthcheck.verifier;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
-import org.symphonyoss.integration.model.ConnectionInfo;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ConnectionInfo;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
  * Test class to validate {@link KmConnectivityVerifier}
@@ -37,8 +35,10 @@ public class KmConnectivityVerifierTest {
 
   private static final String MOCK_HOST = "test.symphony.com";
 
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
+  private static final String MOCK_PORT = "8443";
+
+  @Spy
+  private IntegrationProperties properties = new IntegrationProperties();
 
   @InjectMocks
   private KmConnectivityVerifier verifier = new KmConnectivityVerifier();
@@ -47,13 +47,11 @@ public class KmConnectivityVerifierTest {
   public void testHealthCheckUrl() {
     ConnectionInfo km = new ConnectionInfo();
     km.setHost(MOCK_HOST);
+    km.setPort(MOCK_PORT);
 
-    IntegrationProperties properties = new IntegrationProperties();
     properties.setKeyManager(km);
 
-    doReturn(properties).when(propertiesReader).getProperties();
-
-    assertEquals("https://test.symphony.com/relay/HealthCheck", verifier.getHealthCheckUrl());
+    assertEquals("https://test.symphony.com:8443/relay/HealthCheck", verifier.getHealthCheckUrl());
   }
 
 }

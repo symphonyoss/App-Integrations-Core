@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.core;
+package org.symphonyoss.integration.web;
 
-import com.symphony.atlas.AbstractAtlas;
-import com.symphony.atlas.AtlasException;
-
-import java.io.File;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Mock to represent a Atlas object.
- * Created by rsanchez on 22/11/16.
+ * Integration Bridge application class.
+ * Created by rsanchez on 23/12/16.
  */
-public class MockAtlas extends AbstractAtlas {
+@SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"})
+public class IntegrationBridgeApplication {
 
-  @Override
-  public File getConfigDir(String name) throws AtlasException {
-    throw new AtlasException("getConfigDir not supported in this implementation");
+  public static void main(String[] args) throws Exception {
+    SpringApplication.run(IntegrationBridgeApplication.class, args);
   }
 
-  @Override
-  public File getConfigFile(String name) throws AtlasException {
-    throw new AtlasException("getConfigDir not supported in this implementation");
-  }
 }

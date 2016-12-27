@@ -16,19 +16,14 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.KEY_AUTH_URL;
-import static com.symphony.atlas.config.SymphonyAtlas.SESSION_AUTH_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.auth.client.ApiException;
 import com.symphony.api.auth.model.Token;
-import com.symphony.atlas.AtlasException;
-import com.symphony.atlas.IAtlas;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,12 +31,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -77,8 +72,6 @@ public class AuthenticationProxyImplTest {
 
   private static final String KM_TOKEN2 = "3975bd7f-a6c1-4ec4-806d-c241991889a1";
 
-  private IAtlas atlas;
-
   @Mock
   private AuthenticationApiDecorator sbeAuthApi;
 
@@ -86,7 +79,7 @@ public class AuthenticationProxyImplTest {
   private AuthenticationApiDecorator keyManagerAuthApi;
 
   @Mock
-  private IntegrationAtlas integrationAtlas;
+  private IntegrationProperties properties;
 
   @Mock
   private KeyStore jiraKs;
@@ -105,9 +98,6 @@ public class AuthenticationProxyImplTest {
   public void setup() {
     this.proxy.registerUser(JIRAWEBHOOK, jiraKs, "");
     this.proxy.registerUser(SIMPLEWEBHOOK, simpleKs, "");
-
-    this.atlas = mock(IAtlas.class);
-    when(integrationAtlas.getAtlas()).thenReturn(atlas);
 
     sessionToken.setName("sessionToken");
     sessionToken.setToken(SESSION_TOKEN);
@@ -129,22 +119,22 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = AuthUrlNotFoundException.class)
   public void testInitWithoutKeyManagerUrl() {
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
     proxy.init();
   }
 
   @Test
-  public void testInit() throws AtlasException {
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+  public void testInit() {
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
     proxy.init();
   }
 
   @Test
   public void testFailAuthenticationSBE() throws ApiException {
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     validateFailedAuthentication();
   }
@@ -156,8 +146,8 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     validateFailedAuthentication();
   }
@@ -177,8 +167,8 @@ public class AuthenticationProxyImplTest {
     ProcessingException exception = new ProcessingException(new IOException());
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
@@ -186,8 +176,8 @@ public class AuthenticationProxyImplTest {
   @Test(expected = ProcessingException.class)
   public void testFailAuthenticationPodProcessingException() throws ApiException {
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
@@ -201,8 +191,8 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
@@ -214,16 +204,16 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
 
   @Test
   public void testAuthentication() throws ApiException {
-    when(atlas.get("session.auth.url")).thenReturn("https://localhost:8444");
-    when(atlas.get("keymanager.auth.url")).thenReturn("https://localhost:8444/relay");
+    when(properties.getSessionManagerAuthUrl()).thenReturn("https://localhost:8444/sessionauth");
+    when(properties.getKeyManagerAuthUrl()).thenReturn("https://localhost:8444/keyauth");
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(kmToken);

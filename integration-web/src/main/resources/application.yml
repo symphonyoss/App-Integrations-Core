@@ -1,0 +1,29 @@
+server:
+  address: 127.0.0.1
+  port: 8186
+  display-name: Integration Bridge
+  context-path: /integration
+  connection-timeout: 20000
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: logs
+      pattern: "%h %l %u %t &quot;%r&quot; %s %b"
+      prefix: localhost_access_log
+      suffix: .txt
+    basedir: /data/symphony/ib/tomcat
+
+spring:
+  mvc:
+    dispatch-options-request: true
+    media-types:
+      json: application/json
+      xml: application/xml
+      csv: text/csv
+      plain: text/plain
+      x-www-form-urlencoded: application/x-www-form-urlencoded
+      form-data: multipart/form-data
+    servlet:
+      load-on-startup: 1
+  profiles:
+    active: jira, github, salesforce, universal, trello, zapier

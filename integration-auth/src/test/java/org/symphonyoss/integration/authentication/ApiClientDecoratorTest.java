@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.AGENT_URL;
-import static com.symphony.atlas.config.SymphonyAtlas.POD_URL;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -29,8 +27,8 @@ import com.symphony.api.pod.client.ApiException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.mockito.Mock;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +70,7 @@ public class ApiClientDecoratorTest {
 
   @Mock protected AuthenticationProxy authenticationProxy;
 
-  @Mock protected IntegrationAtlas integrationAtlas;
+  @Mock protected IntegrationProperties properties;
 
   protected Map<String, String> headerParams = new HashMap<String, String>();
   protected String[] authNames = {};
@@ -95,8 +93,8 @@ public class ApiClientDecoratorTest {
     headerParams.put("sessionToken", SESSION_TOKEN);
     contentTypes.add("application/text");
 
-    when(integrationAtlas.getRequiredUrl(AGENT_URL)).thenReturn(HTTPS_AGENT_URL);
-    when(integrationAtlas.getRequiredUrl(POD_URL)).thenReturn(HTTPS_POD_URL);
+    when(properties.getAgentUrl()).thenReturn(HTTPS_AGENT_URL);
+    when(properties.getPodUrl()).thenReturn(HTTPS_POD_URL);
 
     when(authenticationProxy.httpClientForSessionToken(SESSION_TOKEN)).thenReturn(mockClient);
     when(authenticationProxy.httpClientForUser(USER_ID)).thenReturn(mockClient);

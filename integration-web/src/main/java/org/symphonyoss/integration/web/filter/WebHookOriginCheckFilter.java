@@ -23,26 +23,18 @@ import com.symphony.logging.SymphonyLoggerFactory;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -50,7 +42,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
@@ -64,8 +55,6 @@ import javax.ws.rs.core.Response;
  *
  * Created by rsanchez on 09/11/16.
  */
-@Component
-@WebFilter(filterName = "originCheckFilter", urlPatterns = "/v1/whi/*", asyncSupported = true)
 public class WebHookOriginCheckFilter implements Filter {
 
   private static final ISymphonyLogger LOGGER =
@@ -83,13 +72,9 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
 
-  private IntegrationPropertiesReader reader;
-
   private WebApplicationContext springContext;
 
   private IntegrationProperties properties;
-
-  private LoadingCache<String, Set<String>> whiteListCache;
 
   /**
    * Initialize the spring components and the whitelist cache.
@@ -100,16 +85,7 @@ public class WebHookOriginCheckFilter implements Filter {
   public void init(FilterConfig config) throws ServletException {
     this.springContext =
         WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
-    this.reader = springContext.getBean(IntegrationPropertiesReader.class);
-    this.properties = new IntegrationProperties();
-
-    this.whiteListCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build
-        (new CacheLoader<String, Set<String>>() {
-          @Override
-          public Set<String> load(String key) throws Exception {
-            return getWhiteListByApplication(key);
-          }
-        });
+    this.properties = springContext.getBean(IntegrationProperties.class);
   }
 
   /**
@@ -136,10 +112,12 @@ public class WebHookOriginCheckFilter implements Filter {
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-    String path = request.getPathInfo().replace(URL_PATTERN, StringUtils.EMPTY);
+    String path = request.getRequestURI()
+        .replace(request.getContextPath(), StringUtils.EMPTY)
+        .replace(URL_PATTERN, StringUtils.EMPTY);
     String configType = path.substring(0, path.indexOf("/"));
 
-    Set<String> whiteList = getWhiteList(configType);
+    Set<String> whiteList = getWhiteListByApplication(configType);
 
     if (whiteList.isEmpty()) {
       filterChain.doFilter(servletRequest, servletResponse);
@@ -156,27 +134,12 @@ public class WebHookOriginCheckFilter implements Filter {
   }
 
   /**
-   * Get the cached whitelist by integration type.
-   * @param integrationType Integration type
-   * @return Cached whitelist
-   */
-  private Set<String> getWhiteList(String integrationType) {
-    try {
-      return whiteListCache.get(integrationType);
-    } catch (ExecutionException e) {
-      LOGGER.error("Cannot retrieve " + integrationType + " whitelist", e);
-      return Collections.emptySet();
-    }
-  }
-
-  /**
    * Get the application whitelist based on YAML file settings and embedded integration settings.
    * @param integrationType Integration type
    * @return Application origin whitelist
    */
   private Set<String> getWhiteListByApplication(String integrationType) {
     Set<String> result = new HashSet<>();
-    properties = reader.getProperties();
 
     try {
       Integration integration = springContext.getBean(integrationType, Integration.class);

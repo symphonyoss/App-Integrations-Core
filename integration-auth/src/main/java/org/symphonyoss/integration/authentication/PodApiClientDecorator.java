@@ -16,25 +16,23 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.POD_URL;
-
 import com.symphony.api.pod.client.ApiClient;
 import com.symphony.api.pod.client.ApiException;
 import com.symphony.api.pod.client.Pair;
 import com.symphony.api.pod.client.TypeRef;
 import com.symphony.api.pod.client.auth.Authentication;
 
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.IntegrationAtlas;
-import org.symphonyoss.integration.IntegrationAtlasException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodUrlNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +75,7 @@ public class PodApiClientDecorator extends ApiClient {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationAtlas integrationAtlas;
+  private IntegrationProperties properties;
 
   public PodApiClientDecorator() {
 
@@ -96,11 +94,14 @@ public class PodApiClientDecorator extends ApiClient {
 
   @PostConstruct
   public void init() {
-    try {
-      setBasePath(integrationAtlas.getRequiredUrl(POD_URL));
-    } catch (IntegrationAtlasException e) {
-      throw new PodUrlNotFoundException("No atlas configuration found to the key: " + POD_URL, e);
+    String url = properties.getPodUrl();
+
+    if (StringUtils.isBlank(url)) {
+      throw new PodUrlNotFoundException(
+          "Missing configuration for POD URL. Verify the YAML configuration file");
     }
+
+    setBasePath(url);
   }
 
   /**

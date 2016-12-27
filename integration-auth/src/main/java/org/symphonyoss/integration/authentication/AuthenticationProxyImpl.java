@@ -16,28 +16,25 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.KEY_AUTH_URL;
-import static com.symphony.atlas.config.SymphonyAtlas.SESSION_AUTH_URL;
-
 import com.symphony.api.auth.client.ApiException;
 import com.symphony.api.auth.model.Token;
-import com.symphony.atlas.IAtlas;
 import com.symphony.logging.ISymphonyLogger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
-import org.symphonyoss.integration.exception.authentication.ConnectivityException;
-import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -63,9 +60,6 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private static final Long MAX_SESSION_TIME_MILLIS = TimeUnit.MINUTES.toMillis(3);
 
-  @Autowired
-  private IntegrationAtlas integrationAtlas;
-
   /**
    * SBE Authentication API Client
    */
@@ -78,18 +72,23 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
 
+  @Autowired
+  private IntegrationProperties properties;
+
   /**
    * Initialize HTTP clients.
    */
   @PostConstruct
   public void init() {
-    IAtlas atlas = integrationAtlas.getAtlas();
+    String sbeUrl = properties.getSessionManagerAuthUrl();
+    validateUrl(sbeUrl);
 
-    String sbeUrl = getUrl(atlas, SESSION_AUTH_URL);
     AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this);
     sbeClient.setBasePath(sbeUrl);
 
-    String keyManagerUrl = getUrl(atlas, KEY_AUTH_URL);
+    String keyManagerUrl = properties.getKeyManagerAuthUrl();
+    validateUrl(keyManagerUrl);
+
     AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this);
     keyManagerClient.setBasePath(keyManagerUrl);
 
@@ -97,15 +96,11 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     this.keyManagerAuthApi = new AuthenticationApiDecorator(keyManagerClient);
   }
 
-  private String getUrl(IAtlas atlas, String key) {
-    String sbeUrl = atlas.get(key);
-
-    if (sbeUrl == null || sbeUrl.trim().isEmpty()) {
+  private void validateUrl(String url) {
+    if (StringUtils.isBlank(url)) {
       throw new AuthUrlNotFoundException(
-          "Missing Atlas configuration for authentication URL on pod. Set '" + key
-              + "' in Atlas configuration file.");
+          "Missing configuration for authentication URL. Verify the YAML configuration file");
     }
-    return sbeUrl;
   }
 
   /**
@@ -333,7 +328,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    */
   @Override
   public Client httpClientForUser(String userId) {
-    return authContexts.get(userId).httpClientForContext();
+    return contextForUser(userId).httpClientForContext();
   }
 
   /**

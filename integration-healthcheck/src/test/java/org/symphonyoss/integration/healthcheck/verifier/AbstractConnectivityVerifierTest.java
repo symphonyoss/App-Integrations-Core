@@ -29,17 +29,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.model.Application;
-import org.symphonyoss.integration.model.ApplicationState;
-import org.symphonyoss.integration.model.ConnectionInfo;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
@@ -55,20 +54,18 @@ import javax.ws.rs.core.Response;
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractConnectivityVerifierTest {
 
-  private static final String MOCK_HOST = "test.symphony.com";
-
   private static final String MOCK_APP_TYPE = "testWebHookIntegration";
+
+  private static final String MOCK_APP_TYPE2 = "test2WebHookIntegration";
 
   @Mock
   private AuthenticationProxy authenticationProxy;
 
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
+  @Spy
+  private IntegrationProperties integrationProperties = new IntegrationProperties();
 
   @InjectMocks
   private AbstractConnectivityVerifier verifier = new PodConnectivityVerifier();
-
-  private IntegrationProperties properties;
 
   private Client client;
 
@@ -76,27 +73,20 @@ public class AbstractConnectivityVerifierTest {
 
   @Before
   public void init() {
-    List<Application> applicationList = new ArrayList<>();
-    properties = new IntegrationProperties();
+    Map<String, Application> applications = new LinkedHashMap<>();
 
     Application mockApp1 = new Application();
     mockApp1.setState(ApplicationState.PROVISIONED);
-    mockApp1.setType(MOCK_APP_TYPE);
+    mockApp1.setComponent(MOCK_APP_TYPE);
 
     Application mockApp2 = new Application();
     mockApp2.setState(ApplicationState.PROVISIONED);
+    mockApp2.setComponent(MOCK_APP_TYPE2);
 
-    applicationList.add(mockApp1);
-    applicationList.add(mockApp2);
+    applications.put(MOCK_APP_TYPE, mockApp1);
+    applications.put(MOCK_APP_TYPE2, mockApp2);
 
-    properties.setApplications(applicationList);
-
-    ConnectionInfo pod = new ConnectionInfo();
-    pod.setHost(MOCK_HOST);
-
-    properties.setPod(pod);
-
-    doReturn(properties).when(propertiesReader).getProperties();
+    integrationProperties.setApplications(applications);
 
     client = mock(Client.class);
     WebTarget target = mock(WebTarget.class);
@@ -104,16 +94,18 @@ public class AbstractConnectivityVerifierTest {
 
     doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
     doReturn(target).when(client)
-        .target("https://test.symphony.com/webcontroller/HealthCheck/version");
+        .target("https://test.symphony.com:8443/webcontroller/HealthCheck/version");
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
+
+    doReturn("https://test.symphony.com:8443").when(integrationProperties).getSymphonyUrl();
   }
 
   @Test
   public void testAvailableIntegrationUserEmpty() {
-    properties.getApplications().get(0).setState(ApplicationState.REMOVED);
-    properties.getApplications().get(1).setState(ApplicationState.REMOVED);
+    integrationProperties.getApplications().get(MOCK_APP_TYPE).setState(ApplicationState.REMOVED);
+    integrationProperties.getApplications().get(MOCK_APP_TYPE2).setState(ApplicationState.REMOVED);
 
     assertEquals(StringUtils.EMPTY, verifier.availableIntegrationUser());
   }

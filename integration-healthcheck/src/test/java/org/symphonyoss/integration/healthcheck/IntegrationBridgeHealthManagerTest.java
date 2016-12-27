@@ -32,7 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.healthcheck.verifier.AbstractConnectivityVerifier;
@@ -70,9 +69,6 @@ public class IntegrationBridgeHealthManagerTest {
 
   @Mock
   private PodConnectivityVerifier podConnectivityVerifier;
-
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
 
   @Mock
   private AuthenticationProxy authenticationProxy;

@@ -19,27 +19,26 @@ package org.symphonyoss.integration.core;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import com.symphony.atlas.AtlasException;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.BaseIntegration;
-import org.symphonyoss.integration.IntegrationAtlas;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
-import org.symphonyoss.integration.model.Application;
-import org.symphonyoss.integration.model.IntegrationBridge;
-import org.symphonyoss.integration.model.IntegrationProperties;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.IntegrationBridge;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.utils.IntegrationUtils;
+import org.symphonyoss.integration.webhook.CommonIntegrationTest;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -69,59 +68,50 @@ public class BaseIntegrationTest extends CommonIntegrationTest {
   private static final String MOCK_CONTEXT = "jira";
 
   @Mock
-  private IntegrationAtlas integrationAtlas;
-
-  @Mock
   private AuthenticationProxy authenticationProxy;
 
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
+  @Spy
+  private IntegrationProperties properties = new IntegrationProperties();
 
   @Mock
   private Client client;
 
-  @InjectMocks
-  private BaseIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
+  @Mock
+  private IntegrationUtils utils;
 
-  @Before
-  public void init() {
-    doReturn(atlas).when(integrationAtlas).getAtlas();
-  }
+  @InjectMocks
+  private BaseIntegration integration = new NullIntegration(utils, authenticationProxy);
 
   @Test
   public void testApplicationId() {
-    IntegrationProperties properties = new IntegrationProperties();
-    doReturn(properties).when(propertiesReader).getProperties();
-
     assertEquals(APP_TYPE, integration.getApplicationId(APP_TYPE));
 
     Application application = new Application();
-    application.setType(APP_TYPE);
-    properties.setApplications(Collections.singletonList(application));
+    application.setComponent(APP_TYPE);
+    properties.setApplications(Collections.singletonMap(APP_ID, application));
 
-    assertEquals(APP_TYPE, integration.getApplicationId(APP_TYPE));
-
-    application.setId(APP_ID);
     assertEquals(APP_ID, integration.getApplicationId(APP_TYPE));
   }
 
   @Test(expected = CertificateNotFoundException.class)
   public void testRegisterUserCertNotFound() {
+    doThrow(CertificateNotFoundException.class).when(utils).getCertsDirectory();
     integration.registerUser(APP_TYPE);
   }
 
   @Test(expected = LoadKeyStoreException.class)
-  public void testRegisterUserLoadKeystoreException() throws AtlasException, IOException {
-    mockCertDir();
+  public void testRegisterUserLoadKeystoreException() throws IOException {
+    String dir = mockCertDir();
+    doReturn(dir).when(utils).getCertsDirectory();
+
     integration.registerUser(APP_TYPE);
   }
 
   @Test
   public void testRegisterUser()
-      throws AtlasException, IOException, KeyStoreException, CertificateException,
-      NoSuchAlgorithmException {
-    mockCertDir();
-    mockKeyStore();
+      throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    String dir = mockKeyStore();
+    doReturn(dir).when(utils).getCertsDirectory();
 
     integration.registerUser(APP_TYPE);
 
@@ -131,12 +121,9 @@ public class BaseIntegrationTest extends CommonIntegrationTest {
 
   @Test
   public void testConfiguratorInstalledFlag() {
-    IntegrationProperties properties = new IntegrationProperties();
-    doReturn(properties).when(propertiesReader).getProperties();
-
     Application application = new Application();
-    application.setType(APP_TYPE);
-    properties.setApplications(Collections.singletonList(application));
+    application.setComponent(APP_TYPE);
+    properties.setApplications(Collections.singletonMap(APP_ID, application));
 
     assertEquals(IntegrationFlags.ValueEnum.NOK,
         integration.getConfiguratorInstalledFlag(APP_TYPE));

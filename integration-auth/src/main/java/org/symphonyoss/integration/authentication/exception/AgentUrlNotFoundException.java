@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.properties;
+package org.symphonyoss.integration.authentication.exception;
+
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 
 /**
- * Created by rsanchez on 17/10/16.
+ * Missing configuration to Agent URL.
+ *
+ * Created by cmarcondes on 10/26/16.
  */
-public class AtlasProperties {
+public class AgentUrlNotFoundException extends AuthenticationException {
 
-  /**
-   * Atlas home
-   */
-  public static final String ATLAS_HOME = "atlas.home";
+  public AgentUrlNotFoundException(String message) {
+    super(message);
+  }
 
-  /**
-   * Atlas env
-   */
-  public static final String ATLAS_ENV = "atlas.env";
+  public AgentUrlNotFoundException(String message, Exception cause) {
+    super(message, cause);
+  }
 }

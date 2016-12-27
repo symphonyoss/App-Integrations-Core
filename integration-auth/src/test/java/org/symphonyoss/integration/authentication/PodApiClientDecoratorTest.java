@@ -21,11 +21,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID_SIZE;
 
@@ -40,7 +40,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
-import org.symphonyoss.integration.IntegrationAtlasException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodUrlNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -145,12 +144,8 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
 
   @Test(expected = PodUrlNotFoundException.class)
   public void testPodUrlNotFoundException() throws RemoteApiException {
-
-    doThrow(new IntegrationAtlasException("No URL configured for"))
-        .when(integrationAtlas).getRequiredUrl(anyString());
-
+    when(properties.getPodUrl()).thenReturn(null);
     apiClientDecorator.init();
-
   }
 
   @Test

@@ -35,8 +35,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -81,7 +80,7 @@ public class WebHookOriginCheckFilterTest {
   private HttpServletResponse response = new MockHttpServletResponse();
 
   @Mock
-  private IntegrationPropertiesReader reader;
+  private IntegrationProperties properties;
 
   @Mock
   private Integration integration;
@@ -91,11 +90,11 @@ public class WebHookOriginCheckFilterTest {
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
         springContext);
 
-    doReturn("/v1/whi/jiraWebHookIntegration/11111/22222").when(request).getPathInfo();
+    doReturn("integration/v1/whi/jiraWebHookIntegration/11111/22222").when(request).getRequestURI();
+    doReturn("integration").when(request).getContextPath();
     doReturn(servletContext).when(config).getServletContext();
-    doReturn(reader).when(springContext).getBean(IntegrationPropertiesReader.class);
-    doReturn(new IntegrationProperties()).when(reader).getProperties();
     doReturn(integration).when(springContext).getBean(BEAN_NAME, Integration.class);
+    doReturn(properties).when(springContext).getBean(IntegrationProperties.class);
     doReturn(Collections.singleton(REMOTE_ADDRESS)).when(integration).getIntegrationWhiteList();
 
     filter.init(config);

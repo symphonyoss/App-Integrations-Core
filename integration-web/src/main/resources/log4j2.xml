@@ -2,7 +2,7 @@
 <Configuration>
 
     <Properties>
-        <Property name="catalina.base">${sys:java.io.tmpdir}</Property>
+        <Property name="logs.basedir">/data/symphony/ib/tomcat</Property>
         <Property name="log4j2.logLevel">INFO</Property>
         <Property name="log4j2.symphonyLogLevel">INFO</Property>
         <Property name="log4j2.consoleLogThreshold">INFO</Property>
@@ -18,8 +18,8 @@
         </Console>
 
         <RollingFile name="error-rolling-file"
-                     fileName="${sys:catalina.base}/logs/integration-bridge-error.log"
-                     filePattern="${sys:catalina.base}/logs/integration-bridge-error-%i.log.gz"
+                     fileName="${sys:logs.basedir}/logs/integration-bridge-error.log"
+                     filePattern="${sys:logs.basedir}/logs/integration-bridge-error-%i.log.gz"
                      immediateFlush="false">
             <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
             <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -30,8 +30,8 @@
         </RollingFile>
 
         <RollingFile name="rolling-file"
-                     fileName="${sys:catalina.base}/logs/integration-bridge.log"
-                     filePattern="${sys:catalina.base}/logs/integration-bridge-%i.log.gz"
+                     fileName="${sys:logs.basedir}/logs/integration-bridge.log"
+                     filePattern="${sys:logs.basedir}/logs/integration-bridge-%i.log.gz"
                      immediateFlush="false">
             <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
             <DefaultRolloverStrategy max="10"/>
@@ -44,8 +44,7 @@
 
     <Loggers>
 
-        <AsyncLogger name="com.symphony" level="${sys:log4j2.symphonyLogLevel}"
-                     additivity="${sys:log4j2.outputAllToConsole}">
+        <AsyncLogger name="org.symphonyoss" level="${sys:log4j2.symphonyLogLevel}" additivity="${sys:log4j2.outputAllToConsole}">
             <AppenderRef ref="rolling-file"/>
             <AppenderRef ref="error-rolling-file"/>
         </AsyncLogger>

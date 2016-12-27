@@ -18,20 +18,21 @@ package org.symphonyoss.integration.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
-import com.symphony.atlas.AtlasException;
-
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.utils.IntegrationUtils;
+import org.symphonyoss.integration.webhook.CommonIntegrationTest;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -50,25 +51,18 @@ public class NullIntegrationTest extends CommonIntegrationTest {
   @Mock
   private AuthenticationProxy authenticationProxy;
 
-  @Mock
-  private IntegrationAtlas integrationAtlas;
+  @Spy
+  private IntegrationProperties properties = new IntegrationProperties();
 
   @Mock
-  private LoadingCache<String, IntegrationFlags.ValueEnum> configuratorFlagsCache;
-
-  @Before
-  public void init() throws IOException, AtlasException {
-    doReturn(atlas).when(integrationAtlas).getAtlas();
-    mockCertDir();
-  }
+  private IntegrationUtils utils;
 
   @InjectMocks
-  private NullIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
+  private NullIntegration integration = new NullIntegration(utils, authenticationProxy);
 
   @Test
   public void testFailed() {
-    doReturn(IntegrationFlags.ValueEnum.NOK).when(configuratorFlagsCache)
-        .getUnchecked(APP_TYPE);
+    doThrow(CertificateNotFoundException.class).when(utils).getCertsDirectory();
 
     integration.onCreate(APP_TYPE);
 
@@ -83,11 +77,9 @@ public class NullIntegrationTest extends CommonIntegrationTest {
 
   @Test
   public void testSuccess()
-      throws CertificateException, AtlasException, NoSuchAlgorithmException, KeyStoreException,
-      IOException {
-    doReturn(IntegrationFlags.ValueEnum.OK).when(configuratorFlagsCache)
-        .getUnchecked(APP_TYPE);
-    mockKeyStore();
+      throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    String dir = mockKeyStore();
+    doReturn(dir).when(utils).getCertsDirectory();
 
     integration.onCreate(APP_TYPE);
 

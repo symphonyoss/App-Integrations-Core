@@ -16,23 +16,23 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.AGENT_URL;
-
 import com.symphony.api.agent.client.ApiClient;
 import com.symphony.api.agent.client.ApiException;
 import com.symphony.api.agent.client.Pair;
 import com.symphony.api.agent.client.TypeRef;
 import com.symphony.api.agent.client.auth.Authentication;
 
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
+import org.symphonyoss.integration.authentication.exception.AgentUrlNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class AgentApiClientDecorator extends ApiClient {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationAtlas integrationAtlas;
+  private IntegrationProperties properties;
 
   public AgentApiClientDecorator() {
 
@@ -95,7 +95,14 @@ public class AgentApiClientDecorator extends ApiClient {
 
   @PostConstruct
   public void init() {
-    setBasePath(integrationAtlas.getRequiredUrl(AGENT_URL));
+    String url = properties.getAgentUrl();
+
+    if (StringUtils.isBlank(url)) {
+      throw new AgentUrlNotFoundException(
+          "Missing configuration for Agent URL. Verify the YAML configuration file");
+    }
+
+    setBasePath(url);
   }
 
   /**
