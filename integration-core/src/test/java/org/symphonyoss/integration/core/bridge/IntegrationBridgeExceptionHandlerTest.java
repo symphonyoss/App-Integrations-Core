@@ -113,8 +113,8 @@ public class IntegrationBridgeExceptionHandlerTest {
   public void testForbiddenConfigurationException() throws IntegrationConfigException, IOException {
     ConfigurationInstance instance = mockInstance();
 
-    when(configurationService.save(any(ConfigurationInstance.class), anyString())).thenThrow(
-        SaveConfigurationException.class);
+    doThrow(SaveConfigurationException.class).when(configurationService).save(any(ConfigurationInstance.class),
+        anyString());
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
         instance, INTEGRATION_USER, "", STREAM);

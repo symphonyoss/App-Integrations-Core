@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +61,7 @@ public class StreamServiceTest {
 
   private static final String STREAM = "stream1";
 
-  private static final Long USER_ID = new Long(268745369);
+  private static final Long USER_ID = 268745369L;
 
   @Mock
   private AuthenticationProxy authenticationProxy;
@@ -155,8 +156,8 @@ public class StreamServiceTest {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(messagesApi.v2StreamSidMessageCreatePost(anyString(), anyString(), anyString(),
-        any(V2MessageSubmission.class))).thenThrow(ApiException.class);
+    doThrow(ApiException.class).when(messagesApi).v2StreamSidMessageCreatePost(anyString(), anyString(), anyString(),
+        any(V2MessageSubmission.class));
 
     streamService.postMessage(INTEGRATION_USER, STREAM, new V2MessageSubmission());
   }
@@ -180,8 +181,7 @@ public class StreamServiceTest {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.v2RoomIdInfoGet(anyString(), anyString())).thenThrow(
-        com.symphony.api.pod.client.ApiException.class);
+    doThrow(com.symphony.api.pod.client.ApiException.class).when(streamsApi).v2RoomIdInfoGet(anyString(), anyString());
 
     streamService.getRoomInfo(INTEGRATION_USER, STREAM);
   }
@@ -203,8 +203,8 @@ public class StreamServiceTest {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.v1ImCreatePost(any(UserIdList.class), anyString())).thenThrow(
-        com.symphony.api.pod.client.ApiException.class);
+    doThrow(com.symphony.api.pod.client.ApiException.class).when(streamsApi).v1ImCreatePost(any(UserIdList.class),
+        anyString());
 
     streamService.createIM(INTEGRATION_USER, USER_ID);
   }
