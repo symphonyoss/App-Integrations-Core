@@ -55,7 +55,7 @@ public class NullIntegration extends BaseIntegration implements Integration {
     try {
       registerUser(integrationUser);
     } catch (BootstrapException e) {
-      LOG.error(String.format("%s. Cause: %s", e.getMessage(), e.getCause().getMessage()));
+      LOG.error(String.format("%s. Cause: %s", e.getMessage(), e.getCause().getMessage()), e);
       healthManager.certificateInstalled(NOK);
     }
 
@@ -64,10 +64,14 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   @Override
   public void onConfigChange(V1Configuration conf) {
+    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
+     * "null" Integration. */
   }
 
   @Override
   public void onDestroy() {
+    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
+     * "null" Integration. */
   }
 
   @Override
@@ -82,7 +86,7 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   @Override
   public Set<String> getIntegrationWhiteList() {
-    return Collections.EMPTY_SET;
+    return Collections.emptySet();
   }
 
 }
