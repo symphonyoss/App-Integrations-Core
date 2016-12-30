@@ -25,17 +25,6 @@ import static org.symphonyoss.integration.provisioning.properties.ApplicationPro
 import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.TYPE;
 
 import com.symphony.api.pod.model.V1Configuration;
-import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
-import org.symphonyoss.integration.provisioning.model.Application;
-import org.symphonyoss.integration.provisioning.model.ApplicationList;
-import org.symphonyoss.integration.provisioning.model.ApplicationState;
-import org.symphonyoss.integration.provisioning.model.IntegrationBridge;
-import org.symphonyoss.integration.provisioning.service.ApplicationService;
-import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
-import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
-import org.symphonyoss.integration.provisioning.service.KeyPairService;
-import org.symphonyoss.integration.provisioning.service.UserService;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -47,6 +36,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
+import org.symphonyoss.integration.provisioning.model.Application;
+import org.symphonyoss.integration.provisioning.model.ApplicationList;
+import org.symphonyoss.integration.provisioning.model.ApplicationState;
+import org.symphonyoss.integration.provisioning.model.IntegrationBridge;
+import org.symphonyoss.integration.provisioning.service.ApplicationService;
+import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
+import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
+import org.symphonyoss.integration.provisioning.service.KeyPairService;
+import org.symphonyoss.integration.provisioning.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -240,18 +240,8 @@ public class IntegrationProvisioningService {
     try {
       Resource[] resources = context.getResources("classpath*:" + CONFIG_FILENAME);
       for (Resource resource : resources) {
-        Reader reader = new InputStreamReader(resource.getInputStream(), "UTF8");
-
-        Properties properties = new Properties();
-        properties.load(reader);
-
-        if (applicationId.equals(properties.getProperty(APP_ID))) {
-          String fullPath = resource.getURI().toString();
-          String libPath = fullPath.replace(CONFIG_FILENAME, "");
-
-          properties = populateIntegrationType(properties, libPath);
-          properties = populateAvatarImage(properties, libPath);
-
+        Properties properties = getProperties(applicationId, resource);
+        if (properties != null) {
           return properties;
         }
       }
@@ -260,6 +250,23 @@ public class IntegrationProvisioningService {
       return null;
     }
 
+    return null;
+  }
+
+  private Properties getProperties(String applicationId, Resource resource) throws IOException {
+    try (Reader reader = new InputStreamReader(resource.getInputStream(), "UTF8")) {
+      Properties properties = new Properties();
+      properties.load(reader);
+      if (applicationId.equals(properties.getProperty(APP_ID))) {
+        String fullPath = resource.getURI().toString();
+        String libPath = fullPath.replace(CONFIG_FILENAME, "");
+
+        properties = populateIntegrationType(properties, libPath);
+        properties = populateAvatarImage(properties, libPath);
+
+        return properties;
+      }
+    }
     return null;
   }
 
