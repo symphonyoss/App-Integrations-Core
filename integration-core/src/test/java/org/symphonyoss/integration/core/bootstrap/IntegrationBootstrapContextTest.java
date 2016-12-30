@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -124,9 +125,9 @@ public class IntegrationBootstrapContextTest {
 
     when(integration.getHealthStatus()).thenReturn(status);
 
-    Answer answer = new Answer() {
+    Answer<ScheduledFuture<?>> answer = new Answer<ScheduledFuture<?>>() {
       @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
+      public ScheduledFuture<?> answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();
         return null;
       }
@@ -181,9 +182,9 @@ public class IntegrationBootstrapContextTest {
    */
   @Test
   public void testStartupBootstrappingOneIntegrationWithoutYAMLConfig() {
-    Answer answer = new Answer() {
+    Answer<ScheduledFuture<?>> answer = new Answer<ScheduledFuture<?>>() {
       @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
+      public ScheduledFuture<?> answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();
         ((Runnable) invocation.getArguments()[0]).run();
         return null;
