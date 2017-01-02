@@ -27,12 +27,13 @@ import com.symphony.api.pod.model.PodAppEntitlementList;
 import com.symphony.api.pod.model.UserV2;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.client.AppRepositoryClient;
 import org.symphonyoss.integration.provisioning.client.AppStoreBuilder;
 import org.symphonyoss.integration.provisioning.client.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
-import org.symphonyoss.integration.provisioning.model.Application;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -67,6 +68,9 @@ public class ApplicationService {
   @Autowired
   private PodApiClientDecorator podApiClient;
 
+  @Autowired
+  private IntegrationProperties properties;
+
   private AppEntitlementApi appEntitlementApi;
 
   @PostConstruct
@@ -81,7 +85,7 @@ public class ApplicationService {
    * @param application Application object.
    */
   public void setupApplication(String configurationId, Application application) {
-    String appType = application.getType();
+    String appType = application.getComponent();
 
     LOGGER.info("Provisioning Symphony store data for application: {}", appType);
 
@@ -89,7 +93,9 @@ public class ApplicationService {
     String botUserId = user.getId().toString();
 
     try {
-      AppStoreWrapper wrapper = AppStoreBuilder.build(application, configurationId, botUserId);
+      String domain = properties.getIntegrationBridge().getDomain();
+      AppStoreWrapper wrapper = AppStoreBuilder.build(application, domain, configurationId,
+          botUserId);
 
       JsonNode app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
       if (app != null) {
@@ -110,7 +116,7 @@ public class ApplicationService {
    * @param application Application object
    */
   public void updateAppSettings(Application application) {
-    LOGGER.info("Updating application settings: {}", application.getType());
+    LOGGER.info("Updating application settings: {}", application.getComponent());
 
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
@@ -118,7 +124,7 @@ public class ApplicationService {
       PodAppEntitlementList appEntitlementList = new PodAppEntitlementList();
 
       PodAppEntitlement appEntitlement = new PodAppEntitlement();
-      appEntitlement.setAppId(application.getType());
+      appEntitlement.setAppId(application.getComponent());
       appEntitlement.setAppName(application.getName());
       appEntitlement.setEnable(application.isEnabled());
       appEntitlement.setListed(application.isVisible());
@@ -129,7 +135,7 @@ public class ApplicationService {
       appEntitlementApi.v1AdminAppEntitlementListPost(sessionToken, appEntitlementList);
     } catch (ApiException e) {
       throw new ApplicationProvisioningException("Fail to update application settings. AppId: " +
-          application.getType(), e);
+          application.getComponent(), e);
     }
   }
 }

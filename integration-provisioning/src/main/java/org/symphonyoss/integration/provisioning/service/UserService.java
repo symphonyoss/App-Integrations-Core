@@ -27,12 +27,14 @@ import com.symphony.api.pod.model.UserAttributes;
 import com.symphony.api.pod.model.UserCreate;
 import com.symphony.api.pod.model.UserDetail;
 import com.symphony.api.pod.model.UserV2;
+
+import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
+import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
-import org.symphonyoss.integration.provisioning.model.Application;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -76,9 +78,9 @@ public class UserService {
 
 
   public void setupBotUser(Application app) {
-    LOGGER.info("Setup new user: {}", app.getType());
+    LOGGER.info("Setup new user: {}", app.getComponent());
 
-    String username = app.getType();
+    String username = app.getComponent();
     String name = app.getName();
     String avatar = app.getAvatar();
 
@@ -129,9 +131,11 @@ public class UserService {
 
   private void updateUserAvatar(String sessionToken, Long uid, String avatar) {
     try {
-      AvatarUpdate avatarUpdate = new AvatarUpdate();
-      avatarUpdate.setImage(avatar);
-      userApi.v1AdminUserUidAvatarUpdatePost(sessionToken, uid, avatarUpdate);
+      if (StringUtils.isNotEmpty(avatar)) {
+        AvatarUpdate avatarUpdate = new AvatarUpdate();
+        avatarUpdate.setImage(avatar);
+        userApi.v1AdminUserUidAvatarUpdatePost(sessionToken, uid, avatarUpdate);
+      }
     } catch (ApiException e) {
       throw new UpdateUserException("Failed to update user avatar", e);
     }

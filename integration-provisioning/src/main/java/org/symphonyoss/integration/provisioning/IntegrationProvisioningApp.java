@@ -18,17 +18,17 @@ package org.symphonyoss.integration.provisioning;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .DEFAULT_USER_ID;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.KEY_STORE;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .KEY_STORE;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .KEY_STORE_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .TRUST_STORE;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .TRUST_STORE_PASSWORD;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .TRUST_STORE_TYPE;
 
-import org.symphonyoss.integration.provisioning.listener.BootstrapApplicationListener;
-import org.symphonyoss.integration.provisioning.service.AuthenticationService;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -42,6 +42,7 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.provisioning.service.AuthenticationService;
 
 /**
  * A command line application used by the Integration Bridge installation script to provision data
@@ -54,8 +55,7 @@ import org.springframework.stereotype.Component;
  * Created by rsanchez on 28/06/16.
  */
 @Component
-@SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"},
-    exclude = {EmbeddedServletContainerAutoConfiguration.class, WebMvcAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"})
 public class IntegrationProvisioningApp {
 
   private static final ISymphonyLogger LOGGER =
@@ -86,7 +86,6 @@ public class IntegrationProvisioningApp {
 
     try {
       SpringApplication application = new SpringApplication(IntegrationProvisioningApp.class);
-      application.addListeners(new BootstrapApplicationListener());
       ConfigurableApplicationContext context = application.run(args);
 
       IntegrationProvisioningApp app = context.getBean(IntegrationProvisioningApp.class);

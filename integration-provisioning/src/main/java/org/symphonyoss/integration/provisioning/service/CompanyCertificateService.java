@@ -25,12 +25,6 @@ import com.symphony.api.pod.model.CompanyCert;
 import com.symphony.api.pod.model.CompanyCertAttributes;
 import com.symphony.api.pod.model.CompanyCertStatus;
 import com.symphony.api.pod.model.CompanyCertType;
-import com.symphony.atlas.AtlasException;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
-import org.symphonyoss.integration.provisioning.model.Application;
-import org.symphonyoss.integration.provisioning.util.AtlasUtil;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -40,6 +34,11 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.PodApiClientDecorator;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
+import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -67,7 +66,7 @@ public class CompanyCertificateService {
   private PodApiClientDecorator podApiClient;
 
   @Autowired
-  private AtlasUtil atlasUtil;
+  private IntegrationUtils utils;
 
   private SecurityApi securityApi;
 
@@ -82,7 +81,7 @@ public class CompanyCertificateService {
    * @param application
    */
   public void importCertificate(Application application) {
-    LOGGER.info("Import company certificate: {}", application.getType());
+    LOGGER.info("Import company certificate: {}", application.getComponent());
 
     String pem = getPem(application);
     CompanyCert companyCert = buildCompanyCertificate(application, pem);
@@ -102,12 +101,7 @@ public class CompanyCertificateService {
    * @return
    */
   public String getPem(Application application) {
-    String fileName;
-    try {
-      fileName = atlasUtil.getCertsDirectory() + application.getId() + ".pem";
-    } catch (AtlasException e) {
-      throw new CompanyCertificateException("Certificate directory not found", e);
-    }
+    String fileName = utils.getCertsDirectory() + application.getId() + ".pem";
 
     StringWriter sw = new StringWriter();
 
