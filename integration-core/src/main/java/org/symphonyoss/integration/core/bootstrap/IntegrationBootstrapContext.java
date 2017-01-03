@@ -38,6 +38,7 @@ import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.Application;
 import org.symphonyoss.integration.model.IntegrationProperties;
 
@@ -96,6 +97,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private ExecutorService servicePool;
 
   private ScheduledExecutorService scheduler;
+
+  @Autowired
+  private IntegrationMetricsController metricsController;
 
   @Override
   public void startup() {
@@ -234,6 +238,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       V1Configuration config = integration.getConfig();
       this.integrations.put(config.getConfigurationId(), integration);
+
+      metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
     } catch (ConnectivityException | RetryLifecycleException e) {

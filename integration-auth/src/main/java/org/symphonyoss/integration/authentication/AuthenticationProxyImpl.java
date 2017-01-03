@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
@@ -78,6 +79,9 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
 
+  @Autowired
+  private ApiMetricsController metricsController;
+
   /**
    * Initialize HTTP clients.
    */
@@ -86,11 +90,11 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     IAtlas atlas = integrationAtlas.getAtlas();
 
     String sbeUrl = getUrl(atlas, SESSION_AUTH_URL);
-    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this, metricsController);
     sbeClient.setBasePath(sbeUrl);
 
     String keyManagerUrl = getUrl(atlas, KEY_AUTH_URL);
-    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this, metricsController);
     keyManagerClient.setBasePath(keyManagerUrl);
 
     this.sbeAuthApi = new AuthenticationApiDecorator(sbeClient);
