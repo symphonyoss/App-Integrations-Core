@@ -63,10 +63,14 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   @Override
   public void onConfigChange(V1Configuration conf) {
+    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
+     * "null" Integration. */
   }
 
   @Override
   public void onDestroy() {
+    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
+     * "null" Integration. */
   }
 
   @Override
@@ -81,7 +85,7 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   @Override
   public Set<String> getIntegrationWhiteList() {
-    return Collections.EMPTY_SET;
+    return Collections.emptySet();
   }
 
 }
