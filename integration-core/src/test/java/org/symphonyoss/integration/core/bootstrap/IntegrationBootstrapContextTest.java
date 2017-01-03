@@ -179,7 +179,6 @@ public class IntegrationBootstrapContextTest {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();
-        ((Runnable) invocation.getArguments()[0]).run();
         return null;
       }
     };
@@ -187,13 +186,12 @@ public class IntegrationBootstrapContextTest {
     doAnswer(answer).when(scheduler)
         .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
 
-    doReturn(null).doCallRealMethod().when(properties).getApplication(WEBHOOKINTEGRATION_TYPE_JIRA);
+    doReturn(null).when(properties).getApplication(WEBHOOKINTEGRATION_TYPE_JIRA);
 
     this.integrationBootstrapContext.initIntegrations();
 
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
-    assertNotNull(integration);
-    assertEquals(this.integration, integration);
+    assertNull(integration);
   }
 
   /**

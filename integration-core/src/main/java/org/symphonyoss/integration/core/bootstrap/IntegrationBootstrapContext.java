@@ -183,8 +183,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     try {
       LOGGER.info("Verify new integrations");
 
-      List<IntegrationBootstrapInfo> retries = new ArrayList<>();
-
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);
 
@@ -192,17 +190,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
           Application application = properties.getApplication(info.getConfigurationType());
 
           if (application == null) {
-            LOGGER.warn("Integration {} not configured in the YAML config file",
-                info.getConfigurationType());
-            retries.add(info);
+            LOGGER.warn("Integration {} not configured in the YAML config file", info.getConfigurationType());
           } else {
             submitPoolTask(info);
           }
         }
-      }
-
-      for (IntegrationBootstrapInfo info : retries) {
-        integrationsToRegister.offer(info);
       }
     } catch (InterruptedException e) {
       LOGGER.fatal("Polling stopped", e);
