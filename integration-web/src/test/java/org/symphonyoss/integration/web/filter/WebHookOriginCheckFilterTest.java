@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,8 +91,8 @@ public class WebHookOriginCheckFilterTest {
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
         springContext);
 
-    doReturn("integration/v1/whi/jiraWebHookIntegration/11111/22222").when(request).getRequestURI();
-    doReturn("integration").when(request).getContextPath();
+    doReturn("/integration/v1/whi/jiraWebHookIntegration/11111/22222").when(request).getRequestURI();
+    doReturn(StringUtils.EMPTY).when(request).getContextPath();
     doReturn(servletContext).when(config).getServletContext();
     doReturn(integration).when(springContext).getBean(BEAN_NAME, Integration.class);
     doReturn(properties).when(springContext).getBean(IntegrationProperties.class);

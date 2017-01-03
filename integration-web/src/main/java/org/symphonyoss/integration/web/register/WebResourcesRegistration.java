@@ -17,8 +17,11 @@
 package org.symphonyoss.integration.web.register;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.symphonyoss.integration.web.filter.WebHookOriginCheckFilter;
 import org.symphonyoss.integration.web.filter.WebHookTracingFilter;
 
@@ -31,6 +34,16 @@ import java.util.Collections;
 @Configuration
 public class WebResourcesRegistration {
 
+  private static final String PATH_SEPARATOR = "/";
+
+  private static final String PATH_WILDCARD = "*";
+
+  private static final String BASE_API_PATH = "/integration";
+
+  private static final String API_SERVLET_NAME = "api";
+
+  private static final Integer API_LOAD_ON_STARTUP = 2;
+
   /**
    * Register webhook check origin filter.
    * @return Filter registration object
@@ -39,7 +52,10 @@ public class WebResourcesRegistration {
   public FilterRegistrationBean webhookCheckOriginFilterRegistration() {
     WebHookOriginCheckFilter filter = new WebHookOriginCheckFilter();
     FilterRegistrationBean registration = new FilterRegistrationBean(filter);
-    registration.setUrlPatterns(Collections.singletonList("/v1/whi/*"));
+
+    String urlPattern = WebHookOriginCheckFilter.URL_PATTERN + PATH_WILDCARD;
+    registration.setUrlPatterns(Collections.singletonList(urlPattern));
+
     return registration;
   }
 
@@ -51,8 +67,29 @@ public class WebResourcesRegistration {
   public FilterRegistrationBean webhookTracingFilterRegistration() {
     WebHookTracingFilter filter = new WebHookTracingFilter();
     FilterRegistrationBean registration = new FilterRegistrationBean(filter);
-    registration.setUrlPatterns(Collections.singletonList("/*"));
+    registration.setUrlPatterns(Collections.singletonList(baseUrlMapping()));
     return registration;
+  }
+
+  /**
+   * Register a dispatcher servlet to deal with API requests.
+   * @param context Web application context
+   * @return Servlet registration object
+   */
+  @Bean
+  public ServletRegistrationBean apiServletRegistration(WebApplicationContext context) {
+    DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
+
+    ServletRegistrationBean servletRegistrationBean =
+        new ServletRegistrationBean(dispatcherServlet, baseUrlMapping());
+    servletRegistrationBean.setName(API_SERVLET_NAME);
+    servletRegistrationBean.setLoadOnStartup(API_LOAD_ON_STARTUP);
+
+    return servletRegistrationBean;
+  }
+
+  private String baseUrlMapping() {
+    return BASE_API_PATH + PATH_SEPARATOR + PATH_WILDCARD;
   }
 
 }

@@ -1,8 +1,10 @@
+
+
 server:
   address: 127.0.0.1
-  port: 8186
+  port: ${integration_bridge.http_port:8186}
   display-name: Integration Bridge
-  context-path: /integration
+  context-path: /
   connection-timeout: 20000
   tomcat:
     accesslog:
@@ -25,5 +27,7 @@ spring:
       form-data: multipart/form-data
     servlet:
       load-on-startup: 1
+  resources:
+    static-locations: file:resources/
   profiles:
     active: jira, github, salesforce, universal, trello, zapier

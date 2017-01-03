@@ -60,7 +60,7 @@ public class WebHookOriginCheckFilter implements Filter {
   private static final ISymphonyLogger LOGGER =
       SymphonyLoggerFactory.getLogger(WebHookOriginCheckFilter.class);
 
-  private static final String URL_PATTERN = "/v1/whi/";
+  public static final String URL_PATTERN = "/integration/v1/whi/";
 
   private static final String FORWARD_HEADER = "x-forwarded-for";
 
