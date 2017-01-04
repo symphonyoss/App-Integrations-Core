@@ -22,6 +22,7 @@ import com.symphony.api.agent.client.Pair;
 import com.symphony.api.agent.client.TypeRef;
 import com.symphony.api.agent.client.auth.Authentication;
 
+import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
 import org.symphonyoss.integration.authentication.exception.AgentUrlNotFoundException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -77,6 +79,9 @@ public class AgentApiClientDecorator extends ApiClient {
 
   @Autowired
   private IntegrationProperties properties;
+
+  @Autowired
+  private ApiMetricsController metricsController;
 
   public AgentApiClientDecorator() {
 
@@ -164,8 +169,29 @@ public class AgentApiClientDecorator extends ApiClient {
    * @return The response body in type of string
    */
   @Override
-  public <T> T invokeAPI(String path, String method, List<Pair> queryParams, Object body, Map<String, String> headerParams,
-      Map<String, Object> formParams, String accept, String contentType, String[] authNames, TypeRef returnType) throws ApiException {
+  public <T> T invokeAPI(String path, String method, List<Pair> queryParams, Object body,
+      Map<String, String> headerParams, Map<String, Object> formParams, String accept,
+      String contentType, String[] authNames, TypeRef returnType) throws ApiException {
+    Timer.Context context = null;
+    boolean success = false;
+
+    try {
+      context = metricsController.startApiCall(path);
+
+      T result =
+          executeApi(path, method, queryParams, body, headerParams, formParams, accept, contentType,
+              authNames, returnType);
+      success = true;
+
+      return result;
+    } finally {
+      metricsController.finishApiCall(context, path, success);
+    }
+  }
+
+  private <T> T executeApi(String path, String method, List<Pair> queryParams, Object body,
+      Map<String, String> headerParams, Map<String, Object> formParams, String accept,
+      String contentType, String[] authNames, TypeRef returnType) throws ApiException {
     ApiClientDecoratorUtils.setHeaderTraceId(headerParams);
     updateParamsForAuth(authNames, queryParams, headerParams);
 

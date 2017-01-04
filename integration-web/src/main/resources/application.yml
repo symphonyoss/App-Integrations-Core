@@ -31,3 +31,10 @@ spring:
     static-locations: file:resources/
   profiles:
     active: jira, github, salesforce, universal, trello, zapier
+
+endpoints:
+  enabled: false
+  metrics:
+    enabled: true
+    filter:
+      enabled: false

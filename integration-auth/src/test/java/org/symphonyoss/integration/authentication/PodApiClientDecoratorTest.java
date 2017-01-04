@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,15 +34,18 @@ import com.symphony.api.pod.client.ApiException;
 import com.symphony.api.pod.client.Pair;
 import com.symphony.api.pod.client.TypeRef;
 
+import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodUrlNotFoundException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
@@ -57,6 +61,12 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
   protected TypeRef<String> returnType;
   protected List<Pair> queryParams = new ArrayList<Pair>();
 
+  @Mock
+  private Timer.Context context;
+
+  @Mock
+  private ApiMetricsController metricsController;
+
   @InjectMocks protected PodApiClientDecorator apiClientDecorator = new PodApiClientDecorator();
 
   @Before
@@ -67,6 +77,8 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     apiClientDecorator.init();
     MDC.clear();
+
+    doReturn(context).when(metricsController).startApiCall(PATH);
   }
 
   @Test
@@ -76,6 +88,9 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     assertEquals(respBody, RESPONSE_BODY);
     assertNull(headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -87,6 +102,9 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
 
     assertEquals(respBody, RESPONSE_BODY);
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -105,6 +123,9 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
     assertNotEquals(randHeaderTraceId, headerParams.get(TRACE_ID));
     // current MDC is a composition of the original header trace ID and a random generated number.
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -116,6 +137,8 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
         apiClientDecorator.invokeAPI(PATH, "GET", queryParams, body, headerParams, formParams,
             ACCEPT, CONTENT_TYPE, authNames, returnType);
 
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
     verify(authenticationProxy, times(1))
         .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(UNAUTHORIZED), any(ApiException.class));
     assertEquals(respBody, RESPONSE_BODY);
@@ -136,6 +159,8 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
           ACCEPT, CONTENT_TYPE, authNames, returnType);
       fail();
     } catch (ApiException e) {
+      verify(metricsController, times(1)).startApiCall(PATH);
+      verify(metricsController, times(1)).finishApiCall(context, PATH, false);
       verify(authenticationProxy, times(1))
           .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(UNAUTHORIZED), any(ApiException.class));
     }
@@ -163,6 +188,8 @@ public class PodApiClientDecoratorTest extends ApiClientDecoratorTest {
           ACCEPT, CONTENT_TYPE, authNames, returnType);
       fail();
     } catch (ApiException e) {
+      verify(metricsController, times(1)).startApiCall(PATH);
+      verify(metricsController, times(1)).finishApiCall(context, PATH, false);
       verify(authenticationProxy, times(1))
           .reAuthSessionOrThrow(eq(SESSION_TOKEN), eq(INTERNAL_SERVER_ERROR),
               any(ApiException.class));

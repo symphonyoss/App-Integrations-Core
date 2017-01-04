@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.symphonyoss.integration.web.filter.IntegrationMetricsFilter;
 import org.symphonyoss.integration.web.filter.WebHookOriginCheckFilter;
 import org.symphonyoss.integration.web.filter.WebHookTracingFilter;
 
@@ -44,6 +45,8 @@ public class WebResourcesRegistration {
 
   private static final Integer API_LOAD_ON_STARTUP = 2;
 
+  private static final String METRICS_PATH = "/metrics/";
+  
   /**
    * Register webhook check origin filter.
    * @return Filter registration object
@@ -68,6 +71,20 @@ public class WebResourcesRegistration {
     WebHookTracingFilter filter = new WebHookTracingFilter();
     FilterRegistrationBean registration = new FilterRegistrationBean(filter);
     registration.setUrlPatterns(Collections.singletonList(baseUrlMapping()));
+    return registration;
+  }
+
+  /**
+   * Register metrics filter.
+   * @return Filter registration object
+   */
+  @Bean
+  public FilterRegistrationBean integrationMetricsFilterRegistration() {
+    IntegrationMetricsFilter filter = new IntegrationMetricsFilter();
+    FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+    registration.setUrlPatterns(Collections.singletonList(baseUrlMapping()));
+    registration.addInitParameter(IntegrationMetricsFilter.IGNORE_URL_PARAM, BASE_API_PATH + METRICS_PATH);
+    registration.addInitParameter(IntegrationMetricsFilter.WEBHOOK_URL_PARAM, WebHookOriginCheckFilter.URL_PATTERN);
     return registration;
   }
 
