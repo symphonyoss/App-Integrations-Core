@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -36,18 +37,26 @@ import com.symphony.api.agent.client.TypeRef;
 
 import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.exception.AgentConnectivityException;
 import org.symphonyoss.integration.authentication.exception.AgentUrlNotFoundException;
 import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
+import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +64,11 @@ import java.util.List;
 /**
  * Created by ecarrenho on 8/26/16.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableConfigurationProperties
+@ContextConfiguration(classes = {IntegrationProperties.class, AuthenticationProxyImpl.class,
+    AgentApiClientDecorator.class})
 public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
 
   protected TypeRef<String> returnType;
@@ -64,27 +77,38 @@ public class AgentApiClientDecoratorTest extends ApiClientDecoratorTest {
   @Mock
   private Timer.Context context;
 
-  @Mock
+  @MockBean
   private ApiMetricsController metricsController;
 
-  @InjectMocks protected AgentApiClientDecorator apiClientDecorator = new AgentApiClientDecorator();
+  @InjectMocks
+  @Autowired
+  protected AgentApiClientDecorator apiClientDecorator;
 
   @Before
   public void setup() {
+    when(authenticationProxy.httpClientForSessionToken(SESSION_TOKEN)).thenReturn(mockClient);
+    when(authenticationProxy.httpClientForUser(USER_ID)).thenReturn(mockClient);
+
     initialSetup();
 
     returnType = new TypeRef<String>() {};
 
-    apiClientDecorator.init();
     MDC.clear();
 
     doReturn(context).when(metricsController).startApiCall(PATH);
   }
 
-  @Test(expected = AgentUrlNotFoundException.class)
+  @Test
   public void testAgentUrlNotFoundException() throws RemoteApiException {
-    when(properties.getAgentUrl()).thenReturn(null);
-    apiClientDecorator.init();
+    try {
+      given(properties.getAgentUrl()).willReturn(StringUtils.EMPTY);
+      apiClientDecorator.init();
+      fail();
+    } catch (AgentUrlNotFoundException e) {
+      assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
+          "Verify the YAML configuration file. No configuration found to the key agent.host"),
+          e.getMessage());
+    }
   }
 
   @Test

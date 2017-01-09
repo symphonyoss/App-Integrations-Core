@@ -26,13 +26,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
-import org.symphonyoss.integration.webhook.CommonIntegrationTest;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -44,7 +44,7 @@ import java.security.cert.CertificateException;
  * Created by rsanchez on 22/11/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class NullIntegrationTest extends CommonIntegrationTest {
+public class NullIntegrationTest extends MockKeystore {
 
   private static final String APP_TYPE = "jiraWebHookIntegration";
 
@@ -58,7 +58,7 @@ public class NullIntegrationTest extends CommonIntegrationTest {
   private IntegrationUtils utils;
 
   @InjectMocks
-  private NullIntegration integration = new NullIntegration(utils, authenticationProxy);
+  private NullIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
 
   @Test
   public void testFailed() {

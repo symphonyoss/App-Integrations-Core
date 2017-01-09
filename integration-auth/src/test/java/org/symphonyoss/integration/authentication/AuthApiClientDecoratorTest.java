@@ -64,6 +64,9 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
   private Timer.Context context;
 
   @Mock
+  private AuthenticationProxy authenticationProxy;
+
+  @Mock
   private ApiMetricsController metricsController;
 
   @InjectMocks
@@ -72,6 +75,9 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
 
   @Before
   public void setup() {
+    when(authenticationProxy.httpClientForSessionToken(SESSION_TOKEN)).thenReturn(mockClient);
+    when(authenticationProxy.httpClientForUser(USER_ID)).thenReturn(mockClient);
+
     initialSetup();
 
     contentTypes.clear();

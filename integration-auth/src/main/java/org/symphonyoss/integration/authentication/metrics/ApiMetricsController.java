@@ -16,12 +16,10 @@
 
 package org.symphonyoss.integration.authentication.metrics;
 
-import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants
-    .ACTIVE_API_CALLS;
+import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.ACTIVE_API_CALLS;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.AUTH_API;
-import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants
-    .CONFIGURATION_API;
+import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.CONFIGURATION_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.INSTANCE_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.MESSAGE_API;
 import static org.symphonyoss.integration.authentication.metrics.ApiMetricsConstants.OTHER_API;

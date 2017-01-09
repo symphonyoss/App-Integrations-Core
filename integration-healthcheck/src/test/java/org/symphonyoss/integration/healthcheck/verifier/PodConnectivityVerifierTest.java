@@ -20,38 +20,37 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.model.yaml.ConnectionInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
  * Test class to validate {@link PodConnectivityVerifier}
  * Created by rsanchez on 23/11/16.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableConfigurationProperties
+@ContextConfiguration(classes = {IntegrationProperties.class, PodConnectivityVerifier.class})
 public class PodConnectivityVerifierTest {
 
-  private static final String MOCK_HOST = "test.symphony.com";
+  @MockBean
+  private AuthenticationProxy authenticationProxy;
 
-  private static final String MOCK_PORT = "8443";
-
-  @Spy
+  @Autowired
   private IntegrationProperties properties = new IntegrationProperties();
 
-  @InjectMocks
-  private PodConnectivityVerifier verifier = new PodConnectivityVerifier();
+  @Autowired
+  private PodConnectivityVerifier verifier;
 
   @Test
   public void testHealthCheckUrl() {
-    ConnectionInfo pod = new ConnectionInfo();
-    pod.setHost(MOCK_HOST);
-    pod.setPort(MOCK_PORT);
-
-    properties.setPod(pod);
-
-    assertEquals("https://test.symphony.com:8443/webcontroller/HealthCheck/version",
+    assertEquals("https://nexus.symphony.com:443/webcontroller/HealthCheck/version",
         verifier.getHealthCheckUrl());
   }
 

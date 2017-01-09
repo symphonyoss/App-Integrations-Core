@@ -27,6 +27,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.util.Collections;
@@ -40,7 +41,9 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(NullIntegration.class);
 
-  public NullIntegration(IntegrationUtils utils, AuthenticationProxy authenticationProxy) {
+  public NullIntegration(IntegrationProperties properties, IntegrationUtils utils,
+      AuthenticationProxy authenticationProxy) {
+    this.properties = properties;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
   }

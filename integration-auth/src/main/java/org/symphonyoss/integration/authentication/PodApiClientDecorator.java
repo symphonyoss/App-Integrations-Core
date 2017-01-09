@@ -102,8 +102,8 @@ public class PodApiClientDecorator extends ApiClient {
     String url = properties.getPodUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new PodUrlNotFoundException(
-          "Missing configuration for POD URL. Verify the YAML configuration file");
+      throw new PodUrlNotFoundException("Verify the YAML configuration file. No configuration "
+          + "found to the key pod.host");
     }
 
     setBasePath(url);

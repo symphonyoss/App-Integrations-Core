@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.BaseIntegration;
+import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
@@ -38,7 +39,6 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
-import org.symphonyoss.integration.webhook.CommonIntegrationTest;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
  * Created by rsanchez on 22/11/16.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BaseIntegrationTest extends CommonIntegrationTest {
+public class BaseIntegrationTest extends MockKeystore {
 
   private static final String APP_ID = "jira";
 
@@ -80,7 +80,7 @@ public class BaseIntegrationTest extends CommonIntegrationTest {
   private IntegrationUtils utils;
 
   @InjectMocks
-  private BaseIntegration integration = new NullIntegration(utils, authenticationProxy);
+  private BaseIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
 
   @Test
   public void testApplicationId() {

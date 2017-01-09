@@ -83,11 +83,6 @@ public class RemoteConfigurationServiceTest {
     when(authenticationProxy.getSessionToken(USER_ID)).thenReturn(TOKEN);
   }
 
-  @Test
-  public void testInit() throws Exception {
-    remoteConfigurationService.init();
-  }
-
   @Test(expected = RemoteConfigurationException.class)
   public void testGetConfigurationByIdFailed() throws Exception {
     when(configurationApi.v1ConfigurationConfigurationIdGetGet(CONFIGURATION_ID, TOKEN)).thenThrow(

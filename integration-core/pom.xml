@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-webhook</artifactId>
+            <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
