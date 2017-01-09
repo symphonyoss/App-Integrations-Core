@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.model;
+package org.symphonyoss.integration.authentication.exception;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 
 /**
- * Created by rsanchez on 18/10/16.
+ * Missing configuration to Agent URL.
+ *
+ * Created by cmarcondes on 10/26/16.
  */
-@Configuration
-@ConfigurationProperties()
-public class ApplicationList {
+public class AgentUrlNotFoundException extends AuthenticationException {
 
-  private final List<Application> applications = new ArrayList<>();
+  public AgentUrlNotFoundException(String message) {
+    super(message);
+  }
 
-  public List<Application> getApplications() {
-    return applications;
+  public AgentUrlNotFoundException(String message, Exception cause) {
+    super(message, cause);
   }
 }

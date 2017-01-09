@@ -16,14 +16,6 @@
 
 package org.symphonyoss.integration.provisioning.client;
 
-import com.symphony.atlas.AtlasException;
-import com.symphony.atlas.IAtlas;
-import com.symphony.atlas.config.SymphonyAtlas;
-import org.symphonyoss.integration.IntegrationAtlas;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.json.JsonUtils;
-import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import com.symphony.security.cache.IPersister;
 import com.symphony.security.cache.InMemoryPersister;
 import com.symphony.security.clientsdk.client.Auth;
@@ -37,6 +29,11 @@ import com.symphony.webcommons.rest.RequestEnvelope;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.AuthenticationToken;
+import org.symphonyoss.integration.json.JsonUtils;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,23 +67,21 @@ public class AppRepositoryClient {
   private static final String APPS_REP_APP_GROUP_ID_PATH = "appGroupId";
 
   @Autowired
-  private IntegrationAtlas integrationAtlas;
+  private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private AuthenticationProxy authenticationProxy;
+  private IntegrationProperties properties;
 
   private SymphonyClient appRepositoryClient;
 
   private IPersister authPersister;
 
   @PostConstruct
-  public void init() throws AtlasException {
-    IAtlas atlas = integrationAtlas.getAtlas();
-
+  public void init() {
     SymphonyClientConfig config = new SymphonyClientConfig();
-    config.setKeymanagerUrl(atlas.getRequiredURL(SymphonyAtlas.KEYMANAGER_URL).toString());
-    config.setSymphonyUrl(atlas.getRequiredURL(SymphonyAtlas.SYMPHONY_URL).toString());
-    config.setLoginUrl(atlas.getRequiredURL(SymphonyAtlas.LOGIN_URL).toString());
+    config.setKeymanagerUrl(properties.getKeyManagerUrl());
+    config.setSymphonyUrl(properties.getSymphonyUrl());
+    config.setLoginUrl(properties.getLoginUrl());
 
     config.setAcountName("accountPlaceHolderName");
 

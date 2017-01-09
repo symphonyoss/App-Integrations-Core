@@ -16,9 +16,8 @@
 
 package org.symphonyoss.integration.provisioning.client;
 
-import org.symphonyoss.integration.provisioning.model.Application;
-
 import org.apache.commons.lang3.StringUtils;
+import org.symphonyoss.integration.model.yaml.Application;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,16 +33,16 @@ public class AppStoreBuilder {
 
   private static final String VERSION = "1.0.0";
 
-  public static AppStoreWrapper build(Application application, String configurationId,
+  public static AppStoreWrapper build(Application application, String domain, String configurationId,
       String botUserId) throws MalformedURLException {
     AppStoreWrapper app = new AppStoreWrapper();
-    app.setAppGroupId(application.getType());
+    app.setAppGroupId(application.getComponent());
     app.setName(application.getName());
     app.setType(INTEGRATION_TYPE);
     app.setDescription(application.getDescription());
     app.setPublisher(application.getPublisher());
     app.setAssets(buildAssetWrapper(application, configurationId, botUserId));
-    app.setDomain(application.getDomain());
+    app.setDomain(domain);
     app.setVersion(VERSION);
     app.setEnabled(true);
     app.setSymphonyManaged(true);
@@ -67,7 +66,7 @@ public class AppStoreBuilder {
     }
 
     AppStoreAssetsWrapper asset = new AppStoreAssetsWrapper();
-    asset.setLoadUrl(buildLoadUrl(configurationId, application.getType(), botUserId, host, context));
+    asset.setLoadUrl(buildLoadUrl(configurationId, application.getComponent(), botUserId, host, context));
     asset.setIconUrl(host + DEFAULT_LOGO_IMG);
 
     return asset;

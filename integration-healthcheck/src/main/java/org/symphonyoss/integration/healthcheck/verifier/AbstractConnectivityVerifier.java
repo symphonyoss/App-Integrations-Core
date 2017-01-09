@@ -25,11 +25,11 @@ import com.symphony.logging.SymphonyLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.model.Application;
-import org.symphonyoss.integration.model.ApplicationState;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
@@ -69,13 +69,8 @@ public abstract class AbstractConnectivityVerifier {
 
   private static final int READ_TIMEOUT_MILLIS = 5000;
 
-  /**
-   * Default http protocol to be used for connectivity check calls.
-   */
-  protected static final String DEFAULT_PROTOCOL = "https://";
-
   @Autowired
-  protected IntegrationPropertiesReader propertiesReader;
+  protected IntegrationProperties properties;
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -86,9 +81,9 @@ public abstract class AbstractConnectivityVerifier {
    * @return the user name.
    */
   protected String availableIntegrationUser() {
-    for (Application app : this.propertiesReader.getProperties().getApplications()) {
+    for (Application app : this.properties.getApplications().values()) {
       if (app.getState().equals(ApplicationState.PROVISIONED)) {
-        return app.getType();
+        return app.getComponent();
       }
     }
     return StringUtils.EMPTY;

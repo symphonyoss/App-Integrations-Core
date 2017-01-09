@@ -19,7 +19,7 @@ package org.symphonyoss.integration.authentication.exception;
 import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 
 /**
- * No atlas configuration to Session or KeyManager Auth URL.
+ * Missing configuration to Session or KeyManager Auth URL.
  *
  * Created by ecarrenho on 26/10/16.
  */

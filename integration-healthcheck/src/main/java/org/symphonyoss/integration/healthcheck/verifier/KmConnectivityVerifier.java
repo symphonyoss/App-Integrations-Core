@@ -28,11 +28,10 @@ import org.springframework.stereotype.Component;
 @Lazy
 public class KmConnectivityVerifier extends AbstractConnectivityVerifier {
 
-  public static final String KM_URL_PATH = "/relay/HealthCheck";
+  public static final String KM_URL_PATH = "/HealthCheck";
 
   @Override
   protected String getHealthCheckUrl() {
-    String host = this.propertiesReader.getProperties().getKeyManager().getHost();
-    return DEFAULT_PROTOCOL + host + KM_URL_PATH;
+    return properties.getKeyManagerUrl() + KM_URL_PATH;
   }
 }

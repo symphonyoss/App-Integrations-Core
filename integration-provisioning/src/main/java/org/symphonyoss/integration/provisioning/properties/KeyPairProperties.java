@@ -39,14 +39,4 @@ public class KeyPairProperties {
    */
   public static final String OUTPUT_CERT_PASSWORD = "outputCertPassword";
 
-  /**
-   * ATLAS properties filename
-   */
-  public static final String INTEGRATION_PROPERTIES_FILE = "integration.properties";
-
-  /**
-   * Default keystore type.
-   */
-  public static final String DEFAULT_KEYSTORE_TYPE = "pkcs12";
-
 }

@@ -40,16 +40,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.service.ConfigurationService;
-import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
-import org.symphonyoss.integration.model.Application;
-import org.symphonyoss.integration.model.IntegrationProperties;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.service.ConfigurationService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,14 +89,12 @@ public class IntegrationBootstrapContextTest {
   @Mock
   private ScheduledExecutorService scheduler;
 
-  @Mock
-  private IntegrationPropertiesReader propertiesReader;
-
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
       new IntegrationBootstrapContext();
 
-  private IntegrationProperties properties;
+  @Spy
+  private IntegrationProperties properties = new IntegrationProperties();
 
   /**
    * Setting up the mocks needed for most tests.
@@ -138,12 +135,9 @@ public class IntegrationBootstrapContextTest {
         .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
 
     Application application = new Application();
-    application.setType(WEBHOOKINTEGRATION_TYPE_JIRA);
+    application.setComponent(WEBHOOKINTEGRATION_TYPE_JIRA);
 
-    properties = new IntegrationProperties();
-    properties.setApplications(Collections.singletonList(application));
-
-    doReturn(properties).when(propertiesReader).getProperties();
+    properties.setApplications(Collections.singletonMap(WEBHOOKINTEGRATION_ID_JIRA, application));
 
     doNothing().when(healthCheckManager)
         .updateIntegrationStatus(WEBHOOKINTEGRATION_TYPE_JIRA, integration);
@@ -186,7 +180,6 @@ public class IntegrationBootstrapContextTest {
       @Override
       public ScheduledFuture<?> answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();
-        ((Runnable) invocation.getArguments()[0]).run();
         return null;
       }
     };
@@ -194,14 +187,12 @@ public class IntegrationBootstrapContextTest {
     doAnswer(answer).when(scheduler)
         .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
 
-    doReturn(new IntegrationProperties()).doReturn(properties).when(propertiesReader)
-        .getProperties();
+    doReturn(null).when(properties).getApplication(WEBHOOKINTEGRATION_TYPE_JIRA);
 
     this.integrationBootstrapContext.initIntegrations();
 
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
-    assertNotNull(integration);
-    assertEquals(this.integration, integration);
+    assertNull(integration);
   }
 
   /**

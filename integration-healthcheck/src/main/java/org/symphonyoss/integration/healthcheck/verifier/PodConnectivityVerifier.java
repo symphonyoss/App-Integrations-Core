@@ -31,7 +31,6 @@ public class PodConnectivityVerifier extends AbstractConnectivityVerifier {
 
   @Override
   protected String getHealthCheckUrl() {
-    String host = this.propertiesReader.getProperties().getPod().getHost();
-    return DEFAULT_PROTOCOL + host + POD_URL_PATH;
+    return properties.getSymphonyUrl() + POD_URL_PATH;
   }
 }

@@ -16,6 +16,7 @@
 
 package org.symphonyoss.integration.web.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -33,13 +34,13 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class IntegrationListener implements ServletContextListener {
 
+  @Autowired
   private IntegrationBootstrapContext bootstrap;
 
   @Override
   public void contextInitialized(ServletContextEvent servletContextEvent) {
-    WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(
-        servletContextEvent.getServletContext());
-    bootstrap = springContext.getBean(IntegrationBootstrapContext.class);
+    WebApplicationContextUtils.getRequiredWebApplicationContext(
+        servletContextEvent.getServletContext()).getAutowireCapableBeanFactory().autowireBean(this);
     bootstrap.startup();
   }
 

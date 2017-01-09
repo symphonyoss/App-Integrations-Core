@@ -16,14 +16,6 @@
 
 package org.symphonyoss.integration.provisioning;
 
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.APP_ID;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.AVATAR;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.CONTEXT;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.DESCRIPTION;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.NAME;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.PUBLISHER;
-import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.TYPE;
-
 import com.symphony.api.pod.model.V1Configuration;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
@@ -32,33 +24,25 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
+import org.symphonyoss.integration.model.yaml.IntegrationBridge;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
-import org.symphonyoss.integration.provisioning.model.Application;
-import org.symphonyoss.integration.provisioning.model.ApplicationList;
-import org.symphonyoss.integration.provisioning.model.ApplicationState;
-import org.symphonyoss.integration.provisioning.model.IntegrationBridge;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
 import org.symphonyoss.integration.provisioning.service.KeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Service class to coordinate the workflow to provisioning all the integrations, according
@@ -71,8 +55,6 @@ public class IntegrationProvisioningService {
 
   private static final ISymphonyLogger LOGGER =
       SymphonyLoggerFactory.getLogger(IntegrationProvisioningService.class);
-
-  private static final String CONFIG_FILENAME = "config.properties";
 
   private static final String AVATAR_FILENAME = "logo.png";
 
@@ -94,13 +76,13 @@ public class IntegrationProvisioningService {
   private KeyPairService keyPairService;
 
   @Autowired
-  private ApplicationList applicationList;
-
-  @Autowired
-  private IntegrationBridge bridgeInfo;
+  private IntegrationProperties properties;
 
   @Autowired
   private UserService userService;
+
+  @Value("${spring.config.name:application}")
+  private String configName;
 
   /**
    * The entry point for the provisioning service, responsible for provisioning Symphony Apps, Bot
@@ -114,13 +96,20 @@ public class IntegrationProvisioningService {
     LOGGER.info("Retrieving applications.\n");
 
     Map<String, ApplicationState> summary = new LinkedHashMap<>();
-    List<Application> applications = applicationList.getApplications();
+    Map<String, Application> applications = properties.getApplications();
+
+    String appId = null;
 
     try {
-      for (Iterator<Application> it = applications.iterator(); it.hasNext(); ) {
-        Application application = it.next();
+      for (String app : applications.keySet()) {
+        summary.put(app, ApplicationState.SKIPPED);
+      }
 
-        fillInApplicationInfo(application);
+      for (Map.Entry<String, Application> entry : applications.entrySet()) {
+        Application application = entry.getValue();
+        appId = entry.getKey();
+
+        fillInApplicationInfo(appId, application);
 
         if (ApplicationState.PROVISIONED.equals(application.getState())) {
           provisioningApplication(application);
@@ -128,17 +117,12 @@ public class IntegrationProvisioningService {
           disableApplication(application);
         }
 
-        summary.put(application.getId(), application.getState());
-        it.remove();
+        summary.put(appId, application.getState());
       }
     } catch (Exception e) {
-      LOGGER.error("Failed to configure application: " + applications.get(0).getId(), e);
-
-      Application application = applications.remove(0);
-      summary.put(application.getId(), ApplicationState.FAILED);
-
-      for (Application app : applications) {
-        summary.put(app.getId(), ApplicationState.SKIPPED);
+      if (appId != null) {
+        LOGGER.error("Failed to configure application: " + appId, e);
+        summary.put(appId, ApplicationState.FAILED);
       }
     } finally {
       printSummary(summary);
@@ -206,108 +190,68 @@ public class IntegrationProvisioningService {
    *
    * For instance, the application name, description and publisher for JIRA app will always be
    * provisioned the same on all deployments.
+   * @param appId Application identifier
    * @param application Application object to be filled in with pre-defined information.
    */
-  private void fillInApplicationInfo(Application application) {
-    LOGGER.info("Filling in application data for: {}", application.getId());
+  private void fillInApplicationInfo(String appId, Application application) {
+    LOGGER.info("Filling in application data for: {}", appId);
 
-    String applicationId = application.getId();
-    Properties properties = loadConfigProperties(applicationId);
+    application.setId(appId);
 
-    if (properties != null) {
-      application.setType(properties.getProperty(TYPE));
-      application.setName(properties.getProperty(NAME));
-      application.setDescription(properties.getProperty(DESCRIPTION));
-      application.setPublisher(properties.getProperty(PUBLISHER));
-      application.setDomain(bridgeInfo.getDomain());
-      application.setAvatar(properties.getProperty(AVATAR));
+    IntegrationBridge bridgeInfo = properties.getIntegrationBridge();
 
+    if (bridgeInfo != null) {
       String url = String.format("https://%s/%s/%s", bridgeInfo.getHost(), APPS_CONTEXT,
-          properties.getProperty(CONTEXT));
+          application.getContext());
       application.setUrl(url);
+
+      loadApplicationAvatar(application);
     } else {
-      throw new ApplicationProvisioningException(
-          "Failed to identify application (app id: " + applicationId + ")");
+      throw new ApplicationProvisioningException("Failed to get application info (app id: " + appId + ")");
     }
   }
 
   /**
-   * Load config.properties file inside classpath of the specific integration module.
-   * @param applicationId Application identifier.
-   * @return Properties file or null if file not found.
+   * Load the application avatar image file inside the classpath of the specific integration module.
+   * @param application Application object.
    */
-  private Properties loadConfigProperties(String applicationId) {
+  private void loadApplicationAvatar(Application application) {
+    String applicationId = application.getId();
+
     try {
-      Resource[] resources = context.getResources("classpath*:" + CONFIG_FILENAME);
-      for (Resource resource : resources) {
-        Properties properties = getProperties(applicationId, resource);
-        if (properties != null) {
-          return properties;
+      String fileName = String.format("%s-%s.yml", configName, applicationId);
+
+      Resource resource = context.getResource("classpath:" + fileName);
+      if (resource.exists()) {
+        String fullPath = resource.getURI().toString();
+        String libPath = fullPath.replace(fileName, "");
+
+        String avatar = getAvatarImage(libPath);
+
+        if (StringUtils.isNotEmpty(avatar)) {
+          application.setAvatar(avatar);
         }
       }
     } catch (IOException e) {
-      LOGGER.error("Can't find default config to " + applicationId, e);
-      return null;
+      LOGGER.error("Can't find the avatar to " + applicationId, e);
     }
-
-    return null;
-  }
-
-  private Properties getProperties(String applicationId, Resource resource) throws IOException {
-    try (Reader reader = new InputStreamReader(resource.getInputStream(), "UTF8")) {
-      Properties properties = new Properties();
-      properties.load(reader);
-      if (applicationId.equals(properties.getProperty(APP_ID))) {
-        String fullPath = resource.getURI().toString();
-        String libPath = fullPath.replace(CONFIG_FILENAME, "");
-
-        properties = populateIntegrationType(properties, libPath);
-        properties = populateAvatarImage(properties, libPath);
-
-        return properties;
-      }
-    }
-    return null;
-  }
-
-  private Properties populateIntegrationType(Properties properties, String libPath)
-      throws MalformedURLException {
-    String integrationType = populateIntegrationType(libPath);
-
-    if (!StringUtils.isEmpty(integrationType)) {
-      properties.put(TYPE, integrationType);
-    }
-    return properties;
-  }
-
-  private Properties populateAvatarImage(Properties properties, String libPath) throws IOException {
-    Resource resAvatar = context.getResource(libPath + AVATAR_FILENAME);
-    byte[] imageBytes = IOUtils.toByteArray(resAvatar.getInputStream());
-    String avatar = Base64.encodeBase64String(imageBytes);
-    properties.put(AVATAR, avatar);
-    return properties;
   }
 
   /**
-   * Retrieve the integration component name.
-   * @param libPath Library path
-   * @return Integration component name if exists or null otherwise
+   * Retrieve the avatar image coded in Base64.
+   * @param libPath Integration module path
+   * @return Avatar image coded in Base64.
+   * @throws IOException
    */
-  private String populateIntegrationType(String libPath) throws MalformedURLException {
-    UrlResource libResource = new UrlResource(libPath);
+  private String getAvatarImage(String libPath) throws IOException {
+    Resource resAvatar = context.getResource(libPath + AVATAR_FILENAME);
 
-    for (Map.Entry<String, Integration> entry : context.getBeansOfType(Integration.class)
-        .entrySet()) {
-      Integration integration = entry.getValue();
-      String fullClassName = integration.getClass().getCanonicalName().replaceAll("\\.", File
-          .separator) + ".class";
-      Resource beanResource = libResource.createRelative(fullClassName);
-
-      if (beanResource.exists()) {
-        return entry.getKey();
-      }
+    if (resAvatar.exists()) {
+      byte[] imageBytes = IOUtils.toByteArray(resAvatar.getInputStream());
+      return Base64.encodeBase64String(imageBytes);
     }
 
     return null;
   }
+
 }

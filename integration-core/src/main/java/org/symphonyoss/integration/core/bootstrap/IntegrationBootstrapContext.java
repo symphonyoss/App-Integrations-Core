@@ -27,8 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationAtlas;
-import org.symphonyoss.integration.IntegrationPropertiesReader;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
@@ -38,8 +36,9 @@ import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
-import org.symphonyoss.integration.model.Application;
-import org.symphonyoss.integration.model.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,10 +79,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private IntegrationBridgeHealthManager healthCheckManager;
 
   @Autowired
-  private IntegrationPropertiesReader propertiesReader;
-
-  @Autowired
-  private IntegrationAtlas integrationAtlas;
+  private IntegrationProperties properties;
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -96,6 +92,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private ExecutorService servicePool;
 
   private ScheduledExecutorService scheduler;
+
+  @Autowired
+  protected IntegrationUtils utils;
 
   @Override
   public void startup() {
@@ -142,12 +141,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
    * or with an integration name that does not actually exist for the time being.
    */
   private void initUnknownApps() {
-    List<Application> applications = propertiesReader.getProperties().getApplications();
-    for (Application application : applications) {
-      if (StringUtils.isEmpty(application.getType())) {
-        String appId = application.getId();
+    Map<String, Application> applications = properties.getApplications();
+    for (Map.Entry<String, Application> entry : applications.entrySet()) {
+      if (StringUtils.isEmpty(entry.getValue().getComponent())) {
+        String appId = entry.getKey();
 
-        NullIntegration integration = new NullIntegration(integrationAtlas, authenticationProxy);
+        NullIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
 
         try {
           integration.onCreate(appId);
@@ -184,10 +183,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     try {
       LOGGER.info("Verify new integrations");
 
-      IntegrationProperties properties = propertiesReader.getProperties();
-
-      List<IntegrationBootstrapInfo> retries = new ArrayList<>();
-
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);
 
@@ -195,17 +190,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
           Application application = properties.getApplication(info.getConfigurationType());
 
           if (application == null) {
-            LOGGER.warn("Integration {} not configured in the YAML config file",
-                info.getConfigurationType());
-            retries.add(info);
+            LOGGER.warn("Integration {} not configured in the YAML config file", info.getConfigurationType());
           } else {
             submitPoolTask(info);
           }
         }
-      }
-
-      for (IntegrationBootstrapInfo info : retries) {
-        integrationsToRegister.offer(info);
       }
     } catch (InterruptedException e) {
       LOGGER.fatal("Polling stopped", e);

@@ -24,10 +24,11 @@ import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.util.Collections;
 import java.util.Set;
@@ -40,9 +41,10 @@ public class NullIntegration extends BaseIntegration implements Integration {
 
   private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(NullIntegration.class);
 
-  public NullIntegration(IntegrationAtlas integrationAtlas,
+  public NullIntegration(IntegrationProperties properties, IntegrationUtils utils,
       AuthenticationProxy authenticationProxy) {
-    this.integrationAtlas = integrationAtlas;
+    this.properties = properties;
+    this.utils = utils;
     this.authenticationProxy = authenticationProxy;
   }
 
@@ -55,7 +57,7 @@ public class NullIntegration extends BaseIntegration implements Integration {
     try {
       registerUser(integrationUser);
     } catch (BootstrapException e) {
-      LOG.error(String.format("%s. Cause: %s", e.getMessage(), e.getCause().getMessage()), e);
+      LOG.error(e.getMessage(), e);
       healthManager.certificateInstalled(NOK);
     }
 

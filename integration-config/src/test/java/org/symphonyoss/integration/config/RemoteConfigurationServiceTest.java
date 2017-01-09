@@ -20,7 +20,6 @@ import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.pod.api.ConfigurationApi;
@@ -31,7 +30,6 @@ import com.symphony.api.pod.model.ConfigurationInstanceSubmissionCreate;
 import com.symphony.api.pod.model.ConfigurationInstanceSubmissionUpdate;
 import com.symphony.api.pod.model.V1Configuration;
 import com.symphony.api.pod.model.V1ConfigurationSubmissionCreate;
-import com.symphony.atlas.IAtlas;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
@@ -40,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
@@ -65,8 +62,6 @@ public class RemoteConfigurationServiceTest {
   private static final String INSTANCE_ID = "id";
   private static final String CREATOR_ID = "CreatorId";
   private static final long CREATED_DATE = 123456L;
-  private static final String URL = "Url";
-  private static final String POD_URL = "pod.url";
   private static final String API_EXCEPTION_MESSAGE = "message";
   private static final int STATUS_CODE_BAD_REQUEST = Response.Status.BAD_REQUEST.getStatusCode();
   private static final String TOKEN = "token";
@@ -80,25 +75,12 @@ public class RemoteConfigurationServiceTest {
   @Mock
   private ConfigurationInstanceApi configurationInstanceApi;
 
-  @Mock
-  private IntegrationAtlas integrationAtlas;
-
   @InjectMocks
   private ConfigurationService remoteConfigurationService = new RemoteConfigurationService();
 
   @Before
   public void setUp() throws Exception {
     when(authenticationProxy.getSessionToken(USER_ID)).thenReturn(TOKEN);
-  }
-
-  @Test
-  public void testInit() throws Exception {
-    IAtlas iAtlas = mock(IAtlas.class);
-    when(iAtlas.get(POD_URL)).thenReturn(URL);
-
-    when(integrationAtlas.getAtlas()).thenReturn(iAtlas);
-
-    remoteConfigurationService.init();
   }
 
   @Test(expected = RemoteConfigurationException.class)

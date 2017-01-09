@@ -20,11 +20,12 @@ import static org.symphonyoss.integration.provisioning.properties.Authentication
     .DEFAULT_USER_ID;
 
 import com.symphony.api.pod.model.V1Configuration;
+
+import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
-import org.symphonyoss.integration.provisioning.model.Application;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -54,7 +55,7 @@ public class ConfigurationProvisioningService {
    * @return Configuration object returned by the API.
    */
   public V1Configuration setupConfiguration(Application application) {
-    String appType = application.getType();
+    String appType = application.getComponent();
 
     LOGGER.info("Provisioning integration configs for: {}", appType);
 

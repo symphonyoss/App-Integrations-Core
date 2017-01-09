@@ -1,0 +1,95 @@
+/**
+ * Copyright 2016-2017 Symphony Integrations - Symphony LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.symphonyoss.integration.web.register;
+
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.symphonyoss.integration.web.filter.WebHookOriginCheckFilter;
+import org.symphonyoss.integration.web.filter.WebHookTracingFilter;
+
+import java.util.Collections;
+
+/**
+ * Class responsible to register the web resources required by the application.
+ * Created by rsanchez on 23/12/16.
+ */
+@Configuration
+public class WebResourcesRegistration {
+
+  private static final String PATH_SEPARATOR = "/";
+
+  private static final String PATH_WILDCARD = "*";
+
+  private static final String BASE_API_PATH = "/integration";
+
+  private static final String API_SERVLET_NAME = "api";
+
+  private static final Integer API_LOAD_ON_STARTUP = 2;
+
+  /**
+   * Register webhook check origin filter.
+   * @return Filter registration object
+   */
+  @Bean
+  public FilterRegistrationBean webhookCheckOriginFilterRegistration() {
+    WebHookOriginCheckFilter filter = new WebHookOriginCheckFilter();
+    FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+
+    String urlPattern = WebHookOriginCheckFilter.URL_PATTERN + PATH_WILDCARD;
+    registration.setUrlPatterns(Collections.singletonList(urlPattern));
+
+    return registration;
+  }
+
+  /**
+   * Register webhook tracing filter.
+   * @return Filter registration object
+   */
+  @Bean
+  public FilterRegistrationBean webhookTracingFilterRegistration() {
+    WebHookTracingFilter filter = new WebHookTracingFilter();
+    FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+    registration.setUrlPatterns(Collections.singletonList(baseUrlMapping()));
+    return registration;
+  }
+
+  /**
+   * Register a dispatcher servlet to deal with API requests.
+   * @param context Web application context
+   * @return Servlet registration object
+   */
+  @Bean
+  public ServletRegistrationBean apiServletRegistration(WebApplicationContext context) {
+    DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
+
+    ServletRegistrationBean servletRegistrationBean =
+        new ServletRegistrationBean(dispatcherServlet, baseUrlMapping());
+    servletRegistrationBean.setName(API_SERVLET_NAME);
+    servletRegistrationBean.setLoadOnStartup(API_LOAD_ON_STARTUP);
+
+    return servletRegistrationBean;
+  }
+
+  private String baseUrlMapping() {
+    return BASE_API_PATH + PATH_SEPARATOR + PATH_WILDCARD;
+  }
+
+}

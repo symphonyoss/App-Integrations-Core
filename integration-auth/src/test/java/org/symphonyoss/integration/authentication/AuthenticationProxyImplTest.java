@@ -16,32 +16,35 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static com.symphony.atlas.config.SymphonyAtlas.KEY_AUTH_URL;
-import static com.symphony.atlas.config.SymphonyAtlas.SESSION_AUTH_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.auth.client.ApiException;
 import com.symphony.api.auth.model.Token;
-import com.symphony.atlas.AtlasException;
-import com.symphony.atlas.IAtlas;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationAtlas;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -52,7 +55,10 @@ import javax.ws.rs.core.Response;
 /**
  * Created by rsanchez on 10/05/16.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableConfigurationProperties
+@ContextConfiguration(classes = {IntegrationProperties.class, AuthenticationProxyImpl.class})
 public class AuthenticationProxyImplTest {
 
   private static final String JIRAWEBHOOK = "jirawebhook";
@@ -77,16 +83,14 @@ public class AuthenticationProxyImplTest {
 
   private static final String KM_TOKEN2 = "3975bd7f-a6c1-4ec4-806d-c241991889a1";
 
-  private IAtlas atlas;
-
   @Mock
   private AuthenticationApiDecorator sbeAuthApi;
 
   @Mock
   private AuthenticationApiDecorator keyManagerAuthApi;
 
-  @Mock
-  private IntegrationAtlas integrationAtlas;
+  @SpyBean
+  private IntegrationProperties properties;
 
   @Mock
   private KeyStore jiraKs;
@@ -95,7 +99,9 @@ public class AuthenticationProxyImplTest {
   private KeyStore simpleKs;
 
   @InjectMocks
-  private AuthenticationProxyImpl proxy = new AuthenticationProxyImpl();
+  @Autowired
+  private AuthenticationProxyImpl proxy;
+
   private Token sessionToken = new Token();
   private Token kmToken = new Token();
   private Token sessionToken2 = new Token();
@@ -105,9 +111,6 @@ public class AuthenticationProxyImplTest {
   public void setup() {
     this.proxy.registerUser(JIRAWEBHOOK, jiraKs, "");
     this.proxy.registerUser(SIMPLEWEBHOOK, simpleKs, "");
-
-    this.atlas = mock(IAtlas.class);
-    when(integrationAtlas.getAtlas()).thenReturn(atlas);
 
     sessionToken.setName("sessionToken");
     sessionToken.setToken(SESSION_TOKEN);
@@ -122,30 +125,37 @@ public class AuthenticationProxyImplTest {
     kmToken2.setToken(KM_TOKEN2);
   }
 
-  @Test(expected = AuthUrlNotFoundException.class)
+  @Test
   public void testInitWithoutSBEUrl() {
-    proxy.init();
-  }
-
-  @Test(expected = AuthUrlNotFoundException.class)
-  public void testInitWithoutKeyManagerUrl() {
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    proxy.init();
+    try {
+      given(properties.getSessionManagerAuthUrl()).willReturn(StringUtils.EMPTY);
+      proxy.init();
+      fail();
+    } catch (AuthUrlNotFoundException e) {
+      assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
+          "Verify the YAML configuration file. No configuration found to the key "
+              + "pod_session_manager.host"),
+          e.getMessage());
+    }
   }
 
   @Test
-  public void testInit() throws AtlasException {
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
-    proxy.init();
+  public void testInitWithoutKeyManagerUrl() {
+    try {
+      given(properties.getKeyManagerAuthUrl()).willReturn(StringUtils.EMPTY);
+      proxy.init();
+      fail();
+    } catch (AuthUrlNotFoundException e) {
+      assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
+          "Verify the YAML configuration file. No configuration found to the key "
+              + "key_manager.host"),
+          e.getMessage());
+    }
   }
 
   @Test
   public void testFailAuthenticationSBE() throws ApiException {
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
-
     validateFailedAuthentication();
   }
 
@@ -156,8 +166,6 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
 
     validateFailedAuthentication();
   }
@@ -177,18 +185,12 @@ public class AuthenticationProxyImplTest {
     ProcessingException exception = new ProcessingException(new IOException());
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
-
     proxy.authenticate(JIRAWEBHOOK);
   }
 
   @Test(expected = ProcessingException.class)
   public void testFailAuthenticationPodProcessingException() throws ApiException {
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
-
     proxy.authenticate(JIRAWEBHOOK);
   }
 
@@ -201,8 +203,6 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
@@ -214,17 +214,12 @@ public class AuthenticationProxyImplTest {
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
-    when(atlas.get(SESSION_AUTH_URL)).thenReturn("https://localhost:8444");
-    when(atlas.get(KEY_AUTH_URL)).thenReturn("https://localhost:8444/relay");
 
     proxy.authenticate(JIRAWEBHOOK);
   }
 
   @Test
   public void testAuthentication() throws ApiException {
-    when(atlas.get("session.auth.url")).thenReturn("https://localhost:8444");
-    when(atlas.get("keymanager.auth.url")).thenReturn("https://localhost:8444/relay");
-
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
     when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(kmToken);
 

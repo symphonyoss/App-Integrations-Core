@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.properties;
+package org.symphonyoss.integration.web;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Created by rsanchez on 17/10/16.
+ * Integration Bridge application class.
+ * Created by rsanchez on 23/12/16.
  */
-public class AtlasProperties {
+@SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"})
+public class IntegrationBridgeApplication {
 
-  /**
-   * Atlas home
-   */
-  public static final String ATLAS_HOME = "atlas.home";
+  public static void main(String[] args) throws Exception {
+    SpringApplication.run(IntegrationBridgeApplication.class, args);
+  }
 
-  /**
-   * Atlas env
-   */
-  public static final String ATLAS_ENV = "atlas.env";
 }

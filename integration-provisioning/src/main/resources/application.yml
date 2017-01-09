@@ -2,6 +2,14 @@ logging:
   level:
     root: ERROR
 
+server:
+  address: 127.0.0.1
+  port: 0
+  display-name: Integration Provisioning Tool
+  context-path: /provisioning
+  tomcat:
+    basedir: /data/symphony/ib/tomcat
+
 spring:
-  main:
-    web-environment: false
+  profiles:
+    active: jira, github, salesforce, universal, trello, zapier

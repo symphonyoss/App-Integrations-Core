@@ -54,11 +54,17 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
 
   @Mock Token mockToken;
 
+  @Mock
+  protected AuthenticationProxy authenticationProxy;
+
   @InjectMocks
   protected AuthApiClientDecorator apiClientDecorator = new AuthApiClientDecorator(authenticationProxy);
 
   @Before
   public void setup() {
+    when(authenticationProxy.httpClientForSessionToken(SESSION_TOKEN)).thenReturn(mockClient);
+    when(authenticationProxy.httpClientForUser(USER_ID)).thenReturn(mockClient);
+
     initialSetup();
 
     contentTypes.clear();

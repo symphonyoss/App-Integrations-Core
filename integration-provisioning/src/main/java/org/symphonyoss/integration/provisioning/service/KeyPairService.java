@@ -23,11 +23,6 @@ import static org.symphonyoss.integration.provisioning.properties.KeyPairPropert
 import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
     .SIGNING_CERT_PASSWORD;
 
-import com.symphony.atlas.AtlasException;
-import org.symphonyoss.integration.provisioning.exception.KeyPairException;
-import org.symphonyoss.integration.provisioning.model.Application;
-import org.symphonyoss.integration.provisioning.model.Certificate;
-import org.symphonyoss.integration.provisioning.util.AtlasUtil;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
@@ -35,6 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.Certificate;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.provisioning.exception.KeyPairException;
+import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -63,10 +63,10 @@ public class KeyPairService {
       + " -inkey %s -passin pass:%s -passout pass:%s";
 
   @Autowired
-  private Certificate certificateInfo;
+  private IntegrationProperties properties;
 
   @Autowired
-  private AtlasUtil util;
+  private IntegrationUtils utils;
 
   @Autowired
   private ApplicationArguments arguments;
@@ -108,7 +108,7 @@ public class KeyPairService {
    * @return Key filename
    */
   private String generateKeyPair(Application application) {
-    LOGGER.info("Generating private and public key: {}", application.getType());
+    LOGGER.info("Generating private and public key: {}", application.getComponent());
 
     String password = getTempPassword(application);
     String appKeyFilename = String.format("%s/%s-key.pem", System.getProperty("java.io.tmpdir"),
@@ -128,10 +128,10 @@ public class KeyPairService {
    * @return Request filename
    */
   private String generateCSR(Application application, String appKeyFilename) {
-    LOGGER.info("Generating certificate signing request: {}", application.getType());
+    LOGGER.info("Generating certificate signing request: {}", application.getComponent());
 
     String password = String.format("pass:%s", getTempPassword(application));
-    String subject = String.format("/CN=%s/O=%s/C=%s", application.getType(),
+    String subject = String.format("/CN=%s/O=%s/C=%s", application.getComponent(),
         DEFAULT_ORGANIZATION, Locale.US.getCountry());
 
     String appReqFilename = String.format("%s/%s-req.pem", System.getProperty("java.io.tmpdir"),
@@ -153,37 +153,35 @@ public class KeyPairService {
    */
   private void generateCertificate(Application application, String appKeyFilename, String
       appReqFilename) {
-    LOGGER.info("Generating certificate: {}", application.getType());
+    LOGGER.info("Generating certificate: {}", application.getComponent());
+
+    Certificate certificateInfo = properties.getSigningCert();
 
     String keyPassword = getTempPassword(application);
     String password = arguments.getOptionValues(SIGNING_CERT_PASSWORD).get(0);
     String passOutput = arguments.getOptionValues(OUTPUT_CERT_PASSWORD).get(0);
     String sn = Long.toHexString(System.currentTimeMillis());
 
-    try {
-      String appCertFilename = util.getCertsDirectory() + application.getId() + ".pem";
-      String appPKCS12Filename = util.getCertsDirectory() + application.getId() + ".p12";
-      String caCertFilename = certificateInfo.getCaCertFile();
-      String caCertKeyFilename = certificateInfo.getCaKeyFile();
-      String caCertChain = certificateInfo.getCaCertChainFile();
+    String appCertFilename = utils.getCertsDirectory() + application.getId() + ".pem";
+    String appPKCS12Filename = utils.getCertsDirectory() + application.getId() + ".p12";
+    String caCertFilename = certificateInfo.getCaCertFile();
+    String caCertKeyFilename = certificateInfo.getCaKeyFile();
+    String caCertChain = certificateInfo.getCaCertChainFile();
 
-      String genCerticateCommand = String.format(OPENSSL_GEN_CERT_CMD, appReqFilename,
-          caCertFilename, password, appCertFilename, caCertKeyFilename, sn);
+    String genCerticateCommand =
+        String.format(OPENSSL_GEN_CERT_CMD, appReqFilename, caCertFilename, password,
+            appCertFilename, caCertKeyFilename, sn);
 
-      executeProcess(genCerticateCommand);
+    executeProcess(genCerticateCommand);
 
-      String genPKCS12Command = String.format(OPENSSL_PKCS12_CMD, appPKCS12Filename,
-          appCertFilename, appKeyFilename, keyPassword, passOutput);
+    String genPKCS12Command = String.format(OPENSSL_PKCS12_CMD, appPKCS12Filename,
+        appCertFilename, appKeyFilename, keyPassword, passOutput);
 
-      if (!StringUtils.isEmpty(caCertChain)) {
-        genPKCS12Command = genPKCS12Command.concat(" -certfile ").concat(caCertChain);
-      }
-
-      executeProcess(genPKCS12Command);
-    } catch (AtlasException e) {
-      throw new KeyPairException("Fail to generate user certificate. Can't find signing cert", e);
+    if (!StringUtils.isEmpty(caCertChain)) {
+      genPKCS12Command = genPKCS12Command.concat(" -certfile ").concat(caCertChain);
     }
 
+    executeProcess(genPKCS12Command);
   }
 
   /**

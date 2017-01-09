@@ -16,15 +16,14 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import com.symphony.atlas.AtlasException;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -63,9 +62,6 @@ public class AuthenticationService {
       setupSSLContext(userId, trustStore, trustStorePassword, trustStoreType, keystore,
           keyStorePassword, keyStoreType);
       authenticationProxy.authenticate(userId);
-    } catch (AtlasException e) {
-      LOGGER.fatal("Verify the ATLAS properties", e);
-      throw new IntegrationProvisioningAuthException(e);
     } catch (com.symphony.api.auth.client.ApiException e) {
       LOGGER.fatal("Failed: status=" + e.getCode(), e);
       throw new IntegrationProvisioningAuthException(e);
@@ -81,7 +77,7 @@ public class AuthenticationService {
    */
   private void setupSSLContext(String userId, String trustStore, String trustStorePassword,
       String trustStoreType, String keystore, String keyStorePassword, String keyStoreType)
-      throws AtlasException, KeyStoreException, IOException, CertificateException,
+      throws KeyStoreException, IOException, CertificateException,
       NoSuchAlgorithmException {
     if (!StringUtils.isEmpty(trustStore)) {
       System.setProperty("javax.net.ssl.trustStore", trustStore);

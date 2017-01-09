@@ -32,7 +32,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
  * If it already contains a trace id, it will not override it.
  * Created by Milton Quilzini on 25/11/16.
  */
-@WebFilter(filterName = "tracingFilter", urlPatterns = "/*", asyncSupported = true)
 public class WebHookTracingFilter implements Filter {
 
   private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(WebHookTracingFilter.class);

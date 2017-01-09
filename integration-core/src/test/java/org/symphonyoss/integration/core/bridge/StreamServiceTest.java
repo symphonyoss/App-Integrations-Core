@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.agent.api.MessagesApi;
@@ -34,15 +33,12 @@ import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.Stream;
 import com.symphony.api.pod.model.UserIdList;
 import com.symphony.api.pod.model.V2RoomDetail;
-import com.symphony.atlas.IAtlas;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.IntegrationAtlas;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.model.config.StreamType;
@@ -72,17 +68,8 @@ public class StreamServiceTest {
   @Mock
   private StreamsApi streamsApi;
 
-  @Mock
-  private IntegrationAtlas integrationAtlas;
-
   @InjectMocks
   private StreamServiceImpl streamService = new StreamServiceImpl();
-
-  @Before
-  public void setup() {
-    IAtlas atlas = mock(IAtlas.class);
-    when(integrationAtlas.getAtlas()).thenReturn(atlas);
-  }
 
   @Test
   public void testGetStreamsEmpty() {
