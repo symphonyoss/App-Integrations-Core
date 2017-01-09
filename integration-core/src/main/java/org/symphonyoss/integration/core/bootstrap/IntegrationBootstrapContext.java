@@ -146,7 +146,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       if (StringUtils.isEmpty(entry.getValue().getComponent())) {
         String appId = entry.getKey();
 
-        NullIntegration integration = new NullIntegration(utils, authenticationProxy);
+        NullIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
 
         try {
           integration.onCreate(appId);
