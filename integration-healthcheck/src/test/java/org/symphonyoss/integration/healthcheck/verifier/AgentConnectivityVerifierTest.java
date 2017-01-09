@@ -39,12 +39,8 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
     AgentConnectivityVerifier.class})
 public class AgentConnectivityVerifierTest {
 
-  private static final String MOCK_HOST = "test.symphony.com";
-
-  private static final String MOCK_PORT = "8444";
-
   @Autowired
-  private IntegrationProperties properties = new IntegrationProperties();
+  private IntegrationProperties properties;
 
   @Autowired
   private AgentConnectivityVerifier verifier;
