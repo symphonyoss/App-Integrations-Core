@@ -26,13 +26,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
-import org.symphonyoss.integration.webhook.MockKeystore;
 
 import java.io.IOException;
 import java.security.KeyStoreException;

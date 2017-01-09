@@ -1,0 +1,41 @@
+#
+# Indicate the host and port for the Symphony POD the Apps are associated with.
+#
+pod:
+  host: nexus.symphony.com
+  port: 443
+
+#
+# Indicate the host and port for the POD's Agent.
+#
+agent:
+  host: nexus.symphony.com
+  port: 8444
+
+#
+# Indicate the host and port the POD's Session Manager.
+#
+pod_session_manager:
+  host: nexus.symphony.com
+  port: 8444
+
+#
+# Indicate the host and ports for the POD's Key Manager.
+#
+key_manager:
+  host: nexus.symphony.com
+  port: 443
+  auth_port: 8444
+
+applications:
+  test:
+    component: testWebHookIntegration
+    state: PROVISIONED
+    enabled: true
+    visible: true
+
+  test2:
+    component: test2WebHookIntegration
+    state: PROVISIONED
+    enabled: true
+    visible: true

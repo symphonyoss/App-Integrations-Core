@@ -58,6 +58,10 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   private static final ISymphonyLogger LOG =
       IntegrationBridgeCloudLoggerFactory.getLogger(AuthenticationProxyImpl.class);
 
+  private static final String SESSION_MANAGER_HOST_KEY = "pod_session_manager.host";
+
+  private static final String KEY_MANAGER_HOST_KEY = "key_manager.host";
+
   private static final Long MAX_SESSION_TIME_MILLIS = TimeUnit.MINUTES.toMillis(3);
 
   /**
@@ -81,13 +85,17 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   @PostConstruct
   public void init() {
     String sbeUrl = properties.getSessionManagerAuthUrl();
-    validateUrl(sbeUrl);
+
+    // Validate the Session Manager Auth URL
+    validateUrl(sbeUrl, SESSION_MANAGER_HOST_KEY);
 
     AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this);
     sbeClient.setBasePath(sbeUrl);
 
     String keyManagerUrl = properties.getKeyManagerAuthUrl();
-    validateUrl(keyManagerUrl);
+
+    // Validate the Key Manager Auth URL
+    validateUrl(keyManagerUrl, KEY_MANAGER_HOST_KEY);
 
     AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this);
     keyManagerClient.setBasePath(keyManagerUrl);
@@ -96,10 +104,16 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     this.keyManagerAuthApi = new AuthenticationApiDecorator(keyManagerClient);
   }
 
-  private void validateUrl(String url) {
+  /**
+   * Validates if the url is not empty. Throws an {@link AuthUrlNotFoundException} if the url is
+   * empty. This exception must describe which configuration is missing.
+   * @param url URL to be validated
+   * @param key Missing key in the YAML configuration file.
+   */
+  private void validateUrl(String url, String key) {
     if (StringUtils.isBlank(url)) {
-      throw new AuthUrlNotFoundException(
-          "Missing configuration for authentication URL. Verify the YAML configuration file");
+      throw new AuthUrlNotFoundException("Verify the YAML configuration file. No configuration "
+          + "found to the key " + key);
     }
   }
 

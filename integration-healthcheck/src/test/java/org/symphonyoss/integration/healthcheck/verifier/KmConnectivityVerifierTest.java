@@ -20,38 +20,34 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.model.yaml.ConnectionInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.authentication.AuthenticationProxyImpl;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
  * Test class to validate {@link KmConnectivityVerifier}
  * Created by rsanchez on 23/11/16.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableConfigurationProperties
+@ContextConfiguration(classes = {IntegrationProperties.class, AuthenticationProxyImpl.class,
+    KmConnectivityVerifier.class})
 public class KmConnectivityVerifierTest {
 
-  private static final String MOCK_HOST = "test.symphony.com";
-
-  private static final String MOCK_PORT = "8443";
-
-  @Spy
+  @Autowired
   private IntegrationProperties properties = new IntegrationProperties();
 
-  @InjectMocks
-  private KmConnectivityVerifier verifier = new KmConnectivityVerifier();
+  @Autowired
+  private KmConnectivityVerifier verifier;
 
   @Test
   public void testHealthCheckUrl() {
-    ConnectionInfo km = new ConnectionInfo();
-    km.setHost(MOCK_HOST);
-    km.setPort(MOCK_PORT);
-
-    properties.setKeyManager(km);
-
-    assertEquals("https://test.symphony.com:8443/relay/HealthCheck", verifier.getHealthCheckUrl());
+    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck", verifier.getHealthCheckUrl());
   }
 
 }

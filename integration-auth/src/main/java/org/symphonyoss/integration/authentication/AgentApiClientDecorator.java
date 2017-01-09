@@ -98,8 +98,8 @@ public class AgentApiClientDecorator extends ApiClient {
     String url = properties.getAgentUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new AgentUrlNotFoundException(
-          "Missing configuration for Agent URL. Verify the YAML configuration file");
+      throw new AgentUrlNotFoundException("Verify the YAML configuration file. No configuration "
+          + "found to the key agent.host");
     }
 
     setBasePath(url);

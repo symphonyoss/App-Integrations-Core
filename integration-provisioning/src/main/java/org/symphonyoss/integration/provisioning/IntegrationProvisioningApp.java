@@ -16,18 +16,12 @@
 
 package org.symphonyoss.integration.provisioning;
 
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .DEFAULT_USER_ID;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .KEY_STORE;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .KEY_STORE_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .TRUST_STORE;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .TRUST_STORE_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .TRUST_STORE_TYPE;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.KEY_STORE;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.KEY_STORE_PASSWORD;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE_PASSWORD;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE_TYPE;
 
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
@@ -37,8 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
