@@ -28,7 +28,7 @@ spring:
     servlet:
       load-on-startup: 1
   resources:
-    static-locations: file:resources/
+    static-locations: file:///opt/symphony/ib/resources/
   profiles:
     active: jira, github, salesforce, universal, trello, zapier
 
