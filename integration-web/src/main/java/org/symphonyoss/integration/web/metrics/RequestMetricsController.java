@@ -30,7 +30,6 @@ import com.codahale.metrics.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.metrics.IntegrationController;
-import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.metrics.gauge.CounterRatio;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,12 +47,6 @@ public class RequestMetricsController implements IntegrationController {
 
   @Autowired
   private MetricRegistry metricsRegistry;
-
-  /**
-   * Controller class
-   */
-  @Autowired
-  private IntegrationMetricsController controller;
 
   /**
    * Number of active requests
@@ -85,8 +78,6 @@ public class RequestMetricsController implements IntegrationController {
    */
   @PostConstruct
   public void init() {
-    controller.registerIntegrationController(this);
-
     this.activeRequests = metricsRegistry.counter(ACTIVE_REQUESTS);
     this.requestsTimer = metricsRegistry.timer(INCOMING_REQUESTS);
     this.otherMeter = metricsRegistry.meter(OTHER_RESPONSE_CODE);

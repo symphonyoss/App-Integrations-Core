@@ -32,10 +32,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -48,9 +46,6 @@ import java.util.concurrent.ConcurrentMap;
 public class RequestMetricsControllerTest {
 
   private static final String TEST_INTEGRATION = "testIntegration";
-
-  @Mock
-  private IntegrationMetricsController metricsController;
 
   @Spy
   private MetricRegistry metricsRegistry = new MetricRegistry();
