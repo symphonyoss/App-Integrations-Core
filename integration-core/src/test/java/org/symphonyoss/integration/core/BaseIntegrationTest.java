@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -82,20 +83,34 @@ public class BaseIntegrationTest extends MockKeystore {
   @InjectMocks
   private BaseIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
 
+  private Application application;
+
+  @Before
+  public void init() {
+    this.application = new Application();
+    this.application.setComponent(APP_TYPE);
+
+    properties.setApplications(Collections.singletonMap(APP_ID, application));
+  }
+
   @Test
   public void testApplicationId() {
-    assertEquals(APP_TYPE, integration.getApplicationId(APP_TYPE));
-
-    Application application = new Application();
-    application.setComponent(APP_TYPE);
-    properties.setApplications(Collections.singletonMap(APP_ID, application));
-
     assertEquals(APP_ID, integration.getApplicationId(APP_TYPE));
   }
 
   @Test(expected = CertificateNotFoundException.class)
   public void testRegisterUserCertNotFound() {
     doThrow(CertificateNotFoundException.class).when(utils).getCertsDirectory();
+    integration.registerUser(APP_TYPE);
+  }
+
+  @Test(expected = CertificateNotFoundException.class)
+  public void testRegisterUserCertFileUnknown() throws IOException {
+    properties.setApplications(Collections.<String, Application>emptyMap());
+
+    String dir = mockCertDir();
+    doReturn(dir).when(utils).getCertsDirectory();
+
     integration.registerUser(APP_TYPE);
   }
 
@@ -121,10 +136,6 @@ public class BaseIntegrationTest extends MockKeystore {
 
   @Test
   public void testConfiguratorInstalledFlag() {
-    Application application = new Application();
-    application.setComponent(APP_TYPE);
-    properties.setApplications(Collections.singletonMap(APP_ID, application));
-
     assertEquals(IntegrationFlags.ValueEnum.NOK,
         integration.getConfiguratorInstalledFlag(APP_TYPE));
 
