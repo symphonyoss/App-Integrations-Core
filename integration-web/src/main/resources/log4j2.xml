@@ -2,7 +2,7 @@
 <Configuration>
 
     <Properties>
-        <Property name="logs.basedir">/data/symphony/ib/tomcat</Property>
+        <Property name="logs.basedir">/data/symphony/ib</Property>
         <Property name="log4j2.logLevel">INFO</Property>
         <Property name="log4j2.symphonyLogLevel">INFO</Property>
         <Property name="log4j2.consoleLogThreshold">INFO</Property>
