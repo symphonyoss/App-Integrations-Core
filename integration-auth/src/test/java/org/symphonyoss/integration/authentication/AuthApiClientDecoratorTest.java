@@ -19,6 +19,10 @@ package org.symphonyoss.integration.authentication;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID_SIZE;
@@ -28,6 +32,7 @@ import com.symphony.api.auth.client.Pair;
 import com.symphony.api.auth.client.TypeRef;
 import com.symphony.api.auth.model.Token;
 
+import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.MDC;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
@@ -55,10 +61,17 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
   @Mock Token mockToken;
 
   @Mock
-  protected AuthenticationProxy authenticationProxy;
+  private Timer.Context context;
+
+  @Mock
+  private AuthenticationProxy authenticationProxy;
+
+  @Mock
+  private ApiMetricsController metricsController;
 
   @InjectMocks
-  protected AuthApiClientDecorator apiClientDecorator = new AuthApiClientDecorator(authenticationProxy);
+  protected AuthApiClientDecorator apiClientDecorator =
+      new AuthApiClientDecorator(authenticationProxy, metricsController);
 
   @Before
   public void setup() {
@@ -75,6 +88,8 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
     apiClientDecorator.setBasePath(HTTPS_AUTH_URL);
 
     MDC.clear();
+
+    doReturn(context).when(metricsController).startApiCall(PATH);
   }
 
   @Test
@@ -91,6 +106,9 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
     assertEquals(respBody.getToken(), "123");
 
     assertNull(headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -105,6 +123,9 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
     assertEquals(respBody.getToken(), "123");
 
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
   @Test
@@ -124,14 +145,22 @@ public class AuthApiClientDecoratorTest extends ApiClientDecoratorTest {
     assertNotEquals(randHeaderTraceId, headerParams.get(TRACE_ID));
     // current MDC is a composition of the original header trace ID and a random generated number.
     assertEquals(MDC.get(TRACE_ID), headerParams.get(TRACE_ID));
+
+    verify(metricsController, times(1)).startApiCall(PATH);
+    verify(metricsController, times(1)).finishApiCall(context, PATH, true);
   }
 
-  @Test (expected = ApiException.class)
+  @Test
   public void testFailureDueServerError() throws ApiException, RemoteApiException {
-
     failedReAuthDueServerErrorSetup();
 
-    apiClientDecorator.invokeAPI(USER_ID, PATH, "GET", queryParams, body, headerParams, formParams,
-        ACCEPT, CONTENT_TYPE, authNames, returnType);
+    try {
+      apiClientDecorator.invokeAPI(USER_ID, PATH, "GET", queryParams, body, headerParams, formParams,
+          ACCEPT, CONTENT_TYPE, authNames, returnType);
+      fail();
+    } catch (ApiException e) {
+      verify(metricsController, times(1)).startApiCall(PATH);
+      verify(metricsController, times(1)).finishApiCall(context, PATH, false);
+    }
   }
 }

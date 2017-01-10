@@ -28,6 +28,7 @@ import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivi
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
@@ -79,6 +80,9 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   @Autowired
   private IntegrationProperties properties;
 
+  @Autowired
+  private ApiMetricsController metricsController;
+
   /**
    * Initialize HTTP clients.
    */
@@ -89,7 +93,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     // Validate the Session Manager Auth URL
     validateUrl(sbeUrl, SESSION_MANAGER_HOST_KEY);
 
-    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this, metricsController);
     sbeClient.setBasePath(sbeUrl);
 
     String keyManagerUrl = properties.getKeyManagerAuthUrl();
@@ -97,7 +101,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     // Validate the Key Manager Auth URL
     validateUrl(keyManagerUrl, KEY_MANAGER_HOST_KEY);
 
-    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this);
+    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this, metricsController);
     keyManagerClient.setBasePath(keyManagerUrl);
 
     this.sbeAuthApi = new AuthenticationApiDecorator(sbeClient);

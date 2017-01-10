@@ -35,12 +35,14 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
 import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
+import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
@@ -91,6 +93,9 @@ public class AuthenticationProxyImplTest {
 
   @SpyBean
   private IntegrationProperties properties;
+
+  @MockBean
+  private ApiMetricsController metricsController;
 
   @Mock
   private KeyStore jiraKs;

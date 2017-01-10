@@ -23,9 +23,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxyImpl;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -35,9 +36,11 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, AuthenticationProxyImpl.class,
-    PodConnectivityVerifier.class})
+@ContextConfiguration(classes = {IntegrationProperties.class, PodConnectivityVerifier.class})
 public class PodConnectivityVerifierTest {
+
+  @MockBean
+  private AuthenticationProxy authenticationProxy;
 
   @Autowired
   private IntegrationProperties properties = new IntegrationProperties();
