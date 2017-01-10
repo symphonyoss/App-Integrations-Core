@@ -61,7 +61,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private static final String SESSION_MANAGER_HOST_KEY = "pod_session_manager.host";
 
-  private static final String KEY_MANAGER_HOST_KEY = "key_manager.host";
+  private static final String KEY_MANAGER_HOST_KEY = "key_manager_auth.host";
 
   private static final Long MAX_SESSION_TIME_MILLIS = TimeUnit.MINUTES.toMillis(3);
 

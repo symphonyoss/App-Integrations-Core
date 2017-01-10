@@ -25,4 +25,10 @@ pod_session_manager:
 key_manager:
   host: nexus.symphony.com
   port: 443
-  auth_port: 8444
+
+#
+# Indicate the host and ports for the Key Manager Authentication.
+#
+key_manager_auth:
+  host: nexus.symphony.com
+  port: 8444
