@@ -31,6 +31,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 
 /**
  * Test class to validate {@link NullIntegration}
@@ -45,6 +47,8 @@ import java.security.cert.CertificateException;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NullIntegrationTest extends MockKeystore {
+
+  private static final String APP_ID = "jira";
 
   private static final String APP_TYPE = "jiraWebHookIntegration";
 
@@ -78,6 +82,11 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testSuccess()
       throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    Application application = new Application();
+    application.setComponent(APP_TYPE);
+
+    properties.setApplications(Collections.singletonMap(APP_ID, application));
+
     String dir = mockKeyStore();
     doReturn(dir).when(utils).getCertsDirectory();
 

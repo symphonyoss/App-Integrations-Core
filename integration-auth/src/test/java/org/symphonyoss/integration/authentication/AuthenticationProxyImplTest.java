@@ -131,6 +131,12 @@ public class AuthenticationProxyImplTest {
   }
 
   @Test
+  public void testInit() {
+    assertEquals("https://nexus.symphony.com:8444/sessionauth", properties.getSessionManagerAuthUrl());
+    assertEquals("https://nexus.symphony.com:8444/keyauth", properties.getKeyManagerAuthUrl());
+  }
+
+  @Test
   public void testInitWithoutSBEUrl() {
     try {
       given(properties.getSessionManagerAuthUrl()).willReturn(StringUtils.EMPTY);
@@ -153,7 +159,7 @@ public class AuthenticationProxyImplTest {
     } catch (AuthUrlNotFoundException e) {
       assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
           "Verify the YAML configuration file. No configuration found to the key "
-              + "key_manager.host"),
+              + "key_manager_auth.host"),
           e.getMessage());
     }
   }
