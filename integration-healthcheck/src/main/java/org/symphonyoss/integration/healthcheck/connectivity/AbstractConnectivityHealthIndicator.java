@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.connectivity;
 
 import static javax.ws.rs.core.Response.Status.Family.REDIRECTION;
 import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
@@ -22,51 +22,55 @@ import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
- * Holds common methods to all integration bridge verifiers.
+ * Holds common methods to all integration bridge connectivity indicators.
  *
  * Created by Milton Quilzini on 11/11/16.
  */
-public abstract class AbstractConnectivityVerifier {
+public abstract class AbstractConnectivityHealthIndicator implements HealthIndicator {
 
   private static final ISymphonyLogger LOG =
-      SymphonyLoggerFactory.getLogger(AbstractConnectivityVerifier.class);
-
+      SymphonyLoggerFactory.getLogger(AbstractConnectivityHealthIndicator.class);
 
   /**
-   * Possible values for the connectivity status.
+   * Cache period (in seconds) for the connectivity status of the Integration Bridge.
    */
-  public enum ConnectivityStatus {
-    /**
-     * Indicates a given component can be reached, i.e. connectivity is up.
-     */
-    UP,
+  private static final int CONNECTIVITY_CACHE_PERIOD_SECS = 20;
 
-    /**
-     * Indicates a given component can not be reached, i.e. connectivity is down.
-     */
-    DOWN
-  }
-
-
+  /**
+   * HTTP Connection timeout (in miliseconds)
+   */
   private static final int CONNECT_TIMEOUT_MILLIS = 1000;
 
+  /**
+   * HTTP Read timeout (in miliseconds)
+   */
   private static final int READ_TIMEOUT_MILLIS = 5000;
 
   @Autowired
@@ -74,6 +78,31 @@ public abstract class AbstractConnectivityVerifier {
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
+
+  /**
+   * Cache for the connectivity statuses.
+   */
+  private LoadingCache<String, Status> connectivityStatusCache;
+
+  @PostConstruct
+  public void init() {
+    connectivityStatusCache = initConnectivityStatusCache();
+  }
+
+  private LoadingCache<String, Status> initConnectivityStatusCache() {
+    return CacheBuilder.newBuilder()
+        .expireAfterWrite(CONNECTIVITY_CACHE_PERIOD_SECS, TimeUnit.SECONDS)
+        .build(new CacheLoader<String, Status>() {
+          @Override
+          public Status load(String key) throws Exception {
+            if (key.equals(getHealthName())) {
+              return currentConnectivityStatus();
+            }
+
+            return Status.UNKNOWN;
+          }
+        });
+  }
 
   /**
    * Determine the user to be used on connectivity checks, looking on the base YAML file for a
@@ -86,6 +115,7 @@ public abstract class AbstractConnectivityVerifier {
         return app.getComponent();
       }
     }
+
     return StringUtils.EMPTY;
   }
 
@@ -96,11 +126,32 @@ public abstract class AbstractConnectivityVerifier {
   protected abstract String getHealthCheckUrl();
 
   /**
+   * Returns the health name.
+   * @return Health name
+   */
+  protected abstract String getHealthName();
+
+  @Override
+  public Health health() {
+    String healthName = getHealthName();
+
+    Status status;
+    try {
+      status = connectivityStatusCache.get(healthName);
+    } catch (UncheckedExecutionException | ExecutionException e) {
+      LOG.error(String.format("Unable to retrieve %s connectivity status", healthName), e);
+      status = Status.UNKNOWN;
+    }
+
+    return Health.status(status).build();
+  }
+
+  /**
    * Hits the built URL to the corresponding service, checks its response
-   * {@link Status.Family}, and returns the corresponding connectivity status.
+   * {@link Response.Status.Family}, and returns the corresponding connectivity status.
    * @return Connectivity status: "UP" if the check is successful, "DOWN" otherwise.
    */
-  public ConnectivityStatus currentConnectivityStatus() {
+  public Status currentConnectivityStatus() {
     try {
       Client client = authenticationProxy.httpClientForUser(availableIntegrationUser());
 
@@ -111,15 +162,12 @@ public abstract class AbstractConnectivityVerifier {
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
       Response response = invocationBuilder.get();
-      Status.Family statusFamily = response.getStatusInfo().getFamily();
+      Response.Status.Family statusFamily = response.getStatusInfo().getFamily();
 
-      return statusFamily.equals(SUCCESSFUL) || statusFamily.equals(REDIRECTION) ?
-          ConnectivityStatus.UP : ConnectivityStatus.DOWN;
-
+      return statusFamily.equals(SUCCESSFUL) || statusFamily.equals(REDIRECTION) ? Status.UP : Status.DOWN;
     } catch (ProcessingException | UnregisteredUserAuthException e) {
-      LOG.error("Trying to reach {} but getting exception: {}", getHealthCheckUrl(), e.getMessage
-          (), e);
-      return ConnectivityStatus.DOWN;
+      LOG.error("Trying to reach {} but getting exception: {}", getHealthCheckUrl(), e.getMessage(), e);
+      return Status.DOWN;
     }
   }
 }

@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -46,7 +45,6 @@ import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
-import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -82,9 +80,6 @@ public class IntegrationBootstrapContextTest {
 
   @Mock
   private Integration integration;
-
-  @Spy
-  private IntegrationBridgeHealthManager healthCheckManager = new IntegrationBridgeHealthManager();
 
   @Mock
   private ExecutorService servicePool;
@@ -144,9 +139,6 @@ public class IntegrationBootstrapContextTest {
     application.setComponent(WEBHOOKINTEGRATION_TYPE_JIRA);
 
     properties.setApplications(Collections.singletonMap(WEBHOOKINTEGRATION_ID_JIRA, application));
-
-    doNothing().when(healthCheckManager)
-        .updateIntegrationStatus(WEBHOOKINTEGRATION_TYPE_JIRA, integration);
   }
 
   /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.connectivity;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,30 +27,36 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.healthcheck.connectivity.KmConnectivityHealthIndicator;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link KmConnectivityVerifier}
+ * Test class to validate {@link KmConnectivityHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, KmConnectivityVerifier.class})
-public class KmConnectivityVerifierTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, KmConnectivityHealthIndicator.class})
+public class KmConnectivityHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationProperties properties = new IntegrationProperties();
+  private IntegrationProperties properties;
 
   @Autowired
-  private KmConnectivityVerifier verifier;
+  private KmConnectivityHealthIndicator indicator;
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck", verifier.getHealthCheckUrl());
+    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck", indicator.getHealthCheckUrl());
+  }
+
+  @Test
+  public void testHealthName() {
+    assertEquals("Key Manager", indicator.getHealthName());
   }
 
 }
