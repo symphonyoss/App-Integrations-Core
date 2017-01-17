@@ -136,7 +136,7 @@ public class AppRepositoryClient {
 
     // params
     Auth auth = getSymphonyAuthProvider(userId);
-    RequestEnvelope envelope = new RequestEnvelope<>(appStoreApp);
+    RequestEnvelope<AppStoreWrapper> envelope = new RequestEnvelope<>(appStoreApp);
     String path = APP_REPOSITORY_APP_CREATE;
 
     // call server
@@ -160,7 +160,7 @@ public class AppRepositoryClient {
       throws AppRepositoryClientException {
     // params
     Auth auth = getSymphonyAuthProvider(userId);
-    RequestEnvelope envelope = new RequestEnvelope<>(appStoreApp);
+    RequestEnvelope<AppStoreWrapper> envelope = new RequestEnvelope<>(appStoreApp);
     String path = String.format(APP_REPOSITORY_APP_UPDATE, appId);
 
     // call server

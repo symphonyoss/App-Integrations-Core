@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.symphony.api.auth.client.ApiException;
@@ -166,7 +167,7 @@ public class AuthenticationProxyImplTest {
 
   @Test
   public void testFailAuthenticationSBE() throws ApiException {
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
+    doThrow(ApiException.class).when(sbeAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
     validateFailedAuthentication();
   }
 
@@ -176,7 +177,7 @@ public class AuthenticationProxyImplTest {
     sessionToken.setName("sessionToken");
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ApiException.class);
+    doThrow(ApiException.class).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
 
     validateFailedAuthentication();
   }
@@ -201,7 +202,7 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = ProcessingException.class)
   public void testFailAuthenticationPodProcessingException() throws ApiException {
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
+    doThrow(ProcessingException.class).when(sbeAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
     proxy.authenticate(JIRAWEBHOOK);
   }
 
@@ -213,7 +214,7 @@ public class AuthenticationProxyImplTest {
     ProcessingException exception = new ProcessingException(new IOException());
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
+    doThrow(exception).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
 
     proxy.authenticate(JIRAWEBHOOK);
   }
@@ -224,7 +225,7 @@ public class AuthenticationProxyImplTest {
     sessionToken.setName("sessionToken");
 
     when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(ProcessingException.class);
+    doThrow(ProcessingException.class).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
 
     proxy.authenticate(JIRAWEBHOOK);
   }

@@ -49,6 +49,7 @@ import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -283,7 +284,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   @Test
   public void testCircuitClosing() {
     // mock to run immediately when a scheduled call is made.
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();
