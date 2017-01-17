@@ -86,16 +86,41 @@ public class AgentApiClientDecorator extends ApiClient {
   public AgentApiClientDecorator() {
 
     try {
-      Field defaultHeaderMapField = ApiClient.class.getDeclaredField("defaultHeaderMap");
-      defaultHeaderMapField.setAccessible(true);
-      this.defaultHeaderMap = (Map<String, String>) defaultHeaderMapField.get((ApiClient) this);
-
-      Field authenticationsField = ApiClient.class.getDeclaredField("authentications");
-      authenticationsField.setAccessible(true);
-      this.authentications = (Map<String, Authentication>) authenticationsField.get((ApiClient) this);
+      this.defaultHeaderMap = getDefaultHeaderField();
+      this.authentications = getAuthenticationsField();
     } catch (ReflectiveOperationException e) {
       throw new RuntimeException("Missing parent attributes. Swagger auto-generated code changed and this class requires refactoring.", e);
     }
+  }
+
+  /**
+   * Explicity casting to Map generates an unchecked cast warning.
+   * Since the reflection API does not use Generics, this warning can't be avoided.
+   * That's why set the method with SuppressWarnings annotation.
+   * @return Map<String, Authentication>
+   * @throws NoSuchFieldException
+   * @throws IllegalAccessException
+   */
+  @SuppressWarnings("unchecked")
+  private Map<String, Authentication> getAuthenticationsField() throws NoSuchFieldException, IllegalAccessException {
+    Field authenticationsField = ApiClient.class.getDeclaredField("authentications");
+    authenticationsField.setAccessible(true);
+    return (Map<String, Authentication>) authenticationsField.get((ApiClient) this);
+  }
+
+  /**
+   * Explicity casting to Map generates an unchecked cast warning.
+   * Since the reflection API does not use Generics, this warning can't be avoided.
+   * That's why set the method with SuppressWarnings annotation.
+   * @return Map<String, String>
+   * @throws NoSuchFieldException
+   * @throws IllegalAccessException
+   */
+  @SuppressWarnings("unchecked")
+  private Map<String, String> getDefaultHeaderField() throws NoSuchFieldException, IllegalAccessException {
+    Field defaultHeaderMapField = ApiClient.class.getDeclaredField("defaultHeaderMap");
+    defaultHeaderMapField.setAccessible(true);
+    return (Map<String, String>) defaultHeaderMapField.get((ApiClient) this);
   }
 
   @PostConstruct
