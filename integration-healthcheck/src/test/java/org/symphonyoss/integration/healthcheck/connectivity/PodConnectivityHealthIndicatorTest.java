@@ -43,9 +43,6 @@ public class PodConnectivityHealthIndicatorTest {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationProperties properties;
-
-  @Autowired
   private PodConnectivityHealthIndicator indicator;
 
   @Test

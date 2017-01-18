@@ -27,7 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.healthcheck.connectivity.AgentConnectivityHealthIndicator;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -42,9 +41,6 @@ public class AgentConnectivityHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
-
-  @Autowired
-  private IntegrationProperties properties;
 
   @Autowired
   private AgentConnectivityHealthIndicator indicator;

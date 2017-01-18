@@ -17,7 +17,6 @@
 package org.symphonyoss.integration.healthcheck.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.CompositeHealthIndicator;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;

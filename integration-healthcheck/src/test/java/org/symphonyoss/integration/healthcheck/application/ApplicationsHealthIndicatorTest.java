@@ -25,7 +25,6 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.IntegrationStatus;
@@ -44,9 +43,6 @@ public class ApplicationsHealthIndicatorTest {
 
   @Autowired
   private TestWebHookIntegration integration;
-
-  @SpyBean
-  private IntegrationProperties properties;
 
   @Autowired
   private ApplicationsHealthIndicator healthIndicator;

@@ -127,8 +127,8 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
     List<IntegrationHealth> appsHealth = new ArrayList<>();
     Map<String, Object> details = healthApplications.getDetails();
 
-    for (String key : details.keySet()) {
-      IntegrationHealth health = (IntegrationHealth) details.get(key);
+    for (Object value : details.values()) {
+      IntegrationHealth health = (IntegrationHealth) value;
       appsHealth.add(health);
     }
 

@@ -16,9 +16,12 @@
 
 package org.symphonyoss.integration.healthcheck;
 
+import com.symphony.logging.ISymphonyLogger;
+
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,6 +40,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncCompositeHealthIndicator implements HealthIndicator {
 
+  private static final ISymphonyLogger LOG =
+      IntegrationBridgeCloudLoggerFactory.getLogger(AsyncCompositeHealthIndicator.class);
+
+  /**
+   * Details for error message
+   */
+  private static final String ERROR_KEY = "error";
+
   /**
    * Thread pool size
    */
@@ -46,6 +57,11 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
    * Timeout to verify if the execution was done
    */
   private static final Long EXECUTION_TIMEOUT = 1000L;
+
+  /**
+   * Number of times to check if the execution was done
+   */
+  private static final Integer SHUTDOWN_CHECK_TIMES = 10;
 
   /**
    * Registered indicators
@@ -78,7 +94,9 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
       Map<String, Health> healths = extractResult(result);
       return this.healthAggregator.aggregate(healths);
     } catch (InterruptedException e) {
-      return Health.down().withException(e).build();
+      String message = "Request thread was interrupted";
+      LOG.error(message, e);
+      return Health.down().withDetail(ERROR_KEY, message).build();
     }
   }
 
@@ -120,7 +138,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private void shutdownService(ExecutorService service) throws InterruptedException {
     service.shutdown();
 
-    for (int i = 0; i < 10; i++) {
+    for (int execution = 0; execution < SHUTDOWN_CHECK_TIMES; execution++) {
       boolean terminated = service.awaitTermination(EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS);
 
       if (terminated) {
