@@ -33,6 +33,7 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.Keystore;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.IOException;
@@ -51,6 +52,8 @@ public class NullIntegrationTest extends MockKeystore {
   private static final String APP_ID = "jira";
 
   private static final String APP_TYPE = "jiraWebHookIntegration";
+
+  private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 
   @Mock
   private AuthenticationProxy authenticationProxy;
@@ -82,8 +85,12 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testSuccess()
       throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+
     Application application = new Application();
     application.setComponent(APP_TYPE);
+    application.setKeystore(keystore);
 
     properties.setApplications(Collections.singletonMap(APP_ID, application));
 
