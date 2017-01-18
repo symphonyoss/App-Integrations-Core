@@ -39,9 +39,9 @@ import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookPayload;
@@ -49,7 +49,6 @@ import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
