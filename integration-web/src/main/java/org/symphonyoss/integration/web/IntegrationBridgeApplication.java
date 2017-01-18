@@ -18,6 +18,7 @@ package org.symphonyoss.integration.web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.symphonyoss.integration.web.listener.BootstrapApplicationListener;
 
 /**
  * Integration Bridge application class.
@@ -27,7 +28,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class IntegrationBridgeApplication {
 
   public static void main(String[] args) throws Exception {
-    SpringApplication.run(IntegrationBridgeApplication.class, args);
+    SpringApplication application = new SpringApplication(IntegrationBridgeApplication.class);
+    application.addListeners(new BootstrapApplicationListener());
+    application.run(args);
   }
 
 }
