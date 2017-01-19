@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.application;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,18 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
     ApplicationsHealthIndicator.class})
 public class ApplicationsHealthIndicatorTest {
 
+  private static final String INTEGRATION_USER = "testUser";
+
   @Autowired
   private TestWebHookIntegration integration;
 
   @Autowired
   private ApplicationsHealthIndicator healthIndicator;
+
+  @Before
+  public void init() {
+    integration.onCreate(INTEGRATION_USER);
+  }
 
   @Test
   public void testDown() {

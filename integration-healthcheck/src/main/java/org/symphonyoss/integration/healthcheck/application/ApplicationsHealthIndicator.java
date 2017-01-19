@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
+import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -55,7 +56,7 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
       Integration integration = integrations.get(component);
 
       if (integration != null) {
-        addHealthIndicator(component, integration);
+        addHealthIndicator(component, new IntegrationHealthIndicatorAdapter(integration));
       }
     }
   }

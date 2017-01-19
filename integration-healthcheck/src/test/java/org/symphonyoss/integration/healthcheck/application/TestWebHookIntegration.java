@@ -18,10 +18,10 @@ package org.symphonyoss.integration.healthcheck.application;
 
 import com.symphony.api.pod.model.V1Configuration;
 
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.test.context.TestComponent;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.Set;
@@ -33,11 +33,12 @@ import java.util.Set;
 @TestComponent
 public class TestWebHookIntegration implements Integration {
 
-  private Status status = Status.UNKNOWN;
+  private IntegrationHealth health = new IntegrationHealth();
 
   @Override
   public void onCreate(String integrationUser) {
-    // Do nothing
+    health.setName(integrationUser);
+    health.setStatus(IntegrationStatus.INACTIVE.name());
   }
 
   @Override
@@ -52,9 +53,6 @@ public class TestWebHookIntegration implements Integration {
 
   @Override
   public IntegrationHealth getHealthStatus() {
-    IntegrationHealth health = new IntegrationHealth();
-    health.setName(getClass().getSimpleName());
-
     return health;
   }
 
@@ -68,12 +66,7 @@ public class TestWebHookIntegration implements Integration {
     return null;
   }
 
-  @Override
-  public Health health() {
-    return Health.status(status).withDetail("detail", getHealthStatus()).build();
-  }
-
   public void setStatus(Status status) {
-    this.status = status;
+    this.health.setStatus(status.getCode());
   }
 }
