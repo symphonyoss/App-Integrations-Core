@@ -32,20 +32,25 @@ import java.util.Collections;
 /**
  * Customized health endpoint to aggregate the information about the current deployed
  * applications and connectivity indicators.
+ *
+ * This endpoint uses an asynchronous composite health indicator to improve the performance during
+ * the health check execution.
+ *
  * Created by rsanchez on 17/01/17.
  */
 @Component
-public class CustomHealthEndpoint extends HealthEndpoint {
+public class AsyncCompositeHealthEndpoint extends HealthEndpoint {
 
   private AsyncCompositeHealthIndicator healthIndicator;
 
   @Autowired
-  public CustomHealthEndpoint(IntegrationBridgeHealthAggregator healthAggregator,
+  public AsyncCompositeHealthEndpoint(IntegrationBridgeHealthAggregator healthAggregator,
+      AsyncCompositeHealthIndicator asyncCompositeHealthIndicator,
       ApplicationsHealthIndicator applicationsHealthIndicator,
       ConnectivityHealthIndicator connectivityHealthIndicator) {
     super(healthAggregator, Collections.<String, HealthIndicator>emptyMap());
 
-    this.healthIndicator = new AsyncCompositeHealthIndicator(healthAggregator);
+    this.healthIndicator = asyncCompositeHealthIndicator;
     this.healthIndicator.addHealthIndicator(APPLICATIONS, applicationsHealthIndicator);
     this.healthIndicator.addHealthIndicator(CONNECTIVITY, connectivityHealthIndicator);
   }
@@ -54,4 +59,5 @@ public class CustomHealthEndpoint extends HealthEndpoint {
   public Health invoke() {
     return this.healthIndicator.health();
   }
+
 }

@@ -20,7 +20,6 @@ import static javax.ws.rs.core.Response.Status.Family.REDIRECTION;
 import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 
 import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -34,6 +33,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -56,7 +56,7 @@ import javax.ws.rs.core.Response;
 public abstract class AbstractConnectivityHealthIndicator implements HealthIndicator {
 
   private static final ISymphonyLogger LOG =
-      SymphonyLoggerFactory.getLogger(AbstractConnectivityHealthIndicator.class);
+      IntegrationBridgeCloudLoggerFactory.getLogger(AbstractConnectivityHealthIndicator.class);
 
   /**
    * Cache period (in seconds) for the connectivity status of the Integration Bridge.

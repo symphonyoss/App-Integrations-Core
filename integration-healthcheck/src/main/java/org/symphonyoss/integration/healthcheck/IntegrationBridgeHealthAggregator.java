@@ -80,8 +80,13 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
         (IntegrationBridgeHealthConnectivity) healthConnectivity.getDetails().get(CONNECTIVITY);
     List<IntegrationHealth> appsHealth = getApplicationsHealth(healthApplications);
 
-    return builder.withDetail(VERSION, bridgeVersion).withDetail(CONNECTIVITY, connectivity)
-        .withDetail(APPLICATIONS, appsHealth).build();
+    builder = builder.withDetail(VERSION, bridgeVersion);
+
+    if (connectivity != null) {
+      builder = builder.withDetail(CONNECTIVITY, connectivity);
+    }
+
+    return builder.withDetail(APPLICATIONS, appsHealth).build();
   }
 
   /**

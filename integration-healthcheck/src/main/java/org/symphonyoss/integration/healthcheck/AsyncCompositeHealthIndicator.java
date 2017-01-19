@@ -18,9 +18,11 @@ package org.symphonyoss.integration.healthcheck;
 
 import com.symphony.logging.ISymphonyLogger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
  * asynchronous calls.
  * Created by rsanchez on 16/01/17.
  */
+@Component
 public class AsyncCompositeHealthIndicator implements HealthIndicator {
 
   private static final ISymphonyLogger LOG =
@@ -73,6 +76,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
    */
   private final HealthAggregator healthAggregator;
 
+  @Autowired
   public AsyncCompositeHealthIndicator(HealthAggregator aggregator) {
     this.healthAggregator = aggregator;
     this.indicators = new HashMap<>();
