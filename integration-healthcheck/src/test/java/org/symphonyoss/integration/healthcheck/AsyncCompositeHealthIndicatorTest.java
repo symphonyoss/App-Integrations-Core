@@ -62,13 +62,11 @@ public class AsyncCompositeHealthIndicatorTest {
 
   @Test
   public void testFailIndicator() {
-    RuntimeException exception = new RuntimeException();
-
     Health mock1 = Health.up().build();
-    Health mock2 = Health.down(new ExecutionException(exception)).build();
+    Health mock2 = Health.down().withDetail("error", "Fail to verify the health status").build();
 
     doReturn(mock1).when(healthIndicatorMock1).health();
-    doThrow(exception).when(healthIndicatorMock2).health();
+    doThrow(new RuntimeException()).when(healthIndicatorMock2).health();
 
     healthIndicator.addHealthIndicator(MOCK_INDICATOR_1, healthIndicatorMock1);
     healthIndicator.addHealthIndicator(MOCK_INDICATOR_2, healthIndicatorMock2);

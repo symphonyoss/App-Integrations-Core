@@ -57,14 +57,9 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private static final Integer MAX_POOL_SIZE = 10;
 
   /**
-   * Timeout to verify if the execution was done
+   * Timeout in seconds to verify if the execution was done
    */
-  private static final Long EXECUTION_TIMEOUT = 1000L;
-
-  /**
-   * Number of times to check if the execution was done
-   */
-  private static final Integer SHUTDOWN_CHECK_TIMES = 10;
+  private static final Long EXECUTION_TIMEOUT = 10L;
 
   /**
    * Registered indicators
@@ -142,12 +137,10 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private void shutdownService(ExecutorService service) throws InterruptedException {
     service.shutdown();
 
-    for (int execution = 0; execution < SHUTDOWN_CHECK_TIMES; execution++) {
-      boolean terminated = service.awaitTermination(EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS);
+    service.awaitTermination(EXECUTION_TIMEOUT, TimeUnit.SECONDS);
 
-      if (terminated) {
-        break;
-      }
+    if (!service.isTerminated()) {
+      service.shutdownNow();
     }
   }
 
@@ -176,13 +169,13 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
    */
   private Health getExecutionValue(Future<Health> value) {
     try {
-      if (value.isDone()) {
-        return value.get();
-      } else {
-        return Health.unknown().build();
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      return Health.down().withException(e).build();
+      return value.get();
+    } catch (InterruptedException e) {
+      return Health.down().withDetail(ERROR_KEY, "Thread was interrupted").build();
+    } catch (ExecutionException e) {
+      String message = "Fail to verify the health status";
+      LOG.error(message, e.getCause());
+      return Health.down().withDetail(ERROR_KEY, message).build();
     }
   }
 
