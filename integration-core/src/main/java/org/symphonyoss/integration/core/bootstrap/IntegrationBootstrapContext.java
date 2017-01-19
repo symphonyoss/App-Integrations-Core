@@ -33,7 +33,6 @@ import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
-import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
@@ -41,8 +40,6 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,9 +72,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private ApplicationContext context;
-
-  @Autowired
-  private IntegrationBridgeHealthManager healthCheckManager;
 
   @Autowired
   private IntegrationProperties properties;
@@ -156,8 +150,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
           integration.onCreate(appId);
         } catch (IntegrationRuntimeException e) {
           LOGGER.error(String.format("Fail to bootstrap the Integration %s", appId), e);
-        } finally {
-          this.healthCheckManager.updateIntegrationStatus(appId, integration);
         }
       }
     }
@@ -238,8 +230,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       integrationsToRegister.offer(info);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
-    } finally {
-      this.healthCheckManager.updateIntegrationStatus(integrationUser, integration);
     }
   }
 
@@ -247,7 +237,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   public void shutdown() throws IllegalStateException {
     destroyIntegrations();
 
-    this.healthCheckManager.clearIntegrations();
     this.scheduler.shutdown();
     this.servicePool.shutdown();
   }
@@ -272,9 +261,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
     if (integration != null) {
       this.integrations.remove(id);
-
-      String integrationType = integration.getConfig().getType();
-      this.healthCheckManager.removeIntegration(integrationType);
     }
   }
 

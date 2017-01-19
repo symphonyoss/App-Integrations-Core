@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.connectivity;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Connectivity verifier from Integration Bridge to Key Manager.
- *
- * Created by Milton Quilzini on 11/11/16.
+ * Connectivity indicator from Integration Bridge to POD.
+ * Created by Milton Quilzini on 14/11/16.
  */
 @Component
 @Lazy
-public class KmConnectivityVerifier extends AbstractConnectivityVerifier {
+public class PodConnectivityHealthIndicator extends AbstractConnectivityHealthIndicator {
 
-  public static final String KM_URL_PATH = "/HealthCheck";
+  public static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
+
+  private static final String HEALTH_NAME = "Pod";
 
   @Override
   protected String getHealthCheckUrl() {
-    return properties.getKeyManagerUrl() + KM_URL_PATH;
+    return properties.getSymphonyUrl() + POD_URL_PATH;
   }
+
+  @Override
+  protected String getHealthName() {
+    return HEALTH_NAME;
+  }
+
 }

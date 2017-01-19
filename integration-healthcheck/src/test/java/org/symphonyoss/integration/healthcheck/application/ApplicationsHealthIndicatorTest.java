@@ -14,44 +14,58 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.application;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link AgentConnectivityVerifier}
- * Created by rsanchez on 23/11/16.
+ * Unit test for {@link ApplicationsHealthIndicator}
+ * Created by rsanchez on 16/01/17.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, AgentConnectivityVerifier.class})
-public class AgentConnectivityVerifierTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, TestWebHookIntegration.class,
+    ApplicationsHealthIndicator.class})
+public class ApplicationsHealthIndicatorTest {
 
-  @MockBean
-  private AuthenticationProxy authenticationProxy;
-
-  @Autowired
-  private IntegrationProperties properties;
+  private static final String INTEGRATION_USER = "testUser";
 
   @Autowired
-  private AgentConnectivityVerifier verifier;
+  private TestWebHookIntegration integration;
 
-  @Test
-  public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:8444/agent/v1/HealthCheck",
-        verifier.getHealthCheckUrl());
+  @Autowired
+  private ApplicationsHealthIndicator healthIndicator;
+
+  @Before
+  public void init() {
+    integration.onCreate(INTEGRATION_USER);
   }
 
+  @Test
+  public void testDown() {
+    Health health = healthIndicator.health();
+    assertEquals(Status.DOWN, health.getStatus());
+  }
+
+  @Test
+  public void testUp() {
+    integration.setStatus(new Status(IntegrationStatus.ACTIVE.name()));
+
+    Health health = healthIndicator.health();
+    assertEquals(Status.UP, health.getStatus());
+  }
 }

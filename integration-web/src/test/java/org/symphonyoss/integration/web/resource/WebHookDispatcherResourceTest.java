@@ -74,7 +74,6 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
   @Before
   public void setup() {
-    mockHealthCheckManager();
     this.payload = null;
   }
 
