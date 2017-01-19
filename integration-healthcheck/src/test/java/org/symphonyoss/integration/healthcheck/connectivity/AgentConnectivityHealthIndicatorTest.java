@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.connectivity;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,28 +30,28 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link PodConnectivityVerifier}
+ * Test class to validate {@link AgentConnectivityHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodConnectivityVerifier.class})
-public class PodConnectivityVerifierTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, AgentConnectivityHealthIndicator.class})
+public class AgentConnectivityHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationProperties properties = new IntegrationProperties();
-
-  @Autowired
-  private PodConnectivityVerifier verifier;
+  private AgentConnectivityHealthIndicator indicator;
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/webcontroller/HealthCheck/version",
-        verifier.getHealthCheckUrl());
+    assertEquals("https://nexus.symphony.com:8444/agent/v1/HealthCheck", indicator.getHealthCheckUrl());
   }
 
+  @Test
+  public void testHealthName() {
+    assertEquals("Agent", indicator.getHealthName());
+  }
 }

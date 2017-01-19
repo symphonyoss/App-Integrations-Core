@@ -39,11 +39,6 @@ public class WebHookWelcomeResourceTest extends WebHookResourceTest {
   @InjectMocks
   private WebHookWelcomeResource resource = new WebHookWelcomeResource();
 
-  @Before
-  public void setup() {
-    mockHealthCheckManager();
-  }
-
   /**
    * Test welcome message with valid optional properties
    * @throws Exception

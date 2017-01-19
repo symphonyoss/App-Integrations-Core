@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.verifier;
+package org.symphonyoss.integration.healthcheck.connectivity;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -28,9 +28,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,14 +53,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Test class to validate {@link AbstractConnectivityVerifier}
+ * Test class to validate {@link AbstractConnectivityHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodConnectivityVerifier.class})
-public class AbstractConnectivityVerifierTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, PodConnectivityHealthIndicator.class})
+public class AbstractConnectivityHealthIndicatorTest {
 
   private static final String MOCK_APP_TYPE = "testWebHookIntegration";
 
@@ -69,10 +70,9 @@ public class AbstractConnectivityVerifierTest {
   @SpyBean
   private IntegrationProperties integrationProperties;
 
-  @InjectMocks
   @Autowired
-  @Qualifier("podConnectivityVerifier")
-  private AbstractConnectivityVerifier verifier;
+  @Qualifier("podConnectivityHealthIndicator")
+  private AbstractConnectivityHealthIndicator indicator;
 
   private Client client;
 
@@ -95,12 +95,12 @@ public class AbstractConnectivityVerifierTest {
   @Test
   public void testAvailableIntegrationUserEmpty() {
     given(integrationProperties.getApplications()).willReturn(Collections.<String, Application>emptyMap());
-    assertEquals(StringUtils.EMPTY, verifier.availableIntegrationUser());
+    assertEquals(StringUtils.EMPTY, indicator.availableIntegrationUser());
   }
 
   @Test
   public void testAvailableIntegrationUser() {
-    assertEquals(MOCK_APP_TYPE, verifier.availableIntegrationUser());
+    assertEquals(MOCK_APP_TYPE, indicator.availableIntegrationUser());
   }
 
   @Test
@@ -117,14 +117,41 @@ public class AbstractConnectivityVerifierTest {
         .when(invocationBuilder)
         .get();
 
-    assertEquals(AbstractConnectivityVerifier.ConnectivityStatus.DOWN,
-        verifier.currentConnectivityStatus());
-    assertEquals(AbstractConnectivityVerifier.ConnectivityStatus.DOWN,
-        verifier.currentConnectivityStatus());
-    assertEquals(AbstractConnectivityVerifier.ConnectivityStatus.DOWN,
-        verifier.currentConnectivityStatus());
-    assertEquals(AbstractConnectivityVerifier.ConnectivityStatus.UP,
-        verifier.currentConnectivityStatus());
+    assertEquals(Status.DOWN, indicator.currentConnectivityStatus());
+    assertEquals(Status.DOWN, indicator.currentConnectivityStatus());
+    assertEquals(Status.DOWN, indicator.currentConnectivityStatus());
+    assertEquals(Status.UP, indicator.currentConnectivityStatus());
+  }
+
+  @Test
+  public void testHealthUnknown() {
+    indicator.init();
+
+    doThrow(RuntimeException.class).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
+
+    assertEquals(Health.unknown().build(), indicator.health());
+  }
+
+  @Test
+  public void testHealthDown() {
+    indicator.init();
+
+    Response responseError = Response.serverError().build();
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
+    doReturn(responseError).when(invocationBuilder).get();
+
+    assertEquals(Health.down().build(), indicator.health());
+  }
+
+  @Test
+  public void testHealthUp() {
+    indicator.init();
+
+    Response responseSuccess = Response.ok().build();
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
+    doReturn(responseSuccess).when(invocationBuilder).get();
+
+    assertEquals(Health.up().build(), indicator.health());
   }
 
 }
