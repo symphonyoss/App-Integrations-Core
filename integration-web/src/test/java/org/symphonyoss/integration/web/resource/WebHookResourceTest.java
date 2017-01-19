@@ -109,14 +109,14 @@ public abstract class WebHookResourceTest {
     // mocking httpRequest
     List<String> paramNames = new ArrayList<>();
     paramNames.add(PARAM_NAME);
-    Enumeration paramEnum = Collections.enumeration(paramNames);
+    Enumeration<String> paramEnum = Collections.enumeration(paramNames);
 
     when(request.getParameterNames()).thenReturn(paramEnum);
     when(request.getParameter(PARAM_NAME)).thenReturn(PARAM_VALUE);
 
     List<String> headerNames = new ArrayList<>();
     headerNames.add(HEADER_NAME);
-    Enumeration headerEnum = Collections.enumeration(headerNames);
+    Enumeration<String> headerEnum = Collections.enumeration(headerNames);
 
     when(request.getHeaderNames()).thenReturn(headerEnum);
     when(request.getHeader(HEADER_NAME)).thenReturn(HEADER_VALUE);
