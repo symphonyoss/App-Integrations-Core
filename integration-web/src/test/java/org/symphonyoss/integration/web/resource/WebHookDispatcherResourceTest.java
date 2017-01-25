@@ -39,9 +39,9 @@ import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookPayload;
@@ -74,7 +74,6 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
   @Before
   public void setup() {
-    mockHealthCheckManager();
     this.payload = null;
   }
 
@@ -283,7 +282,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   @Test
   public void testCircuitClosing() {
     // mock to run immediately when a scheduled call is made.
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable) invocation.getArguments()[0]).run();

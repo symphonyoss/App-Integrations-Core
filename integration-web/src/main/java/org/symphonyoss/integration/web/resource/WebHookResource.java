@@ -191,7 +191,7 @@ public abstract class WebHookResource {
       public void run() {
         closeCircuit();
       }
-    }, this.circuitTimeout, TimeUnit.MILLISECONDS);
+    }, circuitTimeout, TimeUnit.MILLISECONDS);
   }
 
   /**

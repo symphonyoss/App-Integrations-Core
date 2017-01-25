@@ -37,7 +37,7 @@ import java.util.Set;
  * Null pattern for integration.
  * Created by rsanchez on 21/11/16.
  */
-public class NullIntegration extends BaseIntegration implements Integration {
+public class NullIntegration extends BaseIntegration {
 
   private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(NullIntegration.class);
 

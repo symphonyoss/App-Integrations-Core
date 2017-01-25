@@ -23,13 +23,10 @@ import com.symphony.api.pod.model.V1Configuration;
 
 import org.mockito.Mock;
 import org.symphonyoss.integration.IntegrationStatus;
-import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.healthcheck.IntegrationBridgeHealthManager;
-import org.symphonyoss.integration.model.healthcheck.IntegrationBridgeHealth;
-import org.symphonyoss.integration.model.healthcheck.IntegrationBridgeHealthConnectivity;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
+import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
 import java.util.ArrayList;
@@ -100,41 +97,6 @@ public abstract class WebHookResourceTest {
   @Mock
   protected ScheduledExecutorService scheduler;
 
-  @Mock
-  private IntegrationBridgeHealthManager healthCheckManager;
-
-  protected void mockHealthCheckManager() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity();
-    connectivity.setKm(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setPod(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setAgent(IntegrationBridgeHealth.StatusEnum.UP.name());
-//    doReturn(connectivity).when(healthCheckManager).getConnectivityStatus();
-  }
-
-  protected void mockHealthCheckManagerKmDown() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity();
-    connectivity.setKm(IntegrationBridgeHealth.StatusEnum.DOWN.name());
-    connectivity.setPod(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setAgent(IntegrationBridgeHealth.StatusEnum.UP.name());
-//    doReturn(connectivity).when(healthCheckManager).getConnectivityStatus();
-  }
-
-  protected void mockHealthCheckManagerPodDown() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity();
-    connectivity.setKm(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setPod(IntegrationBridgeHealth.StatusEnum.DOWN.name());
-    connectivity.setAgent(IntegrationBridgeHealth.StatusEnum.UP.name());
-//    doReturn(connectivity).when(healthCheckManager).getConnectivityStatus();
-  }
-
-  protected void mockHealthCheckManagerAgentDown() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity();
-    connectivity.setKm(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setPod(IntegrationBridgeHealth.StatusEnum.UP.name());
-    connectivity.setAgent(IntegrationBridgeHealth.StatusEnum.DOWN.name());
-//    doReturn(connectivity).when(healthCheckManager).getConnectivityStatus();
-  }
-
   protected void mockStatus(IntegrationStatus status) {
     IntegrationHealth integrationHealth = new IntegrationHealth();
     integrationHealth.setStatus(status.name());
@@ -147,14 +109,14 @@ public abstract class WebHookResourceTest {
     // mocking httpRequest
     List<String> paramNames = new ArrayList<>();
     paramNames.add(PARAM_NAME);
-    Enumeration paramEnum = Collections.enumeration(paramNames);
+    Enumeration<String> paramEnum = Collections.enumeration(paramNames);
 
     when(request.getParameterNames()).thenReturn(paramEnum);
     when(request.getParameter(PARAM_NAME)).thenReturn(PARAM_VALUE);
 
     List<String> headerNames = new ArrayList<>();
     headerNames.add(HEADER_NAME);
-    Enumeration headerEnum = Collections.enumeration(headerNames);
+    Enumeration<String> headerEnum = Collections.enumeration(headerNames);
 
     when(request.getHeaderNames()).thenReturn(headerEnum);
     when(request.getHeader(HEADER_NAME)).thenReturn(HEADER_VALUE);
