@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -72,6 +73,38 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
 
+  private static final String CANNOT_FIND_HOST_FOR_IP = "Cannot lookup hostname for IP address: %s.";
+
+  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION1 = ""
+      + "This may not be an actual problem.\n"
+      + "This Integration Bridge instance is configured to allow webhook requests from specific hosts for this "
+      + "type of integration: %s.\n"
+      + "This warning message indicates that the Integration Bridge cannot convert the indicated IP address to "
+      + "its hostname in order to verify it against the hosts whitelist.\n"
+      + "Check the indicated IP address and verify if it is associated to a hostname indicated in the whitelist of "
+      + "originating hosts for the integration. If that is the case, check the DNS services at the Integration Bridge "
+      + "host machine and verify the reason why the given IP cannot be converted to the its hostname.\n";
+
+  private static final String WEBHOOK_REQUEST_BLOCKED = "Webhook request has been blocked because it is coming "
+      + "from an unauthorized host. Originating host address info: %s.";
+
+  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION1 = ""
+      + "This Integration Bridge instance is configured to allow webhook requests from specific hosts for this "
+      + "type of integration: %s.\n"
+      + "Check if the indicated IP's belong to authorized hosts and, if so, update the IP/host whitelist for the "
+      + "integration (check Integration Bridge deployment instructions for information on how to do that)."
+      + "If the indicated IP does not belong to an authorized host, this warning may indicate that an external system"
+      + "is trying to post spoof messages through the Integration Bridge. If there is a high number "
+      + "of warnings of this type, it is worth analysing the indicated IP's from an IT security standpoint.";
+
+  /**
+   * A regular expression to match commas and commas followed by spaces.
+   * This will allow to split the originating address list into an array of IP's. For instance, the originating IP
+   * addresses is typically something like "12.234.45.56, 13.345.56.67, 13.345.56.67". Splitting that string with
+   * this regular expression will result in an array of the trimmed IP addresses.
+   */
+  private static final String COMMA_FOLLOWED_BY_SPACES = ",\\s*";
+
   private WebApplicationContext springContext;
 
   private IntegrationProperties properties;
@@ -115,20 +148,23 @@ public class WebHookOriginCheckFilter implements Filter {
     String path = request.getRequestURI()
         .replace(request.getContextPath(), StringUtils.EMPTY)
         .replace(URL_PATTERN, StringUtils.EMPTY);
-    String configType = path.substring(0, path.indexOf("/"));
+    String integrationType = path.substring(0, path.indexOf("/"));
 
-    Set<String> whiteList = getWhiteListByApplication(configType);
+    Set<String> whiteList = getWhiteListByApplication(integrationType);
 
     if (whiteList.isEmpty()) {
       filterChain.doFilter(servletRequest, servletResponse);
     } else {
-      String remoteAddress = getRemoteAddress(request);
-      boolean allowedOrigin = verifyOrigin(remoteAddress, whiteList);
+      String remoteAddressInfo = getOriginatingAddressInfo(request);
+      boolean allowedOrigin = verifyOrigin(remoteAddressInfo, whiteList, integrationType);
 
       if (allowedOrigin) {
         filterChain.doFilter(servletRequest, servletResponse);
       } else {
-        writeResponse(response, whiteList, remoteAddress);
+        LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
+            String.format(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
+            String.format(WEBHOOK_REQUEST_BLOCKED_SOLUTION1, integrationType)));
+        writeResponse(response, whiteList, remoteAddressInfo);
       }
     }
   }
@@ -154,40 +190,59 @@ public class WebHookOriginCheckFilter implements Filter {
 
   /**
    * Verify if the origin is allowed to send message through the integration.
-   * @param remoteAddress Origin remote address
-   * @param whiteList Application whitelist
+   * @param remoteAddressInfo Request origin addresses (this may contain one or more IP's separated by comma)
+   * @param whiteList The IP whitelist to match the remoteAddress
+   * @param integrationType The path for the incoming HTTP request
    * @return true if the origin is allowed or false otherwise
    */
-  private boolean verifyOrigin(String remoteAddress, Set<String> whiteList) {
-    if (whiteList.contains(remoteAddress)) {
-      return true;
-    } else {
+  private boolean verifyOrigin(String remoteAddressInfo, Set<String> whiteList, String integrationType) {
+    String[] remoteAddresses = remoteAddressInfo.split(COMMA_FOLLOWED_BY_SPACES);
+    return verifyOriginIPs(remoteAddresses, whiteList) || verifyOriginHosts(remoteAddresses, whiteList, integrationType);
+  }
+
+  private boolean verifyOriginHosts(String[] remoteAddresses, Set<String> whiteList, String integrationType) {
+    for (String ipAddress : remoteAddresses) {
       try {
-        InetAddress address = InetAddress.getByName(remoteAddress);
+        InetAddress address = InetAddress.getByName(ipAddress);
         String hostName = address.getHostName();
         String canonicalHostName = address.getCanonicalHostName();
 
-        return whiteList.contains(hostName) || whiteList.contains(canonicalHostName);
+        if (whiteList.contains(hostName) || whiteList.contains(canonicalHostName)) {
+          return true;
+        }
       } catch (UnknownHostException e) {
-        LOGGER.error("Cannot identify the host origin. IP: " + remoteAddress);
-        return false;
+        LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
+            String.format(CANNOT_FIND_HOST_FOR_IP, ipAddress),
+            String.format(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType),
+            e));
       }
     }
+    return false;
+  }
+
+  private boolean verifyOriginIPs(String[] remoteAddresses, Set<String> whiteList) {
+    for (String ipAddress : remoteAddresses) {
+      if (whiteList.contains(ipAddress)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
-   * Get origin remote address.
-   * @param request Http request
-   * @return Origin remote address.
+   * Gets the originating address information from the request header x-forwarded-for, or from the request remote
+   * address, if x-forwarded-for is not present.
+   * @param request Incoming Http request
+   * @return Originating addresses information: a list of one or more IP's separated by commas.
    */
-  private String getRemoteAddress(HttpServletRequest request) {
+  private String getOriginatingAddressInfo(HttpServletRequest request) {
     String remoteAddress = request.getHeader(FORWARD_HEADER);
 
     if (StringUtils.isEmpty(remoteAddress)) {
       remoteAddress = request.getRemoteAddr();
     }
 
-    return remoteAddress;
+    return remoteAddress != null ? remoteAddress : StringUtils.EMPTY;
   }
 
   /**
