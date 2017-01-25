@@ -92,14 +92,11 @@ public abstract class WebHookResource {
   /**
    * Retrieve the webhook integration based on the configurationId
    * @param configurationId Configuration Identifier
-   * @param configurationType Configuration type
    * @return WebHook integration responsible to handle the request
    * @throws IntegrationUnavailableException Integration wasn't initialized properly
    */
-  protected WebHookIntegration getWebHookIntegration(String configurationId,
-      String configurationType) {
-    WebHookIntegration whiIntegration =
-        checkIntegrationAvailability(configurationId, configurationType);
+  protected WebHookIntegration getWebHookIntegration(String configurationId) {
+    WebHookIntegration whiIntegration = checkIntegrationAvailability(configurationId);
     return whiIntegration;
   }
 
@@ -108,18 +105,16 @@ public abstract class WebHookResource {
    * other problem with the specific integration. Will also validate any internal circuits that may
    * be open.
    * @param configurationId to determine which integration we are processing.
-   * @param configurationType to compose exception messages.
    * @return the {@link WebHookIntegration} object if the process will continue.
    */
-  protected WebHookIntegration checkIntegrationAvailability(String configurationId,
-      String configurationType) {
+  protected WebHookIntegration checkIntegrationAvailability(String configurationId) {
     // check general availability
     checkIntegrationBridgeAvailability();
 
     WebHookIntegration whiIntegration =
         (WebHookIntegration) this.integrationBridge.getIntegrationById(configurationId);
     if (whiIntegration == null) {
-      throw new IntegrationUnavailableException(configurationType);
+      throw new IntegrationUnavailableException(configurationId);
     }
 
     return whiIntegration;

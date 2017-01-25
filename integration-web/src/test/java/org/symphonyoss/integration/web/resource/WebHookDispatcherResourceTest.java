@@ -28,6 +28,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.symphony.api.pod.model.V1Configuration;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -256,8 +258,14 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testConnectivityErrorException() {
     doThrow(mock(ConnectivityException.class)).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
+
     // mocking integration bridge
+    V1Configuration configuration = new V1Configuration();
+    configuration.setType(TEST_USER);
+
     doReturn(whiIntegration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(configuration).when(whiIntegration).getConfig();
+
     // request must exist to reach "handle"
     mockRequest();
 

@@ -126,6 +126,7 @@ public abstract class WebHookResourceTest {
     // mocking configuration
     when(whiConfiguration.getConfigurationId()).thenReturn(CONFIGURATION_ID);
     when(whiConfiguration.getEnabled()).thenReturn(enabled);
+    when(whiConfiguration.getType()).thenReturn(TEST_USER);
 
     // mocking configurationInstance
     when(whiInstance.getConfigurationId()).thenReturn(CONFIGURATION_ID);
@@ -138,5 +139,7 @@ public abstract class WebHookResourceTest {
 
     // mocking integration bridge
     when(integrationBridge.getIntegrationById(CONFIGURATION_ID)).thenReturn(whiIntegration);
+
+    when(whiIntegration.getConfig()).thenReturn(whiConfiguration);
   }
 }
