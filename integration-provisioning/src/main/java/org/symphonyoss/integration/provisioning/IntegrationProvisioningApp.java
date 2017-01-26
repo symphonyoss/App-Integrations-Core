@@ -17,23 +17,20 @@
 package org.symphonyoss.integration.provisioning;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.KEY_STORE;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.KEY_STORE_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.TRUST_STORE_TYPE;
 
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.model.yaml.AdminUser;
+import org.symphonyoss.integration.model.yaml.IntegrationBridge;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.service.AuthenticationService;
 
 /**
@@ -65,10 +62,7 @@ public class IntegrationProvisioningApp {
   private IntegrationProvisioningService service;
 
   @Autowired
-  private Environment environment;
-
-  @Autowired
-  private ApplicationArguments arguments;
+  private IntegrationProperties properties;
 
   /**
    * Entry point for the Provisioning App.
@@ -96,16 +90,8 @@ public class IntegrationProvisioningApp {
    * Application arguments:
    * --spring.config.location: YAML config file path. If not specified the application will try
    * to lookup the file 'application.yml'
-   * --keystorePassword: Admin user password. It's a mandatory parameter.
-   * --signingCertPassword: Signing certificate password. It's a mandatory parameter.
-   * --outputCertPassword: Integration user certificate password. It's a mandatory parameter.
-   *
-   * @param args application arguments.
    */
-  @Autowired
-  public IntegrationProvisioningApp(ApplicationArguments args) {
-    this.arguments = args;
-  }
+  public IntegrationProvisioningApp() {}
 
   /**
    * Executes the Provisioning process.
@@ -125,16 +111,20 @@ public class IntegrationProvisioningApp {
    */
   private boolean authenticate() {
     try {
-      String keyStore = environment.getProperty(KEY_STORE);
-      String keyStorePassword = arguments.getOptionValues(KEY_STORE_PASSWORD).get(0);
+      AdminUser adminUser = properties.getAdminUser();
 
-      String trustStore = environment.getProperty(TRUST_STORE);
+      String keyStore =  adminUser.getKeystoreFile();
+      String keyStorePassword = adminUser.getKeystorePassword();
+
+      IntegrationBridge integrationBridge = properties.getIntegrationBridge();
+
+      String trustStore = integrationBridge.getTruststoreFile();
       String trustStoreType = null;
       String trustStorePassword = null;
 
       if (!StringUtils.isEmpty(trustStore)) {
-        trustStoreType = environment.getProperty(TRUST_STORE_TYPE);
-        trustStorePassword = arguments.getOptionValues(TRUST_STORE_PASSWORD).get(0);
+        trustStoreType = integrationBridge.getTruststoreType();
+        trustStorePassword = integrationBridge.getTruststorePassword();
       }
 
       authService.authenticate(DEFAULT_USER_ID, trustStore, trustStorePassword, trustStoreType,

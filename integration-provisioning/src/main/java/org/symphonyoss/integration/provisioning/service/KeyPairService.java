@@ -16,12 +16,7 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
-    .GENERATE_CERTIFICATE;
-import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
-    .OUTPUT_CERT_PASSWORD;
-import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
-    .SIGNING_CERT_PASSWORD;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.GENERATE_CERTIFICATE;
 
 import com.symphony.logging.ISymphonyLogger;
 import com.symphony.logging.SymphonyLoggerFactory;
@@ -158,8 +153,8 @@ public class KeyPairService {
     Certificate certificateInfo = properties.getSigningCert();
 
     String keyPassword = getTempPassword(application);
-    String password = arguments.getOptionValues(SIGNING_CERT_PASSWORD).get(0);
-    String passOutput = arguments.getOptionValues(OUTPUT_CERT_PASSWORD).get(0);
+    String password = certificateInfo.getCaKeyPassword();
+    String passOutput = application.getKeystore().getPassword();
     String sn = Long.toHexString(System.currentTimeMillis());
 
     String appCertFilename = utils.getCertsDirectory() + application.getId() + ".pem";
