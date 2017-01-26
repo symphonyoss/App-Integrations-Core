@@ -36,6 +36,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -104,6 +105,8 @@ public class WebHookOriginCheckFilter implements Filter {
    * this regular expression will result in an array of the trimmed IP addresses.
    */
   private static final String COMMA_FOLLOWED_BY_SPACES = ",\\s*";
+
+  private static final Pattern COMMA_PATTERN = Pattern.compile(COMMA_FOLLOWED_BY_SPACES);
 
   private WebApplicationContext springContext;
 
@@ -196,7 +199,7 @@ public class WebHookOriginCheckFilter implements Filter {
    * @return true if the origin is allowed or false otherwise
    */
   private boolean verifyOrigin(String remoteAddressInfo, Set<String> whiteList, String integrationType) {
-    String[] remoteAddresses = remoteAddressInfo.split(COMMA_FOLLOWED_BY_SPACES);
+    String[] remoteAddresses = COMMA_PATTERN.split(remoteAddressInfo);
     return verifyOriginIPs(remoteAddresses, whiteList) || verifyOriginHosts(remoteAddresses, whiteList, integrationType);
   }
 
