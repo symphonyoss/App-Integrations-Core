@@ -58,7 +58,7 @@ public class UserService {
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
 
-  private static final String[] BOT_ROLES = {"INDIVIDUAL", "ADMINISTRATOR"};
+  private static final String[] BOT_ROLES = { "INDIVIDUAL" };
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -90,7 +90,7 @@ public class UserService {
     if (user == null) {
       createNewUser(sessionToken, username, name, avatar);
     } else {
-      updateUserAvatar(sessionToken, user.getId(), avatar);
+      updateUser(sessionToken, user, name, avatar);
     }
   }
 
@@ -129,6 +129,25 @@ public class UserService {
     }
   }
 
+  /**
+   * Updates user information
+   * @param sessionToken Token to access the User API.
+   * @param user User object
+   * @param name User display name
+   * @param avatar User avatar (Base64 encoded)
+   */
+  private void updateUser(String sessionToken, UserV2 user, String name, String avatar) {
+    UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
+
+    try {
+      Long userId = user.getId();
+      userApi.v1AdminUserUidUpdatePost(sessionToken, userId, userAttributes);
+      updateUserAvatar(sessionToken, userId, avatar);
+    } catch (ApiException e) {
+      throw new UpdateUserException("Failed to update user avatar", e);
+    }
+  }
+
   private void updateUserAvatar(String sessionToken, Long uid, String avatar) {
     try {
       if (StringUtils.isNotEmpty(avatar)) {
@@ -148,20 +167,30 @@ public class UserService {
    * @return Data to create the user in the backend.
    */
   private UserCreate createUserInformation(String username, String name) {
-    String emailAddress = username + EMAIL_DOMAIN;
-
-    UserAttributes userAttributes = new UserAttributes();
-    userAttributes.setUserName(username);
-    userAttributes.setDisplayName(name);
-    userAttributes.setFirstName(name);
-    userAttributes.setLastName("BOT");
-    userAttributes.setEmailAddress(emailAddress);
-    userAttributes.setAccountType(UserAttributes.AccountTypeEnum.NORMAL);
+    UserAttributes userAttributes = createUserAttributes(username, name);
 
     UserCreate userCreate = new UserCreate();
     userCreate.setUserAttributes(userAttributes);
     userCreate.setRoles(Arrays.asList(BOT_ROLES));
 
     return userCreate;
+  }
+
+  /**
+   * Creates the user attributes
+   * @param username User login
+   * @param name User display name
+   * @return User attributes
+   */
+  private UserAttributes createUserAttributes(String username, String name) {
+    String emailAddress = username + EMAIL_DOMAIN;
+
+    UserAttributes userAttributes = new UserAttributes();
+    userAttributes.setUserName(username);
+    userAttributes.setDisplayName(name);
+    userAttributes.setEmailAddress(emailAddress);
+    userAttributes.setAccountType(UserAttributes.AccountTypeEnum.SYSTEM);
+
+    return userAttributes;
   }
 }
