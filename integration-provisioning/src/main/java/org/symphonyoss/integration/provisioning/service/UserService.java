@@ -130,24 +130,31 @@ public class UserService {
   }
 
   /**
-   * Updates user information
+   * Updates the user information
    * @param sessionToken Token to access the User API.
    * @param user User object
    * @param name User display name
    * @param avatar User avatar (Base64 encoded)
    */
   private void updateUser(String sessionToken, UserV2 user, String name, String avatar) {
-    UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
+    Long userId = user.getId();
 
     try {
-      Long userId = user.getId();
+      UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
       userApi.v1AdminUserUidUpdatePost(sessionToken, userId, userAttributes);
-      updateUserAvatar(sessionToken, userId, avatar);
     } catch (ApiException e) {
-      throw new UpdateUserException("Failed to update user avatar", e);
+      throw new UpdateUserException("Failed to update user attributes", e);
     }
+
+    updateUserAvatar(sessionToken, userId, avatar);
   }
 
+  /**
+   * Updates the user avatar
+   * @param sessionToken Token to access the User API.
+   * @param uid User identifier
+   * @param avatar User avatar (Base64 encoded)
+   */
   private void updateUserAvatar(String sessionToken, Long uid, String avatar) {
     try {
       if (StringUtils.isNotEmpty(avatar)) {
