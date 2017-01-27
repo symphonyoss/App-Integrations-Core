@@ -102,9 +102,8 @@ public class ApplicationService {
         client.updateApp(wrapper, DEFAULT_USER_ID, app.path(APP_ID).asText());
       } else {
         client.createNewApp(wrapper, DEFAULT_USER_ID);
+        updateAppSettings(application);
       }
-
-      updateAppSettings(application);
     } catch (AppRepositoryClientException | MalformedURLException e) {
       throw new ApplicationProvisioningException("Fail to provisioning application. AppId: " +
           application.getId(), e);
