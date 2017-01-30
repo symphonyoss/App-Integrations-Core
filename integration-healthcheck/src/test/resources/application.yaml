@@ -4,6 +4,7 @@
 pod:
   host: nexus.symphony.com
   port: 443
+  min_version: 1.44.0
 
 #
 # Indicate the host and port for the POD's Agent.
@@ -11,6 +12,7 @@ pod:
 agent:
   host: nexus.symphony.com
   port: 8444
+  min_version: 1.45.0-SNAPSHOT
 
 #
 # Indicate the host and port the POD's Session Manager.
@@ -25,7 +27,7 @@ pod_session_manager:
 key_manager:
   host: nexus.symphony.com
   port: 443
-  auth_port: 8444
+  min_version: 1.45.0
 
 applications:
   test:
