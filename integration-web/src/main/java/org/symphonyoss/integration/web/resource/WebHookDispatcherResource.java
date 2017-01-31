@@ -60,7 +60,23 @@ public class WebHookDispatcherResource extends WebHookResource {
   public ResponseEntity<String> handleFormRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
       HttpServletRequest request) {
-    return handleRequest(hash, configurationId, configurationType, null, request);
+    return handleFormRequest(hash, configurationId, request);
+  }
+
+  /**
+   * Handle HTTP POST requests sent from third-party apps to post messages with Content-type
+   * 'application/x-www-form-urlencoded'
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @param request HTTP request
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationId}/{hash}",
+      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, method = RequestMethod.POST,
+      produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> handleFormRequest(@PathVariable String hash,
+      @PathVariable String configurationId, HttpServletRequest request) {
+    return handleRequest(hash, configurationId, null, request);
   }
 
   /**
@@ -77,20 +93,34 @@ public class WebHookDispatcherResource extends WebHookResource {
   public ResponseEntity<String> handleRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
       @RequestBody String body, HttpServletRequest request) {
-    LOGGER.info("Request received for hash {} and configuration {}", hash,
-        configurationType);
+    return handleRequest(hash, configurationId, body, request);
+  }
 
-    WebHookIntegration whiIntegration = getWebHookIntegration(configurationId, configurationType);
+  /**
+   * Handle HTTP POST requests sent from third-party apps to post messages.
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @param request HTTP request
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationId}/{hash}", consumes = MediaType.ALL_VALUE,
+      method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> handleRequest(@PathVariable String hash,
+      @PathVariable String configurationId, @RequestBody String body, HttpServletRequest request) {
+    LOGGER.info("Request received for hash {} and configuration {}", hash, configurationId);
+
+    WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
 
     WebHookPayload payload = retrieveWebHookPayload(request, body);
 
     // handles the request
     try {
+      String configurationType = whiIntegration.getConfig().getType();
       whiIntegration.handle(hash, configurationType, payload);
       return ResponseEntity.ok().body("");
     } catch (WebHookParseException | MessageMLParseException e) {
       LOGGER.fatal(
-          String.format("Couldn't parse the incoming payload for the instance: %s", hash),   e);
+          String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     }
@@ -103,17 +133,28 @@ public class WebHookDispatcherResource extends WebHookResource {
    * @param configurationType Configuration type
    * @return HTTP 200 if success or HTTP error otherwise.
    */
-  @RequestMapping(value = "/{configurationType}/{configurationId}/{hash}",
-      method = RequestMethod.HEAD)
+  @RequestMapping(value = "/{configurationType}/{configurationId}/{hash}", method = RequestMethod.HEAD)
   public ResponseEntity<Void> handleHeadRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType) {
-    LOGGER.info("HEAD Request received for hash {} and configuration {}", hash,
-        configurationType);
+    return handleHeadRequest(hash, configurationId);
+  }
 
-    getWebHookIntegration(configurationId, configurationType);
+  /**
+   * Handle HTTP HEAD requests sent from third-party apps
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationId}/{hash}", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> handleHeadRequest(@PathVariable String hash,
+      @PathVariable String configurationId) {
+    LOGGER.info("HEAD Request received for hash {} and configuration {}", hash, configurationId);
+
+    WebHookIntegration webHookIntegration = getWebHookIntegration(configurationId);
+
+    String configurationType = webHookIntegration.getConfig().getType();
     getConfigurationInstance(hash, configurationId, configurationType);
 
     return ResponseEntity.ok().build();
   }
-
 }

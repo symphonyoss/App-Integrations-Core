@@ -44,7 +44,6 @@ public class WebHookWelcomeResource extends WebHookResource {
    * Handle HTTP POST requests to post the welcome message.
    * @param hash Configuration instance identifier
    * @param configurationId Configuration identifier
-   * @param configurationType Configuration type
    * @param body HTTP payload
    * @return HTTP 200 if success or HTTP error otherwise.
    */
@@ -54,14 +53,30 @@ public class WebHookWelcomeResource extends WebHookResource {
   public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
       @RequestBody String body) {
-    LOGGER.info("Welcome: Request received for hash {} and configuration {}", hash, configurationType);
+    return handleWelcomeRequest(hash, configurationId, body);
+  }
 
-    WebHookIntegration whiIntegration = getWebHookIntegration(configurationId, configurationType);
+  /**
+   * Handle HTTP POST requests to post the welcome message.
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @param body HTTP payload
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationId}/{hash}/welcome",
+      method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
+      @PathVariable String configurationId, @RequestBody String body) {
+    LOGGER.info("Welcome: Request received for hash {} and configuration {}", hash, configurationId);
+
+    WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
+
+    String configurationType = whiIntegration.getConfig().getType();
     ConfigurationInstance configInstance =
         getConfigurationInstance(hash, configurationId, configurationType);
 
     whiIntegration.welcome(configInstance, configurationType, body);
     return ResponseEntity.ok().body("");
   }
-
 }
