@@ -36,6 +36,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -92,6 +93,9 @@ public class WebHookOriginCheckFilterTest {
   @Mock
   private Integration integration;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   @Before
   public void init() throws ServletException {
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
@@ -102,6 +106,7 @@ public class WebHookOriginCheckFilterTest {
     doReturn(servletContext).when(config).getServletContext();
     doReturn(integration).when(springContext).getBean(BEAN_NAME, Integration.class);
     doReturn(properties).when(springContext).getBean(IntegrationProperties.class);
+    doReturn(logMessage).when(springContext).getBean(LogMessageSource.class);
     doReturn(Collections.singleton(REMOTE_ADDRESS)).when(integration).getIntegrationWhiteList();
 
     filter.init(config);

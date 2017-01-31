@@ -35,12 +35,12 @@ public class PodConnectivityException extends ConnectivityException {
     super(MESSAGE);
   }
 
-  public PodConnectivityException(List<String> solutions) {
+  public PodConnectivityException(String... solutions) {
     super(MESSAGE, solutions);
   }
 
-  public PodConnectivityException(List<String> solutions, Throwable cause) {
-    super(MESSAGE, solutions, cause);
+  public PodConnectivityException(Throwable cause, String... solutions) {
+    super(MESSAGE, cause, solutions);
   }
 
   public PodConnectivityException(Throwable cause) {

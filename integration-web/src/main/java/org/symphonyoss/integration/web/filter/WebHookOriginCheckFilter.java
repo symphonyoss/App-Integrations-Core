@@ -206,8 +206,9 @@ public class WebHookOriginCheckFilter implements Filter {
       } catch (UnknownHostException e) {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
-            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType),
-            e));
+            e,
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType)
+        ));
       }
     }
     return false;
