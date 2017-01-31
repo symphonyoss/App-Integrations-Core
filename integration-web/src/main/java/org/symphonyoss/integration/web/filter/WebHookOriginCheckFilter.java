@@ -71,6 +71,8 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String ORIGIN_KEY = "origin";
 
+  private static final String WEBHOOK_FILTER = "Webhook Filter";
+
   private static final String ACCEPTABLE_ORIGINS_KEY = "acceptable_origins";
 
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
@@ -152,7 +154,7 @@ public class WebHookOriginCheckFilter implements Filter {
       if (allowedOrigin) {
         filterChain.doFilter(servletRequest, servletResponse);
       } else {
-        LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
+        LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
             logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION1, integrationType)));
         writeResponse(response, whiteList, remoteAddressInfo);
@@ -202,7 +204,7 @@ public class WebHookOriginCheckFilter implements Filter {
           return true;
         }
       } catch (UnknownHostException e) {
-        LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
+        LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType),
             e));
