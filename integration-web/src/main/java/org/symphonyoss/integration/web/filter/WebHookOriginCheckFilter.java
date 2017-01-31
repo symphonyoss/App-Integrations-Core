@@ -29,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -74,29 +75,13 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
 
-  private static final String CANNOT_FIND_HOST_FOR_IP = "Cannot lookup hostname for IP address: %s.";
+  private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
 
-  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION1 = ""
-      + "This may not be an actual problem.\n"
-      + "This Integration Bridge instance is configured to allow webhook requests from specific hosts for this "
-      + "type of integration: %s.\n"
-      + "This warning message indicates that the Integration Bridge cannot convert the indicated IP address to "
-      + "its hostname in order to verify it against the hosts whitelist.\n"
-      + "Check the indicated IP address and verify if it is associated to a hostname indicated in the whitelist of "
-      + "originating hosts for the integration. If that is the case, check the DNS services at the Integration Bridge "
-      + "host machine and verify the reason why the given IP cannot be converted to the its hostname.\n";
+  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION1 = "integration.web.cannot.find.host.solution1";
 
-  private static final String WEBHOOK_REQUEST_BLOCKED = "Webhook request has been blocked because it is coming "
-      + "from an unauthorized host. Originating host address info: %s.";
+  private static final String WEBHOOK_REQUEST_BLOCKED = "integration.web.request.blocked";
 
-  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION1 = ""
-      + "This Integration Bridge instance is configured to allow webhook requests from specific hosts for this "
-      + "type of integration: %s.\n"
-      + "Check if the indicated IP's belong to authorized hosts and, if so, update the IP/host whitelist for the "
-      + "integration (check Integration Bridge deployment instructions for information on how to do that)."
-      + "If the indicated IP does not belong to an authorized host, this warning may indicate that an external system"
-      + "is trying to post spoof messages through the Integration Bridge. If there is a high number "
-      + "of warnings of this type, it is worth analysing the indicated IP's from an IT security standpoint.";
+  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION1 = "integration.web.request.blocked.solution1";
 
   /**
    * A regular expression to match commas and commas followed by spaces.
@@ -112,6 +97,8 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private IntegrationProperties properties;
 
+  private LogMessageSource logMessage;
+
   /**
    * Initialize the spring components and the whitelist cache.
    * @param config Filter configuration
@@ -122,6 +109,7 @@ public class WebHookOriginCheckFilter implements Filter {
     this.springContext =
         WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
     this.properties = springContext.getBean(IntegrationProperties.class);
+    this.logMessage = springContext.getBean(LogMessageSource.class);
   }
 
   /**
@@ -165,8 +153,8 @@ public class WebHookOriginCheckFilter implements Filter {
         filterChain.doFilter(servletRequest, servletResponse);
       } else {
         LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
-            String.format(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
-            String.format(WEBHOOK_REQUEST_BLOCKED_SOLUTION1, integrationType)));
+            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
+            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION1, integrationType)));
         writeResponse(response, whiteList, remoteAddressInfo);
       }
     }
@@ -215,8 +203,8 @@ public class WebHookOriginCheckFilter implements Filter {
         }
       } catch (UnknownHostException e) {
         LOGGER.warn(ExceptionMessageFormatter.format("Webhook Filter",
-            String.format(CANNOT_FIND_HOST_FOR_IP, ipAddress),
-            String.format(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType),
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType),
             e));
       }
     }
