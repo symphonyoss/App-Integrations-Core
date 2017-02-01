@@ -36,6 +36,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -59,6 +60,16 @@ public class WebHookOriginCheckFilterTest {
   private static final String BEAN_NAME = "jiraWebHookIntegration";
 
   private static final String REMOTE_ADDRESS = "192.30.252.40";
+
+  private static final String REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED = "192.30.252.40, 168.140.252.55";
+
+  private static final String REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED = "10.30.224.40, 192.30.252.40";
+
+  private static final String REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED_NO_SPACE = "192.30.252.40,168.140.252.55";
+
+  private static final String REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED_NO_SPACE = "10.30.224.40,192.30.252.40";
+
+  private static final String REMOTE_ADDRESS_LIST_NO_IP_ALLOWED = "192.30.224.40, 192.140.252.55";
 
   private static final String FORWARD_HEADER = "x-forwarded-for";
 
@@ -86,6 +97,9 @@ public class WebHookOriginCheckFilterTest {
   @Mock
   private Integration integration;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   @Before
   public void init() throws ServletException {
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
@@ -96,6 +110,7 @@ public class WebHookOriginCheckFilterTest {
     doReturn(servletContext).when(config).getServletContext();
     doReturn(integration).when(springContext).getBean(BEAN_NAME, Integration.class);
     doReturn(properties).when(springContext).getBean(IntegrationProperties.class);
+    doReturn(logMessage).when(springContext).getBean(LogMessageSource.class);
     doReturn(Collections.singleton(REMOTE_ADDRESS)).when(integration).getIntegrationWhiteList();
 
     filter.init(config);
@@ -120,6 +135,50 @@ public class WebHookOriginCheckFilterTest {
     doReturn(REMOTE_ADDRESS).when(request).getHeader(FORWARD_HEADER);
     filter.doFilter(request, response, new MockFilterChain());
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedFirstIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedSecondIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedFirstIpAllowedNoSpace() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED_NO_SPACE).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedSecondIpAllowedNoSpace() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED_NO_SPACE).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressNoIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_NO_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyHosAllowed() throws IOException, ServletException {
+    String remoteAddress = request.getRemoteAddr();
+    String host = InetAddress.getByName(remoteAddress).getHostName();
+    doReturn(REMOTE_ADDRESS_LIST_NO_IP_ALLOWED + ", " + remoteAddress).when(request).getHeader(FORWARD_HEADER);
+
+    testRemoteAllowed(host);
   }
 
   @Test

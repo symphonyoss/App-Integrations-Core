@@ -32,13 +32,12 @@ public class IntegrationBridgeUnavailableException extends IntegrationRuntimeExc
     super(COMPONENT, message);
   }
 
-  public IntegrationBridgeUnavailableException(String message, List<String> solutions) {
+  public IntegrationBridgeUnavailableException(String message, String... solutions) {
     super(COMPONENT, message, solutions);
   }
 
-  public IntegrationBridgeUnavailableException(String message, List<String> solutions,
-      Throwable cause) {
-    super(COMPONENT, message, solutions, cause);
+  public IntegrationBridgeUnavailableException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
 
   public IntegrationBridgeUnavailableException(String message, Throwable cause) {
