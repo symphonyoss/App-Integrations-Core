@@ -79,11 +79,11 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
 
-  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION1 = "integration.web.cannot.find.host.solution1";
+  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION = "integration.web.cannot.find.host.solution";
 
   private static final String WEBHOOK_REQUEST_BLOCKED = "integration.web.request.blocked";
 
-  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION1 = "integration.web.request.blocked.solution1";
+  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION = "integration.web.request.blocked.solution";
 
   /**
    * A regular expression to match commas and commas followed by spaces.
@@ -156,7 +156,7 @@ public class WebHookOriginCheckFilter implements Filter {
       } else {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
-            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION1, integrationType)));
+            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION, integrationType)));
         writeResponse(response, whiteList, remoteAddressInfo);
       }
     }
@@ -207,7 +207,7 @@ public class WebHookOriginCheckFilter implements Filter {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
             e,
-            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION1, integrationType)
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION, integrationType)
         ));
       }
     }

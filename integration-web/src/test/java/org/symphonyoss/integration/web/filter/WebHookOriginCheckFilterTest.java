@@ -65,6 +65,10 @@ public class WebHookOriginCheckFilterTest {
 
   private static final String REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED = "10.30.224.40, 192.30.252.40";
 
+  private static final String REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED_NO_SPACE = "192.30.252.40,168.140.252.55";
+
+  private static final String REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED_NO_SPACE = "10.30.224.40,192.30.252.40";
+
   private static final String REMOTE_ADDRESS_LIST_NO_IP_ALLOWED = "192.30.224.40, 192.140.252.55";
 
   private static final String FORWARD_HEADER = "x-forwarded-for";
@@ -143,6 +147,20 @@ public class WebHookOriginCheckFilterTest {
   @Test
   public void testProxyRemoteAddressAllowedSecondIpAllowed() throws IOException, ServletException {
     doReturn(REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedFirstIpAllowedNoSpace() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED_NO_SPACE).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedSecondIpAllowedNoSpace() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED_NO_SPACE).when(request).getHeader(FORWARD_HEADER);
     filter.doFilter(request, response, new MockFilterChain());
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
   }
