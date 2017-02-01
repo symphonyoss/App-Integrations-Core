@@ -26,6 +26,7 @@ import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
+import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
@@ -46,11 +47,12 @@ public class NullIntegration extends BaseIntegration {
     this.properties = properties;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
+    this.healthManager = new IntegrationHealthManager();
   }
 
   @Override
   public void onCreate(String integrationUser) {
-    healthManager.setName(integrationUser);
+    setupHealthManager(integrationUser);
 
     healthManager.parserInstalled(NOK);
 
