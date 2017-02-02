@@ -60,6 +60,12 @@ public class WebHookOriginCheckFilterTest {
 
   private static final String REMOTE_ADDRESS = "192.30.252.40";
 
+  private static final String REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED = "192.30.252.40, 168.140.252.55";
+
+  private static final String REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED = "10.30.224.40, 192.30.252.40";
+
+  private static final String REMOTE_ADDRESS_LIST_NO_IP_ALLOWED = "192.30.224.40, 192.140.252.55";
+
   private static final String FORWARD_HEADER = "x-forwarded-for";
 
   @InjectMocks
@@ -120,6 +126,36 @@ public class WebHookOriginCheckFilterTest {
     doReturn(REMOTE_ADDRESS).when(request).getHeader(FORWARD_HEADER);
     filter.doFilter(request, response, new MockFilterChain());
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedFirstIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressAllowedSecondIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_SECOND_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyRemoteAddressNoIpAllowed() throws IOException, ServletException {
+    doReturn(REMOTE_ADDRESS_LIST_NO_IP_ALLOWED).when(request).getHeader(FORWARD_HEADER);
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testProxyHosAllowed() throws IOException, ServletException {
+    String remoteAddress = request.getRemoteAddr();
+    String host = InetAddress.getByName(remoteAddress).getHostName();
+    doReturn(REMOTE_ADDRESS_LIST_NO_IP_ALLOWED + ", " + remoteAddress).when(request).getHeader(FORWARD_HEADER);
+
+    testRemoteAllowed(host);
   }
 
   @Test
