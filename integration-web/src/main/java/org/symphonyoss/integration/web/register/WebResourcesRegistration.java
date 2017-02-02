@@ -22,6 +22,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.symphonyoss.integration.web.filter.IntegrationMetricsFilter;
 import org.symphonyoss.integration.web.filter.WebHookOriginCheckFilter;
 import org.symphonyoss.integration.web.filter.WebHookTracingFilter;
@@ -46,7 +49,9 @@ public class WebResourcesRegistration {
   private static final Integer API_LOAD_ON_STARTUP = 2;
 
   private static final String METRICS_PATH = "/metrics/";
-  
+
+  private static final String CORS_MAPPING = "/apps/**";
+
   /**
    * Register webhook check origin filter.
    * @return Filter registration object
@@ -104,6 +109,19 @@ public class WebResourcesRegistration {
     servletRegistrationBean.setLoadOnStartup(API_LOAD_ON_STARTUP);
 
     return servletRegistrationBean;
+  }
+
+  /**
+   * Configure CORS for the web resources accessed from other domains
+   */
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurerAdapter() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping(CORS_MAPPING);
+      }
+    };
   }
 
   private String baseUrlMapping() {
