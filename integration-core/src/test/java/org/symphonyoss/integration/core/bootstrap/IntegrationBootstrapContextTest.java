@@ -48,6 +48,7 @@ import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.service.ConfigurationService;
 
@@ -137,6 +138,7 @@ public class IntegrationBootstrapContextTest {
 
     Application application = new Application();
     application.setComponent(WEBHOOKINTEGRATION_TYPE_JIRA);
+    application.setState(ApplicationState.PROVISIONED);
 
     properties.setApplications(Collections.singletonMap(WEBHOOKINTEGRATION_ID_JIRA, application));
   }
@@ -186,6 +188,33 @@ public class IntegrationBootstrapContextTest {
         .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
 
     doReturn(null).when(properties).getApplication(WEBHOOKINTEGRATION_TYPE_JIRA);
+
+    this.integrationBootstrapContext.initIntegrations();
+
+    Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
+    assertNull(integration);
+  }
+
+  /**
+   * Tests if {@link IntegrationBootstrapContext} is behaving correctly when the component isn't
+   * provisioned.
+   * It should not throw any exceptions, and should not store any Integrations.
+   */
+  @Test
+  public void testStartupBootstrappingOneIntegrationRemoved() {
+    Answer<ScheduledFuture<?>> answer = new Answer<ScheduledFuture<?>>() {
+      @Override
+      public ScheduledFuture<?> answer(InvocationOnMock invocation) throws Throwable {
+        ((Runnable) invocation.getArguments()[0]).run();
+        return null;
+      }
+    };
+
+    doAnswer(answer).when(scheduler)
+        .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+
+    Application application = properties.getApplication(WEBHOOKINTEGRATION_TYPE_JIRA);
+    application.setState(ApplicationState.REMOVED);
 
     this.integrationBootstrapContext.initIntegrations();
 
