@@ -25,6 +25,12 @@ import com.symphony.api.pod.client.ApiException;
 import com.symphony.api.pod.model.PodAppEntitlement;
 import com.symphony.api.pod.model.PodAppEntitlementList;
 import com.symphony.api.pod.model.UserV2;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -34,12 +40,6 @@ import org.symphonyoss.integration.provisioning.client.AppStoreBuilder;
 import org.symphonyoss.integration.provisioning.client.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 
@@ -53,8 +53,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class ApplicationService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(ApplicationService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
 
   @Autowired
   private UserService userService;

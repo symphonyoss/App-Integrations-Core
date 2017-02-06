@@ -16,14 +16,13 @@
 
 package org.symphonyoss.integration.healthcheck;
 
-import com.symphony.logging.ISymphonyLogger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -43,8 +42,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AsyncCompositeHealthIndicator implements HealthIndicator {
 
-  private static final ISymphonyLogger LOG =
-      IntegrationBridgeCloudLoggerFactory.getLogger(AsyncCompositeHealthIndicator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AsyncCompositeHealthIndicator.class);
 
   /**
    * Details for error message

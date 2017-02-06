@@ -24,24 +24,23 @@ import com.symphony.api.pod.api.UsersApi;
 import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.Stream;
 import com.symphony.api.pod.model.UserV2;
-import com.symphony.api.pod.model.V2RoomDetail;
-import com.symphony.logging.ISymphonyLogger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.service.ConfigurationService;
-import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
-import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.exception.ExceptionHandler;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.service.StreamService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -58,8 +57,7 @@ import javax.ws.rs.core.Response.Status;
 @Component
 public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
 
   /**
    * We use this message when we want to notify an instance owner that one of his instances has an unreachable room
@@ -146,7 +144,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       removeStreamFromInstance(instance, integrationUser, stream);
       notifyInstanceOwner(instance, integrationUser, roomName);
     } catch (IntegrationRuntimeException | IOException e) {
-      LOGGER.fatal("Fail to update streams", e);
+      LOGGER.error("Fail to update streams", e);
     }
   }
 
@@ -187,7 +185,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       // Posting message through the IM
       postIM(integrationUser, roomName, im.getId(), instance.getName());
     } catch (ApiException | com.symphony.api.pod.client.ApiException | IOException e) {
-      LOGGER.fatal("Fail to notify owner", e);
+      LOGGER.error("Fail to notify owner", e);
     }
   }
 

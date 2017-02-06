@@ -21,16 +21,16 @@ import com.symphony.api.agent.model.V2Message;
 import com.symphony.api.agent.model.V2MessageList;
 import com.symphony.api.agent.model.V2MessageSubmission;
 import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.logging.ISymphonyLogger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
@@ -44,8 +44,7 @@ import javax.ws.rs.ProcessingException;
 @Component
 public class IntegrationBridgeImpl implements IntegrationBridge {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(IntegrationBridgeImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBridgeImpl.class);
 
   @Autowired
   private IntegrationBootstrapContext bootstrap;

@@ -18,12 +18,11 @@ package org.symphonyoss.integration.web.filter;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -60,8 +59,7 @@ import javax.ws.rs.core.Response;
  */
 public class WebHookOriginCheckFilter implements Filter {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(WebHookOriginCheckFilter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebHookOriginCheckFilter.class);
 
   public static final String URL_PATTERN = "/integration/v1/whi/";
 
