@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
+import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -55,21 +57,100 @@ public class NullIntegrationTest extends MockKeystore {
 
   private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 
+  private static final String UNKNOWN_KEYSTORE_FILE = "test.p12";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
-
-  @Spy
-  private IntegrationProperties properties = new IntegrationProperties();
 
   @Mock
   private IntegrationUtils utils;
 
-  @InjectMocks
-  private NullIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
+  @Mock
+  private ApplicationsHealthIndicator healthIndicator;
+
+  private Application application = new Application();
+
+  @Before
+  public void init() {
+    application.setId(APP_ID);
+    application.setComponent(APP_TYPE);
+  }
 
   @Test
-  public void testFailed() {
+  public void testCertificateDirectoryNotFound() {
     doThrow(CertificateNotFoundException.class).when(utils).getCertsDirectory();
+
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+
+    integration.onCreate(APP_TYPE);
+
+    IntegrationHealth health = integration.getHealthManager().getHealth();
+    IntegrationFlags flags = health.getFlags();
+
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+  }
+
+  @Test
+  public void testApplicationWithoutKeystore()
+      throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    String dir = mockKeyStore();
+    doReturn(dir).when(utils).getCertsDirectory();
+
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+
+    integration.onCreate(APP_TYPE);
+
+    IntegrationHealth health = integration.getHealthManager().getHealth();
+    IntegrationFlags flags = health.getFlags();
+
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+  }
+
+  @Test
+  public void testApplicationKeystoreWithoutPassword()
+      throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    String dir = mockKeyStore();
+    doReturn(dir).when(utils).getCertsDirectory();
+
+    Keystore keystore = new Keystore();
+    application.setKeystore(keystore);
+
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+
+    integration.onCreate(APP_TYPE);
+
+    IntegrationHealth health = integration.getHealthManager().getHealth();
+    IntegrationFlags flags = health.getFlags();
+
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+  }
+
+  @Test
+  public void testFailed()
+      throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    Keystore keystore = new Keystore();
+    keystore.setFile(UNKNOWN_KEYSTORE_FILE);
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+
+    application.setKeystore(keystore);
+
+    String dir = mockKeyStore();
+    doReturn(dir).when(utils).getCertsDirectory();
+
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
 
     integration.onCreate(APP_TYPE);
 
@@ -88,14 +169,13 @@ public class NullIntegrationTest extends MockKeystore {
     Keystore keystore = new Keystore();
     keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
 
-    Application application = new Application();
-    application.setComponent(APP_TYPE);
     application.setKeystore(keystore);
-
-    properties.setApplications(Collections.singletonMap(APP_ID, application));
 
     String dir = mockKeyStore();
     doReturn(dir).when(utils).getCertsDirectory();
+
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
 
     integration.onCreate(APP_TYPE);
 
