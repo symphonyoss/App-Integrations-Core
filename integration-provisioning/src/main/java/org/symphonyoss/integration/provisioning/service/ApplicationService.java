@@ -112,28 +112,38 @@ public class ApplicationService {
   /**
    * Update application settings on Symphony store.
    * @param application Application object
+   * @return true if the application was updated or false otherwise.
    */
-  public void updateAppSettings(Application application) {
-    LOGGER.info("Updating application settings: {}", application.getComponent());
+  public boolean updateAppSettings(Application application) {
+    String appType = application.getComponent();
+    LOGGER.info("Updating application settings: {}", appType);
 
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     try {
-      PodAppEntitlementList appEntitlementList = new PodAppEntitlementList();
+      JsonNode app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
 
-      PodAppEntitlement appEntitlement = new PodAppEntitlement();
-      appEntitlement.setAppId(application.getComponent());
-      appEntitlement.setAppName(application.getName());
-      appEntitlement.setEnable(application.isEnabled());
-      appEntitlement.setListed(application.isVisible());
-      appEntitlement.setInstall(Boolean.FALSE);
+      if (app != null) {
+        PodAppEntitlementList appEntitlementList = new PodAppEntitlementList();
 
-      appEntitlementList.add(appEntitlement);
+        PodAppEntitlement appEntitlement = new PodAppEntitlement();
+        appEntitlement.setAppId(appType);
+        appEntitlement.setAppName(application.getName());
+        appEntitlement.setEnable(application.isEnabled());
+        appEntitlement.setListed(application.isVisible());
+        appEntitlement.setInstall(Boolean.FALSE);
 
-      appEntitlementApi.v1AdminAppEntitlementListPost(sessionToken, appEntitlementList);
-    } catch (ApiException e) {
+        appEntitlementList.add(appEntitlement);
+
+        appEntitlementApi.v1AdminAppEntitlementListPost(sessionToken, appEntitlementList);
+
+        return true;
+      } else {
+        return false;
+      }
+    } catch (AppRepositoryClientException | ApiException e) {
       throw new ApplicationProvisioningException("Fail to update application settings. AppId: " +
-          application.getComponent(), e);
+          appType, e);
     }
   }
 }

@@ -178,9 +178,16 @@ public class IntegrationProvisioningService {
     application.setEnabled(Boolean.FALSE);
     application.setVisible(Boolean.FALSE);
 
-    applicationService.updateAppSettings(application);
+    boolean updated = applicationService.updateAppSettings(application);
 
-    LOGGER.info("Application {} disabled\n", application.getId());
+    if (updated) {
+      application.setState(ApplicationState.REMOVED);
+      LOGGER.info("Application {} disabled\n", application.getId());
+    } else {
+      application.setState(ApplicationState.SKIPPED);
+      LOGGER.info("Application {} skipped, as it is already not provisioned on the backend.\n",
+          application.getId());
+    }
   }
 
   /**

@@ -17,18 +17,24 @@
 package org.symphonyoss.integration.core;
 
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
+import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
 import com.symphony.api.pod.model.V1Configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
+import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
+import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.security.KeyStore;
 import java.util.Collections;
 import java.util.Set;
 
@@ -40,9 +46,14 @@ public class NullIntegration extends BaseIntegration {
 
   private static final Logger LOG = LoggerFactory.getLogger(NullIntegration.class);
 
-  public NullIntegration(IntegrationProperties properties, IntegrationUtils utils,
-      AuthenticationProxy authenticationProxy) {
-    this.properties = properties;
+  private final ApplicationsHealthIndicator healthIndicator;
+
+  private final Application application;
+
+  public NullIntegration(ApplicationsHealthIndicator healthIndicator, Application application,
+      IntegrationUtils utils, AuthenticationProxy authenticationProxy) {
+    this.healthIndicator = healthIndicator;
+    this.application = application;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
   }
@@ -60,7 +71,23 @@ public class NullIntegration extends BaseIntegration {
       healthManager.certificateInstalled(NOK);
     }
 
-    healthManager.configuratorInstalled(NOK);
+    healthIndicator.addHealthIndicator(application.getId(), new IntegrationHealthIndicatorAdapter(this));
+  }
+
+  @Override
+  public void registerUser(String integrationUser) {
+    String certsDir = utils.getCertsDirectory();
+
+    if ((application.getKeystore() == null) || (StringUtils.isEmpty(application.getKeystore().getPassword()))) {
+      String appId = application != null ? application.getId() : integrationUser;
+      throw new LoadKeyStoreException(
+          "Fail to retrieve the keystore password. Application: " + appId);
+    }
+
+    KeyStore keyStore = loadKeyStore(certsDir, application);
+
+    healthManager.certificateInstalled(OK);
+    authenticationProxy.registerUser(integrationUser, keyStore, application.getKeystore().getPassword());
   }
 
   @Override
