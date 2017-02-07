@@ -5,12 +5,21 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.symphonyoss</groupId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>integration-web</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <github.version>0.7.0</github.version>
+        <jira.version>0.7.0</jira.version>
+        <salesforce.version>0.7.0</salesforce.version>
+        <trello.version>0.7.0</trello.version>
+        <universal.version>0.7.0</universal.version>
+        <zapier.version>0.7.0</zapier.version>
+    </properties>
 
     <build>
         <finalName>integration</finalName>
@@ -33,38 +42,43 @@
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-jira</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-universal-whi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-trello</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-salesforce</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-github</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-zapier</artifactId>
+            <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.symphonyoss</groupId>
             <artifactId>integration-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-jira</artifactId>
+            <version>${jira.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-universal-whi</artifactId>
+            <version>${universal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-trello</artifactId>
+            <version>${trello.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-salesforce</artifactId>
+            <version>${salesforce.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-github</artifactId>
+            <version>${github.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-zapier</artifactId>
+            <version>${zapier.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
