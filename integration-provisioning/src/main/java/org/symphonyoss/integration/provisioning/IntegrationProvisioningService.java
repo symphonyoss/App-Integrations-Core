@@ -186,6 +186,8 @@ public class IntegrationProvisioningService {
       LOGGER.info("Application {} disabled\n", application.getId());
     } else {
       application.setState(ApplicationState.SKIPPED);
+      LOGGER.info("Application {} skipped, as it is already not provisioned on the backend.\n",
+          application.getId());
     }
   }
 
