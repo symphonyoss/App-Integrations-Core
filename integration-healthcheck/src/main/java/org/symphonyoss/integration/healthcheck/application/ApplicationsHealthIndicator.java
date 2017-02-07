@@ -22,6 +22,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.util.Map;
@@ -55,7 +56,7 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
       String component = app.getComponent();
       Integration integration = integrations.get(component);
 
-      if (integration != null) {
+      if ((integration != null) && (ApplicationState.PROVISIONED.equals(app.getState()))) {
         addHealthIndicator(component, new IntegrationHealthIndicatorAdapter(integration));
       }
     }
