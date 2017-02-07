@@ -73,9 +73,9 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String WEBHOOK_FILTER = "Webhook Filter";
 
-  private static final String ACCEPTABLE_ORIGINS_KEY = "acceptable_origins";
-
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
+
+  private static final String WELCOME_PATH = "welcome";
 
   private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
 
@@ -141,8 +141,15 @@ public class WebHookOriginCheckFilter implements Filter {
     String path = request.getRequestURI()
         .replace(request.getContextPath(), StringUtils.EMPTY)
         .replace(URL_PATTERN, StringUtils.EMPTY);
-    String integrationType = path.substring(0, path.indexOf("/"));
 
+    boolean checkOrigin = shouldCheckOrigin(path);
+
+    if (!checkOrigin) {
+      filterChain.doFilter(servletRequest, servletResponse);
+      return;
+    }
+
+    String integrationType = path.substring(0, path.indexOf("/"));
     Set<String> whiteList = getWhiteListByApplication(integrationType);
 
     if (whiteList.isEmpty()) {
@@ -157,9 +164,35 @@ public class WebHookOriginCheckFilter implements Filter {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
             logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
             logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION, integrationType)));
-        writeResponse(response, whiteList, remoteAddressInfo);
+        writeResponse(response, remoteAddressInfo);
       }
     }
+  }
+
+  /**
+   * Validates if the filter should check the request origin.
+   * @param path Request path
+   * @return true if the request origin should be checked or false otherwise.
+   */
+  private boolean shouldCheckOrigin(String path) {
+    if (path.endsWith("/")) {
+      path = path.substring(0, path.length() - 1);
+    }
+
+    if (isWelcomeResource(path)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Validates if the request path is a welcome resource path.
+   * @param path Request path
+   * @return true if the request path is a welcome resource path or false otherwise.
+   */
+  private boolean isWelcomeResource(String path) {
+    return path.endsWith(WELCOME_PATH);
   }
 
   /**
@@ -242,19 +275,16 @@ public class WebHookOriginCheckFilter implements Filter {
   /**
    * Write the http error response.
    * @param response Http response
-   * @param whiteList Integration whitelist
    * @param remoteAddress Origin remote address
    * @throws IOException Report failure to write the http error response.
    */
-  private void writeResponse(HttpServletResponse response, Set<String> whiteList,
-      String remoteAddress) throws IOException {
+  private void writeResponse(HttpServletResponse response, String remoteAddress) throws IOException {
     response.setContentType(APPLICATION_JSON);
     response.setStatus(Response.Status.FORBIDDEN.getStatusCode());
 
     ObjectNode message = JsonNodeFactory.instance.objectNode();
     message.put(INFO_KEY, FORBIDDEN_MESSAGE);
     message.put(ORIGIN_KEY, remoteAddress);
-    message.put(ACCEPTABLE_ORIGINS_KEY, whiteList.toString());
 
     response.getWriter().write(message.toString());
   }

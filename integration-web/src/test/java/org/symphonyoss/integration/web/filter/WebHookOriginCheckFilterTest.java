@@ -73,6 +73,10 @@ public class WebHookOriginCheckFilterTest {
 
   private static final String FORWARD_HEADER = "x-forwarded-for";
 
+  private static final String WEBHOOK_URL = "/integration/v1/whi/jiraWebHookIntegration/11111/22222";
+
+  private static final String WELCOME_URL = WEBHOOK_URL + "/welcome/";
+
   @InjectMocks
   private WebHookOriginCheckFilter filter = new WebHookOriginCheckFilter();
 
@@ -105,7 +109,7 @@ public class WebHookOriginCheckFilterTest {
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
         springContext);
 
-    doReturn("/integration/v1/whi/jiraWebHookIntegration/11111/22222").when(request).getRequestURI();
+    doReturn(WEBHOOK_URL).when(request).getRequestURI();
     doReturn(StringUtils.EMPTY).when(request).getContextPath();
     doReturn(servletContext).when(config).getServletContext();
     doReturn(integration).when(springContext).getBean(BEAN_NAME, Integration.class);
@@ -209,4 +213,13 @@ public class WebHookOriginCheckFilterTest {
     filter.doFilter(request, response, new MockFilterChain());
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
   }
+
+  @Test
+  public void testWelcomeUrl() throws IOException, ServletException {
+    doReturn(WELCOME_URL).when(request).getRequestURI();
+
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
 }
