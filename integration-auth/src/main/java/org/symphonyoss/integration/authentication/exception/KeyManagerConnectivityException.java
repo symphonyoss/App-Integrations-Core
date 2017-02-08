@@ -35,12 +35,12 @@ public class KeyManagerConnectivityException extends ConnectivityException {
     super(MESSAGE);
   }
 
-  public KeyManagerConnectivityException(List<String> solutions) {
+  public KeyManagerConnectivityException(String... solutions) {
     super(MESSAGE, solutions);
   }
 
-  public KeyManagerConnectivityException(List<String> solutions, Throwable cause) {
-    super(MESSAGE, solutions, cause);
+  public KeyManagerConnectivityException(Throwable cause, String... solutions) {
+    super(MESSAGE, cause, solutions);
   }
 
   public KeyManagerConnectivityException(Throwable cause) {

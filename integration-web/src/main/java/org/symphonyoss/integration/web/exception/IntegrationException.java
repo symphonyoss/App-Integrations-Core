@@ -31,7 +31,7 @@ abstract class IntegrationException extends IntegrationRuntimeException {
 
   private static final String COMPONENT = "Webhook Dispatcher";
 
-  public IntegrationException(String configurationType, List<String> solutions) {
+  public IntegrationException(String configurationType, String... solutions) {
     super(COMPONENT, String.format("Webhook %s disabled!", configurationType), solutions);
   }
 

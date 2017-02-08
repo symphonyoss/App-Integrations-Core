@@ -33,10 +33,12 @@ import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
+import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
@@ -94,6 +96,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   @Autowired
   private IntegrationMetricsController metricsController;
 
+  @Autowired
+  private ApplicationsHealthIndicator applicationsHealthIndicator;
+
   @Override
   public void startup() {
     DistributedTracingUtils.setMDC();
@@ -141,10 +146,16 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private void initUnknownApps() {
     Map<String, Application> applications = properties.getApplications();
     for (Map.Entry<String, Application> entry : applications.entrySet()) {
-      if (StringUtils.isEmpty(entry.getValue().getComponent())) {
-        String appId = entry.getKey();
+      Application application = entry.getValue();
 
-        NullIntegration integration = new NullIntegration(properties, utils, authenticationProxy);
+      if ((StringUtils.isEmpty(application.getComponent())) && (ApplicationState.PROVISIONED.equals(
+          application.getState()))) {
+        String appId = entry.getKey();
+        application.setId(appId);
+
+        NullIntegration integration =
+            new NullIntegration(applicationsHealthIndicator, application, utils,
+                authenticationProxy);
 
         try {
           integration.onCreate(appId);
@@ -185,9 +196,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         if (info != null) {
           Application application = properties.getApplication(info.getConfigurationType());
 
-          if (application == null) {
-            LOGGER.warn("Integration {} not configured in the YAML config file", info.getConfigurationType());
-          } else {
+          if ((application != null) && (ApplicationState.PROVISIONED.equals(application.getState()))) {
             submitPoolTask(info);
           }
         }

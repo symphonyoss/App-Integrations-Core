@@ -95,7 +95,8 @@ public class WebResourcesRegistration {
    */
   @Bean
   public ServletRegistrationBean apiServletRegistration(WebApplicationContext context) {
-    DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
+    DispatcherServlet dispatcherServlet = new DispatcherServlet();
+    dispatcherServlet.setApplicationContext(context);
 
     ServletRegistrationBean servletRegistrationBean =
         new ServletRegistrationBean(dispatcherServlet, baseUrlMapping());

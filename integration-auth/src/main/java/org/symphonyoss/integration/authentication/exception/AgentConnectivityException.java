@@ -35,12 +35,12 @@ public class AgentConnectivityException extends ConnectivityException {
     super(MESSAGE);
   }
 
-  public AgentConnectivityException(List<String> solutions) {
+  public AgentConnectivityException(String... solutions) {
     super(MESSAGE, solutions);
   }
 
-  public AgentConnectivityException(List<String> solutions, Throwable cause) {
-    super(MESSAGE, solutions, cause);
+  public AgentConnectivityException(Throwable cause, String... solutions) {
+    super(MESSAGE, cause, solutions);
   }
 
   public AgentConnectivityException(Throwable cause) {

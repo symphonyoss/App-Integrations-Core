@@ -28,6 +28,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -35,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -68,13 +71,35 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String ORIGIN_KEY = "origin";
 
-  private static final String ACCEPTABLE_ORIGINS_KEY = "acceptable_origins";
+  private static final String WEBHOOK_FILTER = "Webhook Filter";
 
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
+
+  private static final String WELCOME_PATH = "welcome";
+
+  private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
+
+  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION = "integration.web.cannot.find.host.solution";
+
+  private static final String WEBHOOK_REQUEST_BLOCKED = "integration.web.request.blocked";
+
+  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION = "integration.web.request.blocked.solution";
+
+  /**
+   * A regular expression to match commas and commas followed by spaces.
+   * This will allow to split the originating address list into an array of IP's. For instance, the originating IP
+   * addresses is typically something like "12.234.45.56, 13.345.56.67, 13.345.56.67". Splitting that string with
+   * this regular expression will result in an array of the trimmed IP addresses.
+   */
+  private static final String COMMA_FOLLOWED_BY_SPACES = ",\\s*";
+
+  private static final Pattern COMMA_PATTERN = Pattern.compile(COMMA_FOLLOWED_BY_SPACES);
 
   private WebApplicationContext springContext;
 
   private IntegrationProperties properties;
+
+  private LogMessageSource logMessage;
 
   /**
    * Initialize the spring components and the whitelist cache.
@@ -86,6 +111,7 @@ public class WebHookOriginCheckFilter implements Filter {
     this.springContext =
         WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
     this.properties = springContext.getBean(IntegrationProperties.class);
+    this.logMessage = springContext.getBean(LogMessageSource.class);
   }
 
   /**
@@ -115,22 +141,58 @@ public class WebHookOriginCheckFilter implements Filter {
     String path = request.getRequestURI()
         .replace(request.getContextPath(), StringUtils.EMPTY)
         .replace(URL_PATTERN, StringUtils.EMPTY);
-    String configType = path.substring(0, path.indexOf("/"));
 
-    Set<String> whiteList = getWhiteListByApplication(configType);
+    boolean checkOrigin = shouldCheckOrigin(path);
+
+    if (!checkOrigin) {
+      filterChain.doFilter(servletRequest, servletResponse);
+      return;
+    }
+
+    String integrationType = path.substring(0, path.indexOf("/"));
+    Set<String> whiteList = getWhiteListByApplication(integrationType);
 
     if (whiteList.isEmpty()) {
       filterChain.doFilter(servletRequest, servletResponse);
     } else {
-      String remoteAddress = getRemoteAddress(request);
-      boolean allowedOrigin = verifyOrigin(remoteAddress, whiteList);
+      String remoteAddressInfo = getOriginatingAddressInfo(request);
+      boolean allowedOrigin = verifyOrigin(remoteAddressInfo, whiteList, integrationType);
 
       if (allowedOrigin) {
         filterChain.doFilter(servletRequest, servletResponse);
       } else {
-        writeResponse(response, whiteList, remoteAddress);
+        LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
+            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED, remoteAddressInfo),
+            logMessage.getMessage(WEBHOOK_REQUEST_BLOCKED_SOLUTION, integrationType)));
+        writeResponse(response, remoteAddressInfo);
       }
     }
+  }
+
+  /**
+   * Validates if the filter should check the request origin.
+   * @param path Request path
+   * @return true if the request origin should be checked or false otherwise.
+   */
+  private boolean shouldCheckOrigin(String path) {
+    if (path.endsWith("/")) {
+      path = path.substring(0, path.length() - 1);
+    }
+
+    if (isWelcomeResource(path)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Validates if the request path is a welcome resource path.
+   * @param path Request path
+   * @return true if the request path is a welcome resource path or false otherwise.
+   */
+  private boolean isWelcomeResource(String path) {
+    return path.endsWith(WELCOME_PATH);
   }
 
   /**
@@ -154,58 +216,75 @@ public class WebHookOriginCheckFilter implements Filter {
 
   /**
    * Verify if the origin is allowed to send message through the integration.
-   * @param remoteAddress Origin remote address
-   * @param whiteList Application whitelist
+   * @param remoteAddressInfo Request origin addresses (this may contain one or more IP's separated by comma)
+   * @param whiteList The IP whitelist to match the remoteAddress
+   * @param integrationType The path for the incoming HTTP request
    * @return true if the origin is allowed or false otherwise
    */
-  private boolean verifyOrigin(String remoteAddress, Set<String> whiteList) {
-    if (whiteList.contains(remoteAddress)) {
-      return true;
-    } else {
+  private boolean verifyOrigin(String remoteAddressInfo, Set<String> whiteList, String integrationType) {
+    String[] remoteAddresses = COMMA_PATTERN.split(remoteAddressInfo);
+    return verifyOriginIPs(remoteAddresses, whiteList) || verifyOriginHosts(remoteAddresses, whiteList, integrationType);
+  }
+
+  private boolean verifyOriginHosts(String[] remoteAddresses, Set<String> whiteList, String integrationType) {
+    for (String ipAddress : remoteAddresses) {
       try {
-        InetAddress address = InetAddress.getByName(remoteAddress);
+        InetAddress address = InetAddress.getByName(ipAddress);
         String hostName = address.getHostName();
         String canonicalHostName = address.getCanonicalHostName();
 
-        return whiteList.contains(hostName) || whiteList.contains(canonicalHostName);
+        if (whiteList.contains(hostName) || whiteList.contains(canonicalHostName)) {
+          return true;
+        }
       } catch (UnknownHostException e) {
-        LOGGER.error("Cannot identify the host origin. IP: " + remoteAddress);
-        return false;
+        LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
+            e,
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION, integrationType)
+        ));
       }
     }
+    return false;
+  }
+
+  private boolean verifyOriginIPs(String[] remoteAddresses, Set<String> whiteList) {
+    for (String ipAddress : remoteAddresses) {
+      if (whiteList.contains(ipAddress)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
-   * Get origin remote address.
-   * @param request Http request
-   * @return Origin remote address.
+   * Gets the originating address information from the request header x-forwarded-for, or from the request remote
+   * address, if x-forwarded-for is not present.
+   * @param request Incoming Http request
+   * @return Originating addresses information: a list of one or more IP's separated by commas.
    */
-  private String getRemoteAddress(HttpServletRequest request) {
+  private String getOriginatingAddressInfo(HttpServletRequest request) {
     String remoteAddress = request.getHeader(FORWARD_HEADER);
 
     if (StringUtils.isEmpty(remoteAddress)) {
       remoteAddress = request.getRemoteAddr();
     }
 
-    return remoteAddress;
+    return remoteAddress != null ? remoteAddress : StringUtils.EMPTY;
   }
 
   /**
    * Write the http error response.
    * @param response Http response
-   * @param whiteList Integration whitelist
    * @param remoteAddress Origin remote address
    * @throws IOException Report failure to write the http error response.
    */
-  private void writeResponse(HttpServletResponse response, Set<String> whiteList,
-      String remoteAddress) throws IOException {
+  private void writeResponse(HttpServletResponse response, String remoteAddress) throws IOException {
     response.setContentType(APPLICATION_JSON);
     response.setStatus(Response.Status.FORBIDDEN.getStatusCode());
 
     ObjectNode message = JsonNodeFactory.instance.objectNode();
     message.put(INFO_KEY, FORBIDDEN_MESSAGE);
     message.put(ORIGIN_KEY, remoteAddress);
-    message.put(ACCEPTABLE_ORIGINS_KEY, whiteList.toString());
 
     response.getWriter().write(message.toString());
   }
