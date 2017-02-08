@@ -6,7 +6,7 @@ This document provides a brief overview of Integration Core components and how t
 
 # Overview
 
-Integration Core is responsible to managed active integrations and provides key services to allow third party
+Integration Core is responsible to manage active integrations and provides key services to allow third party
 services the ability to post messages into a configurable set of streams.
 
 The key services provided to the registered integrations are:
@@ -40,4 +40,11 @@ To start from scratch, do the following:
 3. Build using maven:
    `mvn clean install`
 
-Notes: If you have no access to Symphony Artifactory you should build the _App-Integrations-Commons_ previously.
+Notes: If you have no access to Symphony Artifactory you should build all other modules first, starting with the Commons module and then the other Integration modules:
+1. [_App-Integrations-Commons_](https://github.com/symphonyoss/App-Integrations-Commons) 
+2. [_App-Integrations-Universal_](https://github.com/symphonyoss/App-Integrations-Universal)
+3. [_App-Integrations-Github_](https://github.com/symphonyoss/App-Integrations-Github)
+4. [_App-Integrations-Jira_](https://github.com/symphonyoss/App-Integrations-Jira)
+5. [_App-Integrations-Salesforce_](https://github.com/symphonyoss/App-Integrations-Salesforce)
+6. [_App-Integrations-Trello_](https://github.com/symphonyoss/App-Integrations-Trello)
+7. [_App-Integrations-Zapier_](https://github.com/symphonyoss/App-Integrations-Zapier)
