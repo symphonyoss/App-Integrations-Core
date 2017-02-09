@@ -41,6 +41,7 @@ To start from scratch, do the following:
 3. Build using maven: `mvn clean install`
 
 Notes: If you have no access to Symphony Artifactory you should build all other modules first, starting with the Commons module and then the other Integration modules:
+
 1. [_App-Integrations-Commons_](https://github.com/symphonyoss/App-Integrations-Commons) 
 
 2. [_App-Integrations-Universal_](https://github.com/symphonyoss/App-Integrations-Universal)
