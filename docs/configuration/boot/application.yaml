@@ -1,0 +1,84 @@
+integration_bridge:
+  domain: .symphony.com
+  host: nexus.symphony.com
+
+#
+# Indicate the host and port for the Symphony POD the Apps are associated with.
+#
+pod:
+  host: nexus.symphony.com
+  port: 443
+
+#
+# Indicate the host and port for the POD's Agent.
+#
+agent:
+  host: nexus.symphony.com
+  port: 8444
+
+#
+# Indicate the host and ports for the POD's Key Manager.
+#
+key_manager:
+  host: nexus.symphony.com
+  port: 443
+
+key_manager_auth:
+  host: nexus.symphony.com
+  port: 8444
+
+pod_session_manager:
+  host: nexus.symphony.com
+  port: 8444
+
+cloud_logging:
+  account: cloudlogger
+  secret: /dsa87yd897sadsS&D67aGSD679ad67satd671=
+
+applications:
+  jira:
+    state: PROVISIONED
+    keystore: 
+      file: jira.p12 
+      password: password
+      type: pkcs12 
+    allowed_origins:
+      - address: 10.0.0.0
+      - address: 10.0.0.1
+      - host: localhost
+
+  github:
+    state: PROVISIONED
+    keystore: 
+      file: github.p12 
+      password: password
+      type: pkcs12
+
+  salesforce:
+    state: PROVISIONED
+    keystore: 
+      file: salesforce.p12 
+      password: password
+      type: pkcs12
+
+  universal:
+    state: PROVISIONED
+    keystore: 
+      file: universal.p12 
+      password: password
+      type: pkcs12 
+
+  trello:
+    state: PROVISIONED
+    keystore: 
+      file: trello.p12 
+      password: password
+      type: pkcs12 
+
+  zapier:
+    state: PROVISIONED
+    keystore: 
+      file: zapier.p12 
+      password: password
+      type: pkcs12 
+
