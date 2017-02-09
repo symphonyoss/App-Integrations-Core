@@ -19,7 +19,7 @@ The bridge itself proxies those services to the cloud with the proper authentica
 * Read user information to the cloud user services
 * Health check
 
-# Installation instructions for the Java developer
+# Build instructions for the Java developer
 
 ### What you’ll build
 You’ll build a simple java web application that provides the key services described above.
