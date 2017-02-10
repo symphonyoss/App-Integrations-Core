@@ -31,19 +31,19 @@ As of providing the mentioned structure above, we'll detail here what is the gen
 > 5. The parser will then convert the message to a [Message ML format](#the-message-ml-format), extracting the needed information from the payload received.
 > 6. The parsed message will return to the Integration Core and post the message to the Symphony platform
 
-#### Parsers
+### Parsers
 Integrations will most of the times need a parser to work properly.
 Those special classes will need to deal with the content coming from the related application, parsing this data into a format readable by the Symphony platform.
 
 This format is called Symphony Message ML and it may contain a set of tags. More details below.
 
-#### The Message ML format
+### The Message ML format
 A Message ML is a Symphony XML format that defines XML elements and attributes necessary to compose a message that can be posted within a chat room.
 The most basic message one can send may be as simple as ``<messageML>simple message</messageML>`` or as detailed as it can get. What determines this is what system we are integrating with.
 
 These elements and attributes will be briefly detailed in the next topics as reference. The specific integration formats can be found in their separate repositories "Readme" files. 
 
-#### Entity
+### Entity
 An entity is a special element contained in a ``<messageML>``, it may also be nested within other entities as another element, and so on.
  
 Entities must have a "type" and a "version", and may also have a "name" for itself, all of those as XML attributes.
