@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>integration</artifactId>
+    <version>0.7.2</version>
+
     <packaging>pom</packaging>
 
     <modules>

@@ -5,22 +5,26 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.symphonyoss</groupId>
-        <version>0.7.1</version>
+        <version>0.7.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>integration-auth</artifactId>
 
+    <properties>
+        <integration.common.version>0.7.1</integration.common.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss</groupId>
             <artifactId>integration-commons</artifactId>
-            <version>${project.version}</version>
+            <version>${integration.common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.symphonyoss</groupId>
             <artifactId>integration-metrics</artifactId>
-            <version>${project.version}</version>
+            <version>${integration.common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.symphony.sbe.core</groupId>
