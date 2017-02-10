@@ -20,9 +20,7 @@ The bridge itself proxies those services to the cloud with the proper authentica
 * Health check
 
 The Integration Core exposes the implemented Integrations through its web module, [integration-web](integration-web/pom.xml).
-There it expects messages to be posted on a specific URL format, in which it will try to determine for who this message is from using the information in the URL itself.
-
-More details on this basic flow below: 
+It expects messages to be posted on a specific URL format, in which it will try to determine for who this message is from using the information in the URL itself.
 
 ## General Integration Workflow
 As of providing the mentioned structure above, we'll detail here what is the general workflow when the core receives a message from an integrated app, let's say GitHub, for this example:
