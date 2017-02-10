@@ -5,6 +5,8 @@ target/
 .idea
 *.iml
 
+docs/configuration/
+
 # Applications
 integration-jira/
 integration-github/
