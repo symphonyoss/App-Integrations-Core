@@ -6,8 +6,7 @@ This document provides a brief overview of Integration Core components and how t
 
 # Overview
 
-Integration Core is responsible to manage active integrations and provides key services to allow third party
-services the ability to post messages into a configurable set of streams.
+Integration Core is responsible for managing active integrations and provides key services to allow third party services the ability to post messages into a configurable set of streams
 
 The key services provided to the registered integrations are:
 
@@ -99,7 +98,7 @@ To start from scratch, do the following:
 > 6. [_App-Integrations-Trello_](https://github.com/symphonyoss/App-Integrations-Trello)
 > 7. [_App-Integrations-Zapier_](https://github.com/symphonyoss/App-Integrations-Zapier)
 
-2. Clone the source repository using Git: `git clone https://github.com/SymphonyOSF/App-Integrations-Core.git`
+2. Clone the source repository using Git: `git clone git@github.com:symphonyoss/App-Integrations-Core.git`
 3. cd into _App-Integrations-Core_
 4. Build using maven: `mvn clean install`
 
@@ -111,6 +110,6 @@ Here are the initial steps to get your project configured to run using the Intel
 3. Copy [this file](docs/configuration/idea/IntegrationBridgeApplication.xml) to your "project source folder"/.idea/runConfigurations (feel free to create the last folder if you don't have it yet).
 4. Go to ``Run > Edit Configurations...`` and select check the one called "IntegrationBridgeApplication"
 5. Check that the referenced folders do exist, they should all be pointing to ``docs/configuration/boot/`` folders, to exemplify the structure you need
-6. Obtain valid user certificates to your POD and copy those to ``docs/configuration/boot/certs``, you'll need one for each integration
+6. Obtain valid, PKCS#12 user certificates to your POD and copy those to ``docs/configuration/boot/certs``, you'll need one for each integration.
 7. Configure valid addresses to connect the application to on the file [application.yaml](docs/configuration/boot/application.yaml)
 8. Run ``IntegrationBridgeApplication`` from the "Run" menu and we're done!
