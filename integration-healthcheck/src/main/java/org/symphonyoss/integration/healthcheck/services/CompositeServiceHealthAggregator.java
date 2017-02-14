@@ -30,6 +30,12 @@ import java.util.Map;
  */
 public class CompositeServiceHealthAggregator implements HealthAggregator {
 
+  /**
+   * This method receives all the service health indicators and aggregates the health status.
+   * If at least one service is DOWN, the aggregated status is DOWN.
+   * @param healths Service health indicators
+   * @return Aggregated service status
+   */
   @Override
   public Health aggregate(Map<String, Health> healths) {
     Health.Builder builder = Health.up();
