@@ -112,7 +112,7 @@ public class NullIntegration extends BaseIntegration {
   }
 
   @Override
-  public V1Configuration getConfig() {
+  public IntegrationSettings getSettings() {
     return null;
   }
 
