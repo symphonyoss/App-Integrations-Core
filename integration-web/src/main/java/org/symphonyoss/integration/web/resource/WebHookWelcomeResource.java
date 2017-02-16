@@ -71,7 +71,7 @@ public class WebHookWelcomeResource extends WebHookResource {
 
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
 
-    String configurationType = whiIntegration.getConfig().getType();
+    String configurationType = whiIntegration.getSettings().getType();
     ConfigurationInstance configInstance =
         getConfigurationInstance(hash, configurationId, configurationType);
 

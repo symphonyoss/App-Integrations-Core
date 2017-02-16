@@ -17,7 +17,7 @@
 package org.symphonyoss.integration.healthcheck;
 
 import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator.APPLICATIONS;
-import static org.symphonyoss.integration.healthcheck.connectivity.ConnectivityHealthIndicator.CONNECTIVITY;
+import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator.SERVICES;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
@@ -25,7 +25,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
-import org.symphonyoss.integration.healthcheck.connectivity.ConnectivityHealthIndicator;
+import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
 
 import java.util.Collections;
 
@@ -47,12 +47,12 @@ public class AsyncCompositeHealthEndpoint extends HealthEndpoint {
   public AsyncCompositeHealthEndpoint(IntegrationBridgeHealthAggregator healthAggregator,
       AsyncCompositeHealthIndicator asyncCompositeHealthIndicator,
       ApplicationsHealthIndicator applicationsHealthIndicator,
-      ConnectivityHealthIndicator connectivityHealthIndicator) {
+      CompositeServiceHealthIndicator servicesHealthIndicator) {
     super(healthAggregator, Collections.<String, HealthIndicator>emptyMap());
 
     this.healthIndicator = asyncCompositeHealthIndicator;
     this.healthIndicator.addHealthIndicator(APPLICATIONS, applicationsHealthIndicator);
-    this.healthIndicator.addHealthIndicator(CONNECTIVITY, connectivityHealthIndicator);
+    this.healthIndicator.addHealthIndicator(SERVICES, servicesHealthIndicator);
   }
 
   @Override

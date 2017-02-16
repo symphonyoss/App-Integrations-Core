@@ -37,6 +37,7 @@ import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -225,8 +226,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     try {
       integration.onCreate(integrationUser);
 
-      V1Configuration config = integration.getConfig();
-      this.integrations.put(config.getConfigurationId(), integration);
+      IntegrationSettings settings = integration.getSettings();
+      this.integrations.put(settings.getConfigurationId(), integration);
 
       metricsController.addIntegrationTimer(integrationUser);
 

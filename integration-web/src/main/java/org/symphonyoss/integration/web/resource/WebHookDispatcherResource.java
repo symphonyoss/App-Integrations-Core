@@ -113,7 +113,7 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     // handles the request
     try {
-      String configurationType = whiIntegration.getConfig().getType();
+      String configurationType = whiIntegration.getSettings().getType();
       whiIntegration.handle(hash, configurationType, payload);
       return ResponseEntity.ok().body("");
     } catch (WebHookParseException | MessageMLParseException e) {
@@ -149,7 +149,7 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     WebHookIntegration webHookIntegration = getWebHookIntegration(configurationId);
 
-    String configurationType = webHookIntegration.getConfig().getType();
+    String configurationType = webHookIntegration.getSettings().getType();
     getConfigurationInstance(hash, configurationId, configurationType);
 
     return ResponseEntity.ok().build();

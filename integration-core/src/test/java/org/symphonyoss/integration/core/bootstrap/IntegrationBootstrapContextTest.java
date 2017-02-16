@@ -46,6 +46,7 @@ import org.symphonyoss.integration.authentication.exception.PodConnectivityExcep
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
@@ -115,7 +116,8 @@ public class IntegrationBootstrapContextTest {
     configuration.setConfigurationId(CONFIGURATION_ID);
     configuration.setType(WEBHOOKINTEGRATION_TYPE_JIRA);
 
-    when(integration.getConfig()).thenReturn(configuration);
+    IntegrationSettings settings = new IntegrationSettings(configuration);
+    when(integration.getSettings()).thenReturn(settings);
 
     // Mocking integration status
     IntegrationHealth status = new IntegrationHealth();

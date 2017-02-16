@@ -44,6 +44,7 @@ import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookPayload;
@@ -263,8 +264,10 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     V1Configuration configuration = new V1Configuration();
     configuration.setType(TEST_USER);
 
+    IntegrationSettings settings = new IntegrationSettings(configuration);
+
     doReturn(whiIntegration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
-    doReturn(configuration).when(whiIntegration).getConfig();
+    doReturn(settings).when(whiIntegration).getSettings();
 
     // request must exist to reach "handle"
     mockRequest();

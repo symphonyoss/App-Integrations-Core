@@ -14,31 +14,37 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.connectivity;
+package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Connectivity indicator from Integration Bridge to POD.
- * Created by Milton Quilzini on 14/11/16.
+ * Service health indicator for POD.
+ *
+ * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class PodConnectivityHealthIndicator extends AbstractConnectivityHealthIndicator {
+public class PodHealthIndicator extends ServiceHealthIndicator {
+
+  private static final String SERVICE_NAME = "POD";
 
   public static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
 
-  private static final String HEALTH_NAME = "Pod";
+  @Override
+  protected String getServiceName() {
+    return SERVICE_NAME;
+  }
+
+  @Override
+  protected String getMinVersion() {
+    return properties.getPod().getMinVersion();
+  }
 
   @Override
   protected String getHealthCheckUrl() {
     return properties.getSymphonyUrl() + POD_URL_PATH;
-  }
-
-  @Override
-  protected String getHealthName() {
-    return HEALTH_NAME;
   }
 
 }

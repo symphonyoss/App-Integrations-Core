@@ -14,32 +14,37 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.connectivity;
+package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Connectivity indicator from Integration Bridge to Agent.
+ * Service health indicator for Agent.
  *
- * Created by Milton Quilzini on 11/11/16.
+ * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class AgentConnectivityHealthIndicator extends AbstractConnectivityHealthIndicator {
+public class AgentHealthIndicator extends ServiceHealthIndicator {
 
-  private static final String HEALTH_NAME = "Agent";
+  private static final String SERVICE_NAME = "Agent";
 
   private static final String AGENT_URL_PATH = "/v1/HealthCheck";
 
   @Override
-  protected String getHealthCheckUrl() {
-    return properties.getAgentUrl() + AGENT_URL_PATH;
+  protected String getServiceName() {
+    return SERVICE_NAME;
   }
 
   @Override
-  protected String getHealthName() {
-    return HEALTH_NAME;
+  protected String getMinVersion() {
+    return properties.getAgent().getMinVersion();
+  }
+
+  @Override
+  protected String getHealthCheckUrl() {
+    return properties.getAgentUrl() + AGENT_URL_PATH;
   }
 
 }

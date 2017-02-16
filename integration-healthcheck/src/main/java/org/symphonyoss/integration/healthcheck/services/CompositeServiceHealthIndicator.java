@@ -14,48 +14,38 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.connectivity;
+package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 /**
  * Composite health indicator to keep the health information about the Integration Bridge
- * connectivity with the required services (POD, Key Manager and Agent).
+ * compatibility and connectivity with the required services (POD, Key Manager and Agent).
  * Created by rsanchez on 13/01/17.
  */
 @Component
-public class ConnectivityHealthIndicator extends AsyncCompositeHealthIndicator {
+public class CompositeServiceHealthIndicator extends AsyncCompositeHealthIndicator {
 
-  public static final String CONNECTIVITY = "connectivity";
-
-  public static final String AGENT_CONNECTIVITY = "agentConnectivity";
-
-  public static final String KM_CONNECTIVITY = "kmConnectivity";
-
-  public static final String POD_CONNECTIVITY = "podConnectivity";
+  public static final String SERVICES = "services";
 
   @Autowired
-  private AgentConnectivityHealthIndicator agentConnectivityHealthIndicator;
+  private List<ServiceHealthIndicator> serviceHealthIndicators;
 
-  @Autowired
-  private KmConnectivityHealthIndicator kmConnectivityHealthIndicator;
-
-  @Autowired
-  private PodConnectivityHealthIndicator podConnectivityHealthIndicator;
-
-  public ConnectivityHealthIndicator() {
-    super(new ConnectivityHealthAggregator());
+  public CompositeServiceHealthIndicator() {
+    super(new CompositeServiceHealthAggregator());
   }
 
   @PostConstruct
   public void init() {
-    addHealthIndicator(AGENT_CONNECTIVITY, agentConnectivityHealthIndicator);
-    addHealthIndicator(KM_CONNECTIVITY, kmConnectivityHealthIndicator);
-    addHealthIndicator(POD_CONNECTIVITY, podConnectivityHealthIndicator);
+    for (ServiceHealthIndicator indicator : serviceHealthIndicators) {
+      addHealthIndicator(indicator.getServiceName(), indicator);
+    }
   }
 
 }

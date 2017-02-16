@@ -17,16 +17,17 @@
 package org.symphonyoss.integration.healthcheck;
 
 import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator.APPLICATIONS;
-import static org.symphonyoss.integration.healthcheck.connectivity.ConnectivityHealthIndicator.CONNECTIVITY;
+import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator.SERVICES;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.healthcheck.connectivity.IntegrationBridgeHealthConnectivity;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeService;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,39 +72,34 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
 
   @Override
   public Health aggregate(Map<String, Health> healths) {
-    Health healthConnectivity = healths.get(CONNECTIVITY);
     Health healthApplications = healths.get(APPLICATIONS);
+    Health healthServices = healths.get(SERVICES);
 
-    Health.Builder builder = retrieveIntegrationBridgeStatus(healthApplications, healthConnectivity);
+    Health.Builder builder = retrieveIntegrationBridgeStatus(healthApplications, healthServices);
 
-    IntegrationBridgeHealthConnectivity connectivity =
-        (IntegrationBridgeHealthConnectivity) healthConnectivity.getDetails().get(CONNECTIVITY);
     List<IntegrationHealth> appsHealth = getApplicationsHealth(healthApplications);
+    Map<String, IntegrationBridgeService> services = getServicesHealth(healthServices);
 
-    builder = builder.withDetail(VERSION, bridgeVersion);
-
-    if (connectivity != null) {
-      builder = builder.withDetail(CONNECTIVITY, connectivity);
-    }
-
-    return builder.withDetail(APPLICATIONS, appsHealth).build();
+    return builder.withDetail(VERSION, bridgeVersion)
+        .withDetail(SERVICES, services)
+        .withDetail(APPLICATIONS, appsHealth)
+        .build();
   }
 
   /**
    * Retrieves Integration Bridge main status with the rule:
-   * If at least one integration is "active", and connectivity with Agent, KM and POD is up, the
-   * main status for the Integration Bridge will be set to "UP". Otherwise, it will be set to
-   * "DOWN".
+   * If at least one integration is "active", and the required services (Agent, KM and POD) are
+   * compatible with the current version of Integration Bridge, the main status for the Integration
+   * Bridge will be set to "UP". Otherwise, it will be set to "DOWN".
    */
-  private Health.Builder retrieveIntegrationBridgeStatus(Health healthApplications, Health healthConnectivity) {
+  private Health.Builder retrieveIntegrationBridgeStatus(Health healthApplications, Health healthServices) {
     if (Status.DOWN.equals(healthApplications.getStatus())) {
       // if all integrations are in a non-active status, Integration Bridge status should be "down".
       return down("There is no active Integration");
     }
 
-    if (Status.DOWN.equals(healthConnectivity.getStatus())) {
-      // if connectivity is down for Agent, KM or POD, Integration Bridge status should be "down".
-      return down("Connectivity is down for Agent, KM or POD");
+    if (Status.DOWN.equals(healthServices.getStatus())) {
+      return down("Required services are not available");
     }
 
     return up();
@@ -140,4 +136,20 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
     return appsHealth;
   }
 
+  /**
+   * Retrieves the services statuses.
+   * @param healthServices Health aggregator from all the services
+   * @return Services statuses.
+   */
+  private Map<String, IntegrationBridgeService> getServicesHealth(Health healthServices) {
+    Map<String, IntegrationBridgeService> services = new LinkedHashMap<>();
+    Map<String, Object> details = healthServices.getDetails();
+
+    for (Map.Entry<String, Object> entry : details.entrySet()) {
+      IntegrationBridgeService service = (IntegrationBridgeService) entry.getValue();
+      services.put(entry.getKey(), service);
+    }
+
+    return services;
+  }
 }

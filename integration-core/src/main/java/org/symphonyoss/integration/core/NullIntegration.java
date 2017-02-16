@@ -29,7 +29,9 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
 import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
+import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.utils.IntegrationUtils;
@@ -56,11 +58,13 @@ public class NullIntegration extends BaseIntegration {
     this.application = application;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
+    this.healthManager = new IntegrationHealthManager();
   }
 
   @Override
   public void onCreate(String integrationUser) {
-    healthManager.setName(integrationUser);
+    String applicationId = application.getId();
+    healthManager.setName(applicationId);
 
     healthManager.parserInstalled(NOK);
 
@@ -71,7 +75,7 @@ public class NullIntegration extends BaseIntegration {
       healthManager.certificateInstalled(NOK);
     }
 
-    healthIndicator.addHealthIndicator(application.getId(), new IntegrationHealthIndicatorAdapter(this));
+    healthIndicator.addHealthIndicator(applicationId, new IntegrationHealthIndicatorAdapter(this));
   }
 
   @Override
@@ -108,7 +112,7 @@ public class NullIntegration extends BaseIntegration {
   }
 
   @Override
-  public V1Configuration getConfig() {
+  public IntegrationSettings getSettings() {
     return null;
   }
 
