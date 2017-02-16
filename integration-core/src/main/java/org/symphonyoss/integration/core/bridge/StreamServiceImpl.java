@@ -25,18 +25,18 @@ import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.Stream;
 import com.symphony.api.pod.model.UserIdList;
 import com.symphony.api.pod.model.V2RoomDetail;
-import com.symphony.logging.ISymphonyLogger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AgentApiClientDecorator;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.model.config.StreamType;
 import org.symphonyoss.integration.service.StreamService;
+import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -50,8 +50,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class StreamServiceImpl implements StreamService {
 
-  private static final ISymphonyLogger LOG =
-      IntegrationBridgeCloudLoggerFactory.getLogger(StreamServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(StreamServiceImpl.class);
 
   @Autowired
   private AuthenticationProxy authenticationProxy;

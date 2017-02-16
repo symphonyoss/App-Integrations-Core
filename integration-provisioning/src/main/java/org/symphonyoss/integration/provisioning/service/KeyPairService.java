@@ -18,10 +18,9 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.GENERATE_CERTIFICATE;
 
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Service;
@@ -43,8 +42,7 @@ import java.util.Scanner;
 @Service
 public class KeyPairService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(KeyPairService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KeyPairService.class);
 
   private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
 

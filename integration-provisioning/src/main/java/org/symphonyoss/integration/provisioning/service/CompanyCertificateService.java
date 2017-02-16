@@ -25,13 +25,13 @@ import com.symphony.api.pod.model.CompanyCert;
 import com.symphony.api.pod.model.CompanyCertAttributes;
 import com.symphony.api.pod.model.CompanyCertStatus;
 import com.symphony.api.pod.model.CompanyCertType;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
@@ -56,8 +56,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class CompanyCertificateService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(CompanyCertificateService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CompanyCertificateService.class);
 
   @Autowired
   private AuthenticationProxy authenticationProxy;

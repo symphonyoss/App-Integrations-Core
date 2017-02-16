@@ -17,8 +17,9 @@
 package org.symphonyoss.integration.web.resource;
 
 import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.logging.ISymphonyLogger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
 /**
@@ -37,8 +37,7 @@ import org.symphonyoss.integration.webhook.WebHookIntegration;
 @RestController
 public class WebHookWelcomeResource extends WebHookResource {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(WebHookWelcomeResource.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebHookWelcomeResource.class);
 
   /**
    * Handle HTTP POST requests to post the welcome message.

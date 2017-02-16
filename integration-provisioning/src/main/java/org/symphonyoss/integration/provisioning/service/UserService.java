@@ -16,8 +16,7 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
 import com.symphony.api.pod.api.UserApi;
 import com.symphony.api.pod.api.UsersApi;
@@ -29,17 +28,16 @@ import com.symphony.api.pod.model.UserDetail;
 import com.symphony.api.pod.model.UserV2;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.PodApiClientDecorator;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
@@ -53,8 +51,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class UserService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(UserService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
 

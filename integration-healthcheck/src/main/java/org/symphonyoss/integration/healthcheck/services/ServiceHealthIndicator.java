@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.healthcheck.services;
 
-import com.symphony.logging.ISymphonyLogger;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -25,6 +23,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -32,7 +32,6 @@ import org.springframework.boot.actuate.health.Status;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.json.JsonUtils;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -55,8 +54,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class ServiceHealthIndicator implements HealthIndicator {
 
-  private static final ISymphonyLogger LOG =
-      IntegrationBridgeCloudLoggerFactory.getLogger(ServiceHealthIndicator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ServiceHealthIndicator.class);
 
   /**
    * Version field

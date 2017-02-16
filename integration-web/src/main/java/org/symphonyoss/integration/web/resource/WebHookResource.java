@@ -17,8 +17,9 @@
 package org.symphonyoss.integration.web.resource;
 
 import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.logging.ISymphonyLogger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -27,13 +28,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
-import org.symphonyoss.integration.service.ConfigurationService;
-import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
@@ -59,8 +59,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/v1/whi")
 public abstract class WebHookResource {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(WebHookResource.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebHookResource.class);
 
   @Autowired
   @Qualifier("remoteConfigurationService")
@@ -211,7 +210,7 @@ public abstract class WebHookResource {
   @ExceptionHandler(IntegrationUnavailableException.class)
   public ResponseEntity<String> handleUnavailableException(IntegrationUnavailableException ex) {
     String message = ex.getMessage();
-    LOGGER.fatal(message);
+    LOGGER.error(message);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
   }
 
@@ -224,7 +223,7 @@ public abstract class WebHookResource {
   @ExceptionHandler(ConnectivityException.class)
   public ResponseEntity<String> handleConnectivityException(ConnectivityException ex) {
     String message = ex.getMessage();
-    LOGGER.fatal(message);
+    LOGGER.error(message);
 
     openCircuit();
 
@@ -242,7 +241,7 @@ public abstract class WebHookResource {
       {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class})
   public ResponseEntity<String> handleIntegrationBridgeUnavailableException(Exception ex) {
     String message = ex.getMessage();
-    LOGGER.fatal(message);
+    LOGGER.error(message);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
   }
 
@@ -254,7 +253,7 @@ public abstract class WebHookResource {
   @ResponseBody
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleUnexpectedException(Exception ex) {
-    LOGGER.fatal(ex.getMessage(), ex);
+    LOGGER.error(ex.getMessage(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected exception");
   }
 }

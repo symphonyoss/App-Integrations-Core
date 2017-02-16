@@ -19,9 +19,10 @@ package org.symphonyoss.integration.core.bootstrap;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import com.symphony.api.pod.model.V1Configuration;
-import com.symphony.logging.ISymphonyLogger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -35,7 +36,6 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -60,8 +60,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(IntegrationBootstrapContext.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBootstrapContext.class);
 
   public static final Integer DEFAULT_POOL_SIZE = 10;
 
@@ -203,7 +202,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         }
       }
     } catch (InterruptedException e) {
-      LOGGER.fatal("Polling stopped", e);
+      LOGGER.error("Polling stopped", e);
     }
   }
 

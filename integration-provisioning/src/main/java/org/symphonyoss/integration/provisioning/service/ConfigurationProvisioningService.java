@@ -21,18 +21,17 @@ import static org.symphonyoss.integration.provisioning.properties.Authentication
 
 import com.symphony.api.pod.model.V1Configuration;
 
-import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.service.ConfigurationService;
-import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
-import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
+import org.symphonyoss.integration.service.ConfigurationService;
 
 /**
  * Service class to setup integration configs at Symphony backend.
@@ -42,8 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationProvisioningService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(ConfigurationProvisioningService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationProvisioningService.class);
 
   @Autowired
   @Qualifier("remoteConfigurationService")
