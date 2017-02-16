@@ -7,6 +7,9 @@
         <Property name="log4j2.symphonyLogLevel">INFO</Property>
         <Property name="log4j2.consoleLogThreshold">INFO</Property>
         <Property name="log4j2.outputAllToConsole">false</Property>
+        <Property name="symphony.instanceId">integration-bridge</Property>
+        <Property name="symphony.maxLogsPerBulkRequest">10</Property>
+        <Property name="symphony.maxPayloadSize">100000</Property>
     </Properties>
 
     <Appenders>
@@ -14,14 +17,14 @@
         <Console name="console" target="SYSTEM_OUT">
             <ThresholdFilter level="${sys:log4j2.consoleLogThreshold}" onMatch="ACCEPT"
                              onMismatch="DENY"/>
-            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M %X{X-Trace-Id} - %m%n"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M [Trace ID: %X{X-Trace-Id}] - %m%n"/>
         </Console>
 
         <RollingFile name="error-rolling-file"
                      fileName="${sys:logs.basedir}/logs/integration-bridge-error.log"
                      filePattern="${sys:logs.basedir}/logs/integration-bridge-error-%i.log.gz"
                      immediateFlush="false">
-            <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
+            <PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>
             <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <DefaultRolloverStrategy max="10"/>
             <Policies>
@@ -33,12 +36,22 @@
                      fileName="${sys:logs.basedir}/logs/integration-bridge.log"
                      filePattern="${sys:logs.basedir}/logs/integration-bridge-%i.log.gz"
                      immediateFlush="false">
-            <PatternLayout pattern="%d %-5p [%c] (%t) %X{X-Trace-Id} %m%n"/>
+            <PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>
             <DefaultRolloverStrategy max="10"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
+
+        <SymphonyOnPremHttpsAppender name="OnPremHttpsAppender" url="${sys:cloudLogHarvesterURL}"
+                                     maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"
+                                     maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"
+                                     maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5"
+                                     sinkFlushingInterval="5"
+                                     sinkFileName="${sys:logs.basedir}/logs/integration." instanceId="${sys:symphony.instanceId}"
+                                     sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">
+            <PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>
+        </SymphonyOnPremHttpsAppender>
 
     </Appenders>
 
@@ -47,11 +60,13 @@
         <AsyncLogger name="org.symphonyoss" level="${sys:log4j2.symphonyLogLevel}" additivity="${sys:log4j2.outputAllToConsole}">
             <AppenderRef ref="rolling-file"/>
             <AppenderRef ref="error-rolling-file"/>
+            <AppenderRef ref="OnPremHttpsAppender" />
         </AsyncLogger>
 
         <AsyncRoot level="${sys:log4j2.logLevel}">
             <AppenderRef ref="console"/>
             <AppenderRef ref="error-rolling-file"/>
+            <AppenderRef ref="OnPremHttpsAppender" />
         </AsyncRoot>
 
     </Loggers>
