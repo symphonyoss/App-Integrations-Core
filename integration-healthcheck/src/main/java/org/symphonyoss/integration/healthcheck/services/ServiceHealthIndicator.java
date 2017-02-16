@@ -129,16 +129,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     } else {
       service.setConnectivity(Status.UP);
 
-      try {
-        JsonNode node = JsonUtils.readTree(healthResponse);
-        String version = node.path(VERSION).asText();
-
-        if (StringUtils.isNotEmpty(version)) {
-          service.setCurrentVersion(version);
-        }
-      } catch (IOException e) {
-        LOG.error("Cannot retrieve the service version for the service {}", getServiceName());
-      }
+      String currentVersion = getCurrentVersion(healthResponse);
+      service.setCurrentVersion(currentVersion);
     }
 
     return service;
@@ -201,6 +193,28 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Minimum required version for this service.
    */
   protected abstract String getMinVersion();
+
+  /**
+   * This is the default implementation to determine the current version for this service.
+   * This method tries to retrieve the JSON node "version" from the health check response. Using
+   * this approach the new services can implement your own logic to retrieve the current version
+   * based on the health check response.
+   * @return Current version for this service.
+   */
+  protected String getCurrentVersion(String healthResponse) {
+    try {
+      JsonNode node = JsonUtils.readTree(healthResponse);
+      String version = node.path(VERSION).asText();
+
+      if (StringUtils.isNotEmpty(version)) {
+        return version;
+      }
+    } catch (IOException e) {
+      LOG.error("Cannot retrieve the service version for the service {}", getServiceName());
+    }
+
+    return null;
+  }
 
   /**
    * Build the specific health check URL for the component which compatibility will be checked for.

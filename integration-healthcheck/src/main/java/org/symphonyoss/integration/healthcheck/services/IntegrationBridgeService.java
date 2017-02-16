@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.healthcheck.services;
 
+import com.github.zafarkhaja.semver.ParseException;
+import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.health.Status;
 
@@ -77,15 +79,15 @@ public class IntegrationBridgeService {
     }
 
     try {
-      ServiceVersion minServiceVersion = new ServiceVersion(minVersion);
-      ServiceVersion currentServiceVersion = new ServiceVersion(currentVersion);
+      Version minServiceVersion = Version.valueOf(minVersion);
+      Version currentServiceVersion = Version.valueOf(currentVersion);
 
-      if (currentServiceVersion.compareTo(minServiceVersion) >= 0) {
+      if (currentServiceVersion.greaterThanOrEqualTo(minServiceVersion)) {
         return Compability.OK;
       } else {
         return Compability.NOK;
       }
-    } catch (IllegalArgumentException e) {
+    } catch (ParseException e) {
       return Compability.NOK;
     }
   }
