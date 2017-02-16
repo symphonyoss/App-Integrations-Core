@@ -75,6 +75,11 @@
             <artifactId>webcommons</artifactId>
             <version>${symphony.common.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.symphony.sbe.core</groupId>
+            <artifactId>sdk</artifactId>
+            <version>${symphony.sbe.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

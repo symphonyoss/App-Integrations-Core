@@ -20,12 +20,11 @@ import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.Val
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
 import com.symphony.api.pod.model.V1Configuration;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.symphonyoss.integration.BaseIntegration;
-import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
 import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
@@ -33,7 +32,6 @@ import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.security.KeyStore;
@@ -46,7 +44,7 @@ import java.util.Set;
  */
 public class NullIntegration extends BaseIntegration {
 
-  private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(NullIntegration.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NullIntegration.class);
 
   private final ApplicationsHealthIndicator healthIndicator;
 

@@ -18,9 +18,10 @@ package org.symphonyoss.integration.authentication;
 
 import com.symphony.api.auth.client.ApiException;
 import com.symphony.api.auth.model.Token;
-import com.symphony.logging.ISymphonyLogger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
@@ -34,7 +35,6 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
@@ -56,8 +56,7 @@ import javax.ws.rs.core.Response.Status;
 @Component
 public class AuthenticationProxyImpl implements AuthenticationProxy {
 
-  private static final ISymphonyLogger LOG =
-      IntegrationBridgeCloudLoggerFactory.getLogger(AuthenticationProxyImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AuthenticationProxyImpl.class);
 
   private static final String SESSION_MANAGER_HOST_KEY = "pod_session_manager.host";
 
