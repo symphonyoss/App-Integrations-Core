@@ -47,3 +47,7 @@ agent:
 
 key_manager:
   min_version: 1.44.0
+
+management:
+  security:
+    enabled: false
