@@ -13,8 +13,9 @@
 
     <properties>
         <java.version>1.7</java.version>
-        <spring.boot.version>1.4.0.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.1.RELEASE</spring.boot.version>
         <symphony.common.version>0.0.71</symphony.common.version>
+        <jersey.common.version>2.12</jersey.common.version>
 
         <!-- Override RPM properties -->
         <rpm.name>integration-provisioning</rpm.name>
@@ -23,14 +24,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.symphonyoss</groupId>
             <artifactId>integration-jira</artifactId>
@@ -67,6 +60,14 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
@@ -79,6 +80,17 @@
             <groupId>com.symphony.sbe.core</groupId>
             <artifactId>sdk</artifactId>
             <version>${symphony.sbe.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>${jersey.common.version}</version>
         </dependency>
     </dependencies>
 
