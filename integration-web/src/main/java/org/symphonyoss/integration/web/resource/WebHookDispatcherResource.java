@@ -16,8 +16,8 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import com.symphony.logging.ISymphonyLogger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.entity.MessageMLParseException;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
@@ -42,8 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class WebHookDispatcherResource extends WebHookResource {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(WebHookDispatcherResource.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebHookDispatcherResource.class);
 
   /**
    * Handle HTTP POST requests sent from third-party apps to post messages with Content-type
@@ -115,12 +113,11 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     // handles the request
     try {
-      String configurationType = whiIntegration.getConfig().getType();
+      String configurationType = whiIntegration.getSettings().getType();
       whiIntegration.handle(hash, configurationType, payload);
       return ResponseEntity.ok().body("");
     } catch (WebHookParseException | MessageMLParseException e) {
-      LOGGER.fatal(
-          String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
+      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     }
@@ -152,7 +149,7 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     WebHookIntegration webHookIntegration = getWebHookIntegration(configurationId);
 
-    String configurationType = webHookIntegration.getConfig().getType();
+    String configurationType = webHookIntegration.getSettings().getType();
     getConfigurationInstance(hash, configurationId, configurationType);
 
     return ResponseEntity.ok().build();

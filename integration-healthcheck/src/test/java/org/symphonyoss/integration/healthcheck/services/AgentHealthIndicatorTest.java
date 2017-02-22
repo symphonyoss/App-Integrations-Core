@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.connectivity;
+package org.symphonyoss.integration.healthcheck.services;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,29 +30,37 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link KmConnectivityHealthIndicator}
+ * Test class to validate {@link AgentHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, KmConnectivityHealthIndicator.class})
-public class KmConnectivityHealthIndicatorTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, AgentHealthIndicator.class})
+public class AgentHealthIndicatorTest {
+
+  private static final String MOCK_VERSION = "1.45.0-SNAPSHOT";
+
+  private static final String SERVICE_NAME = "Agent";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private KmConnectivityHealthIndicator indicator;
+  private AgentHealthIndicator indicator;
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck", indicator.getHealthCheckUrl());
+    assertEquals("https://nexus.symphony.com:8444/agent/v1/HealthCheck", indicator.getHealthCheckUrl());
   }
 
   @Test
-  public void testHealthName() {
-    assertEquals("Key Manager", indicator.getHealthName());
+  public void testServiceName() {
+    assertEquals(SERVICE_NAME, indicator.getServiceName());
   }
 
+  @Test
+  public void testMinVersion() {
+    assertEquals(MOCK_VERSION, indicator.getMinVersion());
+  }
 }

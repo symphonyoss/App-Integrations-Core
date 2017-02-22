@@ -19,9 +19,8 @@ package org.symphonyoss.integration.web.filter;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 
 import java.io.IOException;
@@ -41,7 +40,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class WebHookTracingFilter implements Filter {
 
-  private static final ISymphonyLogger LOG = SymphonyLoggerFactory.getLogger(WebHookTracingFilter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WebHookTracingFilter.class);
 
   @Override
   public void init(FilterConfig config) throws ServletException {

@@ -18,11 +18,12 @@ package org.symphonyoss.integration.config;
 
 import com.symphony.api.pod.model.ConfigurationInstance;
 import com.symphony.api.pod.model.V1Configuration;
-import com.symphony.logging.ISymphonyLogger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
@@ -35,7 +36,6 @@ import org.symphonyoss.integration.config.exception.InvalidInstanceIdException;
 import org.symphonyoss.integration.config.exception.SaveConfigurationException;
 import org.symphonyoss.integration.config.exception.SaveInstanceException;
 import org.symphonyoss.integration.config.model.ConfigurationRepository;
-import org.symphonyoss.integration.logging.IntegrationBridgeCloudLoggerFactory;
 import org.symphonyoss.integration.service.ConfigurationService;
 
 import java.io.Closeable;
@@ -59,8 +59,7 @@ import javax.annotation.PostConstruct;
 @Lazy
 public class LocalConfigurationService implements ConfigurationService {
 
-  private static final ISymphonyLogger LOGGER =
-      IntegrationBridgeCloudLoggerFactory.getLogger(LocalConfigurationService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LocalConfigurationService.class);
 
   private static final String DEFAULT_FILE_NAME = "configuration.json";
 

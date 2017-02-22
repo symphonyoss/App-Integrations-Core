@@ -16,10 +16,9 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
@@ -40,8 +39,7 @@ import java.security.cert.CertificateException;
 @Service
 public class AuthenticationService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(AuthenticationService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -63,10 +61,10 @@ public class AuthenticationService {
           keyStorePassword, keyStoreType);
       authenticationProxy.authenticate(userId);
     } catch (com.symphony.api.auth.client.ApiException e) {
-      LOGGER.fatal("Failed: status=" + e.getCode(), e);
+      LOGGER.error("Failed: status=" + e.getCode(), e);
       throw new IntegrationProvisioningAuthException(e);
     } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-      LOGGER.fatal("Verify the admin user certificate", e);
+      LOGGER.error("Verify the admin user certificate", e);
       throw new IntegrationProvisioningAuthException(e);
     }
   }

@@ -14,32 +14,37 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.connectivity;
+package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Connectivity indicator from Integration Bridge to Key Manager.
+ * Service health indicator for Key Manager.
  *
- * Created by Milton Quilzini on 11/11/16.
+ * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class KmConnectivityHealthIndicator extends AbstractConnectivityHealthIndicator {
+public class KmHealthIndicator extends ServiceHealthIndicator {
 
-  public static final String KM_URL_PATH = "/HealthCheck";
+  private static final String SERVICE_NAME = "Key Manager";
 
-  private static final String HEALTH_NAME = "Key Manager";
+  public static final String KM_URL_PATH = "/HealthCheck/version";
+
+  @Override
+  protected String getServiceName() {
+    return SERVICE_NAME;
+  }
+
+  @Override
+  protected String getMinVersion() {
+    return properties.getKeyManager().getMinVersion();
+  }
 
   @Override
   protected String getHealthCheckUrl() {
     return properties.getKeyManagerUrl() + KM_URL_PATH;
   }
 
-  @Override
-  protected String getHealthName() {
-    return HEALTH_NAME;
-  }
-  
 }

@@ -24,6 +24,7 @@ import com.symphony.api.pod.model.V1Configuration;
 import org.mockito.Mock;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.service.IntegrationBridge;
@@ -140,6 +141,7 @@ public abstract class WebHookResourceTest {
     // mocking integration bridge
     when(integrationBridge.getIntegrationById(CONFIGURATION_ID)).thenReturn(whiIntegration);
 
-    when(whiIntegration.getConfig()).thenReturn(whiConfiguration);
+    IntegrationSettings settings = new IntegrationSettings(whiConfiguration);
+    when(whiIntegration.getSettings()).thenReturn(settings);
   }
 }

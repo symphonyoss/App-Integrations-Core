@@ -18,17 +18,18 @@ package org.symphonyoss.integration.healthcheck;
 
 import static org.junit.Assert.assertEquals;
 import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator.APPLICATIONS;
-import static org.symphonyoss.integration.healthcheck.connectivity.ConnectivityHealthIndicator.CONNECTIVITY;
+import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator.SERVICES;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.symphonyoss.integration.healthcheck.connectivity.IntegrationBridgeHealthConnectivity;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeService;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,14 @@ public class IntegrationBridgeHealthAggregatorTest {
 
   private static final String UNKNOWN_VERSION = "Unknown Version";
 
+  private static final String MOCK_VERSION = "1.44.0";
+
+  private static final String AGENT_SERVICE = "Agent";
+
+  private static final String KM_SERVICE = "Key Manager";
+
+  private static final String POD_SERVICE = "POD";
+
   private IntegrationBridgeHealthAggregator aggregator = new IntegrationBridgeHealthAggregator();
 
   private Health.Builder builder;
@@ -55,20 +64,19 @@ public class IntegrationBridgeHealthAggregatorTest {
 
   @Test
   public void testNoActiveIntegration() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity(
-        Status.DOWN, Status.UP, Status.DOWN);
-    Health healthConnectivity = Health.down().withDetail(CONNECTIVITY, connectivity).build();
-
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.DOWN, appsHealth);
 
+    Map<String, IntegrationBridgeService> services = mockServices();
+    Health healthServices = mockServicesHealth(Status.UP, services);
+
     Map<String, Health> healths = new HashMap<>();
-    healths.put(CONNECTIVITY, healthConnectivity);
     healths.put(APPLICATIONS, healthApplications);
+    healths.put(SERVICES, healthServices);
 
     Health expected = builder.down()
         .withDetail(MESSAGE, "There is no active Integration")
-        .withDetail(CONNECTIVITY, connectivity)
+        .withDetail(SERVICES, services)
         .withDetail(APPLICATIONS, appsHealth)
         .build();
 
@@ -77,20 +85,19 @@ public class IntegrationBridgeHealthAggregatorTest {
 
   @Test
   public void testConnectivityDown() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity(
-        Status.DOWN, Status.UP, Status.DOWN);
-    Health healthConnectivity = Health.down().withDetail(CONNECTIVITY, connectivity).build();
-
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.UP, appsHealth);
 
+    Map<String, IntegrationBridgeService> services = mockServices();
+    Health healthServices = mockServicesHealth(Status.DOWN, services);
+
     Map<String, Health> healths = new HashMap<>();
-    healths.put(CONNECTIVITY, healthConnectivity);
     healths.put(APPLICATIONS, healthApplications);
+    healths.put(SERVICES, healthServices);
 
     Health expected = builder.down()
-        .withDetail(MESSAGE, "Connectivity is down for Agent, KM or POD")
-        .withDetail(CONNECTIVITY, connectivity)
+        .withDetail(MESSAGE, "Required services are not available")
+        .withDetail(SERVICES, services)
         .withDetail(APPLICATIONS, appsHealth)
         .build();
 
@@ -99,20 +106,19 @@ public class IntegrationBridgeHealthAggregatorTest {
 
   @Test
   public void testUp() {
-    IntegrationBridgeHealthConnectivity connectivity = new IntegrationBridgeHealthConnectivity(
-        Status.UP, Status.UP, Status.UP);
-    Health healthConnectivity = Health.up().withDetail(CONNECTIVITY, connectivity).build();
-
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.UP, appsHealth);
 
+    Map<String, IntegrationBridgeService> services = mockServices();
+    Health healthServices = mockServicesHealth(Status.UP, services);
+
     Map<String, Health> healths = new HashMap<>();
-    healths.put(CONNECTIVITY, healthConnectivity);
     healths.put(APPLICATIONS, healthApplications);
+    healths.put(SERVICES, healthServices);
 
     Health expected = builder.up()
         .withDetail(MESSAGE, "Success")
-        .withDetail(CONNECTIVITY, connectivity)
+        .withDetail(SERVICES, services)
         .withDetail(APPLICATIONS, appsHealth)
         .build();
 
@@ -139,6 +145,26 @@ public class IntegrationBridgeHealthAggregatorTest {
 
     for (IntegrationHealth health : appsHealth) {
       builder = builder.withDetail(health.getName(), health);
+    }
+
+    return builder.build();
+  }
+
+  private Map<String, IntegrationBridgeService> mockServices() {
+    Map<String, IntegrationBridgeService> services = new LinkedHashMap<>();
+
+    services.put(AGENT_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
+    services.put(KM_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
+    services.put(POD_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
+
+    return services;
+  }
+
+  private Health mockServicesHealth(Status status, Map<String, IntegrationBridgeService> services) {
+    Health.Builder builder = Health.status(status);
+
+    for (Map.Entry<String, IntegrationBridgeService> entry : services.entrySet()) {
+      builder = builder.withDetail(entry.getKey(), entry.getValue());
     }
 
     return builder.build();

@@ -19,6 +19,7 @@ package org.symphonyoss.integration.healthcheck;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator.APPLICATIONS;
+import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator.SERVICES;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +28,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Health;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
-import org.symphonyoss.integration.healthcheck.connectivity.ConnectivityHealthIndicator;
+import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * Unit test for {@link AsyncCompositeHealthEndpoint}
@@ -63,7 +65,7 @@ public class AsyncCompositeHealthEndpointTest {
   private ApplicationsHealthIndicator applicationsHealthIndicator;
 
   @Mock
-  private ConnectivityHealthIndicator connectivityHealthIndicator;
+  private CompositeServiceHealthIndicator servicesHealthIndicator;
 
   private Health.Builder builder;
 
@@ -71,17 +73,18 @@ public class AsyncCompositeHealthEndpointTest {
   public void init() {
     builder = Health.unknown()
         .withDetail(VERSION, UNKNOWN_VERSION)
+        .withDetail(SERVICES, new LinkedHashMap<>())
         .withDetail(APPLICATIONS, new ArrayList<IntegrationHealth>());
   }
 
   @Test
   public void testDownApplications() {
     doReturn(Health.down().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.up().build()).when(connectivityHealthIndicator).health();
+    doReturn(Health.up().build()).when(servicesHealthIndicator).health();
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, connectivityHealthIndicator);
+            applicationsHealthIndicator, servicesHealthIndicator);
 
     Health health = endpoint.invoke();
     assertEquals(builder.down().withDetail(MESSAGE, "There is no active Integration").build(), health);
@@ -90,26 +93,26 @@ public class AsyncCompositeHealthEndpointTest {
   @Test
   public void testDownConnectivity() {
     doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.down().build()).when(connectivityHealthIndicator).health();
+    doReturn(Health.down().build()).when(servicesHealthIndicator).health();
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, connectivityHealthIndicator);
+            applicationsHealthIndicator, servicesHealthIndicator);
 
     Health health = endpoint.invoke();
     assertEquals(
-        builder.down().withDetail(MESSAGE, "Connectivity is down for Agent, KM or POD").build(),
+        builder.down().withDetail(MESSAGE, "Required services are not available").build(),
         health);
   }
 
   @Test
   public void testUp() {
     doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.up().build()).when(connectivityHealthIndicator).health();
+    doReturn(Health.up().build()).when(servicesHealthIndicator).health();
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, connectivityHealthIndicator);
+            applicationsHealthIndicator, servicesHealthIndicator);
 
     Health health = endpoint.invoke();
     assertEquals(builder.up().withDetail(MESSAGE, "Success").build(), health);

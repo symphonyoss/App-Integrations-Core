@@ -17,12 +17,12 @@
 package org.symphonyoss.integration.provisioning;
 
 import com.symphony.api.pod.model.V1Configuration;
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -53,8 +53,7 @@ import java.util.Map;
 @Service
 public class IntegrationProvisioningService {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(IntegrationProvisioningService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationProvisioningService.class);
 
   private static final String AVATAR_FILENAME = "logo.png";
 

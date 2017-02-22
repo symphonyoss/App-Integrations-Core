@@ -24,7 +24,7 @@ import org.symphonyoss.integration.web.listener.BootstrapApplicationListener;
  * Integration Bridge application class.
  * Created by rsanchez on 23/12/16.
  */
-@SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"})
+@SpringBootApplication(scanBasePackages = { "org.symphonyoss.integration", "com.symphony.integration.logging" })
 public class IntegrationBridgeApplication {
 
   public static void main(String[] args) throws Exception {

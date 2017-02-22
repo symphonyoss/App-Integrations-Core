@@ -22,6 +22,7 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.test.context.TestComponent;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.Set;
@@ -57,7 +58,7 @@ public class TestWebHookIntegration implements Integration {
   }
 
   @Override
-  public V1Configuration getConfig() {
+  public IntegrationSettings getSettings() {
     return null;
   }
 

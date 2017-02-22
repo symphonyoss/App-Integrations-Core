@@ -18,15 +18,13 @@ package org.symphonyoss.integration.provisioning;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
-import com.symphony.logging.ISymphonyLogger;
-import com.symphony.logging.SymphonyLoggerFactory;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.model.yaml.AdminUser;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
@@ -47,8 +45,7 @@ import org.symphonyoss.integration.provisioning.service.AuthenticationService;
 @SpringBootApplication(scanBasePackages = {"org.symphonyoss.integration"})
 public class IntegrationProvisioningApp {
 
-  private static final ISymphonyLogger LOGGER =
-      SymphonyLoggerFactory.getLogger(IntegrationProvisioningApp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationProvisioningApp.class);
 
   /**
    * Default keystore type.
