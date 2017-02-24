@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import com.symphony.api.pod.model.ConfigurationInstance;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,9 @@ import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
@@ -62,8 +61,8 @@ public abstract class WebHookResource {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebHookResource.class);
 
   @Autowired
-  @Qualifier("remoteConfigurationService")
-  private ConfigurationService configurationService;
+  @Qualifier("remoteIntegrationService")
+  private IntegrationService integrationService;
 
   @Autowired
   private IntegrationBridge integrationBridge;
@@ -120,18 +119,18 @@ public abstract class WebHookResource {
   }
 
   /**
-   * Retrieve the configuration instance based on instanceId and configurationId
-   * @param instanceId Configuration instance identifier
-   * @param configurationId Configuration identifier
-   * @param configurationType Configuration type
+   * Retrieve the integration instance based on instanceId and configurationId
+   * @param instanceId Integration instance identifier
+   * @param configurationId Integration identifier
+   * @param configurationType Integration type
    * @return Configuration instance that contains information how to handle the request.
    * @throws InstanceNotFoundException Instance not found
    * @throws ForbiddenUserException
    */
-  protected ConfigurationInstance getConfigurationInstance(String instanceId,
+  protected IntegrationInstance getConfigurationInstance(String instanceId,
       String configurationId,
       String configurationType) {
-    return configurationService.getInstanceById(configurationId, instanceId, configurationType);
+    return integrationService.getInstanceById(configurationId, instanceId, configurationType);
   }
 
   /**

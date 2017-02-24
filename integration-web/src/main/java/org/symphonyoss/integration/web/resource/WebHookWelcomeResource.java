@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import com.symphony.api.pod.model.ConfigurationInstance;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -27,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
 /**
@@ -72,10 +71,10 @@ public class WebHookWelcomeResource extends WebHookResource {
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
 
     String configurationType = whiIntegration.getSettings().getType();
-    ConfigurationInstance configInstance =
+    IntegrationInstance instance =
         getConfigurationInstance(hash, configurationId, configurationType);
 
-    whiIntegration.welcome(configInstance, configurationType, body);
+    whiIntegration.welcome(instance, configurationType, body);
     return ResponseEntity.ok().body("");
   }
 }

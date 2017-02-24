@@ -24,24 +24,20 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import com.symphony.api.agent.api.MessagesApi;
-import com.symphony.api.agent.client.ApiException;
-import com.symphony.api.agent.model.V2Message;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.pod.api.StreamsApi;
-import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.api.pod.model.Stream;
-import com.symphony.api.pod.model.UserIdList;
-import com.symphony.api.pod.model.V2RoomDetail;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.model.config.StreamType;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.stream.Stream;
+import org.symphonyoss.integration.model.stream.StreamType;
+import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 
 import java.util.List;
 
@@ -63,17 +59,17 @@ public class StreamServiceTest {
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private MessagesApi messagesApi;
+  private MessageApiClient messagesApi;
 
   @Mock
-  private StreamsApi streamsApi;
+  private StreamApiClient streamsApi;
 
   @InjectMocks
   private StreamServiceImpl streamService = new StreamServiceImpl();
 
   @Test
   public void testGetStreamsEmpty() {
-    ConfigurationInstance instance = mockInstance();
+    IntegrationInstance instance = mockInstance();
     instance.setOptionalProperties("");
 
     List<String> streams = streamService.getStreams(instance);
@@ -88,7 +84,7 @@ public class StreamServiceTest {
   @Test
   public void testGetStreams() {
     String optionalProperties = "{ \"streams\": [ \"stream1\", \"stream2\"] }";
-    ConfigurationInstance instance = mockInstance();
+    IntegrationInstance instance = mockInstance();
     instance.setOptionalProperties(optionalProperties);
 
     List<String> streams = streamService.getStreams(instance);
@@ -106,7 +102,7 @@ public class StreamServiceTest {
 
   @Test
   public void testGetInvalidStreamType() {
-    ConfigurationInstance instance = mockInstance();
+    IntegrationInstance instance = mockInstance();
     instance.setOptionalProperties("");
 
     StreamType streamType = streamService.getStreamType(instance);
@@ -119,7 +115,7 @@ public class StreamServiceTest {
 
   @Test
   public void testGetStreamType() {
-    ConfigurationInstance instance = mockInstance();
+    IntegrationInstance instance = mockInstance();
     instance.setOptionalProperties("{ \"streamType\": \"IM\" }");
 
     StreamType streamType = streamService.getStreamType(instance);
@@ -130,79 +126,55 @@ public class StreamServiceTest {
     assertEquals(StreamType.CHATROOM, streamType);
   }
 
-  private ConfigurationInstance mockInstance() {
-    ConfigurationInstance instance = new ConfigurationInstance();
+  private IntegrationInstance mockInstance() {
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
 
     return instance;
   }
 
-  @Test(expected = ApiException.class)
-  public void testPostMessageApiException() throws ApiException {
+  @Test(expected = RemoteApiException.class)
+  public void testPostMessageApiException() throws RemoteApiException {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(ApiException.class).when(messagesApi).v2StreamSidMessageCreatePost(anyString(), anyString(), anyString(),
-        any(V2MessageSubmission.class));
+    doThrow(RemoteApiException.class).when(messagesApi)
+        .postMessage(anyString(), anyString(), anyString(), any(Message.class));
 
-    streamService.postMessage(INTEGRATION_USER, STREAM, new V2MessageSubmission());
+    streamService.postMessage(INTEGRATION_USER, STREAM, new Message());
   }
 
   @Test
-  public void testPostMessageSuccessfully() throws ApiException {
-    V2Message message = new V2Message();
+  public void testPostMessageSuccessfully() throws RemoteApiException {
+    Message message = new Message();
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(messagesApi.v2StreamSidMessageCreatePost(anyString(), anyString(), anyString(),
-        any(V2MessageSubmission.class))).thenReturn(message);
+    when(messagesApi.postMessage(anyString(), anyString(), anyString(),
+        any(Message.class))).thenReturn(message);
 
-    V2Message result =
-        streamService.postMessage(INTEGRATION_USER, STREAM, new V2MessageSubmission());
+    Message result = streamService.postMessage(INTEGRATION_USER, STREAM, new Message());
     assertEquals(message, result);
   }
 
-  @Test(expected = com.symphony.api.pod.client.ApiException.class)
-  public void testGetRoomInfoApiException() throws com.symphony.api.pod.client.ApiException {
+  @Test(expected = RemoteApiException.class)
+  public void testCreateIMApiException() throws RemoteApiException {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(com.symphony.api.pod.client.ApiException.class).when(streamsApi).v2RoomIdInfoGet(anyString(), anyString());
-
-    streamService.getRoomInfo(INTEGRATION_USER, STREAM);
-  }
-
-  @Test
-  public void testGetRoomInfoSuccessfully() throws com.symphony.api.pod.client.ApiException {
-    V2RoomDetail detail = new V2RoomDetail();
-    when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.v2RoomIdInfoGet(anyString(), anyString())).thenReturn(detail);
-
-    V2RoomDetail result = streamService.getRoomInfo(INTEGRATION_USER, STREAM);
-    assertEquals(detail, result);
-  }
-
-  @Test(expected = com.symphony.api.pod.client.ApiException.class)
-  public void testCreateIMApiException() throws com.symphony.api.pod.client.ApiException {
-    when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(com.symphony.api.pod.client.ApiException.class).when(streamsApi).v1ImCreatePost(any(UserIdList.class),
-        anyString());
+    doThrow(RemoteApiException.class).when(streamsApi).createIM(anyString(), any(List.class));
 
     streamService.createIM(INTEGRATION_USER, USER_ID);
   }
 
   @Test
-  public void testCreateIMSuccessfully() throws com.symphony.api.pod.client.ApiException {
+  public void testCreateIMSuccessfully() throws RemoteApiException {
     Stream stream = new Stream();
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.v1ImCreatePost(any(UserIdList.class), anyString())).thenReturn(stream);
+    when(streamsApi.createIM(anyString(), any(List.class))).thenReturn(stream);
 
     Stream result = streamService.createIM(INTEGRATION_USER, USER_ID);
     assertEquals(stream, result);

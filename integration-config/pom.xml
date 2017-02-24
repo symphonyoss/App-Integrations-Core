@@ -17,5 +17,10 @@
             <artifactId>integration-auth</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-pod-api-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -66,7 +66,8 @@ public class WebHookWelcomeResourceTest extends WebHookResourceTest {
     mockStatus(IntegrationStatus.ACTIVE);
     mockRequest();
 
-    doThrow(InstanceNotFoundException.class).when(configurationService).getInstanceById(CONFIGURATION_ID, TEST_HASH, TEST_USER);
+    doThrow(InstanceNotFoundException.class).when(integrationService)
+        .getInstanceById(CONFIGURATION_ID, TEST_HASH, TEST_USER);
 
     resource.handleWelcomeRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER, null);
   }

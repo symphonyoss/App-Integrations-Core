@@ -16,29 +16,26 @@
 
 package org.symphonyoss.integration.core.bridge;
 
-import com.symphony.api.agent.api.MessagesApi;
-import com.symphony.api.agent.client.ApiException;
-import com.symphony.api.agent.model.V2Message;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.pod.api.StreamsApi;
-import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.api.pod.model.Stream;
-import com.symphony.api.pod.model.UserIdList;
-import com.symphony.api.pod.model.V2RoomDetail;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.authentication.AgentApiClientDecorator;
+import org.symphonyoss.integration.agent.api.client.AgentApiClient;
+import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.authentication.PodApiClientDecorator;
-import org.symphonyoss.integration.model.config.StreamType;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.stream.Stream;
+import org.symphonyoss.integration.model.stream.StreamType;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 import org.symphonyoss.integration.service.StreamService;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,32 +53,32 @@ public class StreamServiceImpl implements StreamService {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private AgentApiClientDecorator agentApiClient;
+  private AgentApiClient agentApiClient;
 
   @Autowired
-  private PodApiClientDecorator podApiClient;
+  private PodHttpApiClient podApiClient;
 
   /**
-   * Agent Messages API Client
+   * Agent Message API Client
    */
-  private MessagesApi messagesApi;
+  private MessageApiClient messagesApi;
 
   /**
    * Pod Stream API Client
    */
-  private StreamsApi streamsApi;
+  private StreamApiClient streamsApi;
 
   /**
-   * Initialize {@link MessagesApi}
+   * Initialize
    */
   @PostConstruct
   public void init() {
-    messagesApi = new MessagesApi(agentApiClient);
-    streamsApi = new StreamsApi(podApiClient);
+    messagesApi = new MessageApiClient(agentApiClient);
+    streamsApi = new StreamApiClient(podApiClient);
   }
 
   @Override
-  public List<String> getStreams(ConfigurationInstance instance) {
+  public List<String> getStreams(IntegrationInstance instance) {
     return getStreams(instance.getOptionalProperties());
   }
 
@@ -96,7 +93,7 @@ public class StreamServiceImpl implements StreamService {
   }
 
   @Override
-  public StreamType getStreamType(ConfigurationInstance instance) {
+  public StreamType getStreamType(IntegrationInstance instance) {
     try {
       return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
     } catch (IOException e) {
@@ -106,33 +103,24 @@ public class StreamServiceImpl implements StreamService {
   }
 
   @Override
-  public V2Message postMessage(String integrationUser, String stream,
-      V2MessageSubmission messageSubmission) throws ApiException {
+  public Message postMessage(String integrationUser, String stream, Message messageSubmission)
+      throws RemoteApiException {
     AuthenticationToken authToken = authenticationProxy.getToken(integrationUser);
 
     String sessionToken = authToken.getSessionToken();
     String keyManagerToken = authToken.getKeyManagerToken();
 
     // Post Message using Message API
-    return messagesApi.v2StreamSidMessageCreatePost(stream, sessionToken, keyManagerToken,
-        messageSubmission);
+    return messagesApi.postMessage(sessionToken, keyManagerToken, stream, messageSubmission);
   }
 
   @Override
-  public V2RoomDetail getRoomInfo(String integrationUser, String stream)
-      throws com.symphony.api.pod.client.ApiException {
-    return streamsApi.v2RoomIdInfoGet(stream, authenticationProxy.getSessionToken(integrationUser));
-  }
-
-  @Override
-  public Stream createIM(String integrationUser, Long userId)
-      throws com.symphony.api.pod.client.ApiException {
-    UserIdList userIdList = new UserIdList();
+  public Stream createIM(String integrationUser, Long userId) throws RemoteApiException {
+    List<Long> userIdList = new ArrayList<>();
     userIdList.add(userId);
 
     // Create IM
-    return streamsApi.v1ImCreatePost(userIdList,
-        authenticationProxy.getSessionToken(integrationUser));
+    return streamsApi.createIM(authenticationProxy.getSessionToken(integrationUser), userIdList);
   }
 
 }

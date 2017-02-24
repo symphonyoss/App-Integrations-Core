@@ -72,6 +72,11 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.symphony.sbe.core</groupId>
+            <artifactId>pod-api-client</artifactId>
+            <version>${symphony.sbe.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.symphony.common</groupId>
             <artifactId>webcommons</artifactId>
             <version>${symphony.common.version}</version>

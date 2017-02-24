@@ -16,12 +16,6 @@
 
 package org.symphonyoss.integration.core.bridge;
 
-import com.symphony.api.agent.client.ApiException;
-import com.symphony.api.agent.model.V2Message;
-import com.symphony.api.agent.model.V2MessageList;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.pod.model.ConfigurationInstance;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +25,12 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.ProcessingException;
@@ -56,9 +53,8 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private IntegrationBridgeExceptionHandler exceptionHandler;
 
   @Override
-  public V2MessageList sendMessage(ConfigurationInstance instance, String integrationUser,
-      String message) {
-    V2MessageList result = new V2MessageList();
+  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, String message) {
+    List<Message> result = new ArrayList<>();
     List<String> streams = streamService.getStreams(instance);
 
     if (streams.isEmpty()) {
@@ -70,13 +66,13 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   }
 
   @Override
-  public V2MessageList sendMessage(ConfigurationInstance instance, String integrationUser,
+  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
       List<String> streams, String message) {
-    V2MessageList result = new V2MessageList();
+    List<Message> result = new ArrayList<>();
 
     for (String stream : streams) {
       try {
-        V2Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
+        Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
@@ -98,38 +94,35 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
    * @param stream the stream identifier.
    * @param message the actual message. It's expected to be already on proper format.
    * @return
-   * @throws ApiException
+   * @throws RemoteApiException
    */
-  private V2Message postMessageWithRetry(String integrationUser, String stream, String message)
+  private Message postMessageWithRetry(String integrationUser, String stream, String message)
       throws RemoteApiException {
     try {
       return postMessageToStream(integrationUser, stream, message);
-    } catch (ApiException e) {
+    } catch (RemoteApiException e) {
       LOGGER.error("Fail to post message", e);
       throw new RemoteApiException(e.getCode(), e);
     }
   }
 
-  private V2Message postMessageToStream(String integrationUser, String stream, String message)
-      throws ApiException {
-
-    V2MessageSubmission messageSubmission = buildMessage(message);
-    V2Message messageResponse =
-        streamService.postMessage(integrationUser, stream, messageSubmission);
+  private Message postMessageToStream(String integrationUser, String stream, String message)
+      throws RemoteApiException {
+    Message messageSubmission = buildMessage(message);
+    Message messageResponse = streamService.postMessage(integrationUser, stream, messageSubmission);
     LOGGER.info("Message posted to stream {} ", stream);
 
     return messageResponse;
   }
-
 
   /**
    * Build the Message Object
    * @param message Message text
    * @return
    */
-  private V2MessageSubmission buildMessage(String message) {
-    V2MessageSubmission messageSubmission = new V2MessageSubmission();
-    messageSubmission.setFormat(V2MessageSubmission.FormatEnum.MESSAGEML);
+  private Message buildMessage(String message) {
+    Message messageSubmission = new Message();
+    messageSubmission.setFormat(Message.FormatEnum.MESSAGEML);
     messageSubmission.setMessage(message);
     return messageSubmission;
   }

@@ -16,8 +16,7 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
-    .DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
 import com.symphony.api.pod.api.SecurityApi;
 import com.symphony.api.pod.client.ApiException;
@@ -35,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.PodApiClientDecorator;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.provisioning.client.PodApiClientDecorator;
 import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 

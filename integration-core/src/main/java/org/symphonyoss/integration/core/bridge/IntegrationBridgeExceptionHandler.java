@@ -18,13 +18,6 @@ package org.symphonyoss.integration.core.bridge;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import com.symphony.api.agent.client.ApiException;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.pod.api.UsersApi;
-import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.api.pod.model.Stream;
-import com.symphony.api.pod.model.UserV2;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,12 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.PodApiClientDecorator;
+import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.ExceptionHandler;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
-import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.stream.Stream;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.UserApiClient;
+import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.service.StreamService;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
@@ -83,25 +81,25 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   @Autowired
   private AuthenticationProxy authenticationProxy;
 
-  @Qualifier("remoteConfigurationService")
+  @Qualifier("remoteIntegrationService")
   @Autowired
-  private ConfigurationService configurationService;
+  private IntegrationService integrationService;
 
   @Autowired
   private StreamService streamService;
 
   @Autowired
-  private PodApiClientDecorator podApiClient;
+  private PodHttpApiClient podApiClient;
 
-  private UsersApi usersApi;
+  private UserApiClient usersApi;
 
   @PostConstruct
   public void init() {
-    usersApi = new UsersApi(podApiClient);
+    usersApi = new UserApiClient(podApiClient);
   }
 
   public void handleRemoteApiException(RemoteApiException remoteException,
-      ConfigurationInstance instance, String integrationUser, String message, String stream) {
+      IntegrationInstance instance, String integrationUser, String message, String stream) {
     int code = remoteException.getCode();
     Status status = Status.fromStatusCode(code);
 
@@ -121,12 +119,12 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   }
 
   /**
-   * Update the configuration instance removing the stream. Needs to notify the instance owner.
+   * Update the integration instance removing the stream. Needs to notify the instance owner.
    * @param instance to determine the unreachable room name and provide info for the remaining process.
    * @param integrationUser to remove the stream from the instance and to notify the instance owner.
    * @param stream to be removed from the instance.
    */
-  private void updateStreams(ConfigurationInstance instance, String integrationUser, String stream) {
+  private void updateStreams(IntegrationInstance instance, String integrationUser, String stream) {
     try {
       String roomName = StringUtils.EMPTY;
       Iterator<JsonNode> rooms =
@@ -150,13 +148,13 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   /**
    * Remove stream from instance
-   * @param instance Configuration instance
+   * @param instance Integration instance
    * @param integrationUser Integration user
    * @param stream Stream that will be removed
    * @throws IntegrationConfigException Reports failure to save the configuration instance
    * @throws IOException Reports failure to read or write the JSON nodes
    */
-  private void removeStreamFromInstance(ConfigurationInstance instance, String integrationUser,
+  private void removeStreamFromInstance(IntegrationInstance instance, String integrationUser,
       String stream) throws IOException {
     String optionalProperties = instance.getOptionalProperties();
 
@@ -167,7 +165,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
         WebHookConfigurationUtils.setStreams(optionalProperties, streams);
     instance.setOptionalProperties(WebHookConfigurationUtils.toJsonString(optionalPropertiesNode));
 
-    configurationService.save(instance, integrationUser);
+    integrationService.save(instance, integrationUser);
   }
 
   /**
@@ -176,7 +174,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
    * @param integrationUser to determine which integration user is going to post the message.
    * @param roomName to tell the user which room we can't reach.
    */
-  private void notifyInstanceOwner(ConfigurationInstance instance, String integrationUser, String roomName) {
+  private void notifyInstanceOwner(IntegrationInstance instance, String integrationUser, String roomName) {
     try {
       // Create IM
       Long ownerUserId = WebHookConfigurationUtils.getOwner(instance.getOptionalProperties());
@@ -184,7 +182,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
       // Posting message through the IM
       postIM(integrationUser, roomName, im.getId(), instance.getName());
-    } catch (ApiException | com.symphony.api.pod.client.ApiException | IOException e) {
+    } catch (RemoteApiException | IOException e) {
       LOGGER.error("Fail to notify owner", e);
     }
   }
@@ -195,23 +193,24 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
    * @param roomName to tell the user which room we can't reach.
    * @param im to determine where to post the actual message.
    * @param instanceName just in case we can't determine the room name.
-   * @throws ApiException when something goes wrong with the API while sending the message.
+   * @throws RemoteApiException when something goes wrong with the API while sending the message.
    */
   private void postIM(String integrationUser, String roomName, String im, String instanceName)
-      throws ApiException, com.symphony.api.pod.client.ApiException {
+      throws RemoteApiException {
 
-    UserV2 userInfo =
-        usersApi.v2UserGet(authenticationProxy.getSessionToken(integrationUser), null, null, integrationUser, true);
+    User userInfo = usersApi.getUserByUsername(authenticationProxy.getSessionToken(integrationUser),
+        integrationUser);
 
     String message;
+
     if (isBlank(roomName)) {
       message = String.format(UNDETERMINED_ROOM_NOTIFICATION, userInfo.getDisplayName(), instanceName);
     } else {
       message = String.format(DEFAULT_NOTIFICATION, userInfo.getDisplayName(), roomName, roomName);
     }
 
-    V2MessageSubmission messageSubmission = new V2MessageSubmission();
-    messageSubmission.setFormat(V2MessageSubmission.FormatEnum.MESSAGEML);
+    Message messageSubmission = new Message();
+    messageSubmission.setFormat(Message.FormatEnum.MESSAGEML);
     messageSubmission.setMessage(message);
 
     streamService.postMessage(integrationUser, im, messageSubmission);

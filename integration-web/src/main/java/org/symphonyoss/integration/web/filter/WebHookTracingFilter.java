@@ -54,10 +54,10 @@ public class WebHookTracingFilter implements Filter {
 
     if (isBlank(xTraceInHeader)) {
       DistributedTracingUtils.setMDC();
-      LOG.info("Starting trace for request %s", request.getRequestURL());
+      LOG.info("Starting trace for request {}", request.getRequestURL());
     } else {
       DistributedTracingUtils.setMDC(xTraceInHeader);
-      LOG.info("Continuing trace for request %s", request.getRequestURL());
+      LOG.info("Continuing trace for request {}", request.getRequestURL());
     }
     filterChain.doFilter(servletRequest, servletResponse);
     DistributedTracingUtils.clearMDC();

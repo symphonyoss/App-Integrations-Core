@@ -20,6 +20,12 @@
 
         <dependency>
             <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-agent-api-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
             <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
