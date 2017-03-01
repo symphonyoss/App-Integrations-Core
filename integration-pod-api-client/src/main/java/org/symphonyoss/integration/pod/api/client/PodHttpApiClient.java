@@ -19,106 +19,37 @@ package org.symphonyoss.integration.pod.api.client;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.api.client.HttpApiClient;
-import org.symphonyoss.integration.api.client.ReAuthenticationApiClient;
-import org.symphonyoss.integration.api.client.trace.TraceLoggingApiClient;
-import org.symphonyoss.integration.api.client.metrics.ApiMetricsController;
-import org.symphonyoss.integration.api.client.metrics.MetricsHttpApiClient;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.api.client.AuthenticationProxyApiClient;
-import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.api.client.SymphonyApiClient;
+import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.pod.api.exception.PodUrlNotFoundException;
-
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.ws.rs.client.Client;
 
 /**
  * Low-level HTTP client to query POD API.
  * Created by rsanchez on 22/02/17.
  */
 @Component
-public class PodHttpApiClient implements HttpApiClient {
+public class PodHttpApiClient extends SymphonyApiClient {
 
-  @Autowired
-  private AuthenticationProxy proxy;
+  private static final String SERVICE_NAME = "POD";
 
-  @Autowired
-  private ApiMetricsController metricsController;
+  private static final String REQUIRED_KEY = "pod.host";
 
   @Autowired
   private IntegrationProperties properties;
 
-  private HttpApiClient client;
+  public PodHttpApiClient() {
+    super(SERVICE_NAME);
+  }
 
-  @PostConstruct
-  public void init() {
+  @Override
+  protected String getBasePath() {
     String url = properties.getPodUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new PodUrlNotFoundException("Verify the YAML configuration file. No configuration "
-          + "found to the key pod.host");
+      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY);
     }
 
-    buildHttpClient(url);
+    return url;
   }
 
-  /**
-   * Builds the HTTP client and set the base path.
-   * This HTTP client should implement connectivity exception handling, re-authentication, trace
-   * logging, and metric counters.
-   * @param basePath Base path
-   */
-  private void buildHttpClient(String basePath) {
-    AuthenticationProxyApiClient jsonClient = new AuthenticationProxyApiClient(proxy);
-    jsonClient.setBasePath(basePath);
-
-    PodConnectivityApiClientDecorator connectivityApiClient =
-        new PodConnectivityApiClientDecorator(jsonClient);
-
-    ReAuthenticationApiClient reAuthApiClient =
-        new ReAuthenticationApiClient(proxy, connectivityApiClient);
-
-    TraceLoggingApiClient traceLoggingApiClient = new TraceLoggingApiClient(reAuthApiClient);
-
-    this.client = new MetricsHttpApiClient(metricsController, traceLoggingApiClient);
-  }
-
-  @Override
-  public String escapeString(String str) {
-    return client.escapeString(str);
-  }
-
-  @Override
-  public <T> T doGet(String path, Map<String, String> headerParams, Map<String, String> queryParams,
-      Class<T> returnType) throws RemoteApiException {
-    return client.doGet(path, headerParams, queryParams, returnType);
-  }
-
-  @Override
-  public <T> T doPost(String path, Map<String, String> headerParams,
-      Map<String, String> queryParams, Object payload, Class<T> returnType)
-      throws RemoteApiException {
-    return client.doPost(path, headerParams, queryParams, payload, returnType);
-  }
-
-  @Override
-  public <T> T doPut(String path, Map<String, String> headerParams, Map<String, String> queryParams,
-      Object payload, Class<T> returnType) throws RemoteApiException {
-    return client.doPut(path, headerParams, queryParams, payload, returnType);
-  }
-
-  @Override
-  public <T> T doDelete(String path, Map<String, String> headerParams,
-      Map<String, String> queryParams, Class<T> returnType) throws RemoteApiException {
-    return client.doDelete(path, headerParams, queryParams, returnType);
-  }
-
-  @Override
-  public Client getClientForContext(Map<String, String> queryParams,
-      Map<String, String> headerParams) {
-    return client.getClientForContext(queryParams, headerParams);
-  }
 }

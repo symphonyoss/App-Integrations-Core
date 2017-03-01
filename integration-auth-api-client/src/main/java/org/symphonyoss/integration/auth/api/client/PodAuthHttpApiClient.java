@@ -19,62 +19,37 @@ package org.symphonyoss.integration.auth.api.client;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.api.client.AuthenticationProxyApiClient;
-import org.symphonyoss.integration.api.client.ReAuthenticationApiClient;
-import org.symphonyoss.integration.api.client.metrics.ApiMetricsController;
-import org.symphonyoss.integration.api.client.metrics.MetricsHttpApiClient;
-import org.symphonyoss.integration.api.client.trace.TraceLoggingApiClient;
-import org.symphonyoss.integration.auth.api.exception.AuthUrlNotFoundException;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.api.client.SymphonyApiClient;
+import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Low-level HTTP client to query Authentication API used to authenticate on the POD.
  * Created by rsanchez on 22/02/17.
  */
 @Component
-public class PodAuthHttpApiClient extends AuthHttpApiClient {
+public class PodAuthHttpApiClient extends SymphonyApiClient {
 
-  @Autowired
-  private AuthenticationProxy proxy;
+  private static final String SERVICE_NAME = "POD Session Manager";
 
-  @Autowired
-  private ApiMetricsController metricsController;
+  private static final String REQUIRED_KEY = "pod_session_manager.host";
 
   @Autowired
   private IntegrationProperties properties;
 
-  @PostConstruct
-  public void init() {
+  public PodAuthHttpApiClient() {
+    super(SERVICE_NAME);
+  }
+
+  @Override
+  protected String getBasePath() {
     String url = properties.getSessionManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new AuthUrlNotFoundException("Verify the YAML configuration file. No configuration "
-          + "found to the key pod_session_manager.host");
+      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY);
     }
 
-    buildHttpClient(url);
-  }
-
-  /**
-   * Builds the HTTP client and set the base path
-   * @param basePath Base path
-   */
-  private void buildHttpClient(String basePath) {
-    AuthenticationProxyApiClient jsonClient = new AuthenticationProxyApiClient(proxy);
-    jsonClient.setBasePath(basePath);
-
-    PodAuthConnectivityApiClientDecorator connectivityApiClient =
-        new PodAuthConnectivityApiClientDecorator(jsonClient);
-
-    ReAuthenticationApiClient reAuthApiClient =
-        new ReAuthenticationApiClient(proxy, connectivityApiClient);
-
-    TraceLoggingApiClient traceLoggingApiClient = new TraceLoggingApiClient(reAuthApiClient);
-
-    this.client = new MetricsHttpApiClient(metricsController, traceLoggingApiClient);
+    return url;
   }
 
 }

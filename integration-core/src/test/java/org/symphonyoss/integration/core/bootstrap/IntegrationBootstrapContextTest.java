@@ -41,6 +41,7 @@ import org.springframework.context.ApplicationContext;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -48,7 +49,6 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.pod.api.exception.PodConnectivityException;
 import org.symphonyoss.integration.service.IntegrationService;
 
 import java.util.Collections;
@@ -261,7 +261,7 @@ public class IntegrationBootstrapContextTest {
    */
   @Test
   public void testStartupWithConnectivityException() throws InterruptedException {
-    doThrow(PodConnectivityException.class).doNothing().when(integration).onCreate(TEST_USER);
+    doThrow(ConnectivityException.class).doNothing().when(integration).onCreate(TEST_USER);
 
     this.integrationBootstrapContext.initIntegrations();
 

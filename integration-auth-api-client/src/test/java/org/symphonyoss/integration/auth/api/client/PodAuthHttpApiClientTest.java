@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.auth.api.exception.AuthUrlNotFoundException;
+import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -41,7 +41,7 @@ public class PodAuthHttpApiClientTest {
   @InjectMocks
   private PodAuthHttpApiClient podAuthHttpApiClient = new PodAuthHttpApiClient();
 
-  @Test(expected = AuthUrlNotFoundException.class)
+  @Test(expected = MissingConfigurationException.class)
   public void testInitFail() {
     podAuthHttpApiClient.init();
 
