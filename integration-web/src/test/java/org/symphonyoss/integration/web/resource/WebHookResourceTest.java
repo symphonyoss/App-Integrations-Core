@@ -18,16 +18,14 @@ package org.symphonyoss.integration.web.resource;
 
 import static org.mockito.Mockito.when;
 
-import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.api.pod.model.V1Configuration;
-
 import org.mockito.Mock;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
-import org.symphonyoss.integration.service.ConfigurationService;
 import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
 import java.util.ArrayList;
@@ -68,8 +66,8 @@ public abstract class WebHookResourceTest {
    */
   public static final String TEST_USER = "jiraWebHookIntegration";
 
-  @Mock(name = "configurationService")
-  protected ConfigurationService configurationService;
+  @Mock(name = "integrationService")
+  protected IntegrationService integrationService;
 
   @Mock(name = "integrationBridge")
   protected IntegrationBridge integrationBridge;
@@ -78,13 +76,13 @@ public abstract class WebHookResourceTest {
    * Used within mocked services.
    */
   @Mock
-  protected V1Configuration whiConfiguration;
+  protected IntegrationSettings settings;
 
   /**
    * Used within mocked services.
    */
   @Mock
-  protected ConfigurationInstance whiInstance;
+  protected IntegrationInstance whiInstance;
 
   /**
    * Used within mocked services.
@@ -125,23 +123,22 @@ public abstract class WebHookResourceTest {
 
   protected void mockConfiguration(boolean enabled) throws IntegrationConfigException {
     // mocking configuration
-    when(whiConfiguration.getConfigurationId()).thenReturn(CONFIGURATION_ID);
-    when(whiConfiguration.getEnabled()).thenReturn(enabled);
-    when(whiConfiguration.getType()).thenReturn(TEST_USER);
+    when(settings.getConfigurationId()).thenReturn(CONFIGURATION_ID);
+    when(settings.getEnabled()).thenReturn(enabled);
+    when(settings.getType()).thenReturn(TEST_USER);
 
     // mocking configurationInstance
     when(whiInstance.getConfigurationId()).thenReturn(CONFIGURATION_ID);
 
     // mocking configuration service
-    when(configurationService.getInstanceById(CONFIGURATION_ID, TEST_HASH, TEST_USER)).thenReturn(
+    when(integrationService.getInstanceById(CONFIGURATION_ID, TEST_HASH, TEST_USER)).thenReturn(
         whiInstance);
-    when(configurationService.getConfigurationById(CONFIGURATION_ID, TEST_USER)).thenReturn(
-        whiConfiguration);
+    when(integrationService.getIntegrationById(CONFIGURATION_ID, TEST_USER)).thenReturn(
+        settings);
 
     // mocking integration bridge
     when(integrationBridge.getIntegrationById(CONFIGURATION_ID)).thenReturn(whiIntegration);
 
-    IntegrationSettings settings = new IntegrationSettings(whiConfiguration);
     when(whiIntegration.getSettings()).thenReturn(settings);
   }
 }

@@ -28,8 +28,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.symphony.api.pod.model.V1Configuration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,8 +40,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
-import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -51,7 +49,7 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.service.IntegrationService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +76,7 @@ public class IntegrationBootstrapContextTest {
   private ApplicationContext context;
 
   @Mock
-  private ConfigurationService configService;
+  private IntegrationService integrationService;
 
   @Mock
   private Integration integration;
@@ -112,11 +110,10 @@ public class IntegrationBootstrapContextTest {
     when(this.context.getBeansOfType(Integration.class)).thenReturn(integrations);
 
     // Mocking configuration
-    V1Configuration configuration = new V1Configuration();
-    configuration.setConfigurationId(CONFIGURATION_ID);
-    configuration.setType(WEBHOOKINTEGRATION_TYPE_JIRA);
+    IntegrationSettings settings = new IntegrationSettings();
+    settings.setConfigurationId(CONFIGURATION_ID);
+    settings.setType(WEBHOOKINTEGRATION_TYPE_JIRA);
 
-    IntegrationSettings settings = new IntegrationSettings(configuration);
     when(integration.getSettings()).thenReturn(settings);
 
     // Mocking integration status
@@ -264,7 +261,7 @@ public class IntegrationBootstrapContextTest {
    */
   @Test
   public void testStartupWithConnectivityException() throws InterruptedException {
-    doThrow(PodConnectivityException.class).doNothing().when(integration).onCreate(TEST_USER);
+    doThrow(ConnectivityException.class).doNothing().when(integration).onCreate(TEST_USER);
 
     this.integrationBootstrapContext.initIntegrations();
 

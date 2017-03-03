@@ -16,6 +16,10 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -23,12 +27,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-
-import com.symphony.api.agent.client.ApiException;
-import com.symphony.api.agent.model.V2Message;
-import com.symphony.api.agent.model.V2MessageList;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.pod.model.ConfigurationInstance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Assert;
@@ -40,11 +38,14 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
 import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.ProcessingException;
 
@@ -75,90 +76,82 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testSendMessageWithoutStreamsConfigured() {
-    doReturn(Collections.EMPTY_LIST).when(streamService)
-        .getStreams(any(ConfigurationInstance.class));
+    doReturn(Collections.EMPTY_LIST).when(streamService).getStreams(any(IntegrationInstance.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
 
-    V2MessageList result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
 
-    Assert.assertNotNull(result);
-    Assert.assertTrue(result.isEmpty());
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
   }
 
   @Test
-  public void testSendMessageSuccessfully()
-      throws ApiException, JsonProcessingException {
-    doReturn(mock(V2Message.class)).when(streamService)
-        .postMessage(anyString(), anyString(), any(V2MessageSubmission.class));
+  public void testSendMessageSuccessfully() throws RemoteApiException, JsonProcessingException {
+    doReturn(mock(Message.class)).when(streamService)
+        .postMessage(anyString(), anyString(), any(Message.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    V2MessageList result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
 
-    Assert.assertNotNull(result);
-    Assert.assertFalse(result.isEmpty());
-    Assert.assertEquals(2, result.size());
+    assertNotNull(result);
+    assertFalse(result.isEmpty());
+    assertEquals(2, result.size());
   }
 
   @Test
-  public void testSendMessageWithPostErrors()
-      throws ApiException, JsonProcessingException {
-    doReturn(mock(V2Message.class)).when(streamService).postMessage(anyString(), eq("stream2"),
-        any(V2MessageSubmission.class));
+  public void testSendMessageWithPostErrors() throws RemoteApiException, JsonProcessingException {
+    doReturn(mock(Message.class)).when(streamService).postMessage(anyString(), eq("stream2"),
+        any(Message.class));
 
-    doThrow(ApiException.class).when(streamService).postMessage(anyString(), eq("stream1"),
-        any(V2MessageSubmission.class));
+    doThrow(RemoteApiException.class).when(streamService).postMessage(anyString(), eq("stream1"),
+        any(Message.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    V2MessageList result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
 
-    Assert.assertNotNull(result);
-    Assert.assertFalse(result.isEmpty());
-    Assert.assertEquals(1, result.size());
+    assertNotNull(result);
+    assertFalse(result.isEmpty());
+    assertEquals(1, result.size());
   }
 
   @Test
-  public void testSendMessageUnauthenticated()
-      throws ApiException, JsonProcessingException {
-    ApiException exception = new ApiException(401, "Unauthorized");
+  public void testSendMessageUnauthenticated() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exception = new RemoteApiException(401, "Unauthorized");
 
-    doThrow(exception).when(streamService)
-        .postMessage(anyString(), anyString(), any(V2MessageSubmission.class));
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    V2MessageList result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
 
-    Assert.assertNotNull(result);
-    Assert.assertTrue(result.isEmpty());
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
   }
 
   @Test(expected = ProcessingException.class)
-  public void testSendMessageSocketException()
-      throws ApiException, com.symphony.api.auth.client.ApiException, JsonProcessingException,
-      RemoteApiException {
+  public void testSendMessageSocketException() throws RemoteApiException, JsonProcessingException{
     ProcessingException exception = new ProcessingException(new ConnectException());
 
-    doThrow(exception).when(streamService)
-        .postMessage(anyString(), anyString(), any(V2MessageSubmission.class));
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
     doThrow(exception).when(authenticationProxy)
-        .reAuthOrThrow(anyString(), anyInt(), any(ApiException.class));
+        .reAuthOrThrow(anyString(), anyInt(), any(RemoteApiException.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
@@ -167,26 +160,23 @@ public class IntegrationBridgeTest {
   }
 
   @Test
-  public void testSendMessageUnexpectedException()
-      throws ApiException, com.symphony.api.auth.client.ApiException, JsonProcessingException,
-      RemoteApiException {
+  public void testSendMessageUnexpectedException() throws JsonProcessingException, RemoteApiException {
     Exception exception = new RuntimeException();
 
-    doThrow(exception).when(streamService)
-        .postMessage(anyString(), anyString(), any(V2MessageSubmission.class));
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
     doThrow(exception).when(authenticationProxy)
-        .reAuthOrThrow(anyString(), anyInt(), any(ApiException.class));
+        .reAuthOrThrow(anyString(), anyInt(), any(RemoteApiException.class));
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    V2MessageList result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
 
-    Assert.assertNotNull(result);
-    Assert.assertTrue(result.isEmpty());
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
   }
 
 }

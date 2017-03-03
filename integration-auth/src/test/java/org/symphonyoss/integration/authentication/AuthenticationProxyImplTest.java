@@ -20,14 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
-import com.symphony.api.auth.client.ApiException;
-import com.symphony.api.auth.model.Token;
-
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,25 +32,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
-import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
-import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
-import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
-import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
+import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
+import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
+import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
+import org.symphonyoss.integration.auth.api.model.Token;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.io.IOException;
 import java.security.KeyStore;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 /**
+ * Unit test for {@link AuthenticationProxy}
  * Created by rsanchez on 10/05/16.
  */
 @RunWith(SpringRunner.class)
@@ -86,17 +78,17 @@ public class AuthenticationProxyImplTest {
 
   private static final String KM_TOKEN2 = "3975bd7f-a6c1-4ec4-806d-c241991889a1";
 
-  @Mock
-  private AuthenticationApiDecorator sbeAuthApi;
-
-  @Mock
-  private AuthenticationApiDecorator keyManagerAuthApi;
-
-  @SpyBean
-  private IntegrationProperties properties;
+  @MockBean
+  private PodAuthHttpApiClient podAuthHttpApiClient;
 
   @MockBean
-  private ApiMetricsController metricsController;
+  private KmAuthHttpApiClient kmAuthHttpApiClient;
+
+  @Mock
+  private AuthenticationApiClient sbeAuthApi;
+
+  @Mock
+  private AuthenticationApiClient keyManagerAuthApi;
 
   @Mock
   private KeyStore jiraKs;
@@ -132,52 +124,18 @@ public class AuthenticationProxyImplTest {
   }
 
   @Test
-  public void testInit() {
-    assertEquals("https://nexus.symphony.com:8444/sessionauth", properties.getSessionManagerAuthUrl());
-    assertEquals("https://nexus.symphony.com:8444/keyauth", properties.getKeyManagerAuthUrl());
-  }
-
-  @Test
-  public void testInitWithoutSBEUrl() {
-    try {
-      given(properties.getSessionManagerAuthUrl()).willReturn(StringUtils.EMPTY);
-      proxy.init();
-      fail();
-    } catch (AuthUrlNotFoundException e) {
-      assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
-          "Verify the YAML configuration file. No configuration found to the key "
-              + "pod_session_manager.host"),
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void testInitWithoutKeyManagerUrl() {
-    try {
-      given(properties.getKeyManagerAuthUrl()).willReturn(StringUtils.EMPTY);
-      proxy.init();
-      fail();
-    } catch (AuthUrlNotFoundException e) {
-      assertEquals(ExceptionMessageFormatter.format("Authentication Proxy",
-          "Verify the YAML configuration file. No configuration found to the key "
-              + "key_manager_auth.host"),
-          e.getMessage());
-    }
-  }
-
-  @Test
-  public void testFailAuthenticationSBE() throws ApiException {
-    doThrow(ApiException.class).when(sbeAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
+  public void testFailAuthenticationSBE() throws RemoteApiException {
+    doThrow(RemoteApiException.class).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
     validateFailedAuthentication();
   }
 
   @Test
-  public void testFailAuthenticationKeyManager() throws ApiException {
+  public void testFailAuthenticationKeyManager() throws RemoteApiException {
     Token sessionToken = new Token();
     sessionToken.setName("sessionToken");
 
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    doThrow(ApiException.class).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
+    doReturn(sessionToken).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    doThrow(RemoteApiException.class).when(keyManagerAuthApi).authenticate(JIRAWEBHOOK);
 
     validateFailedAuthentication();
   }
@@ -186,57 +144,19 @@ public class AuthenticationProxyImplTest {
     try {
       proxy.authenticate(JIRAWEBHOOK);
       fail();
-    } catch (ApiException e) {
+    } catch (RemoteApiException e) {
       assertTrue(proxy.getToken(JIRAWEBHOOK).equals(AuthenticationToken.VOID_AUTH_TOKEN));
       assertFalse(proxy.isAuthenticated(JIRAWEBHOOK));
     }
   }
 
-  @Test(expected = PodConnectivityException.class)
-  public void testFailAuthenticationPodConnectivityException() throws ApiException {
-    ProcessingException exception = new ProcessingException(new IOException());
-
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(exception);
-    proxy.authenticate(JIRAWEBHOOK);
-  }
-
-  @Test(expected = ProcessingException.class)
-  public void testFailAuthenticationPodProcessingException() throws ApiException {
-    doThrow(ProcessingException.class).when(sbeAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
-    proxy.authenticate(JIRAWEBHOOK);
-  }
-
-  @Test(expected = KeyManagerConnectivityException.class)
-  public void testFailAuthenticationKMConnectivityException() throws ApiException {
-    Token sessionToken = new Token();
-    sessionToken.setName("sessionToken");
-
-    ProcessingException exception = new ProcessingException(new IOException());
-
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    doThrow(exception).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
-
-    proxy.authenticate(JIRAWEBHOOK);
-  }
-
-  @Test(expected = ProcessingException.class)
-  public void testFailAuthenticationKMProcessingException() throws ApiException {
-    Token sessionToken = new Token();
-    sessionToken.setName("sessionToken");
-
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    doThrow(ProcessingException.class).when(keyManagerAuthApi).v1AuthenticatePost(JIRAWEBHOOK);
-
-    proxy.authenticate(JIRAWEBHOOK);
-  }
-
   @Test
-  public void testAuthentication() throws ApiException {
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(sessionToken);
-    when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(kmToken);
+  public void testAuthentication() throws RemoteApiException {
+    doReturn(sessionToken).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    doReturn(kmToken).when(keyManagerAuthApi).authenticate(JIRAWEBHOOK);
 
-    when(sbeAuthApi.v1AuthenticatePost(SIMPLEWEBHOOK)).thenReturn(sessionToken2);
-    when(keyManagerAuthApi.v1AuthenticatePost(SIMPLEWEBHOOK)).thenReturn(kmToken2);
+    doReturn(sessionToken2).when(sbeAuthApi).authenticate(SIMPLEWEBHOOK);
+    doReturn(kmToken2).when(keyManagerAuthApi).authenticate(SIMPLEWEBHOOK);
 
     proxy.authenticate(JIRAWEBHOOK);
     proxy.authenticate(SIMPLEWEBHOOK);
@@ -251,7 +171,7 @@ public class AuthenticationProxyImplTest {
   }
 
   @Test
-  public void testInvalidate() throws ApiException {
+  public void testInvalidate() throws RemoteApiException {
     testAuthentication();
 
     proxy.invalidate(JIRAWEBHOOK);
@@ -276,15 +196,15 @@ public class AuthenticationProxyImplTest {
   }
 
   @Test(expected = UnexpectedAuthException.class)
-  public void testReAuthFailed() throws RemoteApiException, ApiException {
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenThrow(new ApiException());
+  public void testReAuthFailed() throws RemoteApiException {
+    doThrow(new RemoteApiException(500, new RuntimeException())).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
     proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
   }
 
   @Test
-  public void testReAuth() throws ApiException, RemoteApiException {
-    when(sbeAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(new Token());
-    when(keyManagerAuthApi.v1AuthenticatePost(JIRAWEBHOOK)).thenReturn(new Token());
+  public void testReAuth() throws RemoteApiException {
+    doReturn(new Token()).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    doReturn(new Token()).when(keyManagerAuthApi).authenticate(JIRAWEBHOOK);
     proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
   }
 }

@@ -18,8 +18,6 @@ package org.symphonyoss.integration.core.bootstrap;
 
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
-import com.symphony.api.pod.model.V1Configuration;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

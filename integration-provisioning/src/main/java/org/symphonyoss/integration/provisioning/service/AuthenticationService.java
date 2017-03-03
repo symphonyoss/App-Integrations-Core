@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
 import java.io.FileInputStream;
@@ -60,7 +61,7 @@ public class AuthenticationService {
       setupSSLContext(userId, trustStore, trustStorePassword, trustStoreType, keystore,
           keyStorePassword, keyStoreType);
       authenticationProxy.authenticate(userId);
-    } catch (com.symphony.api.auth.client.ApiException e) {
+    } catch (RemoteApiException e) {
       LOGGER.error("Failed: status=" + e.getCode(), e);
       throw new IntegrationProvisioningAuthException(e);
     } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {

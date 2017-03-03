@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.provisioning;
 
-import com.symphony.api.pod.model.V1Configuration;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
@@ -157,8 +156,8 @@ public class IntegrationProvisioningService {
   private void provisioningApplication(Application application) {
     LOGGER.info("Provisioning application: {}", application.getId());
 
-    V1Configuration configuration = configurationService.setupConfiguration(application);
-    applicationService.setupApplication(configuration.getConfigurationId(), application);
+    IntegrationSettings settings = configurationService.setupConfiguration(application);
+    applicationService.setupApplication(settings.getConfigurationId(), application);
 
     userService.setupBotUser(application);
 

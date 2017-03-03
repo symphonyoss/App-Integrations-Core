@@ -27,16 +27,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import com.symphony.api.agent.model.V2Message;
-import com.symphony.api.agent.model.V2MessageSubmission;
-import com.symphony.api.auth.client.ApiException;
-import com.symphony.api.pod.api.UsersApi;
-import com.symphony.api.pod.model.ConfigurationInstance;
-import com.symphony.api.pod.model.Stream;
-import com.symphony.api.pod.model.UserV2;
-import com.symphony.api.pod.model.V2RoomAttributes;
-import com.symphony.api.pod.model.V2RoomDetail;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +38,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.service.ConfigurationService;
+import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.stream.Stream;
+import org.symphonyoss.integration.pod.api.client.UserApiClient;
+import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.config.exception.SaveConfigurationException;
@@ -87,13 +82,13 @@ public class IntegrationBridgeExceptionHandlerTest {
   private StreamService streamService = new StreamServiceImpl();
 
   @Mock
-  private ConfigurationService configurationService;
+  private IntegrationService integrationService;
 
   @Mock
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private UsersApi usersApi;
+  private UserApiClient usersApi;
 
   @InjectMocks
   private IntegrationBridgeExceptionHandler exceptionHandler =
@@ -101,7 +96,7 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   private String messagePosted;
 
-  private ConfigurationInstance savedInstance;
+  private IntegrationInstance savedInstance;
 
   @Before
   public void setup() {
@@ -111,34 +106,34 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Test
   public void testForbiddenConfigurationException() throws IntegrationConfigException, IOException {
-    ConfigurationInstance instance = mockInstance();
+    IntegrationInstance instance = mockInstance();
 
-    doThrow(SaveConfigurationException.class).when(configurationService).save(any(ConfigurationInstance.class),
+    doThrow(SaveConfigurationException.class).when(integrationService).save(any(IntegrationInstance.class),
         anyString());
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
         instance, INTEGRATION_USER, "", STREAM);
     assertTrue(messagePosted.isEmpty());
   }
 
-  private ConfigurationInstance mockInstance() throws JsonProcessingException {
+  private IntegrationInstance mockInstance() throws JsonProcessingException {
     String optionalProperties =
         "{ \"lastPostedDate\": 1, \"owner\": \"" + USER_ID + "\", \"streams\": [ \"" + STREAM + "\"], "
             + "\"streamType\" : \"CHATROOM\" , \"rooms\" : [ { \"streamId\" : \"" + STREAM_ID + "\" , "
             + "\"roomName\" : \"Test Room\"}]}";
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setOptionalProperties(optionalProperties);
     return instance;
   }
 
-  private ConfigurationInstance mockInstanceAlt() throws JsonProcessingException {
+  private IntegrationInstance mockInstanceAlt() throws JsonProcessingException {
     String optionalProperties =
         "{ \"lastPostedDate\": 1, \"owner\": \"" + USER_ID + "\", \"streams\": [ \"" + STREAM + "\"], "
             + "\"streamType\" : \"CHATROOM\" , \"rooms\" : [ { \"streamId\" : \"" + STREAM_ID_ALT + "\" , "
             + "\"roomName\" : \"Test Room\"}]}";
 
-    ConfigurationInstance instance = new ConfigurationInstance();
+    IntegrationInstance instance = new IntegrationInstance();
     instance.setName(INSTANCE_NAME);
     instance.setOptionalProperties(optionalProperties);
     return instance;
@@ -146,16 +141,14 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Test
   public void testForbiddenCreateIMException()
-      throws com.symphony.api.pod.client.ApiException, IntegrationConfigException,
-      IOException {
-    ConfigurationInstance instance = mockInstance();
+      throws RemoteApiException, IntegrationConfigException, IOException {
+    IntegrationInstance instance = mockInstance();
 
-    mockConfigurationService();
+    mockIntegrationService();
 
-    doThrow(com.symphony.api.pod.client.ApiException.class).when(streamService)
-        .createIM(anyString(), anyLong());
+    doThrow(RemoteApiException.class).when(streamService).createIM(anyString(), anyLong());
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
         instance, INTEGRATION_USER, "", STREAM);
 
     List<String> streams =
@@ -164,25 +157,24 @@ public class IntegrationBridgeExceptionHandlerTest {
     assertTrue(messagePosted.isEmpty());
   }
 
-  private void mockConfigurationService() throws IntegrationConfigException {
-    when(configurationService.save(any(ConfigurationInstance.class), anyString())).thenAnswer(
-        new Answer<ConfigurationInstance>() {
+  private void mockIntegrationService() throws IntegrationConfigException {
+    when(integrationService.save(any(IntegrationInstance.class), anyString())).thenAnswer(
+        new Answer<IntegrationInstance>() {
           @Override
-          public ConfigurationInstance answer(InvocationOnMock invocation) throws Throwable {
+          public IntegrationInstance answer(InvocationOnMock invocation) throws Throwable {
             Object[] args = invocation.getArguments();
-            savedInstance = (ConfigurationInstance) args[0];
+            savedInstance = (IntegrationInstance) args[0];
             return savedInstance;
           }
         });
   }
 
   @Test
-  public void testForbiddenPostMessageSuccessfully()
-      throws com.symphony.api.agent.client.ApiException, IntegrationConfigException, IOException,
-      com.symphony.api.pod.client.ApiException {
-    ConfigurationInstance instance = mockInstance();
+  public void testForbiddenPostMessageSuccessfully() throws IntegrationConfigException,
+      IOException, RemoteApiException {
+    IntegrationInstance instance = mockInstance();
 
-    mockConfigurationService();
+    mockIntegrationService();
 
     when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(TOKEN);
 
@@ -190,24 +182,22 @@ public class IntegrationBridgeExceptionHandlerTest {
     resultIM.setId(IM);
     doReturn(resultIM).when(streamService).createIM(INTEGRATION_USER, new Long(USER_ID));
 
-    UserV2 userInfo = new UserV2();
+    User userInfo = new User();
     userInfo.setDisplayName(DISPLAY_NAME);
-    when(usersApi.v2UserGet(TOKEN, null, null, INTEGRATION_USER, true)).thenReturn(userInfo);
+    when(usersApi.getUserByUsername(TOKEN, INTEGRATION_USER)).thenReturn(userInfo);
 
-    doAnswer(new Answer<V2Message>() {
+    doAnswer(new Answer<Message>() {
       @Override
-      public V2Message answer(InvocationOnMock invocationOnMock) throws Throwable {
-        V2MessageSubmission messageSubmission =
-            (V2MessageSubmission) invocationOnMock.getArguments()[2];
+      public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Message messageSubmission = (Message) invocationOnMock.getArguments()[2];
         messagePosted = messageSubmission.getMessage();
-        V2Message message = new V2Message();
+        Message message = new Message();
         message.setMessage(messageSubmission.getMessage());
         return message;
       }
-    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(V2MessageSubmission
-        .class));
+    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
         instance, INTEGRATION_USER, "", STREAM);
 
     List<String> streams =
@@ -221,11 +211,10 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Test
   public void testForbiddenPostMessageSuccessfullyForUndeterminedRoom()
-      throws com.symphony.api.agent.client.ApiException, IntegrationConfigException, IOException,
-      com.symphony.api.pod.client.ApiException {
-    ConfigurationInstance instance = mockInstanceAlt();
+      throws RemoteApiException, IntegrationConfigException, IOException {
+    IntegrationInstance instance = mockInstanceAlt();
 
-    mockConfigurationService();
+    mockIntegrationService();
 
     when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(TOKEN);
 
@@ -233,24 +222,22 @@ public class IntegrationBridgeExceptionHandlerTest {
     resultIM.setId(IM);
     doReturn(resultIM).when(streamService).createIM(INTEGRATION_USER, new Long(USER_ID));
 
-    UserV2 userInfo = new UserV2();
+    User userInfo = new User();
     userInfo.setDisplayName(DISPLAY_NAME);
-    when(usersApi.v2UserGet(TOKEN, null, null, INTEGRATION_USER, true)).thenReturn(userInfo);
+    when(usersApi.getUserByUsername(TOKEN, INTEGRATION_USER)).thenReturn(userInfo);
 
-    doAnswer(new Answer<V2Message>() {
+    doAnswer(new Answer<Message>() {
       @Override
-      public V2Message answer(InvocationOnMock invocationOnMock) throws Throwable {
-        V2MessageSubmission messageSubmission =
-            (V2MessageSubmission) invocationOnMock.getArguments()[2];
+      public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Message messageSubmission = (Message) invocationOnMock.getArguments()[2];
         messagePosted = messageSubmission.getMessage();
-        V2Message message = new V2Message();
+        Message message = new Message();
         message.setMessage(messageSubmission.getMessage());
         return message;
       }
-    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(V2MessageSubmission
-        .class));
+    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new ApiException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
         instance, INTEGRATION_USER, "", STREAM);
 
     List<String> streams =
@@ -264,8 +251,8 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Test
   public void testInternalServerException() {
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(500, new ApiException()),
-        new ConfigurationInstance(), INTEGRATION_USER, "", "");
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(500, new RuntimeException()),
+        new IntegrationInstance(), INTEGRATION_USER, "", "");
   }
 
 }

@@ -14,6 +14,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>integration-auth-api-client</module>
+        <module>integration-pod-api-client</module>
+        <module>integration-agent-api-client</module>
         <module>integration-auth</module>
         <module>integration-config</module>
         <module>integration-healthcheck</module>
