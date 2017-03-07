@@ -14,7 +14,6 @@
     <properties>
         <java.version>1.7</java.version>
         <spring.boot.version>1.5.1.RELEASE</spring.boot.version>
-        <symphony.common.version>0.0.71</symphony.common.version>
         <bouncycastle.version>1.51</bouncycastle.version>
         <commons.codec.version>1.10</commons.codec.version>
         <jersey.common.version>2.12</jersey.common.version>
@@ -78,11 +77,6 @@
             <groupId>com.symphony.sbe.core</groupId>
             <artifactId>pod-api-client</artifactId>
             <version>${symphony.sbe.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.symphony.common</groupId>
-            <artifactId>webcommons</artifactId>
-            <version>${symphony.common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
