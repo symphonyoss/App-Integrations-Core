@@ -41,6 +41,7 @@ import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientExc
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
 
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -95,9 +96,9 @@ public class ApplicationService {
       AppStoreWrapper wrapper = AppStoreBuilder.build(application, domain, configurationId,
           botUserId);
 
-      JsonNode app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
+      Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
       if (app != null) {
-        client.updateApp(wrapper, DEFAULT_USER_ID, app.path(APP_ID).asText());
+        client.updateApp(wrapper, DEFAULT_USER_ID, app.get(APP_ID));
       } else {
         client.createNewApp(wrapper, DEFAULT_USER_ID);
         updateAppSettings(application);
@@ -120,7 +121,7 @@ public class ApplicationService {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     try {
-      JsonNode app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
+      Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
 
       if (app != null) {
         PodAppEntitlementList appEntitlementList = new PodAppEntitlementList();
