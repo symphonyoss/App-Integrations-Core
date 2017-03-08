@@ -17,7 +17,6 @@
 package org.symphonyoss.integration.authentication;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import java.security.KeyStore;
 
@@ -52,7 +51,6 @@ public class AuthenticationContext {
     this.userId = userId;
 
     final ClientConfig clientConfig = new ClientConfig();
-    clientConfig.register(MultiPartFeature.class);
 
     final ClientBuilder clientBuilder = ClientBuilder.newBuilder()
         .keyStore(keyStore, keyStorePass)

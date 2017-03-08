@@ -16,35 +16,28 @@
 
 package org.symphonyoss.integration.authentication;
 
-import com.symphony.api.auth.client.ApiException;
-import com.symphony.api.auth.model.Token;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.authentication.exception.AuthUrlNotFoundException;
-import org.symphonyoss.integration.authentication.exception.KeyManagerConnectivityException;
-import org.symphonyoss.integration.authentication.exception.PodConnectivityException;
+import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
+import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
+import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
+import org.symphonyoss.integration.auth.api.model.Token;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.authentication.metrics.ApiMetricsController;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response.Status;
 
@@ -58,116 +51,48 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   private static final Logger LOG = LoggerFactory.getLogger(AuthenticationProxyImpl.class);
 
-  private static final String SESSION_MANAGER_HOST_KEY = "pod_session_manager.host";
-
-  private static final String KEY_MANAGER_HOST_KEY = "key_manager_auth.host";
-
   private static final Long MAX_SESSION_TIME_MILLIS = TimeUnit.MINUTES.toMillis(3);
 
   /**
    * SBE Authentication API Client
    */
-  private AuthenticationApiDecorator sbeAuthApi;
+  private AuthenticationApiClient sbeAuthApi;
 
   /**
    * Key Manager Authentication API Client
    */
-  private AuthenticationApiDecorator keyManagerAuthApi;
+  private AuthenticationApiClient keyManagerAuthApi;
 
   private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
 
   @Autowired
-  private IntegrationProperties properties;
+  private PodAuthHttpApiClient podAuthHttpApiClient;
 
   @Autowired
-  private ApiMetricsController metricsController;
+  private KmAuthHttpApiClient kmAuthHttpApiClient;
 
   /**
    * Initialize HTTP clients.
    */
   @PostConstruct
   public void init() {
-    String sbeUrl = properties.getSessionManagerAuthUrl();
-
-    // Validate the Session Manager Auth URL
-    validateUrl(sbeUrl, SESSION_MANAGER_HOST_KEY);
-
-    AuthApiClientDecorator sbeClient = new AuthApiClientDecorator(this, metricsController);
-    sbeClient.setBasePath(sbeUrl);
-
-    String keyManagerUrl = properties.getKeyManagerAuthUrl();
-
-    // Validate the Key Manager Auth URL
-    validateUrl(keyManagerUrl, KEY_MANAGER_HOST_KEY);
-
-    AuthApiClientDecorator keyManagerClient = new AuthApiClientDecorator(this, metricsController);
-    keyManagerClient.setBasePath(keyManagerUrl);
-
-    this.sbeAuthApi = new AuthenticationApiDecorator(sbeClient);
-    this.keyManagerAuthApi = new AuthenticationApiDecorator(keyManagerClient);
+    this.sbeAuthApi = new AuthenticationApiClient(podAuthHttpApiClient);
+    this.keyManagerAuthApi = new AuthenticationApiClient(kmAuthHttpApiClient);
   }
 
-  /**
-   * Validates if the url is not empty. Throws an {@link AuthUrlNotFoundException} if the url is
-   * empty. This exception must describe which configuration is missing.
-   * @param url URL to be validated
-   * @param key Missing key in the YAML configuration file.
-   */
-  private void validateUrl(String url, String key) {
-    if (StringUtils.isBlank(url)) {
-      throw new AuthUrlNotFoundException("Verify the YAML configuration file. No configuration "
-          + "found to the key " + key);
-    }
-  }
-
-  /**
-   * Perform the user authentication.
-   * @param userId
-   * @throws ApiException
-   */
   @Override
-  public void authenticate(String userId) throws ApiException {
+  public void authenticate(String userId) throws RemoteApiException {
     AuthenticationContext context = contextForUser(userId);
 
     if (!context.isAuthenticated()) {
       LOG.info("Authenticate {}", userId);
-      Token sessionToken = authSessionApi(userId);
-      Token keyManagerToken = authKeyManagerApi(userId);
+      Token sessionToken = sbeAuthApi.authenticate(userId);
+      Token keyManagerToken = keyManagerAuthApi.authenticate(userId);
 
       context.setToken(
           new AuthenticationToken(sessionToken.getToken(), keyManagerToken.getToken()));
     }
 
-  }
-
-  private Token authKeyManagerApi(String userId) throws ApiException {
-    Token keyManagerToken;
-    try {
-      keyManagerToken = keyManagerAuthApi.v1AuthenticatePost(userId);
-      LOG.info("Token {} successfully", keyManagerToken.getName());
-    } catch (ProcessingException e) {
-      if (IOException.class.isInstance(e.getCause())) {
-        throw new KeyManagerConnectivityException(e);
-      } else {
-        throw e;
-      }
-    }
-    return keyManagerToken;
-  }
-
-  private Token authSessionApi(String userId) throws ApiException {
-    Token sessionToken;
-    try {
-      sessionToken = sbeAuthApi.v1AuthenticatePost(userId);
-      LOG.info("Token {} successfully", sessionToken.getName());
-    } catch (ProcessingException e) {
-      if (IOException.class.isInstance(e.getCause())) {
-        throw new PodConnectivityException(e);
-      } else {
-        throw e;
-      }
-    }
-    return sessionToken;
   }
 
   /**
@@ -248,8 +173,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * @param userId
    * @param code
    * @param e
-   * @throws ApiException an authorization exception thrown on FAILURE to re-auth
-   * @throws com.symphony.api.agent.client.ApiException the original exception
+   * @throws RemoteApiException the original exception
    */
   @Override
   public synchronized void reAuthOrThrow(String userId, int code, Exception e)
@@ -259,7 +183,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         invalidate(userId);
         try {
           authenticate(userId);
-        } catch (ApiException e1) {
+        } catch (RemoteApiException e1) {
           checkAndThrowException(e1, userId);
         } catch (ConnectivityException e2) {
           throw e2;
@@ -272,7 +196,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     }
   }
 
-  private void checkAndThrowException(ApiException e, String userId) throws RemoteApiException {
+  private void checkAndThrowException(RemoteApiException e, String userId) throws RemoteApiException {
     int code = e.getCode();
 
     if (sessionUnauthorized(code)) {

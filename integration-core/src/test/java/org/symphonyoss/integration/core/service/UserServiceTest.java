@@ -16,15 +16,14 @@
 
 package org.symphonyoss.integration.core.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-
-import com.symphony.api.pod.api.UsersApi;
-import com.symphony.api.pod.client.ApiException;
-import com.symphony.api.pod.model.UserV2;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,6 +34,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.service.UserService;
 
 /**
@@ -47,80 +48,86 @@ public class UserServiceTest {
   private static final String SESSION_TOKEN = "95248a7075f53c5458b276d";
 
   @Mock
-  private UsersApi usersApi;
+  private UserApiClient usersApi;
 
   @Mock
-  private AuthenticationProxy AuthenticationProxy;
+  private AuthenticationProxy authenticationProxy;
 
   @InjectMocks
   private UserService userService = new UserServiceImpl();
 
   @Before
   public void setup() {
-    when(AuthenticationProxy.getSessionToken(anyString())).thenReturn(SESSION_TOKEN);
+    doReturn(SESSION_TOKEN).when(authenticationProxy).getSessionToken(anyString());
   }
 
   @Test
   public void testFindUserWithoutEmail() {
     User user = userService.getUserByEmail(null, null);
-    Assert.assertNull(user);
+    assertNull(user);
   }
 
   @Test
-  public void testFindUserByEmailNotFound() throws ApiException {
-    doThrow(ApiException.class).when(usersApi)
-        .v2UserGet(anyString(), anyLong(), anyString(), anyString(), anyBoolean());
+  public void testFindUserByEmailNotFound() throws RemoteApiException {
+    doThrow(RemoteApiException.class).when(usersApi).getUserByEmail(anyString(), anyString());
 
     String email = "symphony@symphony.com";
     User user = userService.getUserByEmail(null, email);
-    Assert.assertEquals(email, user.getEmailAddress());
-    Assert.assertNull(user.getId());
+    assertEquals(email, user.getEmailAddress());
+    assertNull(user.getId());
   }
 
   @Test
-  public void testFindUserByEmail() throws ApiException {
-    prepareToReturnUserV2();
+  public void testFindUserByEmail() throws RemoteApiException {
+    prepareToReturnUser();
+
     String email = "symphony@symphony.com";
     User user = userService.getUserByEmail(null, email);
-    Assert.assertEquals(email, user.getEmailAddress());
-    Assert.assertEquals("Symphony Display Name", user.getDisplayName());
+    assertEquals(email, user.getEmailAddress());
+    assertEquals("Symphony Display Name", user.getDisplayName());
   }
 
   @Test
-  public void testFindUserByUserName() throws ApiException {
-    prepareToReturnUserV2();
+  public void testFindUserByUserName() throws RemoteApiException {
+    prepareToReturnUser();
+
     String userName = "symphony";
     User user = userService.getUserByUserName(null, userName);
-    Assert.assertEquals(userName, user.getUsername());
-    Assert.assertEquals("Symphony Display Name", user.getDisplayName());
+    assertEquals(userName, user.getUsername());
+    assertEquals("Symphony Display Name", user.getDisplayName());
   }
 
-  private void prepareToReturnUserV2() throws ApiException {
-    UserV2 v2 = new UserV2();
-    v2.setEmailAddress("symphony@symphony.com");
-    v2.setId(123L);
-    v2.setDisplayName("Symphony Display Name");
-    v2.setUsername("symphony");
+  private void prepareToReturnUser() throws RemoteApiException {
+    String email = "symphony@symphony.com";
+    String username = "symphony";
+    Long userId = 123L;
 
-    when(usersApi.v2UserGet(anyString(), anyLong(), anyString(), anyString(),
-        anyBoolean())).thenReturn(v2);
+    User user = new User();
+    user.setEmailAddress(email);
+    user.setId(userId);
+    user.setDisplayName("Symphony Display Name");
+    user.setUserName(username);
+
+    doReturn(user).when(usersApi).getUserByEmail(SESSION_TOKEN, email);
+    doReturn(user).when(usersApi).getUserByUsername(SESSION_TOKEN, username);
+    doReturn(user).when(usersApi).getUserById(SESSION_TOKEN, userId);
   }
 
   @Test
-  public void testFindUserByUserNameNotFound() throws ApiException {
-    doThrow(ApiException.class).when(usersApi)
-        .v2UserGet(anyString(), anyLong(), anyString(), anyString(), anyBoolean());
-
+  public void testFindUserByUserNameNotFound() throws RemoteApiException {
     String userName = "symphony";
+
+    doThrow(RemoteApiException.class).when(usersApi).getUserByUsername(SESSION_TOKEN, userName);
+
     User user = userService.getUserByUserName(null, userName);
-    Assert.assertEquals(userName, user.getUsername());
-    Assert.assertNull(user.getId());
+    assertEquals(userName, user.getUsername());
+    assertNull(user.getId());
   }
 
   @Test
   public void testFindUserWithoutUserName() {
     User user = userService.getUserByUserName(null, null);
-    Assert.assertNull(user);
+    assertNull(user);
   }
 
 }

@@ -19,8 +19,6 @@ package org.symphonyoss.integration.core;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
-import com.symphony.api.pod.model.V1Configuration;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +93,7 @@ public class NullIntegration extends BaseIntegration {
   }
 
   @Override
-  public void onConfigChange(V1Configuration conf) {
+  public void onConfigChange(IntegrationSettings settings) {
     /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
      * "null" Integration. */
   }

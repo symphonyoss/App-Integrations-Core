@@ -14,17 +14,8 @@
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-commons</artifactId>
+            <artifactId>integration-auth-api-client</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-metrics</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>auth-api-client</artifactId>
         </dependency>
     </dependencies>
 
