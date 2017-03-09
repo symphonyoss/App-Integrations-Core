@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.client;
+package org.symphonyoss.integration.provisioning.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreAssetsWrapper;
 
 /**
+ * Holds the information required to create or update an application on the appstore.
  * Created by mquilzini on 09/08/16.
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

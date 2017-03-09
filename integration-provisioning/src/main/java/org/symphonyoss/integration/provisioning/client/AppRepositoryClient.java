@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.client.model.Envelope;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 
@@ -60,6 +61,12 @@ public class AppRepositoryClient {
   @Autowired
   private SymphonyHttpApiClient client;
 
+  /**
+   * Retrieves all the available applications in the Appstore repository.
+   * @param userId User identifier
+   * @return Available applications
+   * @throws AppRepositoryClientException Failed to retrieve available applications
+   */
   public List getAppsAvailable(String userId) throws AppRepositoryClientException {
     Map<String, String> headers = getRequiredHeaders(userId);
 
@@ -76,6 +83,13 @@ public class AppRepositoryClient {
     }
   }
 
+  /**
+   * Retrieves an application based on the appGroupId.
+   * @param appGroupId Application group identifier
+   * @param userId User identifier
+   * @return Map of the application attributes or null if have no found the application.
+   * @throws AppRepositoryClientException Failed to retrieve available applications
+   */
   public Map<String, String> getAppByAppGroupId(String appGroupId, String userId) throws
       AppRepositoryClientException {
     List appsAvailable = getAppsAvailable(userId);
@@ -92,6 +106,12 @@ public class AppRepositoryClient {
     return null;
   }
 
+  /**
+   * Creates a new application.
+   * @param appStoreApp Application object to be created
+   * @param userId User identifier
+   * @throws AppRepositoryClientException Failed to create a new application
+   */
   public void createNewApp(AppStoreWrapper appStoreApp, String userId)
       throws AppRepositoryClientException {
     Map<String, String> headers = getRequiredHeaders(userId);
@@ -108,6 +128,13 @@ public class AppRepositoryClient {
     }
   }
 
+  /**
+   * Updates an existing application.
+   * @param appStoreApp Application object to override the current application attributes
+   * @param userId User identifier
+   * @param appId Application identifier
+   * @throws AppRepositoryClientException Failed to update the application
+   */
   public void updateApp(AppStoreWrapper appStoreApp, String userId, String appId)
       throws AppRepositoryClientException {
     Map<String, String> headers = getRequiredHeaders(userId);
@@ -119,11 +146,16 @@ public class AppRepositoryClient {
       client.doPost(path, headers, Collections.<String, String>emptyMap(), envelope, Envelope.class);
     } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
-          "Failed to create a new app due to an error calling the server: " + e.getCode() + " "
-              + e.getMessage());
+          "Failed to update the application " + appId + " due to an error calling the server: "
+              + e.getCode() + " " + e.getMessage());
     }
   }
 
+  /**
+   * Get the required headers to be used by the HTTP requests.
+   * @param userId User identifier
+   * @return Required headers
+   */
   private Map<String, String> getRequiredHeaders(String userId) {
     AuthenticationToken token = authenticationProxy.getToken(userId);
     String sessionToken = token.getSessionToken();
