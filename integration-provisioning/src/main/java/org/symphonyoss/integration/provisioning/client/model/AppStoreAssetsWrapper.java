@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.properties;
+package org.symphonyoss.integration.provisioning.client.model;
 
 /**
- * Created by rsanchez on 18/10/16.
+ * Holds the information required to setup the application assets.
+ * Created by mquilzini on 09/08/16.
  */
-public class ApplicationProperties {
+public class AppStoreAssetsWrapper {
 
-  public static final String APP_ID = "id";
+  private String loadUrl;
 
-  public static final String TYPE = "type";
+  private String iconUrl;
 
-  public static final String NAME = "name";
+  public String getLoadUrl() {
+    return loadUrl;
+  }
 
-  public static final String DESCRIPTION = "description";
+  public void setLoadUrl(String loadUrl) {
+    this.loadUrl = loadUrl;
+  }
 
-  public static final String PUBLISHER = "publisher";
+  public String getIconUrl() {
+    return iconUrl;
+  }
 
-  public static final String CONTEXT = "context";
-
-  public static final String AVATAR = "avatar";
-
+  public void setIconUrl(String iconUrl) {
+    this.iconUrl = iconUrl;
+  }
 }
