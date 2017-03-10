@@ -14,8 +14,10 @@
     <properties>
         <java.version>1.7</java.version>
         <spring.boot.version>1.5.1.RELEASE</spring.boot.version>
-        <symphony.common.version>0.0.71</symphony.common.version>
+        <bouncycastle.version>1.51</bouncycastle.version>
+        <commons.codec.version>1.10</commons.codec.version>
         <jersey.common.version>2.12</jersey.common.version>
+
 
         <!-- Override RPM properties -->
         <rpm.name>integration-provisioning</rpm.name>
@@ -77,25 +79,27 @@
             <version>${symphony.sbe.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.symphony.common</groupId>
-            <artifactId>webcommons</artifactId>
-            <version>${symphony.common.version}</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.symphony.sbe.core</groupId>
-            <artifactId>sdk</artifactId>
-            <version>${symphony.sbe.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.glassfish.jersey.core</groupId>
-                    <artifactId>jersey-common</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
             <version>${jersey.common.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.symphonyoss</groupId>
+            <artifactId>integration-commons</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
