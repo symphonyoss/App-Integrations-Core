@@ -1,5 +1,3 @@
-_Note that this project depends on internal Symphony infrastructure (repository.symphony.com), and therefore it can only be built by Symphony LLC employees/partners._
-
 # Integrations Core Documentation
 
 This document provides a brief overview of Integration Core components and how to build them from scratch.
