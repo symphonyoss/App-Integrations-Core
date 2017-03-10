@@ -129,8 +129,7 @@ public class CompanyCertificateService {
             .getCertificate((X509CertificateHolder) cert);
       }
 
-      throw new CompanyCertificateException(
-          "Input contains " + cert.getClass() + ", not X509Certificate");
+      throw new CompanyCertificateException("Invalid cerficate " + fileName);
     } catch (IOException | CertificateException e) {
       throw new CompanyCertificateException("Failed to read PEM file", e);
     }
