@@ -1,3 +1,8 @@
+# For debugging purposes, uncomment following lines
+# logging:
+#   level:
+#     org.symphonyoss: DEBUG
+
 server:
   address: 127.0.0.1
   port: ${integration_bridge.http_port:8186}
