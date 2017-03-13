@@ -1,8 +1,8 @@
 # Local run
 certs/
 tomcat/
-application.yaml
 env.sh
+application.yaml
 
 # Maven
 target/
