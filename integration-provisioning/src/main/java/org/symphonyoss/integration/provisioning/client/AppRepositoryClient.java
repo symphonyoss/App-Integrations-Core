@@ -16,32 +16,19 @@
 
 package org.symphonyoss.integration.provisioning.client;
 
-import com.symphony.security.cache.IPersister;
-import com.symphony.security.cache.InMemoryPersister;
-import com.symphony.security.clientsdk.client.Auth;
-import com.symphony.security.clientsdk.client.AuthProvider;
-import com.symphony.security.clientsdk.client.ClientIdentifierFilter;
-import com.symphony.security.clientsdk.client.SymphonyClient;
-import com.symphony.security.clientsdk.client.SymphonyClientConfig;
-import com.symphony.security.clientsdk.client.impl.SymphonyClientFactory;
-import com.symphony.webcommons.rest.RequestEnvelope;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.json.JsonUtils;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
+import org.symphonyoss.integration.provisioning.client.model.Envelope;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * App Repository Client, interfacing all calls to it.
@@ -62,7 +49,9 @@ public class AppRepositoryClient {
   private static final String APP_REPOSITORY_APP_UPDATE =
       APP_REPOSITORY_PATH + "/apps/%s";
 
-  private static final String APPS_REP_DATA_PATH = "data";
+  private static final String SKEY_HEADER = "skey";
+
+  private static final String USER_SESSION_HEADER = "userSession";
 
   private static final String APPS_REP_APP_GROUP_ID_PATH = "appGroupId";
 
@@ -70,125 +59,112 @@ public class AppRepositoryClient {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private IntegrationProperties properties;
+  private SymphonyHttpApiClient client;
 
-  private SymphonyClient appRepositoryClient;
+  /**
+   * Retrieves all the available applications in the Appstore repository.
+   * @param userId User identifier
+   * @return Available applications
+   * @throws AppRepositoryClientException Failed to retrieve available applications
+   */
+  public List getAppsAvailable(String userId) throws AppRepositoryClientException {
+    Map<String, String> headers = getRequiredHeaders(userId);
 
-  private IPersister authPersister;
+    try {
+      // call server
+      Envelope<List> envelope = client.doGet(APP_REPOSITORY_APPS_AVAILABLE, headers,
+          Collections.<String, String>emptyMap(), Envelope.class);
 
-  @PostConstruct
-  public void init() {
-    SymphonyClientConfig config = new SymphonyClientConfig();
-    config.setKeymanagerUrl(properties.getKeyManagerUrl());
-    config.setSymphonyUrl(properties.getSymphonyUrl());
-    config.setLoginUrl(properties.getLoginUrl());
-
-    config.setAcountName("accountPlaceHolderName");
-
-    String clientVersion = "1.0.0";
-
-    appRepositoryClient = SymphonyClientFactory.getClient(
-        new ClientIdentifierFilter(clientVersion, "Symphony-API-AppStore"), config);
-
-    authPersister = new InMemoryPersister();
-  }
-
-  public JsonNode getAppsAvailable(String userId) throws AppRepositoryClientException {
-    // params
-    Auth auth = getSymphonyAuthProvider(userId);
-    String path = APP_REPOSITORY_APPS_AVAILABLE;
-
-    // call server
-    Response response = appRepositoryClient.doGet(auth, path);
-
-    // check response status
-    if (response.getStatus() == HttpServletResponse.SC_OK) {
-      try {
-        JsonNode appList = JsonUtils.readTree((InputStream) response.getEntity());
-        return appList.path(APPS_REP_DATA_PATH);
-      } catch (IOException e) {
-        throw new AppRepositoryClientException("Failed to read response", e);
-      }
-    } else {
+      return envelope.getData();
+    } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
           "Failed to retrieve available apps due to an error calling the server: "
-              + response.getStatus() + " " + response.toString());
+              + e.getCode() + " " + e.getMessage());
     }
   }
 
-  public JsonNode getAppByAppGroupId(String appGroupId, String userId) throws
+  /**
+   * Retrieves an application based on the appGroupId.
+   * @param appGroupId Application group identifier
+   * @param userId User identifier
+   * @return Map of the application attributes or null if have no found the application.
+   * @throws AppRepositoryClientException Failed to retrieve available applications
+   */
+  public Map<String, String> getAppByAppGroupId(String appGroupId, String userId) throws
       AppRepositoryClientException {
-    JsonNode appsAvailable = getAppsAvailable(userId);
-    for (Iterator<JsonNode> appsIterator = appsAvailable.elements(); appsIterator.hasNext(); ) {
-      JsonNode app = appsIterator.next();
-      String currentAppGroupId = app.path(APPS_REP_APP_GROUP_ID_PATH).asText();
+    List appsAvailable = getAppsAvailable(userId);
+
+    for (Object app : appsAvailable) {
+      Map<String, String> appData = (Map<String, String>) app;
+      String currentAppGroupId = appData.get(APPS_REP_APP_GROUP_ID_PATH);
 
       if (currentAppGroupId.equals(appGroupId)) {
-        return app;
+        return appData;
       }
     }
 
     return null;
   }
 
-  public JsonNode createNewApp(AppStoreWrapper appStoreApp, String userId)
+  /**
+   * Creates a new application.
+   * @param appStoreApp Application object to be created
+   * @param userId User identifier
+   * @throws AppRepositoryClientException Failed to create a new application
+   */
+  public void createNewApp(AppStoreWrapper appStoreApp, String userId)
       throws AppRepositoryClientException {
+    Map<String, String> headers = getRequiredHeaders(userId);
 
-    // params
-    Auth auth = getSymphonyAuthProvider(userId);
-    RequestEnvelope<AppStoreWrapper> envelope = new RequestEnvelope<>(appStoreApp);
-    String path = APP_REPOSITORY_APP_CREATE;
+    Envelope<AppStoreWrapper> envelope = new Envelope<>(appStoreApp);
 
-    // call server
-    Response response = appRepositoryClient.doPost(auth, path, envelope);
-
-    // check response status
-    if (response.getStatus() == HttpServletResponse.SC_OK) {
-      try {
-        return JsonUtils.readTree((InputStream) response.getEntity());
-      } catch (IOException e) {
-        throw new AppRepositoryClientException("Failed to read response", e);
-      }
-    } else {
+    try {
+      client.doPost(APP_REPOSITORY_APP_CREATE, headers, Collections.<String, String>emptyMap(),
+          envelope, Envelope.class);
+    } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
-          "Failed to create a new app due to an error calling the server: "
-              + response.getStatus() + " " + response.toString());
+          "Failed to create a new app due to an error calling the server: " + e.getCode() + " "
+              + e.getMessage());
     }
   }
 
-  public JsonNode updateApp(AppStoreWrapper appStoreApp, String userId, String appId)
+  /**
+   * Updates an existing application.
+   * @param appStoreApp Application object to override the current application attributes
+   * @param userId User identifier
+   * @param appId Application identifier
+   * @throws AppRepositoryClientException Failed to update the application
+   */
+  public void updateApp(AppStoreWrapper appStoreApp, String userId, String appId)
       throws AppRepositoryClientException {
-    // params
-    Auth auth = getSymphonyAuthProvider(userId);
-    RequestEnvelope<AppStoreWrapper> envelope = new RequestEnvelope<>(appStoreApp);
+    Map<String, String> headers = getRequiredHeaders(userId);
+
     String path = String.format(APP_REPOSITORY_APP_UPDATE, appId);
+    Envelope<AppStoreWrapper> envelope = new Envelope<>(appStoreApp);
 
-    // call server
-    Response response = appRepositoryClient.doPost(auth, path, envelope);
-
-    // check response status
-    if (response.getStatus() == HttpServletResponse.SC_OK) {
-      try {
-        return JsonUtils.readTree((InputStream) response.getEntity());
-      } catch (IOException e) {
-        throw new AppRepositoryClientException("Failed to read response", e);
-      }
-    } else {
+    try {
+      client.doPost(path, headers, Collections.<String, String>emptyMap(), envelope, Envelope.class);
+    } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
-          "Failed to update app due to an error calling the server: "
-              + response.getStatus() + " " + response.toString());
+          "Failed to update the application " + appId + " due to an error calling the server: "
+              + e.getCode() + " " + e.getMessage());
     }
   }
 
-  private Auth getSymphonyAuthProvider(String userId) {
+  /**
+   * Get the required headers to be used by the HTTP requests.
+   * @param userId User identifier
+   * @return Required headers
+   */
+  private Map<String, String> getRequiredHeaders(String userId) {
     AuthenticationToken token = authenticationProxy.getToken(userId);
-    AuthProvider authProvider = new AuthProvider(authPersister);
-    authProvider.generateAuth(appRepositoryClient);
+    String sessionToken = token.getSessionToken();
 
-    authProvider.getSymphonyAuth().setSession(token.getSessionToken());
-    authProvider.getKeyManagerAuth().setSession(token.getKeyManagerToken());
+    Map<String, String> headers = new HashMap<>();
+    headers.put(USER_SESSION_HEADER, userId);
+    headers.put(SKEY_HEADER, sessionToken);
 
-    return authProvider.getSymphonyAuth();
+    return headers;
   }
 
 }

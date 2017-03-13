@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.client;
+package org.symphonyoss.integration.provisioning.client.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Builder class responsible to create new objects required to the Appstore API client.
  * Created by rsanchez on 18/10/16.
  */
 public class AppStoreBuilder {

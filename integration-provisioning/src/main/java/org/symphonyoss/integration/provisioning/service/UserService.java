@@ -73,7 +73,11 @@ public class UserService {
     this.userApi = new UserApi(podApiClient);
   }
 
-
+  /**
+   * Setup a bot user on the SBE according to the application info provided in the YAML file. If
+   * the user already exists, this process should update the user attributes and avatar.
+   * @param app Application details
+   */
   public void setupBotUser(Application app) {
     LOGGER.info("Setup new user: {}", app.getComponent());
 
