@@ -62,6 +62,8 @@ public class ServiceHealthIndicatorTest {
 
   private static final String MOCK_APP_TYPE = "testWebHookIntegration";
 
+  private static final String MOCK_APP2_TYPE = "test2WebHookIntegration";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -80,6 +82,7 @@ public class ServiceHealthIndicatorTest {
     invocationBuilder = mock(Invocation.Builder.class);
 
     doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE);
     doReturn(target).when(client)
         .target("https://nexus.symphony.com:443/webcontroller/HealthCheck/version");
     doReturn(target).when(target).property(anyString(), any());
