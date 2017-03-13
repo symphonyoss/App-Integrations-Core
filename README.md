@@ -1,5 +1,26 @@
 _Note that this project depends on internal Symphony infrastructure (repository.symphony.com), and therefore it can only be built by Symphony LLC employees/partners._
 
+# Run locally
+
+1. Define your certificate paths and passwords
+```
+cp env.sh.sample env.sh
+open env.sh
+```
+
+Make sure that
+- Paths and passwords are correct
+- You can reach all Symphony Pod endpoints
+- Service accounts exists and cert CNs match with account's usernames
+- `env.sh` and `certs/` are ignored by Git and don't end up in any code repository (especially if public!)
+
+2. Run the integrations
+```
+./run.sh
+```
+
+This command will create an `application.yaml` file (should be ignored by Git, as with `env.sh` and `certs/`) in the project root folder, using `docs/configuration/application.yaml.template` as template
+
 # Integrations Core Documentation
 
 This document provides a brief overview of Integration Core components and how to build them from scratch.
@@ -26,7 +47,7 @@ As of providing the mentioned structure above, we'll detail here what is the gen
 
 > 1. Expose an endpoint where it will receive the message.
 > 2. Identify where this message is coming from through the URL parameters it received (configurationId and instanceId)
-> 3. If the message is trying to reach a valid integration and a configured instance, it will delegate the message to the specific integration code implemented separately across the other Integration repositories. 
+> 3. If the message is trying to reach a valid integration and a configured instance, it will delegate the message to the specific integration code implemented separately across the other Integration repositories.
 > 4. The integration GitHub logic will now determine which event it is dealing with through the received message header parameter, and based on this will determine which [parser](#parsers) it must use to treat the message properly.
 > 5. The parser will then convert the message to a [Message ML format](#the-message-ml-format), extracting the needed information from the payload received.
 > 6. The parsed message will return to the Integration Core and post the message to the Symphony platform
@@ -41,11 +62,11 @@ This format is called Symphony Message ML and it may contain a set of tags. More
 A Message ML is a Symphony XML format that defines XML elements and attributes necessary to compose a message that can be posted within a chat room.
 The most basic message one can send may be as simple as ``<messageML>simple message</messageML>`` or as detailed as it can get. What determines this is what system we are integrating with.
 
-These elements and attributes will be briefly detailed in the next topics as reference. The specific integration formats can be found in their separate repositories "Readme" files. 
+These elements and attributes will be briefly detailed in the next topics as reference. The specific integration formats can be found in their separate repositories "Readme" files.
 
 ### Entity
 An entity is a special element contained in a ``<messageML>``, it may also be nested within other entities as another element, and so on.
- 
+
 Entities must have a "type" and a "version", and may also have a "name" for itself, all of those as XML attributes.
 
 The first entity in a messageML MUST have an element called "presentationML".
@@ -90,7 +111,7 @@ To start from scratch, do the following:
 
 1. Build the _App-Integrations-Core_ dependencies, on this order (so you have them in your Maven local repository):
 
-> 1. [_App-Integrations-Commons_](https://github.com/symphonyoss/App-Integrations-Commons) 
+> 1. [_App-Integrations-Commons_](https://github.com/symphonyoss/App-Integrations-Commons)
 > 2. [_App-Integrations-Universal_](https://github.com/symphonyoss/App-Integrations-Universal)
 > 3. [_App-Integrations-Github_](https://github.com/symphonyoss/App-Integrations-Github)
 > 4. [_App-Integrations-Jira_](https://github.com/symphonyoss/App-Integrations-Jira)
@@ -114,9 +135,9 @@ Here are the initial steps to get your project configured to run using the Intel
 7. Configure valid addresses to connect the application to on the file [application.yaml](docs/configuration/boot/application.yaml)
 8. Run ``IntegrationBridgeApplication`` from the "Run" menu and start watching Intellij run output at the botton of your IDE, if everything works you should see last a message like this one:
 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-1) lMXpkb:d8Gma6:rinXAT INFO Integration salesforceWebHookIntegration bootstrapped successfully 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-5) lMXpkb:d8Gma6:oOHPJ3 INFO Integration simpleWebHookIntegration bootstrapped successfully 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-2) lMXpkb:d8Gma6:YNMo9n INFO Integration zapierWebHookIntegration bootstrapped successfully 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-6) lMXpkb:d8Gma6:uAGbXe INFO Integration jiraWebHookIntegration bootstrapped successfully 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-3) lMXpkb:d8Gma6:5NWnjN INFO Integration trelloWebHookIntegration bootstrapped successfully 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-4) lMXpkb:d8Gma6:O9H1Te INFO Integration githubWebHookIntegration bootstrapped successfully 
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-1) lMXpkb:d8Gma6:rinXAT INFO Integration salesforceWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-5) lMXpkb:d8Gma6:oOHPJ3 INFO Integration simpleWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-2) lMXpkb:d8Gma6:YNMo9n INFO Integration zapierWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-6) lMXpkb:d8Gma6:uAGbXe INFO Integration jiraWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-3) lMXpkb:d8Gma6:5NWnjN INFO Integration trelloWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-4) lMXpkb:d8Gma6:O9H1Te INFO Integration githubWebHookIntegration bootstrapped successfully

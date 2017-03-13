@@ -1,3 +1,9 @@
+# Local run
+certs/
+tomcat/
+application.yaml
+env.sh
+
 # Maven
 target/
 
