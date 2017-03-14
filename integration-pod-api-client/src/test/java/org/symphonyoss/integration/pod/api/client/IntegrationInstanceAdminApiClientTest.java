@@ -42,7 +42,7 @@ import java.util.Map;
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IntegrationInstanceApiClientTest {
+public class IntegrationInstanceAdminApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -53,73 +53,11 @@ public class IntegrationInstanceApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
-  private IntegrationInstanceApiClient apiClient;
+  private IntegrationInstanceAdminApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new IntegrationInstanceApiClient(httpClient);
-  }
-
-  @Test
-  public void testCreateInstanceNullSessionToken() {
-    try {
-      apiClient.createInstance(null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testCreateInstanceNullInstance() {
-    try {
-      apiClient.createInstance(MOCK_SESSION, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling createInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testCreateInstanceInvalidConfiguration() {
-    try {
-      apiClient.createInstance(MOCK_SESSION, new IntegrationInstanceSubmissionCreate());
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required field 'configurationId'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testCreateInstance() throws RemoteApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("sessionToken", MOCK_SESSION);
-
-    IntegrationInstance instance = mockInstance();
-
-    IntegrationInstanceSubmissionCreate create = new IntegrationInstanceSubmissionCreate();
-    create.setConfigurationId(instance.getConfigurationId());
-    create.setOptionalProperties(instance.getOptionalProperties());
-
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance";
-
-    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
-    doReturn(instance).when(httpClient)
-        .doPost(path, headerParams, Collections.<String, String>emptyMap(), create,
-            IntegrationInstance.class);
-
-    IntegrationInstance result = apiClient.createInstance(MOCK_SESSION, create);
-
-    assertEquals(instance, result);
+    this.apiClient = new IntegrationInstanceAdminApiClient(httpClient);
   }
 
   private IntegrationInstance mockInstance() {
@@ -201,7 +139,7 @@ public class IntegrationInstanceApiClientTest {
     update.setInstanceId(instance.getInstanceId());
     update.setOptionalProperties(instance.getOptionalProperties());
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
+    String path = "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -255,7 +193,7 @@ public class IntegrationInstanceApiClientTest {
     IntegrationInstanceList list = new IntegrationInstanceList();
     list.add(instance);
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance";
+    String path = "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -313,7 +251,7 @@ public class IntegrationInstanceApiClientTest {
 
     IntegrationInstance instance = mockInstance();
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
+    String path = "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -374,8 +312,9 @@ public class IntegrationInstanceApiClientTest {
 
     IntegrationInstance instance = mockInstance();
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
-        + "/activate";
+    String path =
+        "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
+            + "/activate";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -435,8 +374,9 @@ public class IntegrationInstanceApiClientTest {
 
     IntegrationInstance instance = mockInstance();
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
-        + "/deactivate";
+    String path =
+        "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
+            + "/deactivate";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);

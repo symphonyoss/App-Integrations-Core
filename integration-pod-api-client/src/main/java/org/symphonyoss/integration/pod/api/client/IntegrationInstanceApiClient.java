@@ -20,8 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
+import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
+import org.symphonyoss.integration.pod.api.model.IntegrationSettingsList;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,12 +34,12 @@ import java.util.Map;
  * Part of Integration API, holds all endpoints to maintain the integration instances.
  * Created by Milton Quilzini on 16/01/17.
  */
-public class IntegrationInstanceApiClient extends BasePodApiClient {
+public class IntegrationInstanceApiClient extends BaseIntegrationInstanceApiClient {
 
-  private HttpApiClient apiClient;
+  private static final String API_PREFIX = "/v1";
 
   public IntegrationInstanceApiClient(HttpApiClient apiClient) {
-    this.apiClient = apiClient;
+    super(apiClient);
   }
 
   /**
@@ -58,7 +61,7 @@ public class IntegrationInstanceApiClient extends BasePodApiClient {
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(instance.getConfigurationId())
-        + "/instance/create";
+        + "/instance";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
@@ -67,70 +70,9 @@ public class IntegrationInstanceApiClient extends BasePodApiClient {
         IntegrationInstance.class);
   }
 
-  /**
-   * Updates an existing integration instance.
-   * @param sessionToken Session authentication token.
-   * @param instance Integration instance to be updated.
-   * @return Integration instance updated
-   */
-  public IntegrationInstance updateInstance(String sessionToken,
-      IntegrationInstanceSubmissionUpdate instance) throws RemoteApiException {
-    checkAuthToken(sessionToken);
-
-    if (instance == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateInstance");
-    }
-
-    String configurationId = instance.getConfigurationId();
-    String instanceId = instance.getInstanceId();
-
-    if (StringUtils.isEmpty(configurationId)) {
-      throw new RemoteApiException(400, "Missing the required field 'configurationId'");
-    }
-
-    if (StringUtils.isEmpty(instanceId)) {
-      throw new RemoteApiException(400, "Missing the required field 'instanceId'");
-    }
-
-    String path = "/v1/admin/configuration/" + apiClient.escapeString(configurationId)
-        + "/instance/" + apiClient.escapeString(instanceId) +"/update";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
-
-    return apiClient.doPut(path, headerParams, Collections.<String, String>emptyMap(), instance,
-        IntegrationInstance.class);
-  }
-
-  /**
-   * Retrieves the existing integration instance.
-   * @param sessionToken Session authentication token.
-   * @param configurationId Integration identifier
-   * @param instanceId Integration instance identifier.
-   * @return Integration instance updated
-   */
-  public IntegrationInstance getInstanceById(String sessionToken, String configurationId,
-      String instanceId) throws RemoteApiException {
-    checkAuthToken(sessionToken);
-
-    if (configurationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'configurationId' when calling getInstanceById");
-    }
-
-    if (instanceId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'instanceId' when calling getInstanceById");
-    }
-
-    String path = "/v1/admin/configuration/" + apiClient.escapeString(configurationId)
-        + "/instance/" + apiClient.escapeString(instanceId) +"/get";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
-
-    return apiClient.doGet(path, headerParams, Collections.<String, String>emptyMap(),
-        IntegrationInstance.class);
+  @Override
+  protected String getApiPathPrefix() {
+    return API_PREFIX;
   }
 
 }

@@ -26,6 +26,10 @@ public abstract class BasePodApiClient {
 
   public static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
 
+  public static final String OFFSET_QUERY_PARAM = "offset";
+
+  public static final String LIMIT_QUERY_PARAM = "limit";
+
   /**
    * Check the required authentication token.
    * @param sessionToken Session authentication token.
