@@ -22,7 +22,8 @@ import org.symphonyoss.integration.model.config.IntegrationSettings;
 import java.util.ArrayList;
 
 /**
- * Holds a list of {@link IntegrationInstance}
+ * Holds a list of {@link IntegrationInstance} to simplify the deserialization of the JSON array
+ * received from the Integration API.
  * Created by rsanchez on 14/03/17.
  */
 public class IntegrationInstanceList extends ArrayList<IntegrationInstance> {
