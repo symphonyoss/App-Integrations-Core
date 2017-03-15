@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.symphonyoss</groupId>
+        <groupId>org.symphonyoss.symphony.integrations</groupId>
         <artifactId>integration</artifactId>
         <version>0.10.0-SNAPSHOT</version>
     </parent>
@@ -27,37 +27,37 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-jira</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-universal-whi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-trello</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-salesforce</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-github</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-zapier</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -95,7 +95,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
