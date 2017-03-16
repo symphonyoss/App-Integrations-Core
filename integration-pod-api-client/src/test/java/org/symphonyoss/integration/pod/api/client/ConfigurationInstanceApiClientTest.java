@@ -29,7 +29,6 @@ import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
-import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 
@@ -38,11 +37,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link IntegrationInstanceApiClient}
+ * Unit test for {@link ConfigurationInstanceApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IntegrationInstanceApiClientTest {
+public class ConfigurationInstanceApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -53,11 +52,11 @@ public class IntegrationInstanceApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
-  private IntegrationInstanceApiClient apiClient;
+  private ConfigurationInstanceApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new IntegrationInstanceApiClient(httpClient);
+    this.apiClient = new ConfigurationInstanceApiClient(httpClient);
   }
 
   @Test
@@ -110,7 +109,7 @@ public class IntegrationInstanceApiClientTest {
     create.setConfigurationId(instance.getConfigurationId());
     create.setOptionalProperties(instance.getOptionalProperties());
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance";
+    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/create";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(instance).when(httpClient)
@@ -201,7 +200,9 @@ public class IntegrationInstanceApiClientTest {
     update.setInstanceId(instance.getInstanceId());
     update.setOptionalProperties(instance.getOptionalProperties());
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
+    String path =
+        "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID +
+            "/update";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -213,58 +214,6 @@ public class IntegrationInstanceApiClientTest {
     IntegrationInstance result = apiClient.updateInstance(MOCK_SESSION, update);
 
     assertEquals(instance, result);
-  }
-
-  @Test
-  public void testGetInstanceListNullSessionToken() {
-    try {
-      apiClient.listInstances(null, null, 0, 0);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testGetInstanceListInvalidConfig() {
-    try {
-      apiClient.listInstances(MOCK_SESSION, null, 0, 0);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'integrationId' when calling listInstances";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testListInstances() throws RemoteApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("sessionToken", MOCK_SESSION);
-
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put("offset", String.valueOf(0));
-    queryParams.put("limit", String.valueOf(10));
-
-    IntegrationInstance instance = mockInstance();
-
-    IntegrationInstanceList list = new IntegrationInstanceList();
-    list.add(instance);
-
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance";
-
-    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
-    doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
-
-    doReturn(list).when(httpClient).doGet(path, headerParams, queryParams, IntegrationInstanceList.class);
-
-    IntegrationInstanceList result = apiClient.listInstances(MOCK_SESSION, MOCK_CONFIGURATION_ID, 0, 10);
-
-    assertEquals(list, result);
   }
 
   @Test
@@ -288,7 +237,7 @@ public class IntegrationInstanceApiClientTest {
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'integrationId' when calling getInstanceById";
+      String message = "Missing the required parameter 'configurationId' when calling getInstanceById";
       assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
     }
   }
@@ -313,7 +262,9 @@ public class IntegrationInstanceApiClientTest {
 
     IntegrationInstance instance = mockInstance();
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID;
+    String path =
+        "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
+            + "/get";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
@@ -328,125 +279,4 @@ public class IntegrationInstanceApiClientTest {
     assertEquals(instance, result);
   }
 
-  @Test
-  public void testActivateInstanceByIdNullSessionToken() {
-    try {
-      apiClient.activateInstance(null, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testActivateInstanceByIdInvalidConfig() {
-    try {
-      apiClient.activateInstance(MOCK_SESSION, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'integrationId' when calling activateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testActivateInstanceByIdInvalidInstance() {
-    try {
-      apiClient.activateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'instanceId' when calling activateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testActivateIntegration() throws RemoteApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("sessionToken", MOCK_SESSION);
-
-    IntegrationInstance instance = mockInstance();
-
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
-        + "/activate";
-
-    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
-    doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
-
-    doReturn(instance).when(httpClient).doPost(path, headerParams, Collections.<String,
-        String>emptyMap(), null, IntegrationInstance.class);
-
-    IntegrationInstance result =
-        apiClient.activateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, MOCK_INSTANCE_ID);
-
-    assertEquals(instance, result);
-  }
-
-  @Test
-  public void testDeactivateInstanceByIdNullSessionToken() {
-    try {
-      apiClient.deactivateInstance(null, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testDeactivateInstanceByIdInvalidConfig() {
-    try {
-      apiClient.deactivateInstance(MOCK_SESSION, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'integrationId' when calling deactivateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testDeactivateInstanceByIdInvalidInstance() {
-    try {
-      apiClient.deactivateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'instanceId' when calling deactivateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testDeactivateIntegration() throws RemoteApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("sessionToken", MOCK_SESSION);
-
-    IntegrationInstance instance = mockInstance();
-
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID
-        + "/deactivate";
-
-    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
-    doReturn(MOCK_INSTANCE_ID).when(httpClient).escapeString(MOCK_INSTANCE_ID);
-
-    doReturn(instance).when(httpClient).doPost(path, headerParams, Collections.<String,
-        String>emptyMap(), null, IntegrationInstance.class);
-
-    IntegrationInstance result =
-        apiClient.deactivateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, MOCK_INSTANCE_ID);
-
-    assertEquals(instance, result);
-  }
 }

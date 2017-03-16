@@ -1,0 +1,66 @@
+integration_bridge:
+  domain: .symphony.com
+  host: test.symphony.com
+
+#
+# Indicate the host and port for the Symphony POD the Apps are associated with.
+#
+pod:
+  host: test.symphony.com
+  port: 443
+
+#
+# Indicate the host and port for the POD's Agent.
+#
+agent:
+  host: test.symphony.com
+  port: 8444
+
+#
+# Indicate the host and ports for the POD's Key Manager.
+#
+key_manager:
+  host: test.symphony.com
+  port: 443
+
+key_manager_auth:
+  host: test.symphony.com
+  port: 8444
+
+pod_session_manager:
+  host: test.symphony.com
+  port: 8444
+
+cloud_logging:
+  enabled: false
+
+applications:
+  jira:
+    keystore:
+      password: changeit
+    state: PROVISIONED
+
+  github:
+    keystore:
+      password: changeit
+    state: PROVISIONED
+
+  salesforce:
+    keystore:
+      password: changeit
+    state: PROVISIONED
+
+  universal:
+    keystore:
+      password: changeit
+    state: PROVISIONED
+
+  trello:
+    keystore:
+      password: changeit
+    state: PROVISIONED
+
+  zapier:
+    keystore:
+      password: changeit
+    state: REMOVED

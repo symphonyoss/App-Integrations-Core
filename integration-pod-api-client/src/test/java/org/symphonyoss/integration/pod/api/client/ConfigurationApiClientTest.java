@@ -36,11 +36,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link IntegrationApiClient}
+ * Unit test for {@link ConfigurationApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IntegrationApiClientTest {
+public class ConfigurationApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -51,11 +51,11 @@ public class IntegrationApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
-  private IntegrationApiClient apiClient;
+  private ConfigurationApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new IntegrationApiClient(httpClient);
+    this.apiClient = new ConfigurationApiClient(httpClient);
   }
 
   @Test
@@ -95,7 +95,7 @@ public class IntegrationApiClientTest {
     create.setName(integration.getName());
     create.setType(integration.getType());
 
-    doReturn(integration).when(httpClient).doPost("/v1/configuration", headerParams,
+    doReturn(integration).when(httpClient).doPost("/v1/configuration/create", headerParams,
         Collections.<String, String>emptyMap(), create, IntegrationSettings.class);
 
     IntegrationSettings result = apiClient.createIntegration(MOCK_SESSION, create);
@@ -147,7 +147,7 @@ public class IntegrationApiClientTest {
 
     IntegrationSettings integration = mockIntegration();
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID;
+    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/get";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(integration).when(httpClient)
@@ -191,7 +191,7 @@ public class IntegrationApiClientTest {
 
     IntegrationSettings integration = mockIntegration();
 
-    String path = "/v1/configuration/type/" + MOCK_TYPE;
+    String path = "/v1/configuration/type/" + MOCK_TYPE + "/get";
 
     doReturn(MOCK_TYPE).when(httpClient).escapeString(MOCK_TYPE);
     doReturn(integration).when(httpClient)
@@ -252,7 +252,7 @@ public class IntegrationApiClientTest {
     create.setName(integration.getName());
     create.setType(integration.getType());
 
-    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID;
+    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/update";
 
     doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
     doReturn(integration).when(httpClient)

@@ -37,8 +37,8 @@ import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.pod.api.client.IntegrationApiClient;
-import org.symphonyoss.integration.pod.api.client.IntegrationInstanceApiClient;
+import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
+import org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
@@ -70,10 +70,10 @@ public class RemoteIntegrationServiceTest {
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private IntegrationApiClient integrationApiClient;
+  private ConfigurationApiClient configurationApiClient;
 
   @Mock
-  private IntegrationInstanceApiClient instanceApiClient;
+  private ConfigurationInstanceApiClient instanceApiClient;
 
   @InjectMocks
   private IntegrationService remoteIntegrationService = new RemoteIntegrationService();
@@ -85,14 +85,14 @@ public class RemoteIntegrationServiceTest {
 
   @Test(expected = RemoteConfigurationException.class)
   public void testGetIntegrationByIdFailed() throws Exception {
-    doThrow(RemoteApiException.class).when(integrationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+    doThrow(RemoteApiException.class).when(configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
     remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID);
   }
 
   @Test(expected = ForbiddenUserException.class)
   public void testGetIntegrationByIdForbidden() throws Exception {
     RemoteApiException apiException = new RemoteApiException(FORBIDDEN.getStatusCode(), "Forbidden user");
-    doThrow(apiException).when(integrationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+    doThrow(apiException).when(configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
     remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID);
   }
@@ -100,14 +100,14 @@ public class RemoteIntegrationServiceTest {
   @Test
   public void testGetIntegrationById() throws Exception {
     IntegrationSettings settings = buildIntegrationSettings();
-    when(integrationApiClient.getIntegrationById(TOKEN, CONFIGURATION_ID)).thenReturn(settings);
+    when(configurationApiClient.getIntegrationById(TOKEN, CONFIGURATION_ID)).thenReturn(settings);
 
     assertEquals(settings, remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID));
   }
 
   @Test(expected = RemoteConfigurationException.class)
   public void testGetIntegrationByTypeFailed() throws Exception {
-    doThrow(RemoteApiException.class).when(integrationApiClient)
+    doThrow(RemoteApiException.class).when(configurationApiClient)
         .getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
     remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID);
   }
@@ -115,7 +115,7 @@ public class RemoteIntegrationServiceTest {
   @Test(expected = ConfigurationNotFoundException.class)
   public void testGetIntegrationByTypeNotFound() throws Exception {
     RemoteApiException exception = new RemoteApiException(STATUS_CODE_BAD_REQUEST, "Configuration not found");
-    doThrow(exception).when(integrationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
+    doThrow(exception).when(configurationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
 
     remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID);
   }
@@ -124,7 +124,7 @@ public class RemoteIntegrationServiceTest {
   public void testGetIntegrationByType() throws Exception {
     IntegrationSettings settings = buildIntegrationSettings();
 
-    doReturn(settings).when(integrationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
+    doReturn(settings).when(configurationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
 
     assertEquals(settings, remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID));
   }
@@ -134,9 +134,9 @@ public class RemoteIntegrationServiceTest {
     IntegrationSettings settings = buildIntegrationSettings();
 
     doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
-        integrationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+        configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
-    doThrow(RemoteApiException.class).when(integrationApiClient).createIntegration(eq(TOKEN),
+    doThrow(RemoteApiException.class).when(configurationApiClient).createIntegration(eq(TOKEN),
         any(IntegrationSubmissionCreate.class));
 
     remoteIntegrationService.save(settings, USER_ID);
@@ -147,9 +147,9 @@ public class RemoteIntegrationServiceTest {
     IntegrationSettings settings = buildIntegrationSettings();
 
     doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
-        integrationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+        configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
-    doReturn(settings).when(integrationApiClient)
+    doReturn(settings).when(configurationApiClient)
         .createIntegration(eq(TOKEN), any(IntegrationSubmissionCreate.class));
 
     assertEquals(settings, remoteIntegrationService.save(settings, USER_ID));
@@ -160,7 +160,7 @@ public class RemoteIntegrationServiceTest {
     IntegrationSettings settings = buildIntegrationSettings();
 
     // make the api update work
-    doThrow(RemoteApiException.class).when(integrationApiClient)
+    doThrow(RemoteApiException.class).when(configurationApiClient)
         .updateIntegration(eq(TOKEN), eq(CONFIGURATION_ID), any(IntegrationSubmissionCreate.class));
     remoteIntegrationService.save(settings, USER_ID);
   }
@@ -170,7 +170,7 @@ public class RemoteIntegrationServiceTest {
     IntegrationSettings settings = buildIntegrationSettings();
 
     // make the api update work
-    doReturn(settings).when(integrationApiClient)
+    doReturn(settings).when(configurationApiClient)
         .updateIntegration(eq(TOKEN), eq(CONFIGURATION_ID), any(IntegrationSubmissionCreate.class));
     assertEquals(settings, remoteIntegrationService.save(settings, USER_ID));
   }

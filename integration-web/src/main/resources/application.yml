@@ -25,8 +25,7 @@ spring:
       form-data: multipart/form-data
     servlet:
       load-on-startup: 1
-  resources:
-    static-locations: file:///opt/symphony/ib/resources/
+    static-path-pattern: /apps/**
   profiles:
     active: jira, github, salesforce, universal, trello, zapier
 

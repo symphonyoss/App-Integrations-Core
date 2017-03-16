@@ -19,7 +19,12 @@ package org.symphonyoss.integration.pod.api.client;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
+import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserCreate;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,4 +115,63 @@ public class UserApiClient extends BasePodApiClient {
 
     return apiClient.doGet(path, headerParams, queryParams, User.class);
   }
+
+  public UserDetail createUser(String sessionToken, UserCreate userInfo) throws RemoteApiException {
+    checkAuthToken(sessionToken);
+
+    if (userInfo == null) {
+      throw new RemoteApiException(400, "Missing the required body payload when calling createUser");
+    }
+
+    String path = "/v1/admin/user/create";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
+
+    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), userInfo,
+        UserDetail.class);
+  }
+
+  public UserDetail updateUser(String sessionToken, Long uid, UserAttributes attributes)
+      throws RemoteApiException {
+    checkAuthToken(sessionToken);
+
+    if (uid == null) {
+      throw new RemoteApiException(400, "Missing the required parameter 'uid' when calling updateUser");
+    }
+
+    if (attributes == null) {
+      throw new RemoteApiException(400, "Missing the required body payload when calling updateUser");
+    }
+
+    String path = "/v1/admin/user/" + uid + "/update";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
+
+    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), attributes,
+        UserDetail.class);
+  }
+
+  public void updateUserAvatar(String sessionToken, Long uid, AvatarUpdate avatarUpdate)
+      throws RemoteApiException {
+    checkAuthToken(sessionToken);
+
+    if (uid == null) {
+      throw new RemoteApiException(400, "Missing the required parameter 'uid' when calling updateUserAvatar");
+    }
+
+    if (avatarUpdate == null) {
+      throw new RemoteApiException(400, "Missing the required body payload when calling updateUserAvatar");
+    }
+
+    String path = "/v1/admin/user/" + uid + "/avatar/update";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
+
+    apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), avatarUpdate,
+        Map.class);
+  }
+
 }

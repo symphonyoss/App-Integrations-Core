@@ -12,6 +12,12 @@
     <artifactId>integration-web</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <!-- Override RPM properties -->
+        <rpm.name>integration-bridge</rpm.name>
+        <rpm.deployment.folder>${rpm.deployment.prefix}/ib</rpm.deployment.folder>
+    </properties>
+
     <build>
         <finalName>integration</finalName>
         <plugins>
@@ -36,39 +42,16 @@
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-jira</artifactId>
+            <artifactId>integration-webhook</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-universal-whi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-trello</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-salesforce</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-github</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-zapier</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+      
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

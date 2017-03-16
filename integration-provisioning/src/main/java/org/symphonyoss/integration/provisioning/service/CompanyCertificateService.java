@@ -18,13 +18,6 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
-import com.symphony.api.pod.api.SecurityApi;
-import com.symphony.api.pod.client.ApiException;
-import com.symphony.api.pod.model.CompanyCert;
-import com.symphony.api.pod.model.CompanyCertAttributes;
-import com.symphony.api.pod.model.CompanyCertStatus;
-import com.symphony.api.pod.model.CompanyCertType;
-
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMParser;
@@ -34,8 +27,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.provisioning.client.PodApiClientDecorator;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
+import org.symphonyoss.integration.pod.api.model.CompanyCert;
+import org.symphonyoss.integration.pod.api.model.CompanyCertAttributes;
+import org.symphonyoss.integration.pod.api.model.CompanyCertStatus;
+import org.symphonyoss.integration.pod.api.model.CompanyCertType;
 import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
@@ -61,17 +60,17 @@ public class CompanyCertificateService {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private PodApiClientDecorator podApiClient;
+  private PodHttpApiClient podApiClient;
 
   @Autowired
   private IntegrationUtils utils;
 
-  private SecurityApi securityApi;
+  private SecurityApiClient securityApi;
 
   @PostConstruct
   public void init() {
     Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    this.securityApi = new SecurityApi(podApiClient);
+    this.securityApi = new SecurityApiClient(podApiClient);
   }
 
   /**
@@ -87,8 +86,8 @@ public class CompanyCertificateService {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     try {
-      securityApi.v2CompanycertCreatePost(sessionToken, companyCert);
-    } catch (ApiException e) {
+      securityApi.createCompanyCert(sessionToken, companyCert);
+    } catch (RemoteApiException e) {
       throw new CompanyCertificateException("Failed to import company certificate", e);
     }
   }
@@ -130,8 +129,7 @@ public class CompanyCertificateService {
             .getCertificate((X509CertificateHolder) cert);
       }
 
-      throw new CompanyCertificateException(
-          "Input contains " + cert.getClass() + ", not X509Certificate");
+      throw new CompanyCertificateException("Invalid cerficate " + fileName);
     } catch (IOException | CertificateException e) {
       throw new CompanyCertificateException("Failed to read PEM file", e);
     }
