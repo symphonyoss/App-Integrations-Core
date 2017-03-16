@@ -1,11 +1,15 @@
+# Local run
+certs/
+tomcat/
+env.sh
+application.yaml
+
 # Maven
 target/
 
 # Intellij
 .idea
 *.iml
-
-docs/configuration/
 
 # Applications
 integration-jira/
