@@ -1,0 +1,84 @@
+integration_bridge:
+  domain: <<IB_DOMAIN>>
+  host: <<IB_HOST>>
+  http_port: <<IB_PORT>>
+
+#
+# Indicate the host and port for the Symphony POD the Apps are associated with.
+#
+pod:
+  host: <<POD_HOST>>
+  port: <<POD_PORT>>
+
+#
+# Indicate the host and port for the POD's Agent.
+#
+agent:
+  host: <<AGENT_HOST>>
+  port: <<AGENT_PORT>>
+
+#
+# Indicate the host and ports for the POD's Key Manager.
+#
+key_manager:
+  host: <<KM_HOST>>
+  port: <<KM_PORT>>
+
+key_manager_auth:
+  host: <<KM_AUTH_HOST>>
+  port: <<KM_AUTH_PORT>>
+
+pod_session_manager:
+  host: <<SM_HOST>>
+  port: <<SM_PORT>>
+
+# cloud_logging:
+#   account: <<CL_ACCOUNT>>
+#   secret: <<CL_SECRET>>
+
+applications:
+  jira:
+    state: PROVISIONED
+    keystore:
+      file: <<JIRA_CERT_FILE>>
+      password: <<JIRA_CERT_PWD>>
+    type: pkcs12
+    allowed_origins:
+      - address: 10.0.0.0
+      - address: 10.0.0.1
+      - host: localhost
+
+  github:
+    state: PROVISIONED
+    keystore:
+      file: <<GITHUB_CERT_FILE>>
+      password: <<GITHUB_CERT_PWD>>
+      type: pkcs12
+
+  salesforce:
+    state: PROVISIONED
+    keystore:
+      file: <<SALESFORCE_CERT_FILE>>
+      password: <<SALESFORCE_CERT_PWD>>
+      type: pkcs12
+
+  universal:
+    state: PROVISIONED
+    keystore:
+      file: <<UNIVERSAL_CERT_FILE>>
+      password: <<UNIVERSAL_CERT_PWD>>
+      type: pkcs12
+
+  trello:
+    state: PROVISIONED
+    keystore:
+      file: <<TRELLO_CERT_FILE>>
+      password: <<TRELLO_CERT_PWD>>
+      type: pkcs12
+
+  zapier:
+    state: PROVISIONED
+    keystore:
+      file: <<ZAPIER_CERT_FILE>>
+      password: <<ZAPIER_CERT_PWD>>
+      type: pkcs12
