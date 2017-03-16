@@ -19,7 +19,6 @@ package org.symphonyoss.integration.pod.api.client;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.pod.api.model.IntegrationSettingsList;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
 
 import java.util.Collections;
@@ -27,38 +26,38 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Part of Integration API, holds all endpoints to maintain the integration settings.
+ * Part of Configuration API, holds all endpoints to maintain the integration settings.
  * Created by Milton Quilzini on 16/01/17.
  */
-public class IntegrationApiClient extends BasePodApiClient {
+public class ConfigurationApiClient extends BasePodApiClient {
 
   private HttpApiClient apiClient;
 
-  public IntegrationApiClient(HttpApiClient apiClient) {
+  public ConfigurationApiClient(HttpApiClient apiClient) {
     this.apiClient = apiClient;
   }
 
   /**
-   * List integrations
+   * Creates a new integration.
    * @param sessionToken Session authentication token.
-   * @param offset Number of integrations to skip.
-   * @param limit Max number of integrations to return.
+   * @param integration Integration to be created.
    * @return Integration settings
    */
-  public IntegrationSettingsList listIntegrations(String sessionToken, int offset, int limit)
-      throws RemoteApiException {
+  public IntegrationSettings createIntegration(String sessionToken,
+      IntegrationSubmissionCreate integration) throws RemoteApiException {
     checkAuthToken(sessionToken);
 
-    String path = "/v1/configuration";
+    if (integration == null) {
+      throw new RemoteApiException(400, "Missing the required body payload when calling createIntegration");
+    }
+
+    String path = "/v1/configuration/create";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put(OFFSET_QUERY_PARAM, String.valueOf(offset));
-    queryParams.put(LIMIT_QUERY_PARAM, String.valueOf(limit));
-
-    return apiClient.doGet(path, headerParams, queryParams, IntegrationSettingsList.class);
+    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(),
+        integration, IntegrationSettings.class);
   }
 
   /**
@@ -78,7 +77,7 @@ public class IntegrationApiClient extends BasePodApiClient {
           "Missing the required parameter 'integrationId' when calling getIntegrationById");
     }
 
-    String path = "/v1/configuration/" + apiClient.escapeString(integrationId);
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/get";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
@@ -104,36 +103,13 @@ public class IntegrationApiClient extends BasePodApiClient {
           "Missing the required parameter 'integrationType' when calling getIntegrationByType");
     }
 
-    String path = "/v1/configuration/type/" + apiClient.escapeString(integrationType);
+    String path = "/v1/configuration/type/" + apiClient.escapeString(integrationType) + "/get";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
     return apiClient.doGet(path, headerParams, Collections.<String, String>emptyMap(),
         IntegrationSettings.class);
-  }
-
-  /**
-   * Creates a new integration.
-   * @param sessionToken Session authentication token.
-   * @param integration Integration to be created.
-   * @return Integration settings
-   */
-  public IntegrationSettings createIntegration(String sessionToken,
-      IntegrationSubmissionCreate integration) throws RemoteApiException {
-    checkAuthToken(sessionToken);
-
-    if (integration == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createIntegration");
-    }
-
-    String path = "/v1/configuration";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
-
-    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(),
-        integration, IntegrationSettings.class);
   }
 
   /**
@@ -158,60 +134,12 @@ public class IntegrationApiClient extends BasePodApiClient {
       throw new RemoteApiException(400, "Missing the required body payload when calling updateIntegration");
     }
 
-    String path = "/v1/configuration/" + apiClient.escapeString(integrationId);
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/update";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
     return apiClient.doPut(path, headerParams, Collections.<String, String>emptyMap(), integration,
-        IntegrationSettings.class);
-  }
-
-  /**
-   * Activates an integration.
-   * @param sessionToken Session authentication token.
-   * @param integrationId Integration identifier.
-   * @return Integration settings
-   */
-  public IntegrationSettings activateIntegration(String sessionToken, String integrationId)
-      throws RemoteApiException {
-    checkAuthToken(sessionToken);
-
-    if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling activateIntegration");
-    }
-
-    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/activate";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
-
-    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), null,
-        IntegrationSettings.class);
-  }
-
-  /**
-   * Deactivates an integration.
-   * @param sessionToken Session authentication token.
-   * @param integrationId Integration identifier.
-   * @return Integration settings
-   */
-  public IntegrationSettings deactivateIntegration(String sessionToken, String integrationId)
-      throws RemoteApiException {
-    checkAuthToken(sessionToken);
-
-    if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling deactivateIntegration");
-    }
-
-    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/deactivate";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
-
-    return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), null,
         IntegrationSettings.class);
   }
 

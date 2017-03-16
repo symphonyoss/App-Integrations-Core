@@ -28,8 +28,8 @@ import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.pod.api.client.IntegrationApiClient;
-import org.symphonyoss.integration.pod.api.client.IntegrationInstanceApiClient;
+import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
+import org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
@@ -52,21 +52,21 @@ public class RemoteIntegrationService implements IntegrationService {
   @Autowired
   private PodHttpApiClient client;
 
-  private IntegrationApiClient integrationApiClient;
+  private ConfigurationApiClient configurationApiClient;
 
-  private IntegrationInstanceApiClient instanceApiClient;
+  private ConfigurationInstanceApiClient instanceApiClient;
 
   @Override
   @PostConstruct
   public void init() {
-    integrationApiClient = new IntegrationApiClient(client);
-    instanceApiClient = new IntegrationInstanceApiClient(client);
+    configurationApiClient = new ConfigurationApiClient(client);
+    instanceApiClient = new ConfigurationInstanceApiClient(client);
   }
 
   @Override
   public IntegrationSettings getIntegrationById(String integrationId, String userId) {
     try {
-      return integrationApiClient.getIntegrationById(authenticationProxy.getSessionToken(userId),
+      return configurationApiClient.getIntegrationById(authenticationProxy.getSessionToken(userId),
           integrationId);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
@@ -84,7 +84,7 @@ public class RemoteIntegrationService implements IntegrationService {
   @Override
   public IntegrationSettings getIntegrationByType(String integrationType, String userId) {
     try {
-      return integrationApiClient.getIntegrationByType(authenticationProxy.getSessionToken(userId),
+      return configurationApiClient.getIntegrationByType(authenticationProxy.getSessionToken(userId),
           integrationType);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
@@ -132,7 +132,7 @@ public class RemoteIntegrationService implements IntegrationService {
     IntegrationSubmissionCreate create = buildIntegrationSubmission(settings);
 
     try {
-      return integrationApiClient.createIntegration(authenticationProxy.getSessionToken(userId),
+      return configurationApiClient.createIntegration(authenticationProxy.getSessionToken(userId),
           create);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
@@ -145,7 +145,7 @@ public class RemoteIntegrationService implements IntegrationService {
     IntegrationSubmissionCreate create = buildIntegrationSubmission(settings);
 
     try {
-      return integrationApiClient.updateIntegration(authenticationProxy.getSessionToken(userId),
+      return configurationApiClient.updateIntegration(authenticationProxy.getSessionToken(userId),
           settings.getConfigurationId(), create);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
@@ -165,7 +165,7 @@ public class RemoteIntegrationService implements IntegrationService {
   private boolean integrationExists(IntegrationSettings settings, String userId)
       throws RemoteConfigurationException {
     try {
-      integrationApiClient.getIntegrationById(authenticationProxy.getSessionToken(userId),
+      configurationApiClient.getIntegrationById(authenticationProxy.getSessionToken(userId),
           settings.getConfigurationId());
       return true;
     } catch (RemoteApiException e) {
