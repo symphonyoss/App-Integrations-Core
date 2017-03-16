@@ -24,6 +24,17 @@
         <module>integration-web</module>
     </modules>
 
+    <repositories>
+        <repository>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <!-- Project Information -->
     <name>Integration Bridge</name>
     <description>
@@ -155,35 +166,6 @@
             <modules>
                 <module>integration-provisioning</module>
             </modules>
-
-            <repositories>
-                <repository>
-                    <id>oss-sonatype</id>
-                    <name>oss-sonatype</name>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-
-            <pluginRepositories>
-                <pluginRepository>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                    <id>symphony</id>
-                    <name>plugins-release</name>
-                    <url>https://repo.symphony.com/artifactory/plugins-release</url>
-                </pluginRepository>
-                <pluginRepository>
-                    <snapshots/>
-                    <id>snapshots</id>
-                    <name>plugins-snapshot</name>
-                    <url>https://repo.symphony.com/artifactory/plugins-snapshot</url>
-                </pluginRepository>
-            </pluginRepositories>
-
         </profile>
 
     </profiles>
