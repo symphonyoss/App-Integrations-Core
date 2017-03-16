@@ -18,23 +18,21 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
-import com.symphony.api.pod.api.UserApi;
-import com.symphony.api.pod.api.UsersApi;
-import com.symphony.api.pod.client.ApiException;
-import com.symphony.api.pod.model.AvatarUpdate;
-import com.symphony.api.pod.model.UserAttributes;
-import com.symphony.api.pod.model.UserCreate;
-import com.symphony.api.pod.model.UserDetail;
-import com.symphony.api.pod.model.UserV2;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.provisioning.client.PodApiClientDecorator;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.UserApiClient;
+import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
+import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserCreate;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
@@ -61,16 +59,13 @@ public class UserService {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private PodApiClientDecorator podApiClient;
+  private PodHttpApiClient podHttpApiClient;
 
-  private UsersApi usersApi;
-
-  private UserApi userApi;
+  private UserApiClient userApiClient;
 
   @PostConstruct
   public void init() {
-    this.usersApi = new UsersApi(podApiClient);
-    this.userApi = new UserApi(podApiClient);
+    this.userApiClient = new UserApiClient(podHttpApiClient);
   }
 
   /**
@@ -86,7 +81,7 @@ public class UserService {
     String avatar = app.getAvatar();
 
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
-    UserV2 user = getUser(username);
+    User user = getUser(username);
 
     if (user == null) {
       createNewUser(sessionToken, username, name, avatar);
@@ -100,17 +95,14 @@ public class UserService {
    * @param username User login.
    * @return User information (retrieved from the backend).
    */
-  public UserV2 getUser(String username) {
+  public User getUser(String username) {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
-    UserV2 user;
     try {
-      user = usersApi.v2UserGet(sessionToken, null, null, username, true);
-    } catch (ApiException e) {
+      return userApiClient.getUserByUsername(sessionToken, username);
+    } catch (RemoteApiException e) {
       throw new UserSearchException("Fail to retrieve user information. Username: " + username, e);
     }
-
-    return user;
   }
 
   /**
@@ -123,9 +115,9 @@ public class UserService {
     UserCreate userInfo = createUserInformation(username, name);
 
     try {
-      UserDetail createdUser = userApi.v1AdminUserCreatePost(sessionToken, userInfo);
+      UserDetail createdUser = userApiClient.createUser(sessionToken, userInfo);
       updateUserAvatar(sessionToken, createdUser.getUserSystemInfo().getId(), avatar);
-    } catch (ApiException e) {
+    } catch (RemoteApiException e) {
       throw new CreateUserException("Fail to create user " + username, e);
     }
   }
@@ -137,13 +129,13 @@ public class UserService {
    * @param name User display name
    * @param avatar User avatar (Base64 encoded)
    */
-  private void updateUser(String sessionToken, UserV2 user, String name, String avatar) {
+  private void updateUser(String sessionToken, User user, String name, String avatar) {
     Long userId = user.getId();
 
     try {
       UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
-      userApi.v1AdminUserUidUpdatePost(sessionToken, userId, userAttributes);
-    } catch (ApiException e) {
+      userApiClient.updateUser(sessionToken, userId, userAttributes);
+    } catch (RemoteApiException e) {
       throw new UpdateUserException("Failed to update user attributes", e);
     }
 
@@ -161,9 +153,9 @@ public class UserService {
       if (StringUtils.isNotEmpty(avatar)) {
         AvatarUpdate avatarUpdate = new AvatarUpdate();
         avatarUpdate.setImage(avatar);
-        userApi.v1AdminUserUidAvatarUpdatePost(sessionToken, uid, avatarUpdate);
+        userApiClient.updateUserAvatar(sessionToken, uid, avatarUpdate);
       }
-    } catch (ApiException e) {
+    } catch (RemoteApiException e) {
       throw new UpdateUserException("Failed to update user avatar", e);
     }
   }
