@@ -19,6 +19,8 @@ package org.symphonyoss.integration.pod.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +31,12 @@ import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
+import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserCreate;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +48,14 @@ import java.util.Map;
 public class UserApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
+
+  private static final String MOCK_USERNAME = "testUser";
+
+  private static final String MOCK_FIRST_NAME = "Test";
+
+  private static final String MOCK_LAST_NAME = "User";
+
+  private static final Long MOCK_USER_ID = 123L;
 
   @Mock
   private HttpApiClient httpClient;
@@ -100,7 +115,7 @@ public class UserApiClientTest {
   private User mockUser() {
     User user = new User();
     user.setEmailAddress("symphony@symphony.com");
-    user.setId(123L);
+    user.setId(MOCK_USER_ID);
     user.setDisplayName("Symphony Display Name");
     user.setUserName("symphony");
 
@@ -198,4 +213,179 @@ public class UserApiClientTest {
 
     assertEquals(user, result);
   }
+
+  @Test
+  public void testCreateUserNullSession() {
+    try {
+      apiClient.createUser(null, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required parameter 'sessionToken'";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testCreateUserNullData() {
+    try {
+      apiClient.createUser(MOCK_SESSION, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required body payload when calling createUser";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testCreateUser() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+
+    UserAttributes userAttributes = mockUserAttributes();
+
+    UserCreate userInfo = new UserCreate();
+    userInfo.setUserAttributes(userAttributes);
+
+    UserDetail expected = new UserDetail();
+    expected.setUserAttributes(userAttributes);
+
+    doReturn(expected).when(httpClient)
+        .doPost("/v1/admin/user/create", headerParams, Collections.<String, String>emptyMap(),
+            userInfo, UserDetail.class);
+
+    UserDetail result = apiClient.createUser(MOCK_SESSION, userInfo);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testUpdateUserNullSession() {
+    try {
+      apiClient.updateUser(null, null, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required parameter 'sessionToken'";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUserNullIdentifier() {
+    try {
+      apiClient.updateUser(MOCK_SESSION, null, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required parameter 'uid' when calling updateUser";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUserNullData() {
+    try {
+      apiClient.updateUser(MOCK_SESSION, MOCK_USER_ID, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required body payload when calling updateUser";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUser() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+
+    UserAttributes userAttributes = mockUserAttributes();
+
+    UserDetail expected = new UserDetail();
+    expected.setUserAttributes(userAttributes);
+
+    String path = "/v1/admin/user/" + MOCK_USER_ID + "/update";
+
+    doReturn(expected).when(httpClient)
+        .doPost(path, headerParams, Collections.<String, String>emptyMap(),
+            userAttributes, UserDetail.class);
+
+    UserDetail result = apiClient.updateUser(MOCK_SESSION, MOCK_USER_ID, userAttributes);
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testUpdateUserAvatarNullSession() {
+    try {
+      apiClient.updateUserAvatar(null, null, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required parameter 'sessionToken'";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUserAvatarNullIdentifier() {
+    try {
+      apiClient.updateUserAvatar(MOCK_SESSION, null, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required parameter 'uid' when calling updateUserAvatar";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUserAvatarNullData() {
+    try {
+      apiClient.updateUserAvatar(MOCK_SESSION, MOCK_USER_ID, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+
+      String message = "Missing the required body payload when calling updateUserAvatar";
+      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateUserAvatar() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+
+    String path = "/v1/admin/user/" + MOCK_USER_ID + "/avatar/update";
+
+    AvatarUpdate avatarUpdate = new AvatarUpdate();
+    avatarUpdate.setImage("dGVzdGV0ZXN0ZXN0ZXN0ZXN0ZQ==");
+
+    apiClient.updateUserAvatar(MOCK_SESSION, MOCK_USER_ID, avatarUpdate);
+
+    verify(httpClient, times(1)).doPost(path, headerParams, Collections.<String, String>emptyMap(),
+        avatarUpdate, Map.class);
+  }
+
+  private UserAttributes mockUserAttributes() {
+    UserAttributes attributes = new UserAttributes();
+    attributes.setUserName(MOCK_USERNAME);
+    attributes.setFirstName(MOCK_FIRST_NAME);
+    attributes.setLastName(MOCK_LAST_NAME);
+    attributes.setDisplayName(MOCK_FIRST_NAME + " " + MOCK_LAST_NAME);
+    attributes.setEmailAddress(MOCK_USERNAME + "@symphony.com");
+
+    return attributes;
+  }
+
 }

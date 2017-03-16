@@ -16,6 +16,7 @@
 
 package org.symphonyoss.integration.healthcheck.application;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
@@ -41,7 +42,7 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
   @Autowired
   private IntegrationProperties properties;
 
-  @Autowired
+  @Autowired(required = false)
   private Map<String, Integration> integrations;
 
   public ApplicationsHealthIndicator() {
@@ -52,14 +53,24 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
   public void init() {
     Map<String, Application> applications = properties.getApplications();
 
-    for (Application app : applications.values()) {
-      String component = app.getComponent();
-      Integration integration = integrations.get(component);
+    if ((integrations != null) && (applications != null)) {
 
-      if ((integration != null) && (ApplicationState.PROVISIONED.equals(app.getState()))) {
-        addHealthIndicator(component, new IntegrationHealthIndicatorAdapter(integration));
+      for (Application app : applications.values()) {
+        String component = app.getComponent();
+
+        if (StringUtils.isEmpty(component)) {
+          continue;
+        }
+
+        Integration integration = integrations.get(component);
+
+        if ((integration != null) && (ApplicationState.PROVISIONED.equals(app.getState()))) {
+          addHealthIndicator(component, new IntegrationHealthIndicatorAdapter(integration));
+        }
       }
+
     }
+
   }
 
 }

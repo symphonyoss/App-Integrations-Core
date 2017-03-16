@@ -4,13 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>integration</artifactId>
-        <groupId>org.symphonyoss</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <groupId>org.symphonyoss.symphony.integrations</groupId>
+        <version>0.10.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>integration-web</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <!-- Override RPM properties -->
+        <rpm.name>integration-bridge</rpm.name>
+        <rpm.deployment.folder>${rpm.deployment.prefix}/ib</rpm.deployment.folder>
+    </properties>
 
     <build>
         <finalName>integration</finalName>
@@ -35,40 +41,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-jira</artifactId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
+            <artifactId>integration-webhook</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-universal-whi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-trello</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-salesforce</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-github</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
-            <artifactId>integration-zapier</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss</groupId>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+      
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
