@@ -172,6 +172,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    */
   private Client getHttpClient() {
     for (Application app : this.properties.getApplications().values()) {
+      if (StringUtils.isEmpty(app.getComponent())) {
+        continue;
+      }
+
       try {
         return authenticationProxy.httpClientForUser(app.getComponent());
       } catch (UnregisteredUserAuthException e) {
