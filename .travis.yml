@@ -20,16 +20,13 @@
 # under the License.
 #
 
-# blocklist
-# branches:
-#  except:
-#  - experimental
-
 language: java
-install: true
 
+install: true
 script:
-- mvn clean install -pl \!integration-provisioning
+- "if [[ \"$TRAVIS_PULL_REQUEST\" = \"false\" && $TRAVIS_BRANCH =~ dev ]]; then mvn clean deploy --settings settings.xml -Dbuild.provisioning=false; fi"
+- "if [[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]]; then mvn clean install ; fi"
 
 jdk:
   - oraclejdk8
+
