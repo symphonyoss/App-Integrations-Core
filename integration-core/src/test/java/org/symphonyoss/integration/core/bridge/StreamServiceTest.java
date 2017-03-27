@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.agent.api.client.MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -59,7 +59,7 @@ public class StreamServiceTest {
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private MessageApiClient messagesApi;
+  private V2MessageApiClient messagesApi;
 
   @Mock
   private StreamApiClient streamsApi;
