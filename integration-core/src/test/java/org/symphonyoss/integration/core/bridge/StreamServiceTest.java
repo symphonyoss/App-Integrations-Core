@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.core.bridge;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -24,15 +25,21 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.symphonyoss.integration.agent.api.client.AgentApiClient;
+import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.stream.Stream;
@@ -55,11 +62,20 @@ public class StreamServiceTest {
 
   private static final Long USER_ID = 268745369L;
 
+  private static final String AGENT_SERVICE_NAME = "Agent";
+
+  private static final String AGENT_API_V2 = "1.45.0";
+
+  private static final String AGENT_API_V3 = "1.46.0";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private V2MessageApiClient messagesApi;
+  private MessageApiClient messagesApi;
+
+  @Mock
+  private AgentApiClient agentApiClient;
 
   @Mock
   private StreamApiClient streamsApi;
@@ -178,5 +194,36 @@ public class StreamServiceTest {
 
     Stream result = streamService.createIM(INTEGRATION_USER, USER_ID);
     assertEquals(stream, result);
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedWithoutServiceName() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEvent(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
+
+    Object messagesApi = ReflectionTestUtils.getField(streamService, "messagesApi");
+
+    assertNotEquals(V2MessageApiClient.class, messagesApi.getClass());
+    assertNotEquals(V3MessageApiClient.class, messagesApi.getClass());
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedOldVersion() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
+
+    Object messagesApi = ReflectionTestUtils.getField(streamService, "messagesApi");
+
+    assertEquals(V2MessageApiClient.class, messagesApi.getClass());
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedNewVersion() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
+
+    Object messagesApi = ReflectionTestUtils.getField(streamService, "messagesApi");
+
+    assertEquals(V3MessageApiClient.class, messagesApi.getClass());
   }
 }

@@ -38,8 +38,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.event.HealthCheckServiceEvent;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -90,6 +92,9 @@ public class IntegrationBootstrapContextTest {
   @Mock
   private IntegrationMetricsController metricsController;
 
+  @Mock
+  private ApplicationEventPublisher publisher;
+
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
       new IntegrationBootstrapContext();
@@ -134,6 +139,8 @@ public class IntegrationBootstrapContextTest {
     doAnswer(answer).when(servicePool).submit(any(Runnable.class));
     doAnswer(answer).when(scheduler)
         .scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+    doAnswer(answer).when(scheduler)
+        .scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
 
     Application application = new Application();
     application.setComponent(WEBHOOKINTEGRATION_TYPE_JIRA);
@@ -153,6 +160,8 @@ public class IntegrationBootstrapContextTest {
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
     assertNotNull(integration);
     assertEquals(this.integration, integration);
+
+    verify(publisher, times(1)).publishEvent(any(HealthCheckServiceEvent.class));
   }
 
   /**

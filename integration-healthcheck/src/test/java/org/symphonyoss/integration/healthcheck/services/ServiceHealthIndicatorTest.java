@@ -17,12 +17,16 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,10 +37,13 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.event.HealthCheckServiceEvent;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import javax.ws.rs.ProcessingException;
@@ -142,11 +149,7 @@ public class ServiceHealthIndicatorTest {
 
   @Test
   public void testServiceUp() {
-    Response mockResponse = mock(Response.class);
-
-    doReturn(mockResponse).when(invocationBuilder).get();
-    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
-    doReturn("{\"version\": \"1.45.0-SNAPSHOT\"}").when(mockResponse).readEntity(String.class);
+    mockServiceUp();
 
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
     service.setConnectivity(Status.UP);
@@ -156,6 +159,17 @@ public class ServiceHealthIndicatorTest {
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
+
+    String currentVersion = healthIndicator.getCurrentVersion();
+    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+  }
+
+  private void mockServiceUp() {
+    Response mockResponse = mock(Response.class);
+
+    doReturn(mockResponse).when(invocationBuilder).get();
+    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
+    doReturn("{\"version\": \"1.45.0-SNAPSHOT\"}").when(mockResponse).readEntity(String.class);
   }
 
   @Test
@@ -173,5 +187,32 @@ public class ServiceHealthIndicatorTest {
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
+
+    String currentVersion = healthIndicator.getCurrentVersion();
+    assertNull(currentVersion);
   }
+
+  @Test
+  public void testHandleHealthCheckEventWithoutServiceName() {
+    mockServiceUp();
+
+    HealthCheckServiceEvent event = new HealthCheckServiceEvent(StringUtils.EMPTY);
+    healthIndicator.handleHealthCheckEvent(event);
+
+    assertNull(healthIndicator.getCurrentVersion());
+  }
+
+  @Test
+  public void testHandleHealthCheckEventServiceUp() {
+    mockServiceUp();
+
+    String serviceName = healthIndicator.getServiceName();
+    HealthCheckServiceEvent event = new HealthCheckServiceEvent(serviceName);
+
+    healthIndicator.handleHealthCheckEvent(event);
+
+    String currentVersion = healthIndicator.getCurrentVersion();
+    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+  }
+
 }

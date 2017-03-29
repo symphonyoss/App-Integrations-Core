@@ -16,16 +16,20 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.stream.Stream;
@@ -43,12 +47,17 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 /**
+ * Service component responsible to post message through the Agent Message API.
  * Created by rsanchez on 13/05/16.
  */
 @Component
 public class StreamServiceImpl implements StreamService {
 
   private static final Logger LOG = LoggerFactory.getLogger(StreamServiceImpl.class);
+
+  private static final String AGENT_SERVICE_NAME = "Agent";
+
+  private static final String AGENT_API_V3 = "1.46.0";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -122,6 +131,29 @@ public class StreamServiceImpl implements StreamService {
 
     // Create IM
     return streamsApi.createIM(authenticationProxy.getSessionToken(integrationUser), userIdList);
+  }
+
+  /**
+   * Handle service version updated event to switch the Agent Message API version. If the Agent
+   * version is greater than or equal to '1.46.0' this service should use the API v3, otherwise it
+   * should use the API v2.
+   *
+   * @param event Service version updated event
+   */
+  @EventListener
+  public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEvent event) {
+    // Check the service name
+    if (AGENT_SERVICE_NAME.equals(event.getServiceName())) {
+
+      // Get the current version
+      Version version = Version.valueOf(event.getNewVersion());
+
+      if (version.greaterThanOrEqualTo(Version.valueOf(AGENT_API_V3))) {
+        this.messagesApi = new V3MessageApiClient(agentApiClient);
+      } else {
+        this.messagesApi = new V2MessageApiClient(agentApiClient);
+      }
+    }
   }
 
 }

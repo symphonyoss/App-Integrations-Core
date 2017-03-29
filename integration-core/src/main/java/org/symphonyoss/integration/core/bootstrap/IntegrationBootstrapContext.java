@@ -24,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
+import org.symphonyoss.integration.event.HealthCheckServiceEvent;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -70,6 +72,10 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   public static final String BOOTSTRAP_DELAY_KEY = "bootstrap.delay";
 
+  public static final String AGENT_SERVICE_NAME = "Agent";
+
+  public static final Long HEALTH_CHECK_INITAL_DELAY = TimeUnit.SECONDS.toMillis(20);
+
   @Autowired
   private ApplicationContext context;
 
@@ -97,10 +103,13 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   @Autowired
   private ApplicationsHealthIndicator applicationsHealthIndicator;
 
+  @Autowired
+  private ApplicationEventPublisher publisher;
+
   @Override
   public void startup() {
     DistributedTracingUtils.setMDC();
-    this.scheduler = Executors.newSingleThreadScheduledExecutor();
+    this.scheduler = Executors.newScheduledThreadPool(DEFAULT_POOL_SIZE);
     this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
 
     initIntegrations();
@@ -129,8 +138,28 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       // deals with unknown apps.
       initUnknownApps();
+
+      // Start health check polling
+      healthCheckAgentServicePolling();
     }
 
+  }
+
+  /**
+   * Schedule to dispatch health-check service event to monitor the Agent version.
+   */
+  private void healthCheckAgentServicePolling() {
+    scheduler.scheduleWithFixedDelay(new Runnable() {
+
+      @Override
+      public void run() {
+        LOGGER.debug("Polling AGENT health check");
+
+        HealthCheckServiceEvent event = new HealthCheckServiceEvent(AGENT_SERVICE_NAME);
+        publisher.publishEvent(event);
+      }
+
+    }, HEALTH_CHECK_INITAL_DELAY, Long.valueOf(DEFAULT_DELAY), TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -186,7 +215,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
    */
   private void handleIntegrations() {
     try {
-      LOGGER.info("Verify new integrations");
+      LOGGER.debug("Verify new integrations");
 
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);

@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.agent.api.client;
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
+import org.symphonyoss.integration.api.client.json.JsonEntitySerializer;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.message.Message;
 
@@ -38,6 +39,7 @@ public class V2MessageApiClient extends BaseMessageApiClient implements MessageA
 
   public V2MessageApiClient(HttpApiClient apiClient) {
     this.apiClient = apiClient;
+    this.apiClient.setEntitySerializer(new JsonEntitySerializer());
   }
 
   /**

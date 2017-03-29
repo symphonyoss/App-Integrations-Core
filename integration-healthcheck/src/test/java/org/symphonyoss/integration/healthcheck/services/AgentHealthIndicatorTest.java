@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.event.MessageMLVersionUpdatedEvent;
+import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -43,11 +47,20 @@ public class AgentHealthIndicatorTest {
 
   private static final String SERVICE_NAME = "Agent";
 
+  private static final String AGENT_MESSAGEML_VERSION2 = "1.46.0";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
   private AgentHealthIndicator indicator;
+
+  private MockApplicationPublisher<MessageMLVersionUpdatedEvent> publisher = new MockApplicationPublisher<>();
+
+  @Before
+  public void init() {
+    ReflectionTestUtils.setField(indicator, "publisher", publisher);
+  }
 
   @Test
   public void testHealthCheckUrl() {
@@ -63,4 +76,21 @@ public class AgentHealthIndicatorTest {
   public void testMinVersion() {
     assertEquals(MOCK_VERSION, indicator.getMinVersion());
   }
+
+  @Test
+  public void testMessageMLVersionUpdatedEventV1() {
+    indicator.fireUpdatedServiceVersionEvent(MOCK_VERSION);
+
+    MessageMLVersionUpdatedEvent updatedEvent = publisher.getEvent();
+    assertEquals(MessageMLVersion.V1, updatedEvent.getVersion());
+  }
+
+  @Test
+  public void testMessageMLVersionUpdatedEventV2() {
+    indicator.fireUpdatedServiceVersionEvent(AGENT_MESSAGEML_VERSION2);
+
+    MessageMLVersionUpdatedEvent updatedEvent = publisher.getEvent();
+    assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
+  }
+
 }

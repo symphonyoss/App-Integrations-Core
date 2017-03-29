@@ -99,7 +99,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   }
 
   public void handleRemoteApiException(RemoteApiException remoteException,
-      IntegrationInstance instance, String integrationUser, String message, String stream) {
+      IntegrationInstance instance, String integrationUser, Message message, String stream) {
     int code = remoteException.getCode();
     Status status = Status.fromStatusCode(code);
 
@@ -110,7 +110,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
-      LOGGER.warn("Invalid messageML: " + message, remoteException);
+      LOGGER.warn("Invalid messageML: " + message.toString(), remoteException);
     }
   }
 

@@ -35,4 +35,11 @@ public class V3Message extends Message {
     this.data = data;
   }
 
+  @Override
+  public String toString() {
+    return "V3Message{" +
+        "message='" + getMessage() + '\'' +
+        ", data='" + data + '\'' +
+        '}';
+  }
 }
