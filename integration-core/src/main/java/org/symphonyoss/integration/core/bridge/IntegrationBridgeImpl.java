@@ -82,6 +82,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         throw e;
       } catch (Exception e) {
         exceptionHandler.handleUnexpectedException(e);
+        throw e;
       }
     }
 

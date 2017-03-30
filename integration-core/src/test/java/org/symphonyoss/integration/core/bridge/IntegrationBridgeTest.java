@@ -159,7 +159,7 @@ public class IntegrationBridgeTest {
     bridge.sendMessage(instance, INTEGRATION_USER, "message");
   }
 
-  @Test
+  @Test(expected = Exception.class)
   public void testSendMessageUnexpectedException() throws JsonProcessingException, RemoteApiException {
     Exception exception = new RuntimeException();
 
@@ -174,9 +174,6 @@ public class IntegrationBridgeTest {
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
     List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
-
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
   }
 
 }
