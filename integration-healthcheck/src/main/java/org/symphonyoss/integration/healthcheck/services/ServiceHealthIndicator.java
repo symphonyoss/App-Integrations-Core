@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
@@ -65,6 +66,11 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * Version field
    */
   private static final String VERSION = "version";
+
+  /**
+   * String that should be replaced to retrieve the semantic version
+   */
+  private static final String SNAPSHOT_VERSION = "-SNAPSHOT";
 
   /**
    * HTTP Connection timeout (in miliseconds)
@@ -171,12 +177,28 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   }
 
   /**
+   * Retrieves the semantic version. This method replaces the SNAPSHOT from a version.
+   * @param version Version to be evaluated
+   * @return Semantic version
+   */
+  protected String getSemanticVersion(String version) {
+    if (StringUtils.isEmpty(version)) {
+      return StringUtils.EMPTY;
+    }
+
+    return version.replace(SNAPSHOT_VERSION, StringUtils.EMPTY);
+  }
+
+  /**
    * Raise an updated service version event.
    * @param version Service version
    */
   protected void fireUpdatedServiceVersionEvent(String version) {
+    String oldSemanticVersion = getSemanticVersion(currentVersion);
+    String newSemanticVersion = getSemanticVersion(version);
+
     ServiceVersionUpdatedEvent event =
-        new ServiceVersionUpdatedEvent(getServiceName(), currentVersion, version);
+        new ServiceVersionUpdatedEvent(getServiceName(), oldSemanticVersion, newSemanticVersion);
     this.currentVersion = version;
 
     publisher.publishEvent(event);

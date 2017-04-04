@@ -49,6 +49,8 @@ public class AgentHealthIndicatorTest {
 
   private static final String AGENT_MESSAGEML_VERSION2 = "1.46.0";
 
+  private static final String AGENT_MESSAGEML_VERSION2_SNAPSHOT = "1.46.0-SNAPSHOT";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -93,4 +95,11 @@ public class AgentHealthIndicatorTest {
     assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
   }
 
+  @Test
+  public void testMessageMLVersionUpdatedEventV2SnapshotVersion() {
+    indicator.fireUpdatedServiceVersionEvent(AGENT_MESSAGEML_VERSION2_SNAPSHOT);
+
+    MessageMLVersionUpdatedEvent updatedEvent = publisher.getEvent();
+    assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
+  }
 }

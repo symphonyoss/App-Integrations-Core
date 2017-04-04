@@ -40,9 +40,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.event.HealthCheckServiceEvent;
+import org.symphonyoss.integration.event.MessageMLVersionUpdatedEvent;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -67,6 +69,8 @@ public class ServiceHealthIndicatorTest {
 
   private static final String MOCK_CURRENT_VERSION = "1.45.0-SNAPSHOT";
 
+  private static final String MOCK_CURRENT_SEMANTIC_VERSION = "1.45.0";
+
   private static final String MOCK_APP_TYPE = "testWebHookIntegration";
 
   private static final String MOCK_APP2_TYPE = "test2WebHookIntegration";
@@ -79,6 +83,8 @@ public class ServiceHealthIndicatorTest {
   private ServiceHealthIndicator healthIndicator;
 
   private Invocation.Builder invocationBuilder;
+
+  private MockApplicationPublisher<ServiceVersionUpdatedEvent> publisher = new MockApplicationPublisher<>();
 
   @Before
   public void init() {
@@ -95,6 +101,8 @@ public class ServiceHealthIndicatorTest {
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
+
+    ReflectionTestUtils.setField(healthIndicator, "publisher", publisher);
   }
 
   @Test
@@ -162,6 +170,9 @@ public class ServiceHealthIndicatorTest {
 
     String currentVersion = healthIndicator.getCurrentVersion();
     assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+
+    ServiceVersionUpdatedEvent event = publisher.getEvent();
+    assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
   }
 
   private void mockServiceUp() {
@@ -190,6 +201,8 @@ public class ServiceHealthIndicatorTest {
 
     String currentVersion = healthIndicator.getCurrentVersion();
     assertNull(currentVersion);
+
+    assertNull(publisher.getEvent());
   }
 
   @Test

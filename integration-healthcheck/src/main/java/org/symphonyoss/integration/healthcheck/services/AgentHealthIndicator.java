@@ -35,7 +35,7 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
 
   private static final String AGENT_URL_PATH = "/v1/HealthCheck";
 
-  private static final String AGENT_MESSAGEML_VERSION2 = "1.46.0";
+  private static final Version AGENT_MESSAGEML_VERSION2 = Version.valueOf("1.46.0");
 
   @Override
   protected String getServiceName() {
@@ -62,7 +62,9 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
 
     MessageMLVersion messageMLVersion = MessageMLVersion.V1;
 
-    if (Version.valueOf(version).greaterThanOrEqualTo(Version.valueOf(AGENT_MESSAGEML_VERSION2))) {
+    String currentSemanticVersion = getSemanticVersion(version);
+
+    if (Version.valueOf(currentSemanticVersion).greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
        messageMLVersion = MessageMLVersion.V2;
     }
 
