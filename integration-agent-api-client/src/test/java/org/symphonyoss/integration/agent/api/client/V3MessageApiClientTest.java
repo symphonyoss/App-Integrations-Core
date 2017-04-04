@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doReturn;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.glassfish.jersey.media.multipart.BodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +78,10 @@ public class V3MessageApiClientTest {
       + "</presentationML>";
 
   private static final String FILENAME_ENTITY_JSON = "entity.json";
+
+  private static final String MESSAGE_BODY = "message";
+
+  private static final String DATA_BODY = "data";
 
   @Mock
   private HttpApiClient httpClient;
@@ -150,15 +155,16 @@ public class V3MessageApiClientTest {
     public V3Message answer(InvocationOnMock invocationOnMock) throws Throwable {
       Object[] arguments = invocationOnMock.getArguments();
 
-      MultiPart multiPart = (MultiPart) arguments[3];
+      FormDataMultiPart multiPart = (FormDataMultiPart) arguments[3];
 
-      BodyPart presentationML = multiPart.getBodyParts().get(0);
+      BodyPart presentationML = multiPart.getField(MESSAGE_BODY);
 
       V3Message message = new V3Message();
       message.setMessage(presentationML.getEntity().toString());
 
-      if (multiPart.getBodyParts().size() > 1) {
-        BodyPart entityJson = multiPart.getBodyParts().get(1);
+      BodyPart entityJson = multiPart.getField(DATA_BODY);
+
+      if (entityJson != null) {
         message.setData(entityJson.getEntity().toString());
       }
 

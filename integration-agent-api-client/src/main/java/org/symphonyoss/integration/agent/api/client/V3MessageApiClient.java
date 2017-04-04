@@ -18,12 +18,9 @@ package org.symphonyoss.integration.agent.api.client;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.symphonyoss.integration.agent.api.model.V3Message;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.api.client.form.MultiPartEntitySerializer;
@@ -43,6 +40,10 @@ public class V3MessageApiClient extends BaseMessageApiClient implements MessageA
   private static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
 
   private static final String KM_TOKEN_HEADER_PARAM = "keyManagerToken";
+
+  private static final String MESSAGE_BODY = "message";
+
+  private static final String DATA_BODY = "data";
 
   private HttpApiClient apiClient;
 
@@ -70,14 +71,14 @@ public class V3MessageApiClient extends BaseMessageApiClient implements MessageA
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
     headerParams.put(KM_TOKEN_HEADER_PARAM, kmToken);
 
-    try (MultiPart multiPart = new MultiPart(MULTIPART_FORM_DATA_TYPE)) {
-      multiPart.bodyPart(message.getMessage(), APPLICATION_XML_TYPE);
+    try (FormDataMultiPart multiPart = new FormDataMultiPart()) {
+      multiPart.field(MESSAGE_BODY, message.getMessage(), APPLICATION_XML_TYPE);
 
       if (message instanceof V3Message) {
         String entityJSON = ((V3Message) message).getData();
 
         if (StringUtils.isNotEmpty(entityJSON)) {
-          multiPart.bodyPart(entityJSON, APPLICATION_JSON_TYPE);
+          multiPart.field(DATA_BODY, entityJSON, APPLICATION_JSON_TYPE);
         }
       }
 
