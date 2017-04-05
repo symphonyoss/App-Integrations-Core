@@ -1,26 +1,5 @@
 [![Symphony Software Foundation - Incubating](https://cdn.rawgit.com/symphonyoss/contrib-toolbox/master/images/ssf-badge-incubating.svg)](https://symphonyoss.atlassian.net/wiki/display/FM/Incubating) [![Build Status](https://travis-ci.org/symphonyoss/App-Integrations-Core.svg?branch=dev)](https://travis-ci.org/symphonyoss/App-Integrations-Core)
 
-# Run locally
-
-1. Define your certificate paths and passwords
-```
-cp env.sh.sample env.sh
-open env.sh
-```
-
-Make sure that
-- Paths and passwords are correct
-- You can reach all Symphony Pod endpoints
-- Service accounts exists and cert CNs match with account's usernames. **_Note: The team is working on a integration-provisioning module that will automate this process; until further notice, please contact Symphony Support to get your Symphony integration deployed on your pod, as the pod will need an exact match of service account name, certs and app name in the pod for your app to be visible in your pod and usable._**
-- `env.sh` and `certs/` are ignored by Git and don't end up in any code repository (especially if public!)
-
-2. Run the integrations
-```
-./run.sh
-```
-
-This command will create an `application.yaml` file (should be ignored by Git, as with `env.sh` and `certs/`) in the project root folder, using `docs/configuration/application.yaml.template` as template
-
 # Integrations Core Documentation
 
 This document provides a brief overview of Integration Core components and how to build them from scratch.
@@ -103,6 +82,9 @@ If you add a new integration, to get it up and running you also need to add it t
 ## What you’ll need
 * JDK 1.8
 * Maven 3.0.5+
+* Node 6.10
+* Gulp (globally installed)
+* Webpack (globally installed)
 
 ## Build with maven
 Integration Core is compatible with Apache Maven 3.0.5 or above. If you don’t already have Maven installed you can follow the instructions at maven.apache.org.
