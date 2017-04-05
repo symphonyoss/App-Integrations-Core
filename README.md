@@ -11,7 +11,7 @@ open env.sh
 Make sure that
 - Paths and passwords are correct
 - You can reach all Symphony Pod endpoints
-- Service accounts exists and cert CNs match with account's usernames
+- Service accounts exists and cert CNs match with account's usernames. **_Note: The team is working on a integration-provisioning module that will automate this process; until further notice, please contact Symphony Support to get your Symphony integration deployed on your pod, as the pod will need an exact match of service account name, certs and app name in the pod for your app to be visible in your pod and usable._**
 - `env.sh` and `certs/` are ignored by Git and don't end up in any code repository (especially if public!)
 
 2. Run the integrations
@@ -141,3 +141,17 @@ Here are the initial steps to get your project configured to run using the Intel
 > INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-6) lMXpkb:d8Gma6:uAGbXe INFO Integration jiraWebHookIntegration bootstrapped successfully
 > INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-3) lMXpkb:d8Gma6:5NWnjN INFO Integration trelloWebHookIntegration bootstrapped successfully
 > INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-4) lMXpkb:d8Gma6:O9H1Te INFO Integration githubWebHookIntegration bootstrapped successfully
+
+
+## Expose local endpoint to a public host
+
+In order to be able to create the app in a pod, you must provide a public `App Url`; you can use [ngrok](https://ngrok.com/) (or similar) to tunnel your local connection and expose it via a public DNS:
+```
+ngrok http 8080
+```
+Your local port 8080 is now accessible via `<dynamic_id>.ngrok.io`
+
+If you have a paid subscription, you can also use
+```
+ngrok http -subdomain=my.static.subdomain 8080
+```
