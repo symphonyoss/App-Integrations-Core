@@ -21,7 +21,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.symphonyoss.integration.agent.api.model.V3Message;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.api.client.form.MultiPartEntitySerializer;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -74,16 +73,13 @@ public class V3MessageApiClient extends BaseMessageApiClient implements MessageA
     try (FormDataMultiPart multiPart = new FormDataMultiPart()) {
       multiPart.field(MESSAGE_BODY, message.getMessage(), APPLICATION_XML_TYPE);
 
-      if (message instanceof V3Message) {
-        String entityJSON = ((V3Message) message).getData();
+      String entityJSON = message.getData();
 
-        if (StringUtils.isNotEmpty(entityJSON)) {
-          multiPart.field(DATA_BODY, entityJSON, APPLICATION_JSON_TYPE);
-        }
+      if (StringUtils.isNotEmpty(entityJSON)) {
+        multiPart.field(DATA_BODY, entityJSON, APPLICATION_JSON_TYPE);
       }
 
-      return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart,
-          V3Message.class);
+      return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart, Message.class);
     } catch (Exception e) {
       throw new RemoteApiException(500, e);
     }

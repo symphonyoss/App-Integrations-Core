@@ -32,6 +32,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.stream.Stream;
 import org.symphonyoss.integration.model.stream.StreamType;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
@@ -42,7 +43,9 @@ import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -63,15 +66,13 @@ public class StreamServiceImpl implements StreamService {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private AgentApiClient agentApiClient;
+  private AgentApiClient agentV2ApiClient;
+
+  @Autowired
+  private AgentApiClient agentV3ApiClient;
 
   @Autowired
   private PodHttpApiClient podApiClient;
-
-  /**
-   * Agent Message API Client
-   */
-  private MessageApiClient messagesApi;
 
   /**
    * Pod Stream API Client
@@ -79,12 +80,21 @@ public class StreamServiceImpl implements StreamService {
   private StreamApiClient streamsApi;
 
   /**
+   * Select the correct Agent Message API Client according to the MessageML version
+   */
+  private Map<MessageMLVersion, MessageApiClient> apiResolver = new HashMap<>();
+
+  /**
    * Initialize
    */
   @PostConstruct
   public void init() {
-    messagesApi = new V2MessageApiClient(agentApiClient);
     streamsApi = new StreamApiClient(podApiClient);
+
+    MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient);
+
+    apiResolver.put(MessageMLVersion.V1, messageApiClient);
+    apiResolver.put(MessageMLVersion.V2, messageApiClient);
   }
 
   @Override
@@ -120,8 +130,10 @@ public class StreamServiceImpl implements StreamService {
     String sessionToken = authToken.getSessionToken();
     String keyManagerToken = authToken.getKeyManagerToken();
 
+    MessageApiClient messageApi = apiResolver.get(messageSubmission.getVersion());
+
     // Post Message using Message API
-    return messagesApi.postMessage(sessionToken, keyManagerToken, stream, messageSubmission);
+    return messageApi.postMessage(sessionToken, keyManagerToken, stream, messageSubmission);
   }
 
   @Override
@@ -149,9 +161,10 @@ public class StreamServiceImpl implements StreamService {
       Version version = Version.valueOf(event.getNewVersion());
 
       if (version.greaterThanOrEqualTo(Version.valueOf(AGENT_API_V3))) {
-        this.messagesApi = new V3MessageApiClient(agentApiClient);
+        apiResolver.put(MessageMLVersion.V2, new V3MessageApiClient(agentV3ApiClient));
       } else {
-        this.messagesApi = new V2MessageApiClient(agentApiClient);
+        MessageApiClient messageApiClient = apiResolver.get(MessageMLVersion.V1);
+        apiResolver.put(MessageMLVersion.V2, messageApiClient);
       }
     }
   }

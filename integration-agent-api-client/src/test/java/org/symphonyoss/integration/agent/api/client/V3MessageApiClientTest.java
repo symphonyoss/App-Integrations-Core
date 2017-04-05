@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.symphonyoss.integration.agent.api.model.V3Message;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.json.JsonUtils;
@@ -108,9 +107,9 @@ public class V3MessageApiClientTest {
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
         .doPost(eq(path), eq(headerParams), eq(queryParams), any(MultiPart.class),
-            eq(V3Message.class));
+            eq(Message.class));
 
-    V3Message result = (V3Message) apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
+    Message result = apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
 
     assertEquals(message.getMessage(), result.getMessage());
     assertNull(result.getData());
@@ -124,7 +123,7 @@ public class V3MessageApiClientTest {
 
     Map<String, String> queryParams = new HashMap<>();
 
-    V3Message message = mockMessage();
+    Message message = mockMessage();
 
     JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
     message.setData(node.toString());
@@ -134,32 +133,32 @@ public class V3MessageApiClientTest {
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
         .doPost(eq(path), eq(headerParams), eq(queryParams), any(MultiPart.class),
-            eq(V3Message.class));
+            eq(Message.class));
 
-    V3Message result = (V3Message) apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
+    Message result = apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
 
     assertEquals(message.getMessage(), result.getMessage());
     assertEquals(message.getData(), result.getData());
   }
 
-  private V3Message mockMessage() {
-    V3Message message = new V3Message();
+  private Message mockMessage() {
+    Message message = new Message();
     message.setMessage(MOCK_PRESENTATION_ML);
 
     return message;
   }
 
-  private static final class AnswerV3MessageApi implements Answer<V3Message> {
+  private static final class AnswerV3MessageApi implements Answer<Message> {
 
     @Override
-    public V3Message answer(InvocationOnMock invocationOnMock) throws Throwable {
+    public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
       Object[] arguments = invocationOnMock.getArguments();
 
       FormDataMultiPart multiPart = (FormDataMultiPart) arguments[3];
 
       BodyPart presentationML = multiPart.getField(MESSAGE_BODY);
 
-      V3Message message = new V3Message();
+      Message message = new Message();
       message.setMessage(presentationML.getEntity().toString());
 
       BodyPart entityJson = multiPart.getField(DATA_BODY);
