@@ -94,17 +94,17 @@ Here's an example of a valid MessageML, containing all of the mentioned above:
 
 # Build instructions for the Java developer
 
-### What you’ll build
+## What you’ll build
 You’ll build a simple java web application that provides the key services described above.
 It also builds the other integration modules we currently have, making them available to parse requests from any of the supported and configured integrations.
 
 If you add a new integration, to get it up and running you also need to add it to the integration-web [pom.xml](integration-web/pom.xml)
 
-### What you’ll need
-* JDK 1.7
+## What you’ll need
+* JDK 1.8
 * Maven 3.0.5+
 
-### Build with maven
+## Build with maven
 Integration Core is compatible with Apache Maven 3.0.5 or above. If you don’t already have Maven installed you can follow the instructions at maven.apache.org.
 
 To start from scratch, do the following:
@@ -123,29 +123,30 @@ To start from scratch, do the following:
 3. cd into _App-Integrations-Core_
 4. Build using maven: `mvn clean install`
 
-# Configuring the project
-Here are the initial steps to get your project configured to run using the Intellij IDEA IDE.
+## Run locally
 
-1. Import this project into your IDE as a ``maven`` project and be sure to choose JDK 1.7 to run it with.
-2. Import any other Integration projects the same way as above (like, let's say, App-Integrations-Github or App-Integrations-Commons), but those are not required.
-3. Copy [this file](docs/configuration/idea/IntegrationBridgeApplication.xml) to your "project source folder"/.idea/runConfigurations (feel free to create the last folder if you don't have it yet).
-4. Go to ``Run > Edit Configurations...`` and select check the one called "IntegrationBridgeApplication"
-5. Check that the referenced folders do exist, they should all be pointing to ``docs/configuration/boot/`` folders, to exemplify the structure you need
-6. Obtain valid, PKCS#12 user certificates to your POD and copy those to ``docs/configuration/boot/certs``, you'll need one for each integration.
-7. Configure valid addresses to connect the application to on the file [application.yaml](docs/configuration/boot/application.yaml)
-8. Run ``IntegrationBridgeApplication`` from the "Run" menu and start watching Intellij run output at the botton of your IDE, if everything works you should see last a message like this one:
+1. Define your certificate paths and passwords
+```
+cp local-run/env.sh.sample env.sh
+open env.sh
+```
 
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-1) lMXpkb:d8Gma6:rinXAT INFO Integration salesforceWebHookIntegration bootstrapped successfully
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-5) lMXpkb:d8Gma6:oOHPJ3 INFO Integration simpleWebHookIntegration bootstrapped successfully
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-2) lMXpkb:d8Gma6:YNMo9n INFO Integration zapierWebHookIntegration bootstrapped successfully
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-6) lMXpkb:d8Gma6:uAGbXe INFO Integration jiraWebHookIntegration bootstrapped successfully
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-3) lMXpkb:d8Gma6:5NWnjN INFO Integration trelloWebHookIntegration bootstrapped successfully
-> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-4) lMXpkb:d8Gma6:O9H1Te INFO Integration githubWebHookIntegration bootstrapped successfully
+Make sure that
+- Paths and passwords are correct
+- You can reach all Symphony Pod endpoints
+- Service accounts exists and cert CNs match with account's usernames. **_Note: The team is working on a integration-provisioning module that will automate this process; until further notice, please contact Symphony Support to get your Symphony integration deployed on your pod, as the pod will need an exact match of service account name, certs and app name in the pod for your app to be visible in your pod and usable._**
+- `./env.sh`, `./application.yaml` and `./certs/` are ignored by Git and don't end up in any code repository
 
+2. Run the integrations
+```
+./run.sh
+```
 
-## Expose local endpoint to a public host
+This command will create an `application.yaml` file in the project root folder, using `local-run/application.yaml.template` as template.
 
-In order to be able to create the app in a pod, you must provide a public `App Url`; you can use [ngrok](https://ngrok.com/) (or similar) to tunnel your local connection and expose it via a public DNS:
+### Expose local endpoint to a public host
+
+In order to be able to create the app in the Foundation pod, you must provide a public `App Url`; you can use [ngrok](https://ngrok.com/) (or similar) to tunnel your local connection and expose it via a public DNS:
 ```
 ngrok http 8080
 ```
@@ -154,4 +155,29 @@ Your local port 8080 is now accessible via `<dynamic_id>.ngrok.io`
 If you have a paid subscription, you can also use
 ```
 ngrok http -subdomain=my.static.subdomain 8080
+```
+
+## Running with Intellij 
+Here are the initial steps to get your project configured to run using the Intellij IDEA IDE. The instructions bellow assume that you have cloned App-Integrations-Core under ``/workspace/App-Integrations-Core``. Adjust the indicated procedure according to your actual path.
+
+1. Import this project into your IDE as a ``maven`` project and be sure to choose JDK 1.8 to run it with.
+2. Import any other Integration projects the same way as above (like, let's say, App-Integrations-Github or App-Integrations-Commons), but those are not required.
+3. Copy [this file](docs/configuration/idea/Integration_Bridge.xml) to your App-Integrations-Core source folder under /workspace/App-Integrations-Core/.idea/runConfigurations (feel free to create the runConfigurations if you don't have it yet).
+4. Go to ``Run > Edit Configurations...`` and select check the one called "Integration Bridge".
+5. Check that the referenced folders do exist, they should all be pointing to ``/workspace/App-Integrations-Core/docs/configuration/boot/`` folders, to exemplify the structure you need.
+6. Obtain valid, PKCS#12 user certificates to your POD and copy those to ``/workspace/App-Integrations-Core/docs/configuration/boot/certs``, you'll need one for each integration.
+7. Configure valid addresses to connect the application to on the file [application.yaml](docs/configuration/boot/application.yaml)
+8. Copy the JAR files for each integration to ``/workspace/App-Integrations-Core/docs/configuration/boot/libs/`` (or create a link). The JAR files have been generated on the "Build with maven" section above. For instance, Github JAR ``/workspace/App-Integrations-Github/integration-github-0.10.0-SNAPSHOT.jar`` should be copied to ``/workspace/App-Integrations-Core/docs/configuration/boot/libs/integration-github-0.10.0-SNAPSHOT.jar`` (or linked). Copy or link all the integrations you want to run on Intellij.
+9. Run ``IntegrationBridgeApplication`` from the "Run" menu and start watching Intellij run output at the botton of your IDE, if everything works you should see last a message like this one:
+
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-1) lMXpkb:d8Gma6:rinXAT INFO Integration salesforceWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-5) lMXpkb:d8Gma6:oOHPJ3 INFO Integration simpleWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-2) lMXpkb:d8Gma6:YNMo9n INFO Integration zapierWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-6) lMXpkb:d8Gma6:uAGbXe INFO Integration jiraWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-3) lMXpkb:d8Gma6:5NWnjN INFO Integration trelloWebHookIntegration bootstrapped successfully
+> INFO  [org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext] (pool-5-thread-4) lMXpkb:d8Gma6:O9H1Te INFO Integration githubWebHookIntegration bootstrapped successfully
+
+The Intellij run configuration provided as a sample is equivalent to:
+```
+java -Dloader.path=/workspace/App-Integrations-Core/docs/configuration/boot/libs/ -Dlog4j2.outputAllToConsole=true -Dlogs.basedir=/workspace/App-Integrations-Core/docs/configuration/boot/logs -Dfile.encoding=UTF-8 -jar /workspace/App-Integrations-Core/integration-web/target/integration.jar --spring.config.location=/workspace/App-Integrations-Core/docs/configuration/boot/ --server.tomcat.basedir=/workspace/App-Integrations-Core/docs/configuration/boot/tomcat
 ```
