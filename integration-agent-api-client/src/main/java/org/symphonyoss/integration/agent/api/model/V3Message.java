@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.agent.api.client;
+package org.symphonyoss.integration.agent.api.model;
 
-import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.message.Message;
 
 /**
- * Interface to be implemented by HTTP clients that would like to post message through the Agent
- * Messages API.
+ * Model class to augment the fields required by the new Agent Message API.
  *
  * Created by rsanchez on 27/03/17.
  */
-public interface MessageApiClient {
+public class V3Message extends Message {
 
-  Message postMessage(String sessionToken, String kmToken, String streamId, Message message) throws RemoteApiException;
+  private String data;
+
+  public String getData() {
+    return data;
+  }
+
+  public void setData(String data) {
+    this.data = data;
+  }
 
 }

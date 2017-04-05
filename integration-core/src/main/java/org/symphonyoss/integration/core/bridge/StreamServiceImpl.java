@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -73,7 +74,7 @@ public class StreamServiceImpl implements StreamService {
    */
   @PostConstruct
   public void init() {
-    messagesApi = new MessageApiClient(agentApiClient);
+    messagesApi = new V2MessageApiClient(agentApiClient);
     streamsApi = new StreamApiClient(podApiClient);
   }
 

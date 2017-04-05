@@ -34,11 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link MessageApiClient}
+ * Unit test for {@link BaseMessageApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MessageApiClientTest {
+public class BaseMessageApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -49,17 +49,17 @@ public class MessageApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
-  private MessageApiClient apiClient;
+  private BaseMessageApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new MessageApiClient(httpClient);
+    this.apiClient = new BaseMessageApiClient();
   }
 
   @Test
   public void testPostMessageNullSessionToken() {
     try {
-      apiClient.postMessage(null, null, null, null);
+      apiClient.validateParams(null, null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
@@ -72,7 +72,7 @@ public class MessageApiClientTest {
   @Test
   public void testPostMessageNullKMToken() {
     try {
-      apiClient.postMessage(MOCK_SESSION, null, null, null);
+      apiClient.validateParams(MOCK_SESSION, null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
@@ -85,7 +85,7 @@ public class MessageApiClientTest {
   @Test
   public void testPostMessageNullStreamId() {
     try {
-      apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, null, null);
+      apiClient.validateParams(MOCK_SESSION, MOCK_KM_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
@@ -98,7 +98,7 @@ public class MessageApiClientTest {
   @Test
   public void testPostMessageNullMessage() {
     try {
-      apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, null);
+      apiClient.validateParams(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
@@ -108,31 +108,4 @@ public class MessageApiClientTest {
     }
   }
 
-  @Test
-  public void testPostMessage() throws RemoteApiException {
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("sessionToken", MOCK_SESSION);
-    headerParams.put("keyManagerToken", MOCK_KM_SESSION);
-
-    Map<String, String> queryParams = new HashMap<>();
-
-    Message message = mockMessage();
-
-    String path = "/v2/stream/" + MOCK_STREAM_ID + "/message/create";
-
-    doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
-    doReturn(message).when(httpClient).doPost(path, headerParams, queryParams, message, Message.class);
-
-    Message result = apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
-
-    assertEquals(message, result);
-  }
-
-  private Message mockMessage() {
-    Message message = new Message();
-    message.setFormat(Message.FormatEnum.MESSAGEML);
-    message.setMessage("Test Message");
-
-    return message;
-  }
 }
