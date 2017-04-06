@@ -20,12 +20,15 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.message.Message;
 
 /**
- * Interface to be implemented by HTTP clients that post message through the Agent Messages API.
- *
- * Created by rsanchez on 27/03/17.
+ * Null implementation of {@link MessageApiClient} to validate the common methods from {@link BaseMessageApiClient}
+ * Created by rsanchez on 06/04/17.
  */
-public interface MessageApiClient {
+public class MockMessageApiClient extends BaseMessageApiClient {
 
-  Message postMessage(String sessionToken, String kmToken, String streamId, Message message) throws RemoteApiException;
+  @Override
+  public Message postMessage(String sessionToken, String kmToken, String streamId, Message message)
+      throws RemoteApiException {
+    return null;
+  }
 
 }
