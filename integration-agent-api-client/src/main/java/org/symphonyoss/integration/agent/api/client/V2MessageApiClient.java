@@ -29,11 +29,7 @@ import java.util.Map;
  * Holds all endpoints to deal with message.
  * Created by rsanchez on 23/02/17.
  */
-public class V2MessageApiClient extends BaseMessageApiClient implements MessageApiClient {
-
-  private static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
-
-  private static final String KM_TOKEN_HEADER_PARAM = "keyManagerToken";
+public class V2MessageApiClient extends BaseMessageApiClient {
 
   private HttpApiClient apiClient;
 

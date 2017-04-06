@@ -23,8 +23,23 @@ import org.symphonyoss.integration.model.message.Message;
  * Base Message API client.
  * Created by rsanchez on 27/03/17.
  */
-public class BaseMessageApiClient {
+public abstract class BaseMessageApiClient implements MessageApiClient {
 
+  public static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
+
+  public static final String KM_TOKEN_HEADER_PARAM = "keyManagerToken";
+
+  /**
+   * Validate the required parameters to post messages through the Agent API.
+   *
+   * The required parameters are: sessionToken, kmToken, streamId, and message
+   *
+   * @param sessionToken Session token
+   * @param kmToken Key Manager token
+   * @param streamId Stream identifier
+   * @param message Message payload
+   * @throws RemoteApiException Required parameter is missing
+   */
   protected void validateParams(String sessionToken, String kmToken, String streamId,
       Message message) throws RemoteApiException {
     if (sessionToken == null) {

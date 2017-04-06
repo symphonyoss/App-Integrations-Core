@@ -53,7 +53,7 @@ public class BaseMessageApiClientTest {
 
   @Before
   public void init() {
-    this.apiClient = new BaseMessageApiClient();
+    this.apiClient = new MockMessageApiClient();
   }
 
   @Test

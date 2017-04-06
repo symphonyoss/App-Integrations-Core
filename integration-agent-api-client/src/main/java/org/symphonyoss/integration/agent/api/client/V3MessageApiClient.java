@@ -34,11 +34,7 @@ import java.util.Map;
  * Holds all endpoints to deal with message related to new MessageML version.
  * Created by rsanchez on 27/03/17.
  */
-public class V3MessageApiClient extends BaseMessageApiClient implements MessageApiClient {
-
-  private static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
-
-  private static final String KM_TOKEN_HEADER_PARAM = "keyManagerToken";
+public class V3MessageApiClient extends BaseMessageApiClient {
 
   private static final String MESSAGE_BODY = "message";
 
