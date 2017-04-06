@@ -106,7 +106,7 @@ public class IntegrationBridgeTest {
     assertEquals(2, result.size());
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test()
   public void testSendMessageWithPostErrors() throws RemoteApiException, JsonProcessingException {
     doReturn(mock(Message.class)).when(streamService).postMessage(anyString(), eq("stream2"),
         any(Message.class));

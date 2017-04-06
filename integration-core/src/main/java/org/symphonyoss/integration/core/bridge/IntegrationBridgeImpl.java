@@ -30,6 +30,7 @@ import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +74,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
     boolean wasMessageSent = Boolean.FALSE;
 
+    RemoteApiException remoteApiException = null;
     for (String stream : streams) {
       try {
         Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
@@ -80,10 +82,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
-
-        if (!wasMessageSent) {
-          throw e;
-        }
+        remoteApiException = e;
       } catch (ConnectivityException e) {
         throw e;
       } catch (ProcessingException e) {
@@ -92,6 +91,10 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         exceptionHandler.handleUnexpectedException(e);
         throw e;
       }
+    }
+
+    if (!wasMessageSent) {
+      throw remoteApiException;
     }
 
     return result;
