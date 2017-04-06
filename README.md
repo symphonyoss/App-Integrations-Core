@@ -43,7 +43,9 @@ The most basic message one can send may be as simple as ``<messageML>simple mess
 
 These elements and attributes will be briefly detailed in the next topics as reference. The specific integration formats can be found in their separate repositories "Readme" files.
 
-### Entity
+### Entity (MessageMLv1.0)
+_**note: MessageMLv1.0 has been superseded by MessageMLv2.0. MessageMLv1.0 is still supported, however MessageMLv2.0 will allow you to create a rich render in a more seamlessly manner, with less steps and no front end code. Please see a JIRA ticket rendered using messageMLv2.0 here for as a complex example: https://symphonyoss.atlassian.net/wiki/display/WGFOS/Single+Jira+Ticket+-+Templated+PresentationML & see [Zapier](https://github.com/symphonyoss/App-Integrations-Zapier/tree/db-hackathon) as a simple example of a richly rendererd message._**
+
 An entity is a special element contained in a ``<messageML>``, it may also be nested within other entities as another element, and so on.
 
 Entities must have a "type" and a "version", and may also have a "name" for itself, all of those as XML attributes.
