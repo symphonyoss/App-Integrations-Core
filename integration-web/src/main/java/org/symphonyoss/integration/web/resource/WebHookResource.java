@@ -202,19 +202,6 @@ public abstract class WebHookResource {
   }
 
   /**
-   * Handle {@link WebHookDisabledException} and {@link IntegrationConfigException} exceptions.
-   * @param ex Exception object
-   * @return HTTP 403 (Forbidden)
-   */
-  @ResponseBody
-  @ExceptionHandler({RemoteApiException.class})
-  public ResponseEntity<String> handleForbidden(Exception ex) {
-    String message = ex.getMessage();
-    LOGGER.error(message, ex);
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
-  }
-
-  /**
    * Handle {@link IntegrationUnavailableException} exception.
    * @param ex Exception object
    * @return HTTP 503 (Service Unavailable)

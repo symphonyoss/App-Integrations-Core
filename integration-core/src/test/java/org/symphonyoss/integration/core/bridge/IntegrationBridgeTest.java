@@ -126,7 +126,7 @@ public class IntegrationBridgeTest {
     assertEquals(1, result.size());
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test
   public void testSendMessageUnauthenticated() throws RemoteApiException, JsonProcessingException {
     RemoteApiException exception = new RemoteApiException(401, "Unauthorized");
 
@@ -137,10 +137,29 @@ public class IntegrationBridgeTest {
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    try {
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    } catch (RemoteApiException e) {
+      Assert.assertEquals(exception.getCode(), e.getCode());
+    }
+  }
 
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
+  @Test
+  public void testSendMessageForbidden() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exception = new RemoteApiException(403, "Forbidden");
+
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
+
+    IntegrationInstance instance = new IntegrationInstance();
+    instance.setConfigurationId("57756bca4b54433738037005");
+    instance.setInstanceId("1234");
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
+
+    try {
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    } catch (RemoteApiException e) {
+      Assert.assertEquals(exception.getCode(), e.getCode());
+    }
   }
 
   @Test(expected = ProcessingException.class)
