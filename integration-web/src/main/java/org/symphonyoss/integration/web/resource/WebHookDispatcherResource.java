@@ -122,8 +122,8 @@ public class WebHookDispatcherResource extends WebHookResource {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     } catch (RemoteApiException e) {
-      LOGGER.error(String.format("Forbidden: %s", hash), e);
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(String.format("Forbidden: %s", hash));
+      LOGGER.error(String.format("Message: %s", hash), e);
+      return ResponseEntity.status(e.getCode()).body(String.format("Message: %s", hash));
     }
   }
 

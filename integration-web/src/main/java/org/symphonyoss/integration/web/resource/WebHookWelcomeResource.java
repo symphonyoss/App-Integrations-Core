@@ -79,8 +79,8 @@ public class WebHookWelcomeResource extends WebHookResource {
     try {
       whiIntegration.welcome(instance, configurationType, body);
     } catch (RemoteApiException e) {
-      LOGGER.error(String.format("Forbidden: %s", hash), e);
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(String.format("Forbidden: %s", hash));
+      LOGGER.error(String.format("Message: %s", hash), e);
+      return ResponseEntity.status(e.getCode()).body(String.format("Message: %s", hash));
     }
     return ResponseEntity.ok().body("");
   }
