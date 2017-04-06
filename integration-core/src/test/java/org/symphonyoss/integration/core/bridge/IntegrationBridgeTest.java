@@ -44,6 +44,7 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
+import java.rmi.Remote;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class IntegrationBridgeTest {
   private IntegrationBridge bridge = new IntegrationBridgeImpl();
 
   @Test
-  public void testSendMessageWithoutStreamsConfigured() {
+  public void testSendMessageWithoutStreamsConfigured() throws RemoteApiException {
     doReturn(Collections.EMPTY_LIST).when(streamService).getStreams(any(IntegrationInstance.class));
 
     IntegrationInstance instance = new IntegrationInstance();
@@ -105,7 +106,7 @@ public class IntegrationBridgeTest {
     assertEquals(2, result.size());
   }
 
-  @Test
+  @Test(expected = RemoteApiException.class)
   public void testSendMessageWithPostErrors() throws RemoteApiException, JsonProcessingException {
     doReturn(mock(Message.class)).when(streamService).postMessage(anyString(), eq("stream2"),
         any(Message.class));
@@ -125,7 +126,7 @@ public class IntegrationBridgeTest {
     assertEquals(1, result.size());
   }
 
-  @Test
+  @Test(expected = RemoteApiException.class)
   public void testSendMessageUnauthenticated() throws RemoteApiException, JsonProcessingException {
     RemoteApiException exception = new RemoteApiException(401, "Unauthorized");
 

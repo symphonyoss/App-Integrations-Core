@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.entity.MessageMLParseException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
@@ -120,6 +121,9 @@ public class WebHookDispatcherResource extends WebHookResource {
       LOGGER.error(String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
+    } catch (RemoteApiException e) {
+      LOGGER.error(String.format("Forbidden: %s", hash), e);
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(String.format("Forbidden: %s", hash));
     }
   }
 

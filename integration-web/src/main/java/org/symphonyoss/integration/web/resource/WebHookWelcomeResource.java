@@ -18,6 +18,7 @@ package org.symphonyoss.integration.web.resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
@@ -74,7 +76,12 @@ public class WebHookWelcomeResource extends WebHookResource {
     IntegrationInstance instance =
         getConfigurationInstance(hash, configurationId, configurationType);
 
-    whiIntegration.welcome(instance, configurationType, body);
+    try {
+      whiIntegration.welcome(instance, configurationType, body);
+    } catch (RemoteApiException e) {
+      LOGGER.error(String.format("Forbidden: %s", hash), e);
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(String.format("Forbidden: %s", hash));
+    }
     return ResponseEntity.ok().body("");
   }
 }

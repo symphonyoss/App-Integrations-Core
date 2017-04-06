@@ -53,7 +53,8 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private IntegrationBridgeExceptionHandler exceptionHandler;
 
   @Override
-  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, String message) {
+  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, String message)
+      throws RemoteApiException {
     List<Message> result = new ArrayList<>();
     List<String> streams = streamService.getStreams(instance);
 
@@ -67,15 +68,22 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
-      List<String> streams, String message) {
+      List<String> streams, String message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
+
+    boolean wasMessageSent = Boolean.FALSE;
 
     for (String stream : streams) {
       try {
         Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
+        wasMessageSent = Boolean.TRUE;
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
+
+        if (!wasMessageSent) {
+          throw e;
+        }
       } catch (ConnectivityException e) {
         throw e;
       } catch (ProcessingException e) {
