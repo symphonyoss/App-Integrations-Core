@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator.AGENT_MESSAGEML_VERSION2;
+
 import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +61,6 @@ public class StreamServiceImpl implements StreamService {
   private static final Logger LOG = LoggerFactory.getLogger(StreamServiceImpl.class);
 
   private static final String AGENT_SERVICE_NAME = "Agent";
-
-  private static final String AGENT_API_V3 = "1.46.0";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -162,7 +162,7 @@ public class StreamServiceImpl implements StreamService {
       // Get the current version
       Version version = Version.valueOf(event.getNewVersion());
 
-      if (version.greaterThanOrEqualTo(Version.valueOf(AGENT_API_V3))) {
+      if (version.greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
         apiResolver.put(MessageMLVersion.V2, new V3MessageApiClient(agentV3ApiClient));
       } else {
         MessageApiClient messageApiClient = apiResolver.get(MessageMLVersion.V1);
