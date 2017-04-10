@@ -99,7 +99,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   }
 
   public void handleRemoteApiException(RemoteApiException remoteException,
-      IntegrationInstance instance, String integrationUser, Message message, String stream) {
+      IntegrationInstance instance, String integrationUser, String stream) {
     int code = remoteException.getCode();
     Status status = Status.fromStatusCode(code);
 
@@ -110,8 +110,9 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
-      String logMessage = String.format("Invalid message posted to stream %s.\nMessage: "
-          + "%s\nInstance: %s", stream, message.toString(), instance.getInstanceId());
+      String logMessage =
+          String.format("Invalid message posted to stream %s.\nInstance: %s", stream,
+              instance.getInstanceId());
       LOGGER.warn(logMessage, remoteException);
     }
   }

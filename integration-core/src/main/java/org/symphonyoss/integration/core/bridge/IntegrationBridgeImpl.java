@@ -75,7 +75,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         Message messageResponse = postMessage(integrationUser, stream, message);
         result.add(messageResponse);
       } catch (RemoteApiException e) {
-        exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
+        exceptionHandler.handleRemoteApiException(e, instance, integrationUser, stream);
       } catch (ConnectivityException | ProcessingException e) {
         throw e;
       } catch (Exception e) {
