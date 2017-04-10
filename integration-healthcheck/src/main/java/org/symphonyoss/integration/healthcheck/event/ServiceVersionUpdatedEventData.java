@@ -21,6 +21,9 @@ package org.symphonyoss.integration.healthcheck.event;
  *
  * This class holds the old and new service version.
  *
+ * This event might be used to notify the HTTP clients that a new version of API is available to
+ * be used.
+ *
  * Created by rsanchez on 21/03/17.
  */
 public class ServiceVersionUpdatedEventData {

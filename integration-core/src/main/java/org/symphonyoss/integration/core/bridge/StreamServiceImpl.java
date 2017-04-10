@@ -93,6 +93,8 @@ public class StreamServiceImpl implements StreamService {
 
     MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient);
 
+    // In the begin, we must configure the Agent Message API v2 for both versions of MessageML.
+    // After that, this API version might get overridden by the event handler method.
     apiResolver.put(MessageMLVersion.V1, messageApiClient);
     apiResolver.put(MessageMLVersion.V2, messageApiClient);
   }
