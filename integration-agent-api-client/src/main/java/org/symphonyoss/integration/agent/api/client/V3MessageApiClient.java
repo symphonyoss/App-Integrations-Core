@@ -31,7 +31,49 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Holds all endpoints to deal with message related to new MessageML version.
+ * Holds all endpoints to deal with message using Message API v3.
+ *
+ * Message API v3 requires the authentication tokens (Session and Key Manager), stream identifier
+ * and the payload that contains MessageML v2 and entityJSON as a 'multipart/form-data' content.
+ *
+ * Example:
+ *
+ * MessageML v2
+ * <pre>
+ *   <messageML>
+ *     <div class="entity">
+ *       <card class="barStyle">
+ *         <header>
+ *           <span>${entity['zapierPostMessage'].header}</span>
+ *         </header>
+ *         <body>
+ *           <div class="entity" data-entity-id="zapierPostMessage">
+ *             <div class="labelBackground badge">
+ *               <span>${entity['zapierPostMessage'].body}</span>
+ *             </div>
+ *           </div>
+ *         </body>
+ *       </card>
+ *     </div>
+ *   </messageML>
+ * </pre>
+ *
+ * Entity JSON
+ * <pre>
+ * {
+ *   "zapierPostMessage": {
+ *     "type": "com.symphony.integration.zapier.event.v2.postMessage",
+ *     "version": "1.0",
+ *     "header": "New Trello Card Created",
+ *     "body": "Test Card"
+ *   }
+ * }
+ * </pre>
+ *
+ * For more details:
+ * - MessageML v2: https://symphonyoss.atlassian.net/wiki/display/WGFOS/MessageML+V2+Draft+Proposal+-+For+Discussion
+ * - Entity JSON: https://symphonyoss.atlassian.net/wiki/display/WGFOS/EntityJSON
+ *
  * Created by rsanchez on 27/03/17.
  */
 public class V3MessageApiClient extends BaseMessageApiClient {
