@@ -95,7 +95,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
       }
     }
 
-    if (!wasMessageSent) {
+    if (!wasMessageSent && remoteApiException != null) {
       throw remoteApiException;
     }
 
