@@ -46,6 +46,10 @@ public class KeyPairService {
 
   private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
 
+  private static final String FILE_OWNERSHIP_USER = "ibridge";
+
+  private static final String FILE_OWNERSHIP_GROUP = "ibridge";
+
   private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
       + " %s 2048";
 
@@ -54,6 +58,8 @@ public class KeyPairService {
 
   private static final String OPENSSL_PKCS12_CMD = "openssl pkcs12 -export -out %s -aes256 -in %s"
       + " -inkey %s -passin pass:%s -passout pass:%s";
+
+  private static final String CHANGE_OWNER_CMD = "chown %s:%s %s";
 
   @Autowired
   private IntegrationProperties properties;
@@ -175,6 +181,21 @@ public class KeyPairService {
     }
 
     executeProcess(genPKCS12Command);
+
+    setFileOwnership(appCertFilename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
+    setFileOwnership(appPKCS12Filename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
+  }
+
+  /**
+   * Sets the ownership of the given file with according to the user
+   */
+  private void setFileOwnership(String filename, String user, String group) {
+    LOGGER.info("Setting ownership for {} ({}:{})", filename, user, group);
+
+    String changeOwnerCommand =
+        String.format(CHANGE_OWNER_CMD, filename, user, group);
+
+    executeProcess(changeOwnerCommand);
   }
 
   /**
