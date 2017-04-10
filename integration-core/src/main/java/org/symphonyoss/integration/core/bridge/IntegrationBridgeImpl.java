@@ -30,11 +30,11 @@ import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
-import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
 
 /**
  * See @{@link IntegrationBridge} for further details.
@@ -82,7 +82,9 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
-        remoteApiException = e;
+        if(remoteApiException == null || remoteApiException.getCode() != Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+          remoteApiException = e;
+        }
       } catch (ConnectivityException e) {
         throw e;
       } catch (ProcessingException e) {
@@ -148,5 +150,4 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   public void removeIntegration(String integrationId) {
     this.bootstrap.removeIntegration(integrationId);
   }
-
 }
