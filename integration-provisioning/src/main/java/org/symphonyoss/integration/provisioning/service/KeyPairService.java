@@ -193,7 +193,7 @@ public class KeyPairService {
     LOGGER.info("Setting ownership for {} ({}:{})", filename, user, group);
 
     String changeOwnerCommand =
-        String.format(CHANGE_OWNER_CMD, filename, user, group);
+        String.format(CHANGE_OWNER_CMD, user, group, filename);
 
     executeProcess(changeOwnerCommand);
   }
