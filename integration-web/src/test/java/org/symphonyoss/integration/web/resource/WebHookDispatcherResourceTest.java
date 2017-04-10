@@ -279,7 +279,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
    * open state.
    */
   @Test(expected = IntegrationBridgeUnavailableException.class)
-  public void testIntegrationBridgeUnavailableException() {
+  public void testIntegrationBridgeUnavailableException() throws RemoteApiException {
     // simulates an early call resulting in a connectivity exception
     webHookDispatcherResource.handleConnectivityException(mock(ConnectivityException.class));
 

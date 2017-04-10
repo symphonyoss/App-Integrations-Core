@@ -52,7 +52,7 @@ public class WebHookWelcomeResource extends WebHookResource {
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
-      @RequestBody String body) {
+      @RequestBody String body) throws RemoteApiException {
     return handleWelcomeRequest(hash, configurationId, body);
   }
 
@@ -67,7 +67,7 @@ public class WebHookWelcomeResource extends WebHookResource {
       method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
-      @PathVariable String configurationId, @RequestBody String body) {
+      @PathVariable String configurationId, @RequestBody String body) throws RemoteApiException {
     LOGGER.info("Welcome: Request received for hash {} and configuration {}", hash, configurationId);
 
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
@@ -76,12 +76,8 @@ public class WebHookWelcomeResource extends WebHookResource {
     IntegrationInstance instance =
         getConfigurationInstance(hash, configurationId, configurationType);
 
-    try {
-      whiIntegration.welcome(instance, configurationType, body);
-    } catch (RemoteApiException e) {
-      LOGGER.error(String.format("Message: %s", hash), e);
-      return ResponseEntity.status(e.getCode()).body(String.format("Message: %s", hash));
-    }
+    whiIntegration.welcome(instance, configurationType, body);
+
     return ResponseEntity.ok().body("");
   }
 }

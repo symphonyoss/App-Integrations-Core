@@ -58,7 +58,7 @@ public class WebHookDispatcherResource extends WebHookResource {
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleFormRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
-      HttpServletRequest request) {
+      HttpServletRequest request) throws RemoteApiException {
     return handleFormRequest(hash, configurationId, request);
   }
 
@@ -74,7 +74,7 @@ public class WebHookDispatcherResource extends WebHookResource {
       consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, method = RequestMethod.POST,
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleFormRequest(@PathVariable String hash,
-      @PathVariable String configurationId, HttpServletRequest request) {
+      @PathVariable String configurationId, HttpServletRequest request) throws RemoteApiException {
     return handleRequest(hash, configurationId, null, request);
   }
 
@@ -91,7 +91,7 @@ public class WebHookDispatcherResource extends WebHookResource {
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
-      @RequestBody String body, HttpServletRequest request) {
+      @RequestBody String body, HttpServletRequest request) throws RemoteApiException {
     return handleRequest(hash, configurationId, body, request);
   }
 
@@ -105,7 +105,8 @@ public class WebHookDispatcherResource extends WebHookResource {
   @RequestMapping(value = "/{configurationId}/{hash}", consumes = MediaType.ALL_VALUE,
       method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleRequest(@PathVariable String hash,
-      @PathVariable String configurationId, @RequestBody String body, HttpServletRequest request) {
+      @PathVariable String configurationId, @RequestBody String body, HttpServletRequest request)
+      throws RemoteApiException {
     LOGGER.info("Request received for hash {} and configuration {}", hash, configurationId);
 
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
@@ -121,9 +122,6 @@ public class WebHookDispatcherResource extends WebHookResource {
       LOGGER.error(String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
-    } catch (RemoteApiException e) {
-      LOGGER.error(String.format("Message: %s", hash), e);
-      return ResponseEntity.status(e.getCode()).body(String.format("Message: %s", hash));
     }
   }
 

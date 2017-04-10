@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
@@ -198,6 +199,18 @@ public abstract class WebHookResource {
     String message = ex.getMessage();
     LOGGER.error(message, ex);
     return ResponseEntity.badRequest().body(message);
+  }
+
+  /**
+   * Handle {@link RemoteApiException}exceptions.
+   * @param ex RemoteApiException object
+   * @return HTTP Status
+   */
+  @ResponseBody
+  @ExceptionHandler({RemoteApiException.class})
+  public ResponseEntity<String> handleRemoteAPIExpection(RemoteApiException ex) {
+    LOGGER.error(ex.getMessage(), ex);
+    return ResponseEntity.status(ex.getCode()).body(ex.getMessage());
   }
 
   /**
