@@ -77,7 +77,10 @@ public class V3MessageApiClient extends BaseMessageApiClient {
 
       return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart, Message.class);
     } catch (Exception e) {
-      throw new RemoteApiException(500, e);
+      String errorMessage =
+          String.format("Fail to post message %s to stream %s due to %s", message.toString(),
+              streamId, e.getMessage());
+      throw new RemoteApiException(500, errorMessage, e);
     }
   }
 

@@ -97,7 +97,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private Message postMessage(String integrationUser, String stream, Message message)
       throws RemoteApiException {
     Message messageResponse = streamService.postMessage(integrationUser, stream, message);
-    LOGGER.info("Message posted to stream {} ", stream);
+    LOGGER.info("User {} posted message to stream {} ", integrationUser, stream);
 
     return messageResponse;
   }

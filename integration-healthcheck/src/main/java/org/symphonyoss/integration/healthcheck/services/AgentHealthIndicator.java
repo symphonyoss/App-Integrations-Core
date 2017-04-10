@@ -19,7 +19,7 @@ package org.symphonyoss.integration.healthcheck.services;
 import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.event.MessageMLVersionUpdatedEvent;
+import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
 
 /**
@@ -68,7 +68,7 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
        messageMLVersion = MessageMLVersion.V2;
     }
 
-    MessageMLVersionUpdatedEvent updatedEvent = new MessageMLVersionUpdatedEvent(messageMLVersion);
+    MessageMLVersionUpdatedEventData updatedEvent = new MessageMLVersionUpdatedEventData(messageMLVersion);
     publisher.publishEvent(updatedEvent);
   }
 

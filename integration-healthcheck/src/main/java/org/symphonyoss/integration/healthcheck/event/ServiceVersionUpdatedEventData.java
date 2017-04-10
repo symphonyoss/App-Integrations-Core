@@ -23,7 +23,7 @@ package org.symphonyoss.integration.healthcheck.event;
  *
  * Created by rsanchez on 21/03/17.
  */
-public class ServiceVersionUpdatedEvent {
+public class ServiceVersionUpdatedEventData {
 
   private String serviceName;
 
@@ -31,7 +31,7 @@ public class ServiceVersionUpdatedEvent {
 
   private String newVersion;
 
-  public ServiceVersionUpdatedEvent(String serviceName, String oldVersion, String newVersion) {
+  public ServiceVersionUpdatedEventData(String serviceName, String oldVersion, String newVersion) {
     this.serviceName = serviceName;
     this.oldVersion = oldVersion;
     this.newVersion = newVersion;

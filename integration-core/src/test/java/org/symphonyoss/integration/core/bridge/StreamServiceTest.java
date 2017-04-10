@@ -33,7 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
@@ -41,7 +40,7 @@ import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -51,7 +50,6 @@ import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test class responsible to test the flows in the Stream Service.
@@ -223,7 +221,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedWithoutServiceName() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
+        new ServiceVersionUpdatedEventData(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
@@ -232,7 +230,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedOldVersion() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
@@ -241,7 +239,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedNewVersion() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(V3MessageApiClient.class, apiResolver.get(MessageMLVersion.V2).getClass());

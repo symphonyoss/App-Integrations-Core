@@ -41,7 +41,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
-import org.symphonyoss.integration.event.HealthCheckServiceEvent;
+import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -161,7 +161,7 @@ public class IntegrationBootstrapContextTest {
     assertNotNull(integration);
     assertEquals(this.integration, integration);
 
-    verify(publisher, times(1)).publishEvent(any(HealthCheckServiceEvent.class));
+    verify(publisher, times(1)).publishEvent(any(HealthCheckEventData.class));
   }
 
   /**

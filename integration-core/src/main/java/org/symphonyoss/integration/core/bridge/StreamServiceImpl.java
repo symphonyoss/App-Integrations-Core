@@ -29,7 +29,7 @@ import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -153,7 +153,7 @@ public class StreamServiceImpl implements StreamService {
    * @param event Service version updated event
    */
   @EventListener
-  public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEvent event) {
+  public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEventData event) {
     // Check the service name
     if (AGENT_SERVICE_NAME.equals(event.getServiceName())) {
 

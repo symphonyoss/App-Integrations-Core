@@ -110,7 +110,9 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
-      LOGGER.warn("Invalid messageML: " + message.toString(), remoteException);
+      String logMessage = String.format("Invalid message posted to stream %s.\nMessage: "
+          + "%s\nInstance: %s", stream, message.toString(), instance.getInstanceId());
+      LOGGER.warn(logMessage, remoteException);
     }
   }
 
