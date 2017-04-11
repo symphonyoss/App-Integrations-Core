@@ -18,6 +18,8 @@ package org.symphonyoss.integration.agent.api.client;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
@@ -28,6 +30,7 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
  * Created by rsanchez on 22/02/17.
  */
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AgentApiClient extends SymphonyApiClient {
 
   private static final String SERVICE_NAME = "Agent";

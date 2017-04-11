@@ -34,11 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link MessageApiClient}
+ * Unit test for {@link V2MessageApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MessageApiClientTest {
+public class V2MessageApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -49,63 +49,11 @@ public class MessageApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
-  private MessageApiClient apiClient;
+  private V2MessageApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new MessageApiClient(httpClient);
-  }
-
-  @Test
-  public void testPostMessageNullSessionToken() {
-    try {
-      apiClient.postMessage(null, null, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testPostMessageNullKMToken() {
-    try {
-      apiClient.postMessage(MOCK_SESSION, null, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'kmToken' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testPostMessageNullStreamId() {
-    try {
-      apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, null, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'streamId' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
-  }
-
-  @Test
-  public void testPostMessageNullMessage() {
-    try {
-      apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, null);
-      fail();
-    } catch (RemoteApiException e) {
-      assertEquals(400, e.getCode());
-
-      String message = "Missing the required body when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
-    }
+    this.apiClient = new V2MessageApiClient(httpClient);
   }
 
   @Test

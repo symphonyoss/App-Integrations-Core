@@ -19,26 +19,36 @@ package org.symphonyoss.integration.core.bridge;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.authentication.AuthenticationToken.VOID_KM_TOKEN;
+import static org.symphonyoss.integration.authentication.AuthenticationToken.VOID_SESSION_TOKEN;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.stream.Stream;
 import org.symphonyoss.integration.model.stream.StreamType;
 import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -55,17 +65,38 @@ public class StreamServiceTest {
 
   private static final Long USER_ID = 268745369L;
 
+  private static final String AGENT_SERVICE_NAME = "Agent";
+
+  private static final String AGENT_API_V2 = "1.45.0";
+
+  private static final String AGENT_API_V3 = "1.46.0";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private MessageApiClient messagesApi;
+  private AgentApiClient agentV2ApiClient;
+
+  @Mock
+  private AgentApiClient agentV3ApiClient;
 
   @Mock
   private StreamApiClient streamsApi;
 
+  @Spy
+  private HashMap<MessageMLVersion, MessageApiClient> apiResolver;
+
   @InjectMocks
   private StreamServiceImpl streamService = new StreamServiceImpl();
+
+  @Mock
+  private V2MessageApiClient messageApiClient;
+
+  @Before
+  public void init() {
+    apiResolver.put(MessageMLVersion.V1, messageApiClient);
+    apiResolver.put(MessageMLVersion.V2, messageApiClient);
+  }
 
   @Test
   public void testGetStreamsEmpty() {
@@ -136,34 +167,43 @@ public class StreamServiceTest {
 
   @Test(expected = RemoteApiException.class)
   public void testPostMessageApiException() throws RemoteApiException {
+    Message message = new Message();
+    message.setMessage(StringUtils.EMPTY);
+    message.setVersion(MessageMLVersion.V1);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(RemoteApiException.class).when(messagesApi)
-        .postMessage(anyString(), anyString(), anyString(), any(Message.class));
+    doThrow(RemoteApiException.class).when(messageApiClient)
+        .postMessage(VOID_SESSION_TOKEN, VOID_KM_TOKEN, STREAM, message);
 
-    streamService.postMessage(INTEGRATION_USER, STREAM, new Message());
+    streamService.postMessage(INTEGRATION_USER, STREAM, message);
   }
 
   @Test
   public void testPostMessageSuccessfully() throws RemoteApiException {
     Message message = new Message();
+    message.setMessage(StringUtils.EMPTY);
+    message.setVersion(MessageMLVersion.V1);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(messagesApi.postMessage(anyString(), anyString(), anyString(),
-        any(Message.class))).thenReturn(message);
+    when(messageApiClient.postMessage(VOID_SESSION_TOKEN, VOID_KM_TOKEN, STREAM,
+        message)).thenReturn(message);
 
-    Message result = streamService.postMessage(INTEGRATION_USER, STREAM, new Message());
+    Message result = streamService.postMessage(INTEGRATION_USER, STREAM, message);
     assertEquals(message, result);
   }
 
   @Test(expected = RemoteApiException.class)
   public void testCreateIMApiException() throws RemoteApiException {
+    List<Long> userIdList = new ArrayList<>();
+    userIdList.add(USER_ID);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(RemoteApiException.class).when(streamsApi).createIM(anyString(), any(List.class));
+    when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(VOID_SESSION_TOKEN);
+    doThrow(RemoteApiException.class).when(streamsApi).createIM(VOID_SESSION_TOKEN, userIdList);
 
     streamService.createIM(INTEGRATION_USER, USER_ID);
   }
@@ -171,12 +211,42 @@ public class StreamServiceTest {
   @Test
   public void testCreateIMSuccessfully() throws RemoteApiException {
     Stream stream = new Stream();
+
+    List<Long> userIdList = new ArrayList<>();
+    userIdList.add(USER_ID);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.createIM(anyString(), any(List.class))).thenReturn(stream);
+    when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(VOID_SESSION_TOKEN);
+    when(streamsApi.createIM(VOID_SESSION_TOKEN, userIdList)).thenReturn(stream);
 
     Stream result = streamService.createIM(INTEGRATION_USER, USER_ID);
     assertEquals(stream, result);
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedWithoutServiceName() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
+
+    assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
+    assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedOldVersion() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
+
+    assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
+    assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
+  }
+
+  @Test
+  public void testHandleServiceVersionUpdatedNewVersion() {
+    streamService.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
+
+    assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
+    assertEquals(V3MessageApiClient.class, apiResolver.get(MessageMLVersion.V2).getClass());
   }
 }

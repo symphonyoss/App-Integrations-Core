@@ -112,7 +112,7 @@ public class IntegrationBridgeExceptionHandlerTest {
         anyString());
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
-        instance, INTEGRATION_USER, "", STREAM);
+        instance, INTEGRATION_USER, STREAM);
     assertTrue(messagePosted.isEmpty());
   }
 
@@ -149,7 +149,7 @@ public class IntegrationBridgeExceptionHandlerTest {
     doThrow(RemoteApiException.class).when(streamService).createIM(anyString(), anyLong());
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
-        instance, INTEGRATION_USER, "", STREAM);
+        instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
         WebHookConfigurationUtils.getStreams(savedInstance.getOptionalProperties());
@@ -198,7 +198,7 @@ public class IntegrationBridgeExceptionHandlerTest {
     }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
-        instance, INTEGRATION_USER, "", STREAM);
+        instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
         WebHookConfigurationUtils.getStreams(savedInstance.getOptionalProperties());
@@ -238,7 +238,7 @@ public class IntegrationBridgeExceptionHandlerTest {
     }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
 
     exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
-        instance, INTEGRATION_USER, "", STREAM);
+        instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
         WebHookConfigurationUtils.getStreams(savedInstance.getOptionalProperties());
@@ -252,7 +252,7 @@ public class IntegrationBridgeExceptionHandlerTest {
   @Test
   public void testInternalServerException() {
     exceptionHandler.handleRemoteApiException(new RemoteApiException(500, new RuntimeException()),
-        new IntegrationInstance(), INTEGRATION_USER, "", "");
+        new IntegrationInstance(), INTEGRATION_USER, "");
   }
 
 }
