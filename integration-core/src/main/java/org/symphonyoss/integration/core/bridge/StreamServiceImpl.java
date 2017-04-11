@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator.AGENT_MESSAGEML_VERSION2;
+
 import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -59,8 +61,6 @@ public class StreamServiceImpl implements StreamService {
   private static final Logger LOG = LoggerFactory.getLogger(StreamServiceImpl.class);
 
   private static final String AGENT_SERVICE_NAME = "Agent";
-
-  private static final String AGENT_API_V3 = "1.46.0";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -93,6 +93,8 @@ public class StreamServiceImpl implements StreamService {
 
     MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient);
 
+    // In the begin, we must configure the Agent Message API v2 for both versions of MessageML.
+    // After that, this API version might get overridden by the event handler method.
     apiResolver.put(MessageMLVersion.V1, messageApiClient);
     apiResolver.put(MessageMLVersion.V2, messageApiClient);
   }
@@ -153,14 +155,14 @@ public class StreamServiceImpl implements StreamService {
    * @param event Service version updated event
    */
   @EventListener
-  public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEvent event) {
+  public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEventData event) {
     // Check the service name
     if (AGENT_SERVICE_NAME.equals(event.getServiceName())) {
 
       // Get the current version
       Version version = Version.valueOf(event.getNewVersion());
 
-      if (version.greaterThanOrEqualTo(Version.valueOf(AGENT_API_V3))) {
+      if (version.greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
         apiResolver.put(MessageMLVersion.V2, new V3MessageApiClient(agentV3ApiClient));
       } else {
         MessageApiClient messageApiClient = apiResolver.get(MessageMLVersion.V1);
