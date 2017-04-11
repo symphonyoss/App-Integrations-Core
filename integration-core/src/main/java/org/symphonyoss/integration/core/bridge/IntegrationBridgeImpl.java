@@ -67,18 +67,26 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     return sendMessage(instance, integrationUser, streams, message);
   }
 
+  /**
+   * It receives an array of Stream and sends one by one to each room.
+   * Business rule 1: If I have "n" rooms and one receive OK the return will be HTTP Status 200
+   * Business rule 2: If I have "n" rooms and all returned failed the priority is to return HTTP Status 500
+   * @param instance the instance of integration
+   * @param integrationUser the user of integration
+   * @param streams the array of stream.
+   * @param message the actual message. It's expected to be already on proper format.
+   * @return
+   * @throws RemoteApiException
+   */
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
       List<String> streams, String message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
 
-    boolean wasMessageSent = Boolean.FALSE;
-
     RemoteApiException remoteApiException = null;
     for (String stream : streams) {
       try {
         Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
-        wasMessageSent = Boolean.TRUE;
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
@@ -95,7 +103,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
       }
     }
 
-    if (!wasMessageSent && remoteApiException != null) {
+    if (result.size() <= 0 && remoteApiException != null) {
       throw remoteApiException;
     }
 

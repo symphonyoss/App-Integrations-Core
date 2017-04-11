@@ -44,7 +44,6 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
-import java.rmi.Remote;
 import java.util.Collections;
 import java.util.List;
 

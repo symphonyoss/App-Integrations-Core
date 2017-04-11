@@ -53,6 +53,8 @@ import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException
 
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.Response;
+
 /**
  * Unit tests for {@link WebHookDispatcherResource}.
  *
@@ -322,6 +324,37 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     Assert.assertTrue(response.toString().contains(IB_UNAVAILABLE_EXCEPTION_MESSAGE));
     Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+  }
+
+
+  /**
+   * Test an HTTP Internal Server Error caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testInternalServerErrorWithRemoteApiException() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Bad Request caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testBadRequestWithRemoteApiException() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.BAD_REQUEST,
+        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Forbidden caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testForbiddenWithRemoteApiException() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.FORBIDDEN,
+        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
   }
 
 }
