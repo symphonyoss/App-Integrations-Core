@@ -203,7 +203,7 @@ public abstract class WebHookResource {
 
   /**
    * Handle {@link RemoteApiException} exception.
-   * Returns an HTTP status when an error occurred inside the client.
+   * Returns HTTP status when an error occurred inside the client.
    * @param ex RemoteApiException object
    * @return HTTP Status code
    */

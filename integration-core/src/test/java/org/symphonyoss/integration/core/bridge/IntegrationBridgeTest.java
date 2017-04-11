@@ -164,10 +164,12 @@ public class IntegrationBridgeTest {
   }
 
   @Test
-  public void testSendMessageInternalServerError() throws RemoteApiException, JsonProcessingException {
-    RemoteApiException exception = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error");
+  public void testSendMessageInternalServerErrorWithFirstException() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exceptionBadRequest = new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request");
+    RemoteApiException exceptionInternalServerError = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error");
 
-    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
+    doThrow(exceptionInternalServerError).when(streamService).postMessage(anyString(), eq("stream1"), any(Message.class));
+    doThrow(exceptionBadRequest).when(streamService).postMessage(anyString(), eq("stream2"), any(Message.class));
 
     IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
@@ -177,7 +179,27 @@ public class IntegrationBridgeTest {
     try {
       List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
     } catch (RemoteApiException e) {
-      Assert.assertEquals(exception.getCode(), e.getCode());
+      Assert.assertEquals(exceptionInternalServerError.getCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testSendMessageInternalServerErrorWithLastException() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exceptionBadRequest = new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request");
+    RemoteApiException exceptionInternalServerError = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error");
+
+    doThrow(exceptionBadRequest).when(streamService).postMessage(anyString(), eq("stream1"), any(Message.class));
+    doThrow(exceptionInternalServerError).when(streamService).postMessage(anyString(), eq("stream2"), any(Message.class));
+
+    IntegrationInstance instance = new IntegrationInstance();
+    instance.setConfigurationId("57756bca4b54433738037005");
+    instance.setInstanceId("1234");
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
+
+    try {
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    } catch (RemoteApiException e) {
+      Assert.assertEquals(exceptionInternalServerError.getCode(), e.getCode());
     }
   }
 
