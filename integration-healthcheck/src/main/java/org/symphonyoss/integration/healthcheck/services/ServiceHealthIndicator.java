@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.healthcheck.services;
 
+import static javax.ws.rs.core.Response.Status.OK;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -29,11 +31,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.event.HealthCheckEventData;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
@@ -41,11 +51,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import static javax.ws.rs.core.Response.Status.OK;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract class that holds common methods to all service health indicators.
@@ -60,6 +65,11 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * Version field
    */
   private static final String VERSION = "version";
+
+  /**
+   * String that should be replaced to retrieve the semantic version
+   */
+  private static final String SNAPSHOT_VERSION = "-SNAPSHOT";
 
   /**
    * HTTP Connection timeout (in miliseconds)
@@ -82,10 +92,15 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   @Autowired
   private AuthenticationProxy authenticationProxy;
 
+  @Autowired
+  protected ApplicationEventPublisher publisher;
+
   /**
    * Cache for the service information.
    */
   private LoadingCache<String, IntegrationBridgeService> serviceInfoCache;
+
+  private String currentVersion;
 
   @PostConstruct
   public void init() {
@@ -94,12 +109,27 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       @Override
       public IntegrationBridgeService load(String key) throws Exception {
         if (key.equals(getServiceName())) {
-          return getServiceInfo();
+          return retrieveServiceInfo();
         }
 
         return null;
       }
     });
+  }
+
+  /**
+   * Trigger the health check process on the required service defined in the event.
+   * @param event Health check event
+   */
+  @EventListener
+  public void handleHealthCheckEvent(HealthCheckEventData event) {
+    String serviceName = getServiceName();
+
+    LOG.debug("Handle health-check event. Service name: {}", serviceName);
+
+    if (serviceName.equals(event.getServiceName())) {
+      retrieveServiceInfo();
+    }
   }
 
   @Override
@@ -119,7 +149,9 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * Retrieves the service information like connectivity, current version, and compatibility.
    * @return Service information
    */
-  private IntegrationBridgeService getServiceInfo() {
+  private IntegrationBridgeService retrieveServiceInfo() {
+    LOG.debug("Retrieve service info: {}", getServiceName());
+
     IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion());
 
     String healthResponse = getHealthResponse();
@@ -129,11 +161,44 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     } else {
       service.setConnectivity(Status.UP);
 
-      String currentVersion = getCurrentVersion(healthResponse);
-      service.setCurrentVersion(currentVersion);
+      String version = retrieveCurrentVersion(healthResponse);
+
+      if (StringUtils.isNotEmpty(version) && (!version.equals(currentVersion))) {
+        fireUpdatedServiceVersionEvent(version);
+      }
+
+      service.setCurrentVersion(version);
     }
 
     return service;
+  }
+
+  /**
+   * Retrieves the semantic version. This method replaces the SNAPSHOT from a version.
+   * @param version Version to be evaluated
+   * @return Semantic version
+   */
+  protected String getSemanticVersion(String version) {
+    if (StringUtils.isEmpty(version)) {
+      return StringUtils.EMPTY;
+    }
+
+    return version.replace(SNAPSHOT_VERSION, StringUtils.EMPTY);
+  }
+
+  /**
+   * Raise an updated service version event.
+   * @param version Service version
+   */
+  protected void fireUpdatedServiceVersionEvent(String version) {
+    String oldSemanticVersion = getSemanticVersion(currentVersion);
+    String newSemanticVersion = getSemanticVersion(version);
+
+    ServiceVersionUpdatedEventData event =
+        new ServiceVersionUpdatedEventData(getServiceName(), oldSemanticVersion, newSemanticVersion);
+    this.currentVersion = version;
+
+    publisher.publishEvent(event);
   }
 
   /**
@@ -205,7 +270,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * based on the health check response.
    * @return Current version for this service.
    */
-  protected String getCurrentVersion(String healthResponse) {
+  protected String retrieveCurrentVersion(String healthResponse) {
     try {
       JsonNode node = JsonUtils.readTree(healthResponse);
       String version = node.path(VERSION).asText();
@@ -226,4 +291,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    */
   protected abstract String getHealthCheckUrl();
 
+  public String getCurrentVersion() {
+    return currentVersion;
+  }
 }

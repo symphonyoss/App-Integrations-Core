@@ -1,0 +1,54 @@
+{
+    "jiraUpdated": {
+        "type": "com.symphony.integration.jira.event.updated",
+        "version": "1.0",
+        "user": {
+            "type": "com.symphony.integration.jira.user",
+            "version": "1.0",
+            "username": "test",
+            "emailAddress": "test@symphony.com",
+            "displayName": "Test User"
+        },
+        "labels": [
+            "#production"
+        ],
+        "issue": {
+            "type": "com.symphony.integration.jira.issue",
+            "version": "1.0",
+            "project": "Sample 1",
+            "key": "SAM-24",
+            "subject": "Sample Bug Blocker",
+            "issueType": "Bug",
+            "link": "https://whiteam1.atlassian.net/browse/SAM-24",
+            "priority": "Highest",
+            "status": "Done",
+            "assignee": {
+                "type": "com.symphony.integration.jira.user",
+                "version": "1.0",
+                "username": "test2",
+                "emailAddress": "test2@symphony.com",
+                "displayName": "Test2 User"
+            },
+            "changelog": {
+                "type": "com.symphony.integration.jira.changelog",
+                "version": "1.0",
+                "change": [
+                    {
+                        "type": "com.symphony.integration.jira.change",
+                        "version": "1.0",
+                        "fieldName": "resolution",
+                        "oldValue": "null",
+                        "newValue": "Done"
+                    },
+                    {
+                        "type": "com.symphony.integration.jira.change",
+                        "version": "1.0",
+                        "fieldName": "status",
+                        "oldValue": "To Do",
+                        "newValue": "Done"
+                    }
+                ]
+            }
+        }
+    }
+}

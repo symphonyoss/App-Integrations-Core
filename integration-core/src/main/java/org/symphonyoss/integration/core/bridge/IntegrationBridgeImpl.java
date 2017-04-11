@@ -54,8 +54,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private IntegrationBridgeExceptionHandler exceptionHandler;
 
   @Override
-  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, String message)
-      throws RemoteApiException {
+  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, Message message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
     List<String> streams = streamService.getStreams(instance);
 
@@ -80,22 +79,20 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
    */
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
-      List<String> streams, String message) throws RemoteApiException {
+      List<String> streams, Message message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
 
     RemoteApiException remoteApiException = null;
     for (String stream : streams) {
       try {
-        Message messageResponse = postMessageWithRetry(integrationUser, stream, message);
+        Message messageResponse = postMessage(integrationUser, stream, message);
         result.add(messageResponse);
       } catch (RemoteApiException e) {
-        exceptionHandler.handleRemoteApiException(e, instance, integrationUser, message, stream);
+        exceptionHandler.handleRemoteApiException(e, instance, integrationUser, stream);
         if(remoteApiException == null || remoteApiException.getCode() != Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
           remoteApiException = e;
         }
-      } catch (ConnectivityException e) {
-        throw e;
-      } catch (ProcessingException e) {
+      } catch (ConnectivityException | ProcessingException e) {
         throw e;
       } catch (Exception e) {
         exceptionHandler.handleUnexpectedException(e);
@@ -115,38 +112,15 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
    * @param integrationUser the user of integration
    * @param stream the stream identifier.
    * @param message the actual message. It's expected to be already on proper format.
-   * @return
+   * @return Response message
    * @throws RemoteApiException
    */
-  private Message postMessageWithRetry(String integrationUser, String stream, String message)
+  private Message postMessage(String integrationUser, String stream, Message message)
       throws RemoteApiException {
-    try {
-      return postMessageToStream(integrationUser, stream, message);
-    } catch (RemoteApiException e) {
-      LOGGER.error("Fail to post message", e);
-      throw new RemoteApiException(e.getCode(), e);
-    }
-  }
-
-  private Message postMessageToStream(String integrationUser, String stream, String message)
-      throws RemoteApiException {
-    Message messageSubmission = buildMessage(message);
-    Message messageResponse = streamService.postMessage(integrationUser, stream, messageSubmission);
-    LOGGER.info("Message posted to stream {} ", stream);
+    Message messageResponse = streamService.postMessage(integrationUser, stream, message);
+    LOGGER.info("User {} posted message to stream {} ", integrationUser, stream);
 
     return messageResponse;
-  }
-
-  /**
-   * Build the Message Object
-   * @param message Message text
-   * @return
-   */
-  private Message buildMessage(String message) {
-    Message messageSubmission = new Message();
-    messageSubmission.setFormat(Message.FormatEnum.MESSAGEML);
-    messageSubmission.setMessage(message);
-    return messageSubmission;
   }
 
   @Override

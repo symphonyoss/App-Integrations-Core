@@ -21,12 +21,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Assert;
@@ -36,15 +34,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
-import java.rmi.Remote;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,9 +65,6 @@ public class IntegrationBridgeTest {
   private StreamService streamService = new StreamServiceImpl();
 
   @Mock
-  private AuthenticationProxy authenticationProxy;
-
-  @Mock
   private IntegrationBridgeExceptionHandler exceptionHandler;
 
   @InjectMocks
@@ -84,7 +78,7 @@ public class IntegrationBridgeTest {
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
 
     assertNotNull(result);
     assertTrue(result.isEmpty());
@@ -92,39 +86,44 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testSendMessageSuccessfully() throws RemoteApiException, JsonProcessingException {
-    doReturn(mock(Message.class)).when(streamService)
-        .postMessage(anyString(), anyString(), any(Message.class));
+    Message message = new Message();
+
+    doReturn(message).when(streamService).postMessage(INTEGRATION_USER, "stream1", message);
+    doReturn(message).when(streamService).postMessage(INTEGRATION_USER, "stream2", message);
 
     IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, message);
 
     assertNotNull(result);
     assertFalse(result.isEmpty());
     assertEquals(2, result.size());
+    assertEquals(message, result.get(0));
+    assertEquals(message, result.get(1));
   }
 
   @Test()
   public void testSendMessageWithPostErrors() throws RemoteApiException, JsonProcessingException {
-    doReturn(mock(Message.class)).when(streamService).postMessage(anyString(), eq("stream2"),
-        any(Message.class));
+    Message message = new Message();
 
-    doThrow(RemoteApiException.class).when(streamService).postMessage(anyString(), eq("stream1"),
-        any(Message.class));
+    doReturn(message).when(streamService).postMessage(INTEGRATION_USER, "stream2", message);
+
+    doThrow(RemoteApiException.class).when(streamService).postMessage(INTEGRATION_USER, "stream1", message);
 
     IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, message);
 
     assertNotNull(result);
     assertFalse(result.isEmpty());
     assertEquals(1, result.size());
+    assertEquals(message, result.get(0));
   }
 
   @Test
@@ -139,7 +138,7 @@ public class IntegrationBridgeTest {
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
     try {
-      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
     } catch (RemoteApiException e) {
       Assert.assertEquals(exception.getCode(), e.getCode());
     }
@@ -157,7 +156,7 @@ public class IntegrationBridgeTest {
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
     try {
-      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
     } catch (RemoteApiException e) {
       Assert.assertEquals(exception.getCode(), e.getCode());
     }
@@ -177,7 +176,7 @@ public class IntegrationBridgeTest {
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
     try {
-      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
     } catch (RemoteApiException e) {
       Assert.assertEquals(exceptionInternalServerError.getCode(), e.getCode());
     }
@@ -197,7 +196,7 @@ public class IntegrationBridgeTest {
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
     try {
-      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
     } catch (RemoteApiException e) {
       Assert.assertEquals(exceptionInternalServerError.getCode(), e.getCode());
     }
@@ -209,15 +208,26 @@ public class IntegrationBridgeTest {
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
-    doThrow(exception).when(authenticationProxy)
-        .reAuthOrThrow(anyString(), anyInt(), any(RemoteApiException.class));
+    IntegrationInstance instance = new IntegrationInstance();
+    instance.setConfigurationId("57756bca4b54433738037005");
+    instance.setInstanceId("1234");
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
+
+    bridge.sendMessage(instance, INTEGRATION_USER, new Message());
+  }
+
+  @Test(expected = ConnectivityException.class)
+  public void testSendMessageConnectivityException() throws RemoteApiException, JsonProcessingException {
+    ConnectivityException exception = new ConnectivityException("mockService");
+
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
     IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    bridge.sendMessage(instance, INTEGRATION_USER, new Message());
   }
 
   @Test(expected = Exception.class)
@@ -226,15 +236,12 @@ public class IntegrationBridgeTest {
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
-    doThrow(exception).when(authenticationProxy)
-        .reAuthOrThrow(anyString(), anyInt(), any(RemoteApiException.class));
-
     IntegrationInstance instance = new IntegrationInstance();
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
     instance.setOptionalProperties(OPTIONAL_PROPERTIES);
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
   }
 
 }

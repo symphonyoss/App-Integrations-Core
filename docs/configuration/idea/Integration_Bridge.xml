@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Integration Bridge" type="JarApplication" factoryName="JAR Application">
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+    <option name="JAR_PATH" value="/workspace/App-Integrations-Core/integration-web/target/integration.jar" />
+    <option name="VM_PARAMETERS" value="-Dloader.path=/workspace/App-Integrations-Core/docs/configuration/boot/libs/ -Dlog4j2.outputAllToConsole=true -Dlogs.basedir=/workspace/App-Integrations-Core/docs/configuration/boot/logs" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.config.location=/workspace/App-Integrations-Core/docs/configuration/boot/ --server.tomcat.basedir=/workspace/App-Integrations-Core/docs/configuration/boot/tomcat" />
+    <option name="WORKING_DIRECTORY" value="/workspace/App-Integrations-Core/docs/configuration/boot/" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="1.7" />
+    <envs />
+    <method>
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="-DsymphonySkipUnitTests=true clean install" />
+    </method>
+  </configuration>
+</component>
