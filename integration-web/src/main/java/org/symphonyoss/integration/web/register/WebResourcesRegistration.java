@@ -50,7 +50,7 @@ public class WebResourcesRegistration {
 
   private static final String METRICS_PATH = "/metrics/";
 
-  private static final String CORS_MAPPING = "/apps/**";
+  private static final String CORS_MAPPING = "/**";
 
   /**
    * Register webhook check origin filter.
