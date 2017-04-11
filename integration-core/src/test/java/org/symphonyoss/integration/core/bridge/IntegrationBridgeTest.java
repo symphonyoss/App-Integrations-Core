@@ -44,10 +44,12 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.StreamService;
 
 import java.net.ConnectException;
+import java.rmi.Remote;
 import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
 
 /**
  * Test class responsible to test the flows in the Integration Bridge.
@@ -145,7 +147,25 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testSendMessageForbidden() throws RemoteApiException, JsonProcessingException {
-    RemoteApiException exception = new RemoteApiException(403, "Forbidden");
+    RemoteApiException exception = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "Forbidden");
+
+    doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
+
+    IntegrationInstance instance = new IntegrationInstance();
+    instance.setConfigurationId("57756bca4b54433738037005");
+    instance.setInstanceId("1234");
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
+
+    try {
+      List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, "message");
+    } catch (RemoteApiException e) {
+      Assert.assertEquals(exception.getCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testSendMessageInternalServerError() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exception = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Internal Server Error");
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 

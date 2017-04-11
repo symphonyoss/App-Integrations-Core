@@ -69,7 +69,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
   /**
    * It receives an array of Stream and sends one by one to each room.
-   * Business rule 1: If I have "n" rooms and one receive OK the return will be HTTP Status 200
+   * Business rule 1: If I have "n" rooms and one receive OK then returns HTTP Status 200
    * Business rule 2: If I have "n" rooms and all returned failed the priority is to return HTTP Status 500
    * @param instance the instance of integration
    * @param integrationUser the user of integration
