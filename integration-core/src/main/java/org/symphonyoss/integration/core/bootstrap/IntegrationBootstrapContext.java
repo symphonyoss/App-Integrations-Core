@@ -30,7 +30,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
-import org.symphonyoss.integration.event.HealthCheckServiceEvent;
+import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -147,6 +147,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   /**
    * Schedule to dispatch health-check service event to monitor the Agent version.
+   *
+   * This allows the Integration Bridge to detect if the Agent is upgraded while the Integration
+   * Bridge is running.
    */
   private void healthCheckAgentServicePolling() {
     scheduler.scheduleWithFixedDelay(new Runnable() {
@@ -155,7 +158,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       public void run() {
         LOGGER.debug("Polling AGENT health check");
 
-        HealthCheckServiceEvent event = new HealthCheckServiceEvent(AGENT_SERVICE_NAME);
+        HealthCheckEventData event = new HealthCheckEventData(AGENT_SERVICE_NAME);
         publisher.publishEvent(event);
       }
 

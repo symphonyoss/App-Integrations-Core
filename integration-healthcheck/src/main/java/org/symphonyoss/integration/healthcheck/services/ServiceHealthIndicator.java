@@ -17,7 +17,6 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
@@ -36,8 +35,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.event.HealthCheckServiceEvent;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.event.HealthCheckEventData;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -105,8 +104,6 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   @PostConstruct
   public void init() {
-    this.currentVersion = null;
-
     serviceInfoCache = CacheBuilder.newBuilder().expireAfterWrite(SERVICE_CACHE_PERIOD_SECS,
         TimeUnit.SECONDS).build(new CacheLoader<String, IntegrationBridgeService>() {
       @Override
@@ -125,7 +122,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @param event Health check event
    */
   @EventListener
-  public void handleHealthCheckEvent(HealthCheckServiceEvent event) {
+  public void handleHealthCheckEvent(HealthCheckEventData event) {
     String serviceName = getServiceName();
 
     LOG.debug("Handle health-check event. Service name: {}", serviceName);
@@ -197,8 +194,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     String oldSemanticVersion = getSemanticVersion(currentVersion);
     String newSemanticVersion = getSemanticVersion(version);
 
-    ServiceVersionUpdatedEvent event =
-        new ServiceVersionUpdatedEvent(getServiceName(), oldSemanticVersion, newSemanticVersion);
+    ServiceVersionUpdatedEventData event =
+        new ServiceVersionUpdatedEventData(getServiceName(), oldSemanticVersion, newSemanticVersion);
     this.currentVersion = version;
 
     publisher.publishEvent(event);

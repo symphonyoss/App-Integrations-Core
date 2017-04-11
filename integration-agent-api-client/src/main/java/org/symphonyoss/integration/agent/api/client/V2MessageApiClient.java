@@ -26,7 +26,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Holds all endpoints to deal with message.
+ * Holds all endpoints to deal with message using Message API v2.
+ *
+ * Message API v2 requires the authentication tokens (Session and Key Manager), stream identifier
+ * and the payload that contains MessageML v1.
+ *
+ * Example:
+ *
+ * MessageML
+ * <pre>
+ *   <messageML>
+ *     <entity type="com.symphony.integration.zapier.event.post_message" version="1.0">
+ *       <presentationML>New Trello Card Created<br/>&lt;b&gt;Card Name:&lt;/b&gt; Card added for symphony innovate</presentationML>
+ *       <entity type="com.symphony.integration.zapier.zap" version="1.0">
+ *         <attribute name="name" type="org.symphonyoss.string" value="Card Created"/>
+ *         <attribute name="link" type="com.symphony.uri" value="https://zapier.com/app/edit/12156591"/>
+ *         <attribute name="live" type="org.symphonyoss.string" value="true"/>
+ *       </entity>
+ *       <entity name="action_fields" type="com.symphony.integration.zapier.fields" version="1.0">
+ *         <attribute name="message_header" type="org.symphonyoss.string" value="New Trello Card Created"/>
+ *         <attribute name="message_content" type="org.symphonyoss.string" value="&amp;lt;b&amp;gt;Card Name:&amp;lt;/b&amp;gt; Card added for symphony innovate"/>
+ *       </entity>
+ *       <entity name="action_fields_full" type="com.symphony.integration.zapier.fields" version="1.0">
+ *         <attribute name="message_header" type="org.symphonyoss.string" value="full - New Trello Card Created"/>
+ *         <attribute name="message_content" type="org.symphonyoss.string" value="full - &amp;lt;b&amp;gt;Card Name:&amp;lt;/b&amp;gt; Card added for symphony innovate"/>
+ *       </entity>
+ *       <entity name="action_fields_raw" type="com.symphony.integration.zapier.fields" version="1.0">
+ *         <attribute name="message_header" type="org.symphonyoss.string" value="New Trello Card Created"/>
+ *         <attribute name="message_content" type="org.symphonyoss.string" value="&amp;lt;b&amp;gt;Card Name:&amp;lt;/b&amp;gt; {{12156591__name}}&lt;"/>
+ *       </entity>
+ *     </entity>
+ *   </messageML>
+ * </pre>
+ *
+ * For more details
+ * - MessageML v1: https://rest-api.symphony.com/docs/message-format
+ * - Create Message: https://rest-api.symphony.com/docs/create-message-v2
+ *
  * Created by rsanchez on 23/02/17.
  */
 public class V2MessageApiClient extends BaseMessageApiClient {

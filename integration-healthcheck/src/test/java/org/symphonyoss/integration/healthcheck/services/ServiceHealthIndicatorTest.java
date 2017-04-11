@@ -23,7 +23,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,15 +36,13 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.event.HealthCheckServiceEvent;
-import org.symphonyoss.integration.event.MessageMLVersionUpdatedEvent;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.event.HealthCheckEventData;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import javax.ws.rs.ProcessingException;
@@ -84,7 +81,7 @@ public class ServiceHealthIndicatorTest {
 
   private Invocation.Builder invocationBuilder;
 
-  private MockApplicationPublisher<ServiceVersionUpdatedEvent> publisher = new MockApplicationPublisher<>();
+  private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher = new MockApplicationPublisher<>();
 
   @Before
   public void init() {
@@ -171,7 +168,7 @@ public class ServiceHealthIndicatorTest {
     String currentVersion = healthIndicator.getCurrentVersion();
     assertEquals(MOCK_CURRENT_VERSION, currentVersion);
 
-    ServiceVersionUpdatedEvent event = publisher.getEvent();
+    ServiceVersionUpdatedEventData event = publisher.getEvent();
     assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
   }
 
@@ -209,7 +206,7 @@ public class ServiceHealthIndicatorTest {
   public void testHandleHealthCheckEventWithoutServiceName() {
     mockServiceUp();
 
-    HealthCheckServiceEvent event = new HealthCheckServiceEvent(StringUtils.EMPTY);
+    HealthCheckEventData event = new HealthCheckEventData(StringUtils.EMPTY);
     healthIndicator.handleHealthCheckEvent(event);
 
     assertNull(healthIndicator.getCurrentVersion());
@@ -220,7 +217,7 @@ public class ServiceHealthIndicatorTest {
     mockServiceUp();
 
     String serviceName = healthIndicator.getServiceName();
-    HealthCheckServiceEvent event = new HealthCheckServiceEvent(serviceName);
+    HealthCheckEventData event = new HealthCheckEventData(serviceName);
 
     healthIndicator.handleHealthCheckEvent(event);
 

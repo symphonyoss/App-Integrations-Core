@@ -17,13 +17,12 @@
 package org.symphonyoss.integration.core.bridge;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.authentication.AuthenticationToken.VOID_KM_TOKEN;
+import static org.symphonyoss.integration.authentication.AuthenticationToken.VOID_SESSION_TOKEN;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -33,7 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
@@ -41,7 +39,7 @@ import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEvent;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -49,9 +47,9 @@ import org.symphonyoss.integration.model.stream.Stream;
 import org.symphonyoss.integration.model.stream.StreamType;
 import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test class responsible to test the flows in the Stream Service.
@@ -177,7 +175,7 @@ public class StreamServiceTest {
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
     doThrow(RemoteApiException.class).when(messageApiClient)
-        .postMessage(anyString(), anyString(), anyString(), any(Message.class));
+        .postMessage(VOID_SESSION_TOKEN, VOID_KM_TOKEN, STREAM, message);
 
     streamService.postMessage(INTEGRATION_USER, STREAM, message);
   }
@@ -191,8 +189,8 @@ public class StreamServiceTest {
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
     when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
         AuthenticationToken.VOID_AUTH_TOKEN);
-    when(messageApiClient.postMessage(anyString(), anyString(), anyString(),
-        any(Message.class))).thenReturn(message);
+    when(messageApiClient.postMessage(VOID_SESSION_TOKEN, VOID_KM_TOKEN, STREAM,
+        message)).thenReturn(message);
 
     Message result = streamService.postMessage(INTEGRATION_USER, STREAM, message);
     assertEquals(message, result);
@@ -200,10 +198,12 @@ public class StreamServiceTest {
 
   @Test(expected = RemoteApiException.class)
   public void testCreateIMApiException() throws RemoteApiException {
+    List<Long> userIdList = new ArrayList<>();
+    userIdList.add(USER_ID);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    doThrow(RemoteApiException.class).when(streamsApi).createIM(anyString(), any(List.class));
+    when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(VOID_SESSION_TOKEN);
+    doThrow(RemoteApiException.class).when(streamsApi).createIM(VOID_SESSION_TOKEN, userIdList);
 
     streamService.createIM(INTEGRATION_USER, USER_ID);
   }
@@ -211,10 +211,13 @@ public class StreamServiceTest {
   @Test
   public void testCreateIMSuccessfully() throws RemoteApiException {
     Stream stream = new Stream();
+
+    List<Long> userIdList = new ArrayList<>();
+    userIdList.add(USER_ID);
+
     when(authenticationProxy.isAuthenticated(INTEGRATION_USER)).thenReturn(true);
-    when(authenticationProxy.getToken(INTEGRATION_USER)).thenReturn(
-        AuthenticationToken.VOID_AUTH_TOKEN);
-    when(streamsApi.createIM(anyString(), any(List.class))).thenReturn(stream);
+    when(authenticationProxy.getSessionToken(INTEGRATION_USER)).thenReturn(VOID_SESSION_TOKEN);
+    when(streamsApi.createIM(VOID_SESSION_TOKEN, userIdList)).thenReturn(stream);
 
     Stream result = streamService.createIM(INTEGRATION_USER, USER_ID);
     assertEquals(stream, result);
@@ -223,7 +226,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedWithoutServiceName() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
+        new ServiceVersionUpdatedEventData(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
@@ -232,7 +235,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedOldVersion() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V2));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));
@@ -241,7 +244,7 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedNewVersion() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEvent(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
+        new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(V3MessageApiClient.class, apiResolver.get(MessageMLVersion.V2).getClass());
