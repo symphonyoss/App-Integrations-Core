@@ -89,7 +89,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, stream);
-        if(remoteApiException == null || remoteApiException.getCode() != Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+        if(remoteApiException == null || Response.Status.fromStatusCode(e.getCode()).getFamily() == Response.Status.Family.SERVER_ERROR) {
           remoteApiException = e;
         }
       } catch (ConnectivityException | ProcessingException e) {
