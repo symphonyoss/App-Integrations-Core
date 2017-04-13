@@ -209,8 +209,7 @@ public abstract class WebHookResource {
   @ResponseBody
   @ExceptionHandler(NotFoundException.class)
   public ResponseEntity<String> handleNotFound(Exception ex) {
-    String message = ex.getMessage();
-    LOGGER.info(message, ex);
+    LOGGER.info(ex.getMessage());
     return ResponseEntity.notFound().build();
   }
 
