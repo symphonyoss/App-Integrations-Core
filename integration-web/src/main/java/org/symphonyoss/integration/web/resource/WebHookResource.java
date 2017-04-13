@@ -204,9 +204,9 @@ public abstract class WebHookResource {
   /**
    * Handle {@link RemoteApiException} exception.
    * When an error occurs in the API call, whether this error is on account of the client or the API,
-   * a RemoteApiException with an HTTP code and a description is returned.
+   * a RemoteApiException with an HTTP code and a message description is returned.
    * @param ex RemoteApiException object
-   * @return HTTP Status code
+   * @return HTTP Status code and message description about error
    */
   @ResponseBody
   @ExceptionHandler({RemoteApiException.class})

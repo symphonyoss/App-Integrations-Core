@@ -334,7 +334,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testInternalServerErrorWithRemoteApiException() {
     RemoteApiException ex = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "test");
     Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }
 
   /**
@@ -344,7 +344,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testBadRequestWithRemoteApiException() {
     RemoteApiException ex = new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "test");
     Assert.assertEquals(HttpStatus.BAD_REQUEST,
-        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }
 
   /**
@@ -354,7 +354,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testForbiddenWithRemoteApiException() {
     RemoteApiException ex = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "test");
     Assert.assertEquals(HttpStatus.FORBIDDEN,
-        webHookDispatcherResource.handleRemoteAPIExpection(ex).getStatusCode());
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }
 
 }
