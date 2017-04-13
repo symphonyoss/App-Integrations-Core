@@ -210,7 +210,7 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler({RemoteApiException.class})
-  public ResponseEntity<String> handleRemoteAPIExpection(RemoteApiException ex) {
+  public ResponseEntity<String> handleRemoteAPIException(RemoteApiException ex) {
     LOGGER.error(ex.getMessage(), ex);
     return ResponseEntity.status(ex.getCode()).body(ex.getMessage());
   }
