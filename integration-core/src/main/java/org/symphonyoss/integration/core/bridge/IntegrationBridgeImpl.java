@@ -89,7 +89,8 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, stream);
-        if(remoteApiException == null || Response.Status.fromStatusCode(e.getCode()).getFamily() == Response.Status.Family.SERVER_ERROR) {
+
+        if (remoteApiException == null || Response.Status.fromStatusCode(remoteApiException.getCode()).getFamily() != Response.Status.Family.SERVER_ERROR) {
           remoteApiException = e;
         }
       } catch (ConnectivityException | ProcessingException e) {
@@ -100,7 +101,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
       }
     }
 
-    if (result.size() <= 0 && remoteApiException != null) {
+    if (remoteApiException != null) {
       throw remoteApiException;
     }
 
