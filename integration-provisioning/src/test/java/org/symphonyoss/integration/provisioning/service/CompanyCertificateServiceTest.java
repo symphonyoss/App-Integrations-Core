@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,10 +134,11 @@ public class CompanyCertificateServiceTest {
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
   }
 
-  @Test(expected = CompanyCertificateException.class)
+  @Test
   public void testFileNotFound() {
     this.application.setId(UNKNOWN_ID);
-    service.getPem(application);
+    String pem = service.getPem(application);
+    assertTrue(StringUtils.isBlank(pem));
   }
 
   @Test(expected = CompanyCertificateException.class)
