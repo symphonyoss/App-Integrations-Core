@@ -68,8 +68,9 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
   /**
    * It receives an array of Stream and sends one by one to each room.
-   * Business rule 1: If I have "n" rooms and one receive OK then returns HTTP Status 200
-   * Business rule 2: If I have "n" rooms and all returned failed the priority is to return HTTP Status 500
+   * Business rule 1: If I have N rooms and all receive OK then return 200
+   * Business rule 2: If I have N rooms and to occur exception then return Exception
+   * Business rule 3: If I have N rooms and receive two types exception (example: http 403 and http 500) then priority of return is family 5xx.
    * @param instance the instance of integration
    * @param integrationUser the user of integration
    * @param streams the array of stream.
@@ -93,7 +94,6 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         if (remoteApiException == null || Response.Status.fromStatusCode(remoteApiException.getCode()).getFamily() != Response.Status.Family.SERVER_ERROR) {
           remoteApiException = e;
         }
-
       } catch (ConnectivityException | ProcessingException e) {
         throw e;
       } catch (Exception e) {
