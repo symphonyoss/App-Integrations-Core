@@ -49,6 +49,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response;
 
 /**
  * Base class to support HTTP handlers.
@@ -211,8 +212,16 @@ public abstract class WebHookResource {
   @ResponseBody
   @ExceptionHandler({RemoteApiException.class})
   public ResponseEntity<String> handleRemoteAPIException(RemoteApiException ex) {
-    LOGGER.error(ex.getMessage(), ex);
-    return ResponseEntity.status(ex.getCode()).body(ex.getMessage());
+    Integer httpCode = ex.getCode();
+    String message = ex.getMessage();
+
+    if (httpCode == Response.Status.FORBIDDEN.getStatusCode()) {
+      httpCode = Response.Status.NOT_FOUND.getStatusCode();
+      message = Response.Status.NOT_FOUND.getReasonPhrase();
+    }
+
+    LOGGER.error(message, ex);
+    return ResponseEntity.status(httpCode).body(message);
   }
 
   /**

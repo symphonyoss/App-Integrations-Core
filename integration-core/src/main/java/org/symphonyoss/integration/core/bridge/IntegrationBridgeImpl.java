@@ -93,6 +93,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
         if (remoteApiException == null || Response.Status.fromStatusCode(remoteApiException.getCode()).getFamily() != Response.Status.Family.SERVER_ERROR) {
           remoteApiException = e;
         }
+
       } catch (ConnectivityException | ProcessingException e) {
         throw e;
       } catch (Exception e) {

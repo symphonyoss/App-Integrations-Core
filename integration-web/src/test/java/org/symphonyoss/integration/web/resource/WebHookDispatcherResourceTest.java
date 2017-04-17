@@ -351,9 +351,9 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
    * Test an HTTP Forbidden caused by {@link RemoteApiException}
    */
   @Test
-  public void testForbiddenWithRemoteApiException() {
+  public void testForbiddenWithRemoteApiExceptionThenReturnNotFound() {
     RemoteApiException ex = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "test");
-    Assert.assertEquals(HttpStatus.FORBIDDEN,
+    Assert.assertEquals(HttpStatus.NOT_FOUND,
         webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }
 

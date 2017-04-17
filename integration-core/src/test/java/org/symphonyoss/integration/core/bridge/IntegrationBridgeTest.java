@@ -105,27 +105,6 @@ public class IntegrationBridgeTest {
     assertEquals(message, result.get(1));
   }
 
-  @Test()
-  public void testSendMessageWithPostErrors() throws RemoteApiException, JsonProcessingException {
-    Message message = new Message();
-
-    doReturn(message).when(streamService).postMessage(INTEGRATION_USER, "stream2", message);
-
-    doThrow(RemoteApiException.class).when(streamService).postMessage(INTEGRATION_USER, "stream1", message);
-
-    IntegrationInstance instance = new IntegrationInstance();
-    instance.setConfigurationId("57756bca4b54433738037005");
-    instance.setInstanceId("1234");
-    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
-
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, message);
-
-    assertNotNull(result);
-    assertFalse(result.isEmpty());
-    assertEquals(1, result.size());
-    assertEquals(message, result.get(0));
-  }
-
   @Test
   public void testSendMessageUnauthenticated() throws RemoteApiException, JsonProcessingException {
     RemoteApiException exception = new RemoteApiException(401, "Unauthorized");
