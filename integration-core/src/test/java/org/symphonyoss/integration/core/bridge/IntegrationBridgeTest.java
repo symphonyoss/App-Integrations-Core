@@ -124,8 +124,8 @@ public class IntegrationBridgeTest {
   }
 
   @Test
-  public void testSendMessageForbidden() throws RemoteApiException, JsonProcessingException {
-    RemoteApiException exception = new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+  public void testSendMessageForbiddenAndReturnNotFound() throws RemoteApiException, JsonProcessingException {
+    RemoteApiException exception = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), Response.Status.FORBIDDEN.getReasonPhrase());
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
@@ -137,7 +137,7 @@ public class IntegrationBridgeTest {
     try {
       List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
     } catch (RemoteApiException e) {
-      Assert.assertEquals(exception.getCode(), e.getCode());
+      Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode() , e.getCode());
     }
   }
 
