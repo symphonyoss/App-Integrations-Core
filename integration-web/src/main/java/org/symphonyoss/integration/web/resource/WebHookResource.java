@@ -213,16 +213,10 @@ public abstract class WebHookResource {
   @ResponseBody
   @ExceptionHandler({RemoteApiException.class})
   public ResponseEntity<String> handleRemoteAPIException(RemoteApiException ex) {
-    Integer httpCode = ex.getCode();
     String message = ex.getMessage();
 
-    if (httpCode == Response.Status.FORBIDDEN.getStatusCode()) {
-      httpCode = Response.Status.NOT_FOUND.getStatusCode();
-      message = Response.Status.NOT_FOUND.getReasonPhrase();
-    }
-
     LOGGER.error(message, ex);
-    return ResponseEntity.status(httpCode).body(message);
+    return ResponseEntity.status(ex.getCode()).body(message);
   }
 
   /**

@@ -67,17 +67,36 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   }
 
   /**
-   * It receives an array of Stream and sends one by one to each room.
-   * Business rule 1: If I have N rooms and all receive OK then return 200
-   * Business rule 2: If I have N rooms and to occur exception then return Exception
-   * Business rule 3: If I have N rooms and receive two types exception (example: http 403 and http 500) then priority of return is family 5xx.
-   * @param instance the instance of integration
-   * @param integrationUser the user of integration
-   * @param streams the array of stream.
-   * @param message the actual message. It's expected to be already on proper format.
-   * @return
-   * @throws RemoteApiException
-   */
+   * Dispatches a message to the indicated list of streams.
+   * Each message is dispatched on an individual request to the agent, and may produce a mix of success and
+   * failure results that will be consolidated by this method to return a single result to the caller,
+   * as described below:
+   *
+   * case #1 - When the message is dispatched to all streams successfully, the list of message responses is returned.
+   * No exceptions are thrown and if no other errors occur, a 200 will be returned to the originating system.
+   *
+   * case #2 - When the message fails to be dispatched with 403 returning from the agent from all streams,
+   * a RemoteApiException is thrown with 404 as a result. In this case, 403 is transformed to 404 because the Bot has
+   * been removed from all rooms (streams) the webhook posts to, and the Integration Bridge responds the originating
+   * system with a 404 to indicate that this webhook is not functional anymore, possibly triggering a process to
+   * deactivate the webhook on the originating system.
+   *
+   * case #3 - When the message fails to be dispatched to some of the rooms, regardless the agent's return code,
+   * a RemoteApiException is thrown with 500. In this case, the Integration Bridge returns 500 because it was
+   * a partial success and a retry by the originating system could cause the message to succeed.
+   *
+   * case #4 - When the message fails to be dispatched to all of the rooms, and the agent return codes are mixed,
+   * a RemoteApiException is thrown with 500. In this case, the Integration Bridge returns 500 because there might be
+   * intermittent errors in the process and a retry by the originating system could cause the message to succeed.
+   *
+   * @param instance the integration instance
+   * @param integrationUser the integration user
+   * @param streams the list of streams
+   * @param message the message to be dispatched
+   * @return the list of message responses (in case of success)
+   * @throws RemoteApiException according to the rules described above
+   *
+   **/
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
       List<String> streams, Message message) throws RemoteApiException {
@@ -103,8 +122,16 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     }
 
     if (remoteApiException != null) {
+      if (remoteApiException.getCode() == Response.Status.FORBIDDEN.getStatusCode()) {
+        if (result.size() > 0) {
+          throw new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        }
+
+        throw new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+      }
+
       throw remoteApiException;
-    }
+     }
 
     return result;
   }

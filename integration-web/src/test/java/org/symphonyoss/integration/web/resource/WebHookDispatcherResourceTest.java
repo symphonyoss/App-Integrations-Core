@@ -348,11 +348,11 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   /**
-   * Test an HTTP Forbidden caused by {@link RemoteApiException}
+   * Test an HTTP Not Found caused by {@link RemoteApiException}
    */
   @Test
-  public void testForbiddenWithRemoteApiExceptionThenReturnNotFound() {
-    RemoteApiException ex = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "test");
+  public void testNotFoundWithRemoteApiExceptionThenReturnNotFound() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), "test");
     Assert.assertEquals(HttpStatus.NOT_FOUND,
         webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }

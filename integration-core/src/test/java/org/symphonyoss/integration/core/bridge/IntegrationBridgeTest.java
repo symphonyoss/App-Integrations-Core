@@ -125,7 +125,7 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testSendMessageForbidden() throws RemoteApiException, JsonProcessingException {
-    RemoteApiException exception = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(), "Forbidden");
+    RemoteApiException exception = new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 
