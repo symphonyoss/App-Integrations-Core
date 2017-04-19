@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 
@@ -50,7 +51,7 @@ public class WebHookWelcomeResource extends WebHookResource {
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
       @PathVariable String configurationId, @PathVariable String configurationType,
-      @RequestBody String body) {
+      @RequestBody String body) throws RemoteApiException {
     return handleWelcomeRequest(hash, configurationId, body);
   }
 
@@ -65,7 +66,7 @@ public class WebHookWelcomeResource extends WebHookResource {
       method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> handleWelcomeRequest(@PathVariable String hash,
-      @PathVariable String configurationId, @RequestBody String body) {
+      @PathVariable String configurationId, @RequestBody String body) throws RemoteApiException {
     LOGGER.info("Welcome: Request received for hash {} and configuration {}", hash, configurationId);
 
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
@@ -75,6 +76,7 @@ public class WebHookWelcomeResource extends WebHookResource {
         getConfigurationInstance(hash, configurationId, configurationType);
 
     whiIntegration.welcome(instance, configurationType, body);
+
     return ResponseEntity.ok().body("");
   }
 }
