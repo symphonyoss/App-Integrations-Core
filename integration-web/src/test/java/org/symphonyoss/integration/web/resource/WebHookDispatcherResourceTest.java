@@ -16,18 +16,6 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +38,18 @@ import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link WebHookDispatcherResource}.
@@ -103,11 +102,36 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     // mocking whiIntegration
     doThrow(WebHookParseException.class).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
 
     assertEquals(ResponseEntity.badRequest()
             .body("Couldn't validate the incoming payload for the instance: " + TEST_HASH),
         webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER,
             MESSAGE_BODY, request));
+  }
+
+  /**
+   * Tests if handles request is returning the proper error when the payload is of an unsupported
+   * content type
+   */
+  @Test
+  public void testHandleRequestWithUnsupportedContentType() throws Exception {
+    mockConfiguration(true);
+    mockStatus(IntegrationStatus.ACTIVE);
+    mockRequest();
+
+    // mocking whiIntegration
+    List<MediaType> supportedFormats = new ArrayList<>();
+    supportedFormats.add(MediaType.APPLICATION_JSON_TYPE);
+
+    doThrow(WebHookParseException.class).when(whiIntegration)
+            .handle(anyString(), anyString(), any(WebHookPayload.class));
+    doReturn(supportedFormats).when(whiIntegration).getSupportedContentTypes();
+
+    ResponseEntity response = webHookDispatcherResource.handleRequest(
+            TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY, request);
+
+    assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
   }
 
   /**
@@ -122,6 +146,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     // mocking whiIntegration
     doThrow(MessageMLParseException.class).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
 
     assertEquals(
         ResponseEntity.badRequest().body("Couldn't validate the incoming payload for the instance: " + TEST_HASH),
@@ -135,6 +160,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testHandleRequestSuccessfully() throws Exception {
     mockConfiguration(true);
     mockStatus(IntegrationStatus.ACTIVE);
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
     mockRequest();
 
     assertEquals(webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER,
@@ -148,6 +174,9 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   public void testHandleRequestFormSuccessfully() throws Exception {
     mockConfiguration(true);
     mockStatus(IntegrationStatus.ACTIVE);
+
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
+
     mockRequest();
 
     assertEquals(webHookDispatcherResource.handleFormRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER,
@@ -168,6 +197,8 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
       }
     }).when(whiIntegration)
         .handle(anyString(), eq(TEST_USER), any(WebHookPayload.class));
+
+    doReturn(true).when(whiIntegration).isSupportedContentType(any(MediaType.class));
 
     webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY,
         request);
@@ -232,6 +263,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     doThrow(WebHookUnavailableException.class).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
 
     webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY,
         request);
@@ -248,6 +280,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     doThrow(WebHookDisabledException.class).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
 
     webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY,
         request);
@@ -264,7 +297,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     doReturn(whiIntegration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(settings).when(whiIntegration).getSettings();
-
+    doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
     // request must exist to reach "handle"
     mockRequest();
 
