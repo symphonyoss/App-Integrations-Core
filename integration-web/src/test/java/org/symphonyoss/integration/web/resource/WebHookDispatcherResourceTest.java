@@ -40,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.entity.MessageMLParseException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Unit tests for {@link WebHookDispatcherResource}.
@@ -191,7 +193,8 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   @Test
-  public void testWebHookPayload() throws IntegrationConfigException, WebHookParseException {
+  public void testWebHookPayload()
+      throws IntegrationConfigException, WebHookParseException, RemoteApiException {
     mockConfiguration(true);
     mockStatus(IntegrationStatus.ACTIVE);
     mockRequest();
@@ -294,7 +297,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   @Test(expected = ConnectivityException.class)
-  public void testConnectivityErrorException() {
+  public void testConnectivityErrorException() throws RemoteApiException {
     doThrow(mock(ConnectivityException.class)).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
 
@@ -317,7 +320,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
    * open state.
    */
   @Test(expected = IntegrationBridgeUnavailableException.class)
-  public void testIntegrationBridgeUnavailableException() {
+  public void testIntegrationBridgeUnavailableException() throws RemoteApiException {
     // simulates an early call resulting in a connectivity exception
     webHookDispatcherResource.handleConnectivityException(mock(ConnectivityException.class));
 
@@ -360,6 +363,37 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     Assert.assertTrue(response.toString().contains(IB_UNAVAILABLE_EXCEPTION_MESSAGE));
     Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+  }
+
+
+  /**
+   * Test an HTTP Internal Server Error caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testInternalServerErrorWithRemoteApiException() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Bad Request caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testBadRequestWithRemoteApiException() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.BAD_REQUEST,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Not Found caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testNotFoundWithRemoteApiExceptionThenReturnNotFound() {
+    RemoteApiException ex = new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.NOT_FOUND,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
   }
 
 }
