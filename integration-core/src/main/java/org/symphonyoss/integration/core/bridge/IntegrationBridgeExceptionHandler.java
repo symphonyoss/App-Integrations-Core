@@ -33,6 +33,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
+import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.stream.Stream;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
@@ -215,6 +216,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     Message messageSubmission = new Message();
     messageSubmission.setFormat(Message.FormatEnum.MESSAGEML);
     messageSubmission.setMessage(message);
+    messageSubmission.setVersion(MessageMLVersion.V1);
 
     streamService.postMessage(integrationUser, im, messageSubmission);
     LOGGER.info("User notified about the instance updated");
