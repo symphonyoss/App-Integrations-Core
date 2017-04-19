@@ -16,6 +16,18 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.entity.MessageMLParseException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -43,13 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import javax.ws.rs.core.Response;
 
 /**
  * Unit tests for {@link WebHookDispatcherResource}.
@@ -184,7 +191,8 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   @Test
-  public void testWebHookPayload() throws IntegrationConfigException, WebHookParseException {
+  public void testWebHookPayload()
+      throws IntegrationConfigException, WebHookParseException, RemoteApiException {
     mockConfiguration(true);
     mockStatus(IntegrationStatus.ACTIVE);
     mockRequest();
@@ -287,7 +295,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   @Test(expected = ConnectivityException.class)
-  public void testConnectivityErrorException() {
+  public void testConnectivityErrorException() throws RemoteApiException {
     doThrow(mock(ConnectivityException.class)).when(whiIntegration)
         .handle(anyString(), anyString(), any(WebHookPayload.class));
 
@@ -310,7 +318,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
    * open state.
    */
   @Test(expected = IntegrationBridgeUnavailableException.class)
-  public void testIntegrationBridgeUnavailableException() {
+  public void testIntegrationBridgeUnavailableException() throws RemoteApiException {
     // simulates an early call resulting in a connectivity exception
     webHookDispatcherResource.handleConnectivityException(mock(ConnectivityException.class));
 

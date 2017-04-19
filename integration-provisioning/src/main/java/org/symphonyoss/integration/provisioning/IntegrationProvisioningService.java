@@ -54,9 +54,11 @@ public class IntegrationProvisioningService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationProvisioningService.class);
 
-  private static final String AVATAR_FILENAME = "logo.png";
+  private static final String DEFAULT_AVATAR_FILENAME = "logo.png";
 
   private static final String APPS_CONTEXT = "apps";
+
+  private static final String FILE_RESOURCE_PREFIX = "file://";
 
   @Autowired
   private ApplicationContext context;
@@ -224,18 +226,17 @@ public class IntegrationProvisioningService {
     String applicationId = application.getId();
 
     try {
-      String fileName = String.format("%s-%s.yml", configName, applicationId);
+      Resource resource = getExternalAvatarResource(application);
 
-      Resource resource = context.getResource("classpath:" + fileName);
-      if (resource.exists()) {
-        String fullPath = resource.getURI().toString();
-        String libPath = fullPath.replace(fileName, "");
+      if (resource == null) {
+        resource = getInternalAvatarResource(application);
+      }
 
-        String avatar = getAvatarImage(libPath);
-
-        if (StringUtils.isNotEmpty(avatar)) {
-          application.setAvatar(avatar);
-        }
+      if (resource != null) {
+        String avatar = getAvatarImage(resource);
+        application.setAvatar(avatar);
+      } else {
+        LOGGER.info("Avatar image to {} not exists.",  applicationId);
       }
     } catch (IOException e) {
       LOGGER.error("Can't find the avatar to " + applicationId, e);
@@ -243,20 +244,69 @@ public class IntegrationProvisioningService {
   }
 
   /**
-   * Retrieve the avatar image coded in Base64.
-   * @param libPath Integration module path
-   * @return Avatar image coded in Base64.
-   * @throws IOException
+   * Get avatar image resource outside the classpath. In the first time this method should verify
+   * the avatar as URL (http:// or https://). If this resource does not exist it needs to check
+   * as filesystem resource (file://).
+   * @param application Application object
+   * @return Avatar image resource or null if resource not exists
    */
-  private String getAvatarImage(String libPath) throws IOException {
-    Resource resAvatar = context.getResource(libPath + AVATAR_FILENAME);
+  private Resource getExternalAvatarResource(Application application) {
+    String avatarUrl = application.getAvatarUrl();
+
+    if (StringUtils.isEmpty(avatarUrl)) {
+      return null;
+    }
+
+    Resource resAvatar = context.getResource(avatarUrl);
 
     if (resAvatar.exists()) {
-      byte[] imageBytes = IOUtils.toByteArray(resAvatar.getInputStream());
-      return Base64.encodeBase64String(imageBytes);
+      return resAvatar;
+    }
+
+    String fileAvatar = FILE_RESOURCE_PREFIX + avatarUrl;
+    resAvatar = context.getResource(fileAvatar);
+
+    if (resAvatar.exists()) {
+      return resAvatar;
     }
 
     return null;
+  }
+
+  /**
+   * Get avatar image resource inside the classpath.
+   * @param application Application object
+   * @return Avatar image resource or null if resource not exists
+   * @throws IOException Failure to get the avatar URI
+   */
+  private Resource getInternalAvatarResource(Application application) throws IOException {
+    String fileName = String.format("%s-%s.yml", configName, application.getId());
+
+    Resource resource = context.getResource("classpath:" + fileName);
+
+    if (resource.exists()) {
+      String fullPath = resource.getURI().toString();
+      String libPath = fullPath.replace(fileName, "");
+
+      Resource resAvatar = context.getResource(libPath + DEFAULT_AVATAR_FILENAME);
+
+      if (resAvatar.exists()) {
+        return resAvatar;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Retrieve the avatar image coded in Base64.
+   * @param avatarResource Avatar resource path
+   * @return Avatar image coded in Base64.
+   * @throws IOException
+   */
+  private String getAvatarImage(Resource avatarResource) throws IOException {
+    byte[] imageBytes = IOUtils.toByteArray(avatarResource.getInputStream());
+    return Base64.encodeBase64String(imageBytes);
   }
 
 }
