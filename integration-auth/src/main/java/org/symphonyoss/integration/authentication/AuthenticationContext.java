@@ -66,7 +66,10 @@ public class AuthenticationContext {
 
   public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass) {
     this.userId = userId;
+    this.client = buildClient(keyStore, keyStorePass);;
+  }
 
+  private Client buildClient(KeyStore keyStore, String keyStorePass) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
@@ -74,19 +77,24 @@ public class AuthenticationContext {
     clientConfig.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
     clientConfig.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 
-    // SSL context settings
-    SslConfigurator sslConfigurator = SslConfigurator.newInstance(false)
-        .keyStore(keyStore)
-        .keyStorePassword(keyStorePass);
+    // Socket factory setup with custom SSL context settings
+    SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactory.getSystemSocketFactory();
+
+    if (keyStore != null && keyStorePass != null) {
+      SslConfigurator sslConfigurator = SslConfigurator.newInstance()
+          .keyStore(keyStore)
+          .keyStorePassword(keyStorePass);
+
+      sslSocketFactory = new SSLConnectionSocketFactory(sslConfigurator.createSSLContext());
+    }
 
     Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
         .register("http", PlainConnectionSocketFactory.getSocketFactory())
-        .register("https", new SSLConnectionSocketFactory(sslConfigurator.createSSLContext()))
+        .register("https", sslSocketFactory)
         .build();
 
+    // Connection pool setup with custom socket factory and max connections
     PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-
-    // Connection pool settings
     connectionManager.setMaxTotal(MAX_TOTAL_HTTP_CONNECTIONS);
     connectionManager.setDefaultMaxPerRoute(MAX_HTTP_CONNECTIONS_PER_HOST);
 
@@ -98,7 +106,7 @@ public class AuthenticationContext {
     // Build the client with the above configurations
     final ClientBuilder clientBuilder = ClientBuilder.newBuilder().withConfig(clientConfig);
 
-    this.client = clientBuilder.build();
+    return clientBuilder.build();
   }
 
   public String getUserId() {

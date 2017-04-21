@@ -90,12 +90,6 @@ public class AuthenticationProxyImplTest {
   @Mock
   private AuthenticationApiClient keyManagerAuthApi;
 
-  @Mock
-  private KeyStore jiraKs;
-
-  @Mock
-  private KeyStore simpleKs;
-
   @InjectMocks
   @Autowired
   private AuthenticationProxyImpl proxy;
@@ -107,8 +101,8 @@ public class AuthenticationProxyImplTest {
 
   @Before
   public void setup() {
-    this.proxy.registerUser(JIRAWEBHOOK, jiraKs, "");
-    this.proxy.registerUser(SIMPLEWEBHOOK, simpleKs, "");
+    this.proxy.registerUser(JIRAWEBHOOK, null, "");
+    this.proxy.registerUser(SIMPLEWEBHOOK, null, "");
 
     sessionToken.setName("sessionToken");
     sessionToken.setToken(SESSION_TOKEN);
