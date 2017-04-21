@@ -16,7 +16,18 @@
 
 package org.symphonyoss.integration.authentication;
 
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
+import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.apache.connector.ApacheClientProperties;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import java.security.KeyStore;
@@ -30,6 +41,11 @@ import javax.ws.rs.client.ClientBuilder;
  * Stores authentication context for an integration (Symphony user, keystore and token).
  */
 public class AuthenticationContext {
+
+  private static final int READ_TIMEOUT = 4000;
+  private static final int CONNECT_TIMEOUT = 2000;
+  private static final int MAX_TOTAL_HTTP_CONNECTIONS = 60;
+  private static final int MAX_HTTP_CONNECTIONS_PER_HOST = 20;
 
   private final String userId;
 
@@ -54,9 +70,33 @@ public class AuthenticationContext {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
-    final ClientBuilder clientBuilder = ClientBuilder.newBuilder()
-        .keyStore(keyStore, keyStorePass)
-        .withConfig(clientConfig);
+    // Connect and read timeouts in milliseconds
+    clientConfig.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
+    clientConfig.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+
+    // SSL context settings
+    SslConfigurator sslConfigurator = SslConfigurator.newInstance(false)
+        .keyStore(keyStore)
+        .keyStorePassword(keyStorePass);
+
+    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+        .register("https", new SSLConnectionSocketFactory(sslConfigurator.createSSLContext()))
+        .build();
+
+    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+
+    // Connection pool settings
+    connectionManager.setMaxTotal(MAX_TOTAL_HTTP_CONNECTIONS);
+    connectionManager.setDefaultMaxPerRoute(MAX_HTTP_CONNECTIONS_PER_HOST);
+
+    // Sets the connection manager and connector provider
+    clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+    ApacheConnectorProvider connectorProvider = new ApacheConnectorProvider();
+    clientConfig.connectorProvider(connectorProvider);
+
+    // Build the client with the above configurations
+    final ClientBuilder clientBuilder = ClientBuilder.newBuilder().withConfig(clientConfig);
 
     this.client = clientBuilder.build();
   }

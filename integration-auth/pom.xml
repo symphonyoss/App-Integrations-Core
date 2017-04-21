@@ -17,6 +17,12 @@
             <artifactId>integration-auth-api-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.connectors</groupId>
+            <artifactId>jersey-apache-connector</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
