@@ -57,12 +57,10 @@ public class AuthenticationContext {
 
   /**
    * The current token and the previous one are kept on the authentication context map, as for a
-   * short
-   * time window, some threads may have the previous valid token in hands, while another thread has
+   * short time window, some threads may have the previous valid token in hands, while another thread has
    * just renewed it.
    */
   private AuthenticationToken previousToken = AuthenticationToken.VOID_AUTH_TOKEN;
-
 
   public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass) {
     this.userId = userId;
@@ -78,9 +76,11 @@ public class AuthenticationContext {
     clientConfig.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 
     // Socket factory setup with custom SSL context settings
-    SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactory.getSystemSocketFactory();
+    SSLConnectionSocketFactory sslSocketFactory;
 
-    if (keyStore != null && keyStorePass != null) {
+    if (keyStore == null || keyStorePass == null) {
+      sslSocketFactory = SSLConnectionSocketFactory.getSystemSocketFactory();
+    } else {
       SslConfigurator sslConfigurator = SslConfigurator.newInstance()
           .keyStore(keyStore)
           .keyStorePassword(keyStorePass);
@@ -98,8 +98,9 @@ public class AuthenticationContext {
     connectionManager.setMaxTotal(MAX_TOTAL_HTTP_CONNECTIONS);
     connectionManager.setDefaultMaxPerRoute(MAX_HTTP_CONNECTIONS_PER_HOST);
 
-    // Sets the connection manager and connector provider
+    // Sets the connector provider and connection manager (as shared to avoid the client runtime to shut it down)
     clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+    clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER_SHARED, true);
     ApacheConnectorProvider connectorProvider = new ApacheConnectorProvider();
     clientConfig.connectorProvider(connectorProvider);
 
