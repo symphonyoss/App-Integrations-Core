@@ -31,6 +31,7 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
 import java.util.Map;
@@ -64,6 +65,9 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   private AuthenticationApiClient keyManagerAuthApi;
 
   private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
+
+  @Autowired
+  private IntegrationProperties properties;
 
   @Autowired
   private PodAuthHttpApiClient podAuthHttpApiClient;
@@ -261,7 +265,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    */
   @Override
   public void registerUser(String userId, KeyStore keyStore, String keyStorePass) {
-    authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass));
+    authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass, properties.getApiClientConfig()));
   }
 
   /**

@@ -21,11 +21,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.glassfish.jersey.apache.connector.ApacheClientProperties;
+import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Configuration;
 
 /**
  * Unit test for {@link AuthenticationContext}
@@ -57,7 +64,7 @@ public class AuthenticationContextTest {
 
   @Before
   public void initAuthenticationContext() {
-    authContext = new AuthenticationContext(USER_ID, null, null);
+    authContext = new AuthenticationContext(USER_ID, null, null, new ApiClientConfig());
   }
 
   @Test
@@ -133,5 +140,31 @@ public class AuthenticationContextTest {
     assertFalse(authContext.isAuthenticated());
     assertNotNull(authContext.httpClientForContext());
   }
-  
+
+  @Test
+  public void testApiClientConfiguration() throws RemoteApiException {
+    ApiClientConfig apiClientConfig = new ApiClientConfig();
+    apiClientConfig.setConnectTimeout(ApiClientConfig.MAX_CONNECT_TIMEOUT);
+    apiClientConfig.setReadTimeout(ApiClientConfig.MAX_READ_TIMEOUT);
+    apiClientConfig.setMaxConnections(ApiClientConfig.MAX_TOTAL_CONNECTIONS);
+    apiClientConfig.setMaxConnectionsPerRoute(ApiClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
+
+    AuthenticationContext authContext = new AuthenticationContext(USER_ID, null, null, apiClientConfig);
+
+    Client client = authContext.httpClientForContext();
+    Configuration clientConfiguration = client.getConfiguration();
+
+    Long clientReadTimeout = (Long) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
+    Long clientConnectTimeout = (Long) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
+    PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)
+        clientConfiguration.getProperty(ApacheClientProperties.CONNECTION_MANAGER);
+    Integer clientTotalConn = connectionManager.getMaxTotal();
+    Integer clientTotalConnPerRoute = connectionManager.getDefaultMaxPerRoute();
+
+    assertEquals(apiClientConfig.getReadTimeout(), clientReadTimeout);
+    assertEquals(apiClientConfig.getConnectTimeout(), clientConnectTimeout);
+    assertEquals(apiClientConfig.getMaxConnections(), clientTotalConn);
+    assertEquals(apiClientConfig.getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+  }
+
 }
