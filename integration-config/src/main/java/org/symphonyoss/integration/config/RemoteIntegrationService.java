@@ -25,6 +25,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
+import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -81,6 +82,13 @@ public class RemoteIntegrationService implements IntegrationService {
     }
   }
 
+  private void checkExceptionCodeBadRequest(RemoteApiException e) {
+    if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+      throw new NotFoundException(e.getMessage());
+    }
+  }
+
+
   @Override
   public IntegrationSettings getIntegrationByType(String integrationType, String userId) {
     try {
@@ -114,6 +122,7 @@ public class RemoteIntegrationService implements IntegrationService {
           configurationId, instanceId);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
+      checkExceptionCodeBadRequest(e);
       throw new RemoteConfigurationException(e);
     }
   }
