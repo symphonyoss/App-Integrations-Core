@@ -30,6 +30,7 @@ import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
@@ -198,6 +199,18 @@ public abstract class WebHookResource {
     String message = ex.getMessage();
     LOGGER.error(message, ex);
     return ResponseEntity.badRequest().body(message);
+  }
+
+  /**
+   * Handle {@link NotFoundException} exception.
+   * @param ex Exception object
+   * @return HTTP 404 (Not Found)
+   */
+  @ResponseBody
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<String> handleNotFound(Exception ex) {
+    LOGGER.info(ex.getMessage());
+    return ResponseEntity.notFound().build();
   }
 
   /**
