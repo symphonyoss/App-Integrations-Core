@@ -18,6 +18,7 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMParser;
@@ -38,6 +39,7 @@ import org.symphonyoss.integration.pod.api.model.CompanyCertType;
 import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -78,17 +80,21 @@ public class CompanyCertificateService {
    * @param application
    */
   public void importCertificate(Application application) {
-    LOGGER.info("Import company certificate: {}", application.getComponent());
-
     String pem = getPem(application);
-    CompanyCert companyCert = buildCompanyCertificate(application, pem);
 
-    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+    if (StringUtils.isBlank(pem)) {
+      LOGGER.info("Skipping certificate importing for: {}", application.getComponent());
+    } else {
+      LOGGER.info("Importing company certificate for: {}", application.getComponent());
+      CompanyCert companyCert = buildCompanyCertificate(application, pem);
 
-    try {
-      securityApi.createCompanyCert(sessionToken, companyCert);
-    } catch (RemoteApiException e) {
-      throw new CompanyCertificateException("Failed to import company certificate", e);
+      String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+
+      try {
+        securityApi.createCompanyCert(sessionToken, companyCert);
+      } catch (RemoteApiException e) {
+        throw new CompanyCertificateException("Failed to import company certificate", e);
+      }
     }
   }
 
@@ -100,15 +106,20 @@ public class CompanyCertificateService {
   public String getPem(Application application) {
     String fileName = utils.getCertsDirectory() + application.getId() + ".pem";
 
-    StringWriter sw = new StringWriter();
+    File pemFile = new File(fileName);
+    if (!pemFile.isFile()) {
+      return StringUtils.EMPTY;
+    } else {
+      StringWriter sw = new StringWriter();
 
-    try (JcaPEMWriter pemWriter = new JcaPEMWriter(sw)) {
-      X509Certificate cert = readCertFromFile(fileName);
-      pemWriter.writeObject(cert);
-      pemWriter.flush();
-      return sw.toString();
-    } catch (IOException e) {
-      throw new CompanyCertificateException("Failed to encode PEM", e);
+      try (JcaPEMWriter pemWriter = new JcaPEMWriter(sw)) {
+        X509Certificate cert = readCertFromFile(fileName);
+        pemWriter.writeObject(cert);
+        pemWriter.flush();
+        return sw.toString();
+      } catch (IOException e) {
+        throw new CompanyCertificateException("Failed to encode PEM", e);
+      }
     }
   }
 

@@ -30,7 +30,15 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.KeyPairException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -45,6 +53,10 @@ public class KeyPairService {
   private static final Logger LOGGER = LoggerFactory.getLogger(KeyPairService.class);
 
   private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
+
+  private static final String FILE_OWNERSHIP_USER = "ibridge";
+
+  private static final String FILE_OWNERSHIP_GROUP = "ibridge";
 
   private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
       + " %s 2048";
@@ -175,6 +187,33 @@ public class KeyPairService {
     }
 
     executeProcess(genPKCS12Command);
+
+    setFileOwnership(appCertFilename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
+    setFileOwnership(appPKCS12Filename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
+  }
+
+  /**
+   * Sets the ownership of the given file with according to the user
+   */
+  private void setFileOwnership(String filename, String user, String group) {
+    LOGGER.info("Setting ownership for {} ({}:{})", filename, user, group);
+
+    UserPrincipalLookupService lookupService = FileSystems.getDefault().getUserPrincipalLookupService();
+    File targetFile = new File(filename);
+    PosixFileAttributeView fileAttributeView =
+        Files.getFileAttributeView(targetFile.toPath(), PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+
+    try {
+      UserPrincipal userPrincipal = lookupService.lookupPrincipalByName(user);
+      GroupPrincipal groupPrincipal = lookupService.lookupPrincipalByGroupName(group);
+      fileAttributeView.setOwner(userPrincipal);
+      fileAttributeView.setGroup(groupPrincipal);
+    } catch (IOException e) {
+      throw new KeyPairException(
+          String.format("Cannot set ownership for %s. Failed to lookup user or group (%s:%s)", filename, user, group),
+          e);
+    }
+
   }
 
   /**

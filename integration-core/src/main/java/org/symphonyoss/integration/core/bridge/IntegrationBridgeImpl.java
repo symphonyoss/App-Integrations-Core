@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
 
 /**
  * See @{@link IntegrationBridge} for further details.
@@ -53,7 +54,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private IntegrationBridgeExceptionHandler exceptionHandler;
 
   @Override
-  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, Message message) {
+  public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, Message message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
     List<String> streams = streamService.getStreams(instance);
 
@@ -65,23 +66,72 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     return sendMessage(instance, integrationUser, streams, message);
   }
 
+  /**
+   * Dispatches a message to the indicated list of streams.
+   * Each message is dispatched on an individual request to the agent, and may produce a mix of success and
+   * failure results that will be consolidated by this method to return a single result to the caller,
+   * as described below:
+   *
+   * case #1 - When the message is dispatched to all streams successfully, the list of message responses is returned.
+   * No exceptions are thrown and if no other errors occur, a 200 will be returned to the originating system.
+   *
+   * case #2 - When the message fails to be dispatched with 403 returning from the agent from all streams,
+   * a RemoteApiException is thrown with 404 as a result. In this case, 403 is transformed to 404 because the Bot has
+   * been removed from all rooms (streams) the webhook posts to, and the Integration Bridge responds the originating
+   * system with a 404 to indicate that this webhook is not functional anymore, possibly triggering a process to
+   * deactivate the webhook on the originating system.
+   *
+   * case #3 - When the message fails to be dispatched to some of the rooms, regardless the agent's return code,
+   * a RemoteApiException is thrown with 500. In this case, the Integration Bridge returns 500 because it was
+   * a partial success and a retry by the originating system could cause the message to succeed.
+   *
+   * case #4 - When the message fails to be dispatched to all of the rooms, and the agent return codes are mixed,
+   * a RemoteApiException is thrown with 500. In this case, the Integration Bridge returns 500 because there might be
+   * intermittent errors in the process and a retry by the originating system could cause the message to succeed.
+   *
+   * @param instance the integration instance
+   * @param integrationUser the integration user
+   * @param streams the list of streams
+   * @param message the message to be dispatched
+   * @return the list of message responses (in case of success)
+   * @throws RemoteApiException according to the rules described above
+   *
+   **/
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
-      List<String> streams, Message message) {
+      List<String> streams, Message message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
 
+    RemoteApiException remoteApiException = null;
     for (String stream : streams) {
       try {
         Message messageResponse = postMessage(integrationUser, stream, message);
         result.add(messageResponse);
       } catch (RemoteApiException e) {
         exceptionHandler.handleRemoteApiException(e, instance, integrationUser, stream);
+
+        if (remoteApiException == null || Response.Status.fromStatusCode(remoteApiException.getCode()).getFamily() != Response.Status.Family.SERVER_ERROR) {
+          remoteApiException = e;
+        }
       } catch (ConnectivityException | ProcessingException e) {
         throw e;
       } catch (Exception e) {
         exceptionHandler.handleUnexpectedException(e);
+        throw e;
       }
     }
+
+    if (remoteApiException != null) {
+      if (remoteApiException.getCode() == Response.Status.FORBIDDEN.getStatusCode()) {
+        if (result.size() > 0) {
+          throw new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        }
+
+        throw new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+      }
+
+      throw remoteApiException;
+     }
 
     return result;
   }
@@ -111,5 +161,4 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   public void removeIntegration(String integrationId) {
     this.bootstrap.removeIntegration(integrationId);
   }
-
 }
