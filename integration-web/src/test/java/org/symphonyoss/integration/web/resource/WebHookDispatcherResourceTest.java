@@ -51,11 +51,11 @@ import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 
-import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -132,11 +132,11 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     supportedFormats.add(MediaType.APPLICATION_JSON_TYPE);
 
     doThrow(WebHookParseException.class).when(whiIntegration)
-            .handle(anyString(), anyString(), any(WebHookPayload.class));
+        .handle(anyString(), anyString(), any(WebHookPayload.class));
     doReturn(supportedFormats).when(whiIntegration).getSupportedContentTypes();
 
     ResponseEntity response = webHookDispatcherResource.handleRequest(
-            TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY, request);
+        TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY, request);
 
     assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
   }
@@ -156,8 +156,10 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     doReturn(true).when(whiIntegration).isSupportedContentType(MediaType.WILDCARD_TYPE);
 
     assertEquals(
-        ResponseEntity.badRequest().body("Couldn't validate the incoming payload for the instance: " + TEST_HASH),
-        webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER, MESSAGE_BODY, request));
+        ResponseEntity.badRequest()
+            .body("Couldn't validate the incoming payload for the instance: " + TEST_HASH),
+        webHookDispatcherResource.handleRequest(TEST_HASH, CONFIGURATION_ID, TEST_USER,
+            MESSAGE_BODY, request));
   }
 
   /**
@@ -363,4 +365,36 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
   }
 
+  /**
+   * Test an HTTP Internal Server Error caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testInternalServerErrorWithRemoteApiException() {
+    RemoteApiException ex =
+        new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Bad Request caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testBadRequestWithRemoteApiException() {
+    RemoteApiException ex =
+        new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.BAD_REQUEST,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Not Found caused by {@link RemoteApiException}
+   */
+  @Test
+  public void testNotFoundWithRemoteApiExceptionThenReturnNotFound() {
+    RemoteApiException ex =
+        new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), "test");
+    Assert.assertEquals(HttpStatus.NOT_FOUND,
+        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
+  }
 }
