@@ -16,7 +16,6 @@
         <spring.boot.version>1.5.1.RELEASE</spring.boot.version>
         <bouncycastle.version>1.51</bouncycastle.version>
         <commons.codec.version>1.10</commons.codec.version>
-        <jersey.common.version>2.12</jersey.common.version>
 
 
         <!-- Override RPM properties -->
@@ -86,7 +85,6 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-            <version>${jersey.common.version}</version>
         </dependency>
 
         <dependency>
