@@ -154,8 +154,8 @@ public class AuthenticationContextTest {
     Client client = authContext.httpClientForContext();
     Configuration clientConfiguration = client.getConfiguration();
 
-    Long clientReadTimeout = (Long) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
-    Long clientConnectTimeout = (Long) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
+    Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
+    Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)
         clientConfiguration.getProperty(ApacheClientProperties.CONNECTION_MANAGER);
     Integer clientTotalConn = connectionManager.getMaxTotal();
