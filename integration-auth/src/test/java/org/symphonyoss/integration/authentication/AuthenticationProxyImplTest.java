@@ -172,8 +172,8 @@ public class AuthenticationProxyImplTest {
 
     // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
     Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK).getConfiguration();
-    Long clientReadTimeout = (Long) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
-    Long clientConnectTimeout = (Long) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
+    Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
+    Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)
         clientConfiguration.getProperty(ApacheClientProperties.CONNECTION_MANAGER);
     Integer clientTotalConn = connectionManager.getMaxTotal();
