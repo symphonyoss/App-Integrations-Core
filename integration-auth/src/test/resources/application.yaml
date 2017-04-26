@@ -1,4 +1,14 @@
 #
+# API Client configurations
+#
+api_client_config:
+  connect_timeout: 1003
+  read_timeout: 2004
+  max_connections: 57
+  max_connections_per_route: 19
+
+
+#
 # Indicate the host and port for the Symphony POD the Apps are associated with.
 #
 pod:

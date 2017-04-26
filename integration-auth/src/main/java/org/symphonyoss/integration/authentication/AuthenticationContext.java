@@ -16,8 +16,20 @@
 
 package org.symphonyoss.integration.authentication;
 
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
+import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.apache.connector.ApacheClientProperties;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.symphonyoss.integration.model.yaml.ApiClientConfig;
 
 import java.security.KeyStore;
 
@@ -41,24 +53,61 @@ public class AuthenticationContext {
 
   /**
    * The current token and the previous one are kept on the authentication context map, as for a
-   * short
-   * time window, some threads may have the previous valid token in hands, while another thread has
+   * short time window, some threads may have the previous valid token in hands, while another thread has
    * just renewed it.
    */
   private AuthenticationToken previousToken = AuthenticationToken.VOID_AUTH_TOKEN;
 
+  public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
+    if (apiClientConfig == null) {
+      apiClientConfig = new ApiClientConfig();
+    }
 
-  public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass) {
     this.userId = userId;
+    this.client = buildClient(keyStore, keyStorePass, apiClientConfig);
+  }
 
+  private Client buildClient(KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
-    final ClientBuilder clientBuilder = ClientBuilder.newBuilder()
-        .keyStore(keyStore, keyStorePass)
-        .withConfig(clientConfig);
+    // Connect and read timeouts in milliseconds
+    clientConfig.property(ClientProperties.READ_TIMEOUT, apiClientConfig.getReadTimeout());
+    clientConfig.property(ClientProperties.CONNECT_TIMEOUT, apiClientConfig.getConnectTimeout());
 
-    this.client = clientBuilder.build();
+    // Socket factory setup with custom SSL context settings
+    SSLConnectionSocketFactory sslSocketFactory;
+
+    if (keyStore == null || keyStorePass == null) {
+      sslSocketFactory = SSLConnectionSocketFactory.getSystemSocketFactory();
+    } else {
+      SslConfigurator sslConfigurator = SslConfigurator.newInstance()
+          .keyStore(keyStore)
+          .keyStorePassword(keyStorePass);
+
+      sslSocketFactory = new SSLConnectionSocketFactory(sslConfigurator.createSSLContext());
+    }
+
+    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+        .register("https", sslSocketFactory)
+        .build();
+
+    // Connection pool setup with custom socket factory and max connections
+    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+    connectionManager.setMaxTotal(apiClientConfig.getMaxConnections());
+    connectionManager.setDefaultMaxPerRoute(apiClientConfig.getMaxConnectionsPerRoute());
+
+    // Sets the connector provider and connection manager (as shared to avoid the client runtime to shut it down)
+    clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+    clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER_SHARED, true);
+    ApacheConnectorProvider connectorProvider = new ApacheConnectorProvider();
+    clientConfig.connectorProvider(connectorProvider);
+
+    // Build the client with the above configurations
+    final ClientBuilder clientBuilder = ClientBuilder.newBuilder().withConfig(clientConfig);
+
+    return clientBuilder.build();
   }
 
   public String getUserId() {

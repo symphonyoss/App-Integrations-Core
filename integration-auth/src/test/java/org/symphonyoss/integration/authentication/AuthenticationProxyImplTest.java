@@ -23,6 +23,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.glassfish.jersey.apache.connector.ApacheClientProperties;
+import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +47,7 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
 
+import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
 /**
@@ -90,11 +94,8 @@ public class AuthenticationProxyImplTest {
   @Mock
   private AuthenticationApiClient keyManagerAuthApi;
 
-  @Mock
-  private KeyStore jiraKs;
-
-  @Mock
-  private KeyStore simpleKs;
+  @Autowired
+  private IntegrationProperties properties;
 
   @InjectMocks
   @Autowired
@@ -107,8 +108,8 @@ public class AuthenticationProxyImplTest {
 
   @Before
   public void setup() {
-    this.proxy.registerUser(JIRAWEBHOOK, jiraKs, "");
-    this.proxy.registerUser(SIMPLEWEBHOOK, simpleKs, "");
+    this.proxy.registerUser(JIRAWEBHOOK, null, "");
+    this.proxy.registerUser(SIMPLEWEBHOOK, null, "");
 
     sessionToken.setName("sessionToken");
     sessionToken.setToken(SESSION_TOKEN);
@@ -168,6 +169,20 @@ public class AuthenticationProxyImplTest {
     assertTrue(proxy.isAuthenticated(SIMPLEWEBHOOK));
     assertEquals(sessionToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getSessionToken());
     assertEquals(kmToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getKeyManagerToken());
+
+    // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
+    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK).getConfiguration();
+    Long clientReadTimeout = (Long) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
+    Long clientConnectTimeout = (Long) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
+    PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)
+        clientConfiguration.getProperty(ApacheClientProperties.CONNECTION_MANAGER);
+    Integer clientTotalConn = connectionManager.getMaxTotal();
+    Integer clientTotalConnPerRoute = connectionManager.getDefaultMaxPerRoute();
+
+    assertEquals(properties.getApiClientConfig().getReadTimeout(), clientReadTimeout);
+    assertEquals(properties.getApiClientConfig().getConnectTimeout(), clientConnectTimeout);
+    assertEquals(properties.getApiClientConfig().getMaxConnections(), clientTotalConn);
+    assertEquals(properties.getApiClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
   }
 
   @Test
