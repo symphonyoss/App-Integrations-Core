@@ -113,6 +113,14 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     WebHookPayload payload = retrieveWebHookPayload(request, body);
 
+    // Checks if the payload has the correct content type
+    if (!whiIntegration.isSupportedContentType(payload.getContentType())) {
+        String msg = String.format("Unsupported Content-Type [%s]. Accept %s", payload.getContentType(),
+                whiIntegration.getSupportedContentTypes());
+        LOGGER.error(msg);
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(msg);
+    }
+
     // handles the request
     try {
       String configurationType = whiIntegration.getSettings().getType();
