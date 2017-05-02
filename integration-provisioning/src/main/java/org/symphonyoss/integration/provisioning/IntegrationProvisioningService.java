@@ -128,7 +128,7 @@ public class IntegrationProvisioningService {
 
     Collection<ApplicationState> appStatus = summary.values();
     boolean failedOrSkippedApps = appStatus.contains(ApplicationState.FAILED) ||
-        appStatus.contains(ApplicationState.SKIPPED);
+        appStatus.contains(ApplicationState.UNKNOWN);
 
     return !failedOrSkippedApps;
   }
