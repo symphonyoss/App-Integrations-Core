@@ -19,21 +19,29 @@ package org.symphonyoss.integration.core.bootstrap;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
+import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
@@ -51,6 +59,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Bootstraps all {@link Integration} that exists on the Spring context.
@@ -104,20 +113,30 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private ApplicationsHealthIndicator applicationsHealthIndicator;
 
   @Autowired
+  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+
+  @Autowired
   private ApplicationEventPublisher publisher;
+
+  private JsonUtils jsonUtils = new JsonUtils();
+
+  private AtomicBoolean logHealthApplication = new AtomicBoolean(true);
 
   @Override
   public void startup() {
     DistributedTracingUtils.setMDC();
     this.scheduler = Executors.newScheduledThreadPool(DEFAULT_POOL_SIZE);
     this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
+    applicationsHealthIndicator.init();
 
     initIntegrations();
+
   }
 
   /**
    * Initialize deployed integrations
    */
+
   public void initIntegrations() {
     Map<String, Integration> integrations = this.context.getBeansOfType(Integration.class);
 
@@ -135,12 +154,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
       String initialDelay = System.getProperty(BOOTSTRAP_INITIAL_DELAY_KEY, INITAL_DELAY);
       scheduleHandleIntegrations(Long.valueOf(initialDelay), Long.valueOf(delay), TimeUnit.MILLISECONDS);
-
       // deals with unknown apps.
       initUnknownApps();
 
       // Start health check polling
       healthCheckAgentServicePolling();
+
     }
 
   }
@@ -219,6 +238,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private void handleIntegrations() {
     try {
       LOGGER.debug("Verify new integrations");
+      logHealthApplication.set(true);
 
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);
@@ -245,6 +265,32 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     });
   }
 
+  public void logHealthStatus(Integration integration)
+  {
+
+    try{
+      //Logs application health
+      if(logHealthApplication.getAndSet(false) == true)
+      {
+        Health health = asyncCompositeHealthEndpoint.invoke();
+        String applicationHealthString = jsonUtils.serialize(health);
+        String applicationHealthLog = String.format("Application Health Status: %s",applicationHealthString);
+        LOGGER.info(applicationHealthLog);
+      }
+
+      //Logs integration health
+      String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
+      String integrationName = integration.getSettings().getName();
+      String integrationHealthLog = String.format("Integration: %s %s %s",integrationName," health status: ", integrationHealthString);
+      LOGGER.info(integrationHealthLog);
+
+    }catch (RemoteApiException e)
+    {
+      LOGGER.error("Remote Api Exception");
+      return;
+    }
+  }
+
   /**
    * Perform the integration setup
    * @param info
@@ -262,6 +308,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
+
     } catch (ConnectivityException | RetryLifecycleException e) {
       LOGGER.error(
           String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser),
@@ -269,6 +316,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       integrationsToRegister.offer(info);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+      logHealthApplication.set(true);
+    }finally {
+      logHealthStatus(integration);
     }
   }
 
