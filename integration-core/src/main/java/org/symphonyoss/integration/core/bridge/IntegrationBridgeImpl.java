@@ -55,14 +55,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, Message message) throws RemoteApiException {
-    List<Message> result = new ArrayList<>();
     List<String> streams = streamService.getStreams(instance);
-
-    if (streams.isEmpty()) {
-      LOGGER.info("No streams configured to instance {}", instance.getInstanceId());
-      return result;
-    }
-
     return sendMessage(instance, integrationUser, streams, message);
   }
 
@@ -101,6 +94,12 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser,
       List<String> streams, Message message) throws RemoteApiException {
     List<Message> result = new ArrayList<>();
+
+    if (streams.isEmpty()) {
+      LOGGER.info("No streams configured to instance {} and configuration {}",
+          instance.getInstanceId(), instance.getConfigurationId());
+      return result;
+    }
 
     RemoteApiException remoteApiException = null;
     for (String stream : streams) {
