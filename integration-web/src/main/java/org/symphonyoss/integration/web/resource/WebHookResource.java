@@ -41,6 +41,7 @@ import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
+import org.symphonyoss.integration.webhook.exception.WebHookUnprocessableEntityException;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -273,6 +274,19 @@ public abstract class WebHookResource {
     String message = ex.getMessage();
     LOGGER.error(message);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
+  }
+
+  /**
+   * Handle {@link WebHookUnprocessableEntityException} exceptions.
+   * @param e Exception object
+   * @return HTTP 422 (Unprocessable Entity)
+   */
+  @ResponseBody
+  @ExceptionHandler(WebHookUnprocessableEntityException.class)
+  public ResponseEntity<String> handleWebHookUnprocessableEntityException(WebHookUnprocessableEntityException e) {
+    String message = e.getMessage();
+    LOGGER.info(message);
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(message);
   }
 
   /**
