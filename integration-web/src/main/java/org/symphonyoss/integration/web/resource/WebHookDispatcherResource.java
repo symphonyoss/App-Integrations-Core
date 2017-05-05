@@ -127,7 +127,8 @@ public class WebHookDispatcherResource extends WebHookResource {
       whiIntegration.handle(hash, configurationType, payload);
       return ResponseEntity.ok().body("");
     } catch (WebHookParseException | MessageMLParseException e) {
-      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
+      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance %s and "
+          + "configuration %s", hash, configurationId), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     }
