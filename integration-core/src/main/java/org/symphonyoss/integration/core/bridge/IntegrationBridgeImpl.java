@@ -98,7 +98,8 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     if (streams.isEmpty()) {
       LOGGER.info("No streams configured to instance {} and configuration {}",
           instance.getInstanceId(), instance.getConfigurationId());
-      return result;
+      throw new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(),
+          Response.Status.NOT_FOUND.getReasonPhrase());
     }
 
     RemoteApiException remoteApiException = null;
