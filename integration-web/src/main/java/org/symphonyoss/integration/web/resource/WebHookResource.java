@@ -22,10 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
@@ -197,7 +199,8 @@ public abstract class WebHookResource {
    * @return HTTP 400 (Bad Request)
    */
   @ResponseBody
-  @ExceptionHandler({WebHookDisabledException.class, IntegrationConfigException.class})
+  @ExceptionHandler({WebHookDisabledException.class, IntegrationConfigException.class,
+      MissingServletRequestPartException.class, HttpMessageNotReadableException.class})
   public ResponseEntity<String> handleBadRequest(Exception ex) {
     String message = ex.getMessage();
     LOGGER.error(message, ex);
