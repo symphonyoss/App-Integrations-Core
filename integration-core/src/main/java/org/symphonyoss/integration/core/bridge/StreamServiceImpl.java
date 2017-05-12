@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
-import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V4MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -69,7 +69,7 @@ public class StreamServiceImpl implements StreamService {
   private AgentApiClient agentV2ApiClient;
 
   @Autowired
-  private AgentApiClient agentV3ApiClient;
+  private AgentApiClient agentV4ApiClient;
 
   @Autowired
   private PodHttpApiClient podApiClient;
@@ -163,7 +163,7 @@ public class StreamServiceImpl implements StreamService {
       Version version = Version.valueOf(event.getNewVersion());
 
       if (version.greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
-        apiResolver.put(MessageMLVersion.V2, new V3MessageApiClient(agentV3ApiClient));
+        apiResolver.put(MessageMLVersion.V2, new V4MessageApiClient(agentV4ApiClient));
       } else {
         MessageApiClient messageApiClient = apiResolver.get(MessageMLVersion.V1);
         apiResolver.put(MessageMLVersion.V2, messageApiClient);

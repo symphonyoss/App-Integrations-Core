@@ -76,7 +76,7 @@ import java.util.Map;
  *
  * Created by rsanchez on 27/03/17.
  */
-public class V3MessageApiClient extends BaseMessageApiClient {
+public class V4MessageApiClient extends BaseMessageApiClient {
 
   private static final String MESSAGE_BODY = "message";
 
@@ -84,7 +84,7 @@ public class V3MessageApiClient extends BaseMessageApiClient {
 
   private HttpApiClient apiClient;
 
-  public V3MessageApiClient(HttpApiClient apiClient) {
+  public V4MessageApiClient(HttpApiClient apiClient) {
     this.apiClient = apiClient;
     this.apiClient.setEntitySerializer(new MultiPartEntitySerializer());
   }
@@ -102,7 +102,7 @@ public class V3MessageApiClient extends BaseMessageApiClient {
       throws RemoteApiException {
     validateParams(sessionToken, kmToken, streamId, message);
 
-    String path = "/v3/stream/" + apiClient.escapeString(streamId) + "/message/create";
+    String path = "/v4/stream/" + apiClient.escapeString(streamId) + "/message/create";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
