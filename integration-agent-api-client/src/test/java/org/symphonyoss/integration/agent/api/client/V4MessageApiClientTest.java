@@ -44,11 +44,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link V3MessageApiClient}
+ * Unit test for {@link V4MessageApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class V3MessageApiClientTest {
+public class V4MessageApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -89,7 +89,7 @@ public class V3MessageApiClientTest {
 
   @Before
   public void init() {
-    this.apiClient = new V3MessageApiClient(httpClient);
+    this.apiClient = new V4MessageApiClient(httpClient);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class V3MessageApiClientTest {
 
     Message message = mockMessage();
 
-    String path = "/v3/stream/" + MOCK_STREAM_ID + "/message/create";
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
 
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
@@ -128,7 +128,7 @@ public class V3MessageApiClientTest {
     JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
     message.setData(node.toString());
 
-    String path = "/v3/stream/" + MOCK_STREAM_ID + "/message/create";
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
 
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
