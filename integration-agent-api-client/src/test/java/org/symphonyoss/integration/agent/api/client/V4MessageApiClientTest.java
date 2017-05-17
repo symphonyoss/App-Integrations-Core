@@ -19,9 +19,12 @@ package org.symphonyoss.integration.agent.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.glassfish.jersey.media.multipart.BodyPart;
@@ -169,6 +172,30 @@ public class V4MessageApiClientTest {
 
       return message;
     }
+  }
+
+  @Test(expected = RemoteApiException.class)
+  public void testPostMessageThenReturnedRemoteApiException() throws RemoteApiException,
+      IOException {
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+    headerParams.put("keyManagerToken", MOCK_KM_SESSION);
+
+    Map<String, String> queryParams = new HashMap<>();
+
+    Message message = mockMessage();
+
+    JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
+    message.setData(node.toString());
+
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
+
+    doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
+    doThrow(RemoteApiException.class).when(httpClient).doPost(eq(path), eq(headerParams), anyMap(), any(MultiPart.class),
+        eq(Message.class));
+
+    apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
 
   }
 
