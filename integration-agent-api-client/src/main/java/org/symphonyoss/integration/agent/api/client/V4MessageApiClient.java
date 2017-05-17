@@ -24,8 +24,10 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.api.client.form.MultiPartEntitySerializer;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.model.message.Message;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -118,7 +120,7 @@ public class V4MessageApiClient extends BaseMessageApiClient {
       }
 
       return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart, Message.class);
-    } catch (Exception e) {
+    } catch (IOException e) {
       String errorMessage =
           String.format("Fail to post message to stream %s due to %s", streamId, e.getMessage());
       throw new RemoteApiException(500, errorMessage, e);
