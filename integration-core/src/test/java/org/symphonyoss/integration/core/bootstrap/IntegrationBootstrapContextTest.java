@@ -16,9 +16,7 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.booleanThat;
@@ -58,13 +56,14 @@ import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.service.IntegrationService;
 
-
-import javax.swing.*;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for {@link IntegrationBootstrapContext}.
@@ -109,6 +108,9 @@ public class IntegrationBootstrapContextTest {
 
   @Spy
   private IntegrationProperties properties = new IntegrationProperties();
+
+  @Spy
+  private AtomicBoolean logHealthApplication;
 
   /**
    * Setting up the mocks needed for most tests.
@@ -329,7 +331,7 @@ public class IntegrationBootstrapContextTest {
     assertEquals(this.integration, integration);
 
     //Verify if logging method was called
-    verify(spyContext,times(1)).logHealthStatus(integration);
+    assertFalse(this.logHealthApplication.get());
 
   }
 }

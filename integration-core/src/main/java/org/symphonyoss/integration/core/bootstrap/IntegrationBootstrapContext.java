@@ -19,10 +19,6 @@ package org.symphonyoss.integration.core.bootstrap;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -120,6 +116,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   private JsonUtils jsonUtils = new JsonUtils();
 
+  /**
+   *
+   */
   private AtomicBoolean logHealthApplication = new AtomicBoolean(true);
 
   @Override
@@ -127,7 +126,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     DistributedTracingUtils.setMDC();
     this.scheduler = Executors.newScheduledThreadPool(DEFAULT_POOL_SIZE);
     this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
-    applicationsHealthIndicator.init();
 
     initIntegrations();
 
@@ -265,29 +263,36 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     });
   }
 
-  public void logHealthStatus(Integration integration)
-  {
-
-    try{
-      //Logs application health
-      if(logHealthApplication.getAndSet(false) == true)
-      {
+  /**
+   * Logs the application health, however the logging should only happen on these occasions: after the first
+   * integration finishes its bootstrap process, after new integrations are added or after an exception
+   * happens when trying to bootstrap an integration.
+   */
+  public void logHealthCheck() {
+    try {
+      if(logHealthApplication.getAndSet(false) == true) {
         Health health = asyncCompositeHealthEndpoint.invoke();
         String applicationHealthString = jsonUtils.serialize(health);
         String applicationHealthLog = String.format("Application Health Status: %s",applicationHealthString);
         LOGGER.info(applicationHealthLog);
       }
+    } catch (RemoteApiException e) {
+      LOGGER.error("Failed to log the Application Health", e);
+    }
+  }
 
-      //Logs integration health
+  /**
+   * Logs the health of one integration. This method is called after an integration finishes its bootstrap
+   * process.
+   */
+  public void logIntegrationHealthCheck(Integration integration) {
+    try {
       String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
       String integrationName = integration.getSettings().getName();
       String integrationHealthLog = String.format("Integration: %s %s %s",integrationName," health status: ", integrationHealthString);
       LOGGER.info(integrationHealthLog);
-
-    }catch (RemoteApiException e)
-    {
-      LOGGER.error("Remote Api Exception");
-      return;
+    } catch (RemoteApiException e)  {
+      LOGGER.error("Failed to log the " + integration.getSettings().getName()+ " Integration Health", e);
     }
   }
 
@@ -308,17 +313,21 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
+      logIntegrationHealthCheck(integration);
 
     } catch (ConnectivityException | RetryLifecycleException e) {
       LOGGER.error(
           String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser),
           e);
       integrationsToRegister.offer(info);
+      //Sets the application health to be logged since there has been an exception
+      logHealthApplication.set(true);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+      //Sets the application health to be logged since there has been an exception
       logHealthApplication.set(true);
     }finally {
-      logHealthStatus(integration);
+      logHealthCheck();
     }
   }
 
