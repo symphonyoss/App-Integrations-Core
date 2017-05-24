@@ -23,25 +23,15 @@ import org.symphonyoss.integration.Integration;
  */
 public class IntegrationBootstrapInfo {
 
-  private String configurationId;
-
   private String configurationType;
 
   private Integration integration;
 
+  private int retryAttempts;
+
   public IntegrationBootstrapInfo(String configurationType, Integration integration) {
     this.configurationType = configurationType;
     this.integration = integration;
-  }
-
-  public IntegrationBootstrapInfo(String configurationId, String configurationType,
-      Integration integration) {
-    this(configurationType, integration);
-    this.configurationId = configurationId;
-  }
-
-  public String getConfigurationId() {
-    return configurationId;
   }
 
   public String getConfigurationType() {
@@ -52,4 +42,15 @@ public class IntegrationBootstrapInfo {
     return integration;
   }
 
+  public int getRetryAttemptCounter() {
+    return retryAttempts;
+  }
+
+  public int registerRetryAttempt() {
+    if (retryAttempts < Integer.MAX_VALUE) {
+      return retryAttempts++;
+    } else {
+      return retryAttempts;
+    }
+  }
 }

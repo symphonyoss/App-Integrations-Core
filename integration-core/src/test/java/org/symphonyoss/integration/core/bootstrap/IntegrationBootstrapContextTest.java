@@ -37,6 +37,7 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.Stubber;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.Integration;
@@ -51,7 +52,6 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.service.IntegrationService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,12 +73,10 @@ public class IntegrationBootstrapContextTest {
   private static final String WEBHOOKINTEGRATION_ID_JIRA = "jira";
   private static final String WEBHOOKINTEGRATION_TYPE_JIRA = "jiraWebHookIntegration";
   private static final String TEST_USER = "jiraWebHookIntegration";
+  private static final int MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION = 5;
 
   @Mock
   private ApplicationContext context;
-
-  @Mock
-  private IntegrationService integrationService;
 
   @Mock
   private Integration integration;
@@ -278,6 +276,30 @@ public class IntegrationBootstrapContextTest {
     assertNotNull(integration);
     assertEquals(this.integration, integration);
     verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
+  }
+
+
+  /**
+   * Tests if {@link IntegrationBootstrapContext} is behaving correctly for connectivity exceptions, where the retry
+   * should not be stopped by the maximum retry attempts.
+   */
+  @Test
+  public void testStartupWithRepeatedConnectivityException() throws InterruptedException {
+    Stubber stub = doThrow(ConnectivityException.class);
+
+    for (int i = 0; i < MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION; i++) {
+      stub = stub.doThrow(ConnectivityException.class);
+    }
+
+    stub.doNothing().when(integration).onCreate(TEST_USER);
+
+    this.integrationBootstrapContext.initIntegrations();
+
+    Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
+    assertNotNull(integration);
+    assertEquals(this.integration, integration);
+    verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
+    verify(integration, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 2)).onCreate(TEST_USER);
   }
 
   /**

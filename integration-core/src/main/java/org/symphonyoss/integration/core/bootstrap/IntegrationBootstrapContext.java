@@ -62,6 +62,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBootstrapContext.class);
 
+  private static final int MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION = 5;
+
   public static final Integer DEFAULT_POOL_SIZE = 10;
 
   public static final String INITAL_DELAY = "50";
@@ -262,12 +264,22 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
-    } catch (ConnectivityException | RetryLifecycleException e) {
-      LOGGER.error(
-          String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser),
-          e);
+    } catch (ConnectivityException e) {
+      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
+    } catch (RetryLifecycleException e) {
+      checkRetryAttempt(info, integrationUser, e);
     } catch (IntegrationRuntimeException e) {
+      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+    }
+  }
+
+  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo, String integrationUser, RetryLifecycleException e) {
+    int retryAttempts = integrationInfo.registerRetryAttempt();
+    if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
+      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
+      integrationsToRegister.offer(integrationInfo);
+    } else {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
     }
   }
