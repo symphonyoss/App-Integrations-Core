@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -43,6 +44,10 @@ import javax.servlet.http.HttpServletRequest;
 public class WebHookDispatcherResource extends WebHookResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WebHookDispatcherResource.class);
+
+  private static final String MESSAGE = "message";
+
+  private static final String DATA = "data";
 
   /**
    * Handle HTTP POST requests sent from third-party apps to post messages with Content-type
@@ -110,9 +115,13 @@ public class WebHookDispatcherResource extends WebHookResource {
     LOGGER.info("Request received for hash {} and configuration {}", hash, configurationId);
 
     WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
-
     WebHookPayload payload = retrieveWebHookPayload(request, body);
 
+    return handleRequest(hash, configurationId, whiIntegration, payload);
+  }
+
+  private ResponseEntity<String> handleRequest(String hash, String configurationId,
+      WebHookIntegration whiIntegration, WebHookPayload payload) throws RemoteApiException {
     // Checks if the payload has the correct content type
     if (!whiIntegration.isSupportedContentType(payload.getContentType())) {
         String msg = String.format("Unsupported Content-Type [%s]. Accept %s", payload.getContentType(),
@@ -127,7 +136,8 @@ public class WebHookDispatcherResource extends WebHookResource {
       whiIntegration.handle(hash, configurationType, payload);
       return ResponseEntity.ok().body("");
     } catch (WebHookParseException | MessageMLParseException e) {
-      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance: %s", hash), e);
+      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance %s and "
+          + "configuration %s", hash, configurationId), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     }
@@ -164,4 +174,49 @@ public class WebHookDispatcherResource extends WebHookResource {
 
     return ResponseEntity.ok().build();
   }
+
+  /**
+   * Handle HTTP POST requests sent from third-party apps to post messages with Content-type
+   * 'multipart/form-data'.
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @param request HTTP request
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationType}/{configurationId}/{hash}",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST,
+      produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> handleMultiPartFormDataRequest(@PathVariable String hash,
+      @PathVariable String configurationId, @PathVariable String configurationType,
+      @RequestPart(value = "message") String message,
+      @RequestPart(value = "data", required = false) String data, HttpServletRequest request)
+      throws RemoteApiException {
+    return handleMultiPartFormDataRequest(hash, configurationId, message, data, request);
+  }
+
+  /**
+   * Handle HTTP POST requests sent from third-party apps to post messages with Content-type
+   * 'multipart/form-data'.
+   * @param hash Configuration instance identifier
+   * @param configurationId Configuration identifier
+   * @param request HTTP request
+   * @return HTTP 200 if success or HTTP error otherwise.
+   */
+  @RequestMapping(value = "/{configurationId}/{hash}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> handleMultiPartFormDataRequest(@PathVariable String hash,
+      @PathVariable String configurationId, @RequestPart(value = "message") String message,
+      @RequestPart(value = "data", required = false) String data, HttpServletRequest request)
+      throws RemoteApiException {
+    LOGGER.info("Request received for hash {} and configuration {}", hash, configurationId);
+
+    WebHookIntegration whiIntegration = getWebHookIntegration(configurationId);
+
+    WebHookPayload payload = retrieveWebHookPayload(request, null);
+    payload.addParameter(MESSAGE, message);
+    payload.addParameter(DATA, data);
+
+    return handleRequest(hash, configurationId, whiIntegration, payload);
+  }
+
 }

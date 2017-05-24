@@ -19,9 +19,12 @@ package org.symphonyoss.integration.agent.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.glassfish.jersey.media.multipart.BodyPart;
@@ -44,11 +47,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit test for {@link V3MessageApiClient}
+ * Unit test for {@link V4MessageApiClient}
  * Created by rsanchez on 22/02/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class V3MessageApiClientTest {
+public class V4MessageApiClientTest {
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
@@ -89,7 +92,7 @@ public class V3MessageApiClientTest {
 
   @Before
   public void init() {
-    this.apiClient = new V3MessageApiClient(httpClient);
+    this.apiClient = new V4MessageApiClient(httpClient);
   }
 
   @Test
@@ -102,7 +105,7 @@ public class V3MessageApiClientTest {
 
     Message message = mockMessage();
 
-    String path = "/v3/stream/" + MOCK_STREAM_ID + "/message/create";
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
 
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
@@ -128,7 +131,7 @@ public class V3MessageApiClientTest {
     JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
     message.setData(node.toString());
 
-    String path = "/v3/stream/" + MOCK_STREAM_ID + "/message/create";
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
 
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
     doAnswer(new AnswerV3MessageApi()).when(httpClient)
@@ -169,6 +172,30 @@ public class V3MessageApiClientTest {
 
       return message;
     }
+  }
+
+  @Test(expected = RemoteApiException.class)
+  public void testPostMessageThenReturnedRemoteApiException() throws RemoteApiException,
+      IOException {
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+    headerParams.put("keyManagerToken", MOCK_KM_SESSION);
+
+    Map<String, String> queryParams = new HashMap<>();
+
+    Message message = mockMessage();
+
+    JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
+    message.setData(node.toString());
+
+    String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
+
+    doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
+    doThrow(RemoteApiException.class).when(httpClient).doPost(eq(path), eq(headerParams), anyMap(), any(MultiPart.class),
+        eq(Message.class));
+
+    apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
 
   }
 

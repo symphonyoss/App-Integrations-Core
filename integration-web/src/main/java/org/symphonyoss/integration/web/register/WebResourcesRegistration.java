@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.web.register;
 
+import org.springframework.boot.autoconfigure.web.MultipartProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,7 @@ import java.util.Collections;
  * Created by rsanchez on 23/12/16.
  */
 @Configuration
+@EnableConfigurationProperties({MultipartProperties.class})
 public class WebResourcesRegistration {
 
   private static final String PATH_SEPARATOR = "/";
@@ -99,7 +102,8 @@ public class WebResourcesRegistration {
    * @return Servlet registration object
    */
   @Bean
-  public ServletRegistrationBean apiServletRegistration(WebApplicationContext context) {
+  public ServletRegistrationBean apiServletRegistration(WebApplicationContext context,
+      MultipartProperties multipartProperties) {
     DispatcherServlet dispatcherServlet = new DispatcherServlet();
     dispatcherServlet.setApplicationContext(context);
 
@@ -107,6 +111,7 @@ public class WebResourcesRegistration {
         new ServletRegistrationBean(dispatcherServlet, baseUrlMapping());
     servletRegistrationBean.setName(API_SERVLET_NAME);
     servletRegistrationBean.setLoadOnStartup(API_LOAD_ON_STARTUP);
+    servletRegistrationBean.setMultipartConfig(multipartProperties.createMultipartConfig());
 
     return servletRegistrationBean;
   }

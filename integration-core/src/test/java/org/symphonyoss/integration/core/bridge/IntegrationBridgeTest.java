@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -78,10 +79,12 @@ public class IntegrationBridgeTest {
     instance.setConfigurationId("57756bca4b54433738037005");
     instance.setInstanceId("1234");
 
-    List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
-
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
+    try {
+      bridge.sendMessage(instance, INTEGRATION_USER, new Message());
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(Response.Status.NOT_FOUND.getStatusCode(), e.getCode());
+    }
   }
 
   @Test

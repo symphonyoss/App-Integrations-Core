@@ -35,7 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
-import org.symphonyoss.integration.agent.api.client.V3MessageApiClient;
+import org.symphonyoss.integration.agent.api.client.V4MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -247,6 +247,6 @@ public class StreamServiceTest {
         new ServiceVersionUpdatedEventData(AGENT_SERVICE_NAME, StringUtils.EMPTY, AGENT_API_V3));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
-    assertEquals(V3MessageApiClient.class, apiResolver.get(MessageMLVersion.V2).getClass());
+    assertEquals(V4MessageApiClient.class, apiResolver.get(MessageMLVersion.V2).getClass());
   }
 }
