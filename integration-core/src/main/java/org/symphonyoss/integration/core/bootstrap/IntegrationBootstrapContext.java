@@ -117,8 +117,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private JsonUtils jsonUtils = new JsonUtils();
 
   /**
-   *
-   */
+  *
+  * Atomic boolean used to control when the application should log its health.
+  * The application health should only be logged after the first integration finishes
+  * its bootstrap process, after new integrations are added or after an exception
+  * happens when trying to bootstrap an integration.
+    */
   private AtomicBoolean logHealthApplication = new AtomicBoolean(true);
 
   @Override
