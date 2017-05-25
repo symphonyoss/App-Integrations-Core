@@ -37,7 +37,7 @@ import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
-import org.symphonyoss.integration.provisioning.exception.CreateUserException;
+import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
@@ -105,7 +105,8 @@ public class IntegrationProvisioningServiceTest {
 
   @Test
   public void testFailProvisioning() {
-    doThrow(CreateUserException.class).when(userService).setupBotUser(any(Application.class));
+    doThrow(UserSearchException.class).when(userService)
+        .setupBotUser(any(IntegrationSettings.class), any(Application.class));
     assertFalse(service.configure());
   }
 

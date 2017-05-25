@@ -45,6 +45,9 @@ public class ConfigurationProvisioningService {
   @Qualifier("remoteIntegrationService")
   private IntegrationService integrationService;
 
+  @Autowired
+  private UserService userService;
+
   /**
    * Creates or updates the integration settings for the given application, using Integration API.
    * @param application Application object.
@@ -53,18 +56,15 @@ public class ConfigurationProvisioningService {
   public IntegrationSettings setupConfiguration(Application application) {
     String appType = application.getComponent();
 
-    LOGGER.info("Provisioning integration configs for: {}", appType);
+    LOGGER.info("Provisioning integration config for: {}", appType);
 
-    IntegrationSettings settings =
-        buildIntegrationSettings(appType, application.getName(), application.getDescription(),
-            application.isEnabled(), application.isVisible());
+    IntegrationSettings settings = buildIntegrationSettings(application);
 
     try {
       IntegrationSettings saved = getIntegrationByType(appType);
 
       if (saved != null) {
         settings.setConfigurationId(saved.getConfigurationId());
-        settings.setOwner(saved.getOwner());
       }
 
       return integrationService.save(settings, DEFAULT_USER_ID);
@@ -91,26 +91,26 @@ public class ConfigurationProvisioningService {
 
   /**
    * Create a configuration object.
-   * @param type Configuration type
-   * @param name Configuration name
-   * @param description Description (optional)
-   * @param enabled Boolean value to identify if the integration will be enabled
-   * @param visible Boolean value to identify if the integration will be visible to all users
    * @return
    */
-  private IntegrationSettings buildIntegrationSettings(String type, String name, String description,
-      boolean enabled, boolean visible) {
+  private IntegrationSettings buildIntegrationSettings(Application application) {
+    String type = application.getComponent();
+    String name = application.getName();
+    String description = application.getDescription();
+    String username = userService.getUsername(application);
+
     IntegrationSettings settings = new IntegrationSettings();
     settings.setType(type);
     settings.setName(name);
 
-    if (!StringUtils.isEmpty(description)) {
+    if (StringUtils.isNotEmpty(description)) {
       settings.setDescription(description);
     }
 
-    settings.setEnabled(enabled);
-    settings.setVisible(visible);
+    if (StringUtils.isNotEmpty(username)) {
+      settings.setUsername(username);
+    }
+
     return settings;
   }
-
 }

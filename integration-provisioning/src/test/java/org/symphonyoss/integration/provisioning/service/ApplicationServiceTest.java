@@ -35,6 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -44,6 +45,7 @@ import org.symphonyoss.integration.provisioning.client.AppRepositoryClient;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
+import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,8 +62,6 @@ public class ApplicationServiceTest {
   private static final String MOCK_APP_TYPE = "appTest";
 
   private static final String MOCK_APP_NAME = "Application Test";
-
-  private static final String MOCK_CONFIGURATION_ID = "57e82afce4b07fea0651e8ac";
 
   private static final String MOCK_DOMAIN = ".symphony.com";
 
@@ -91,14 +91,10 @@ public class ApplicationServiceTest {
 
   @Before
   public void init() {
-    User user = new User();
-    user.setId(MOCK_USER);
-
     IntegrationBridge bridge = new IntegrationBridge();
     bridge.setDomain(MOCK_DOMAIN);
 
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
-    doReturn(user).when(userService).getUser(MOCK_APP_TYPE);
     doReturn(bridge).when(properties).getIntegrationBridge();
   }
 
@@ -152,8 +148,17 @@ public class ApplicationServiceTest {
     assertTrue(result);
   }
 
+  @Test(expected = UserSearchException.class)
+  public void testCreateApplicationUserUndefined() throws AppRepositoryClientException {
+    Application application = mockApplication();
+    service.setupApplication(new IntegrationSettings(), application);
+  }
+
   @Test(expected = ApplicationProvisioningException.class)
   public void testCreateApplicationAppRepositoryException() throws AppRepositoryClientException {
+    IntegrationSettings settings = new IntegrationSettings();
+    settings.setOwner(MOCK_USER);
+
     Application application = mockApplication();
 
     doReturn(null).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
@@ -161,11 +166,14 @@ public class ApplicationServiceTest {
     doThrow(AppRepositoryClientException.class).when(client)
         .createNewApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
 
-    service.setupApplication(MOCK_CONFIGURATION_ID, application);
+    service.setupApplication(settings, application);
   }
 
   @Test(expected = ApplicationProvisioningException.class)
   public void testUpdateApplicationAppRepositoryException() throws AppRepositoryClientException {
+    IntegrationSettings settings = new IntegrationSettings();
+    settings.setOwner(MOCK_USER);
+
     Application application = mockApplication();
 
     Map<String, String> app = new HashMap<>();
@@ -176,11 +184,14 @@ public class ApplicationServiceTest {
     doThrow(AppRepositoryClientException.class).when(client)
         .updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE));
 
-    service.setupApplication(MOCK_CONFIGURATION_ID, application);
+    service.setupApplication(settings, application);
   }
 
   @Test
   public void testCreateApplication() throws AppRepositoryClientException {
+    IntegrationSettings settings = new IntegrationSettings();
+    settings.setOwner(MOCK_USER);
+
     Application application = mockApplication();
 
     Map<String, String> app = new HashMap<>();
@@ -188,13 +199,18 @@ public class ApplicationServiceTest {
 
     doReturn(null).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    service.setupApplication(MOCK_CONFIGURATION_ID, application);
+    service.setupApplication(settings, application);
 
     verify(client, times(1)).createNewApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
   }
 
   @Test
   public void testUpdateApplication() throws AppRepositoryClientException {
+    User user = new User();
+    user.setId(MOCK_USER);
+
+    doReturn(user).when(userService).getUser(MOCK_APP_TYPE);
+
     Application application = mockApplication();
 
     Map<String, String> app = new HashMap<>();
@@ -202,9 +218,8 @@ public class ApplicationServiceTest {
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    service.setupApplication(MOCK_CONFIGURATION_ID, application);
+    service.setupApplication(new IntegrationSettings(), application);
 
-    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID),
-        eq(MOCK_APP_TYPE));
+    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE));
   }
 }
