@@ -268,19 +268,19 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
     } catch (RetryLifecycleException e) {
-      checkRetryAttempt(info, integrationUser, e);
+      checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
     }
   }
 
-  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo, String integrationUser, RetryLifecycleException e) {
+  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo, RetryLifecycleException e) {
     int retryAttempts = integrationInfo.registerRetryAttempt();
     if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
-      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
+      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationInfo.getConfigurationType()), e);
       integrationsToRegister.offer(integrationInfo);
     } else {
-      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationInfo.getConfigurationType()), e);
     }
   }
 

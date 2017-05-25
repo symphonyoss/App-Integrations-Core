@@ -18,6 +18,8 @@ package org.symphonyoss.integration.core.bootstrap;
 
 import org.symphonyoss.integration.Integration;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by rsanchez on 12/07/16.
  */
@@ -27,7 +29,7 @@ public class IntegrationBootstrapInfo {
 
   private Integration integration;
 
-  private int retryAttempts;
+  private AtomicInteger retryAttempts = new AtomicInteger();
 
   public IntegrationBootstrapInfo(String configurationType, Integration integration) {
     this.configurationType = configurationType;
@@ -43,14 +45,14 @@ public class IntegrationBootstrapInfo {
   }
 
   public int getRetryAttemptCounter() {
-    return retryAttempts;
+    return retryAttempts.get();
   }
 
   public int registerRetryAttempt() {
-    if (retryAttempts < Integer.MAX_VALUE) {
-      return ++retryAttempts;
+    if (retryAttempts.get() < Integer.MAX_VALUE) {
+      return retryAttempts.incrementAndGet();
     } else {
-      return retryAttempts;
+      return retryAttempts.get();
     }
   }
 }
