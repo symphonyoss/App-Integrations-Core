@@ -48,7 +48,7 @@ public class IntegrationBootstrapInfo {
 
   public int registerRetryAttempt() {
     if (retryAttempts < Integer.MAX_VALUE) {
-      return retryAttempts++;
+      return ++retryAttempts;
     } else {
       return retryAttempts;
     }

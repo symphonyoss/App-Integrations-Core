@@ -37,8 +37,8 @@ public class IntegrationBootstrapInfoTest {
     IntegrationBootstrapInfo integrationInfo = new IntegrationBootstrapInfo("jira", mock(Integration.class));
     assertEquals(0, integrationInfo.getRetryAttemptCounter());
     assertEquals(0, integrationInfo.getRetryAttemptCounter());
-    assertEquals(0, integrationInfo.registerRetryAttempt());
     assertEquals(1, integrationInfo.registerRetryAttempt());
+    assertEquals(2, integrationInfo.registerRetryAttempt());
     assertEquals(2, integrationInfo.getRetryAttemptCounter());
   }
 

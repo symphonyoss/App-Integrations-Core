@@ -56,7 +56,9 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -96,6 +98,9 @@ public class IntegrationBootstrapContextTest {
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
       new IntegrationBootstrapContext();
+
+  @Spy
+  private BlockingQueue<IntegrationBootstrapInfo> integrationsToRegister = new LinkedTransferQueue<>();
 
   @Spy
   private IntegrationProperties properties = new IntegrationProperties();
@@ -300,6 +305,32 @@ public class IntegrationBootstrapContextTest {
     assertEquals(this.integration, integration);
     verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
     verify(integration, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 2)).onCreate(TEST_USER);
+    verify(integrationsToRegister, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 2))
+        .offer(any(IntegrationBootstrapInfo.class));
+  }
+
+  /**
+   * Tests if {@link IntegrationBootstrapContext} is behaving correctly for retry exceptions, where the retry
+   * should be stopped after the maximum retry attempts.
+   */
+  @Test
+  public void testStartupWithRepeatedRetryException() throws InterruptedException {
+    Stubber stub = doThrow(RetryLifecycleException.class);
+
+    for (int i = 0; i < MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 1; i++) {
+      stub = stub.doThrow(RetryLifecycleException.class);
+    }
+
+    stub.doNothing().when(integration).onCreate(TEST_USER);
+
+    this.integrationBootstrapContext.initIntegrations();
+
+    Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
+    assertNull(integration);
+    verify(metricsController, times(0)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
+    verify(this.integration, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 1)).onCreate(TEST_USER);
+    verify(integrationsToRegister, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 1))
+        .offer(any(IntegrationBootstrapInfo.class));
   }
 
   /**
