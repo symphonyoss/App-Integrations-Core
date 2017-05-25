@@ -23,17 +23,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
+import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
@@ -51,6 +55,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Bootstraps all {@link Integration} that exists on the Spring context.
@@ -106,7 +111,21 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private ApplicationsHealthIndicator applicationsHealthIndicator;
 
   @Autowired
+  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+
+  @Autowired
   private ApplicationEventPublisher publisher;
+
+  private JsonUtils jsonUtils = new JsonUtils();
+
+  /**
+  *
+  * Atomic boolean used to control when the application should log its health.
+  * The application health should only be logged after the first integration finishes
+  * its bootstrap process, after new integrations are added or after an exception
+  * happens when trying to bootstrap an integration.
+    */
+  private AtomicBoolean logHealthApplication = new AtomicBoolean(true);
 
   @Override
   public void startup() {
@@ -115,11 +134,13 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
 
     initIntegrations();
+
   }
 
   /**
    * Initialize deployed integrations
    */
+
   public void initIntegrations() {
     Map<String, Integration> integrations = this.context.getBeansOfType(Integration.class);
 
@@ -137,12 +158,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
       String initialDelay = System.getProperty(BOOTSTRAP_INITIAL_DELAY_KEY, INITAL_DELAY);
       scheduleHandleIntegrations(Long.valueOf(initialDelay), Long.valueOf(delay), TimeUnit.MILLISECONDS);
-
       // deals with unknown apps.
       initUnknownApps();
 
       // Start health check polling
       healthCheckAgentServicePolling();
+
     }
 
   }
@@ -221,6 +242,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private void handleIntegrations() {
     try {
       LOGGER.debug("Verify new integrations");
+      logHealthApplication.set(true);
 
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);
@@ -248,6 +270,39 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   }
 
   /**
+   * Logs the application health, however the logging should only happen on these occasions: after the first
+   * integration finishes its bootstrap process, after new integrations are added or after an exception
+   * happens when trying to bootstrap an integration.
+   */
+  public void logHealthCheck() {
+    try {
+      if(logHealthApplication.getAndSet(false) == true) {
+        Health health = asyncCompositeHealthEndpoint.invoke();
+        String applicationHealthString = jsonUtils.serialize(health);
+        String applicationHealthLog = String.format("Application Health Status: %s",applicationHealthString);
+        LOGGER.info(applicationHealthLog);
+      }
+    } catch (RemoteApiException e) {
+      LOGGER.error("Failed to log the Application Health", e);
+    }
+  }
+
+  /**
+   * Logs the health of one integration. This method is called after an integration finishes its bootstrap
+   * process.
+   */
+  public void logIntegrationHealthCheck(Integration integration) {
+    try {
+      String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
+      String integrationName = integration.getSettings().getName();
+      String integrationHealthLog = String.format("Integration: %s %s %s",integrationName," health status: ", integrationHealthString);
+      LOGGER.info(integrationHealthLog);
+    } catch (RemoteApiException e)  {
+      LOGGER.error("Failed to log the " + integration.getSettings().getName()+ " Integration Health", e);
+    }
+  }
+
+  /**
    * Perform the integration setup
    * @param info
    */
@@ -264,13 +319,21 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
+      
+      logIntegrationHealthCheck(integration);
     } catch (ConnectivityException e) {
       LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
+      logHealthApplication.set(true);
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
+      logHealthApplication.set(true);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+      //Sets the application health to be logged since there has been an exception
+      logHealthApplication.set(true);
+    }finally {
+      logHealthCheck();
     }
   }
 
