@@ -16,11 +16,9 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -28,11 +26,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -46,6 +50,8 @@ import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
+import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -53,15 +59,16 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.HashMap;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for {@link IntegrationBootstrapContext}.
@@ -95,6 +102,9 @@ public class IntegrationBootstrapContextTest {
   @Mock
   private ApplicationEventPublisher publisher;
 
+  @Mock
+  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
       new IntegrationBootstrapContext();
@@ -104,6 +114,9 @@ public class IntegrationBootstrapContextTest {
 
   @Spy
   private IntegrationProperties properties = new IntegrationProperties();
+
+  @Spy
+  private AtomicBoolean logHealthApplication;
 
   /**
    * Setting up the mocks needed for most tests.
@@ -165,6 +178,7 @@ public class IntegrationBootstrapContextTest {
     assertEquals(this.integration, integration);
 
     verify(publisher, times(1)).publishEvent(any(HealthCheckEventData.class));
+
   }
 
   /**
@@ -357,4 +371,23 @@ public class IntegrationBootstrapContextTest {
     assertNull(this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID));
   }
 
+  /**
+   * Checs if {@link IntegrationBootstrapContext} is logging the health check information after both the
+   * application and integrations are bootstrapped.
+   */
+  @Test
+  public void testHealthLog(){
+
+    //Spies the bootstrap context
+    IntegrationBootstrapContext spyContext = Mockito.spy(this.integrationBootstrapContext);
+
+    spyContext.initIntegrations();
+    Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
+    assertNotNull(integration);
+    assertEquals(this.integration, integration);
+
+    //Verify if logging method was called
+    assertFalse(this.logHealthApplication.get());
+
+  }
 }
