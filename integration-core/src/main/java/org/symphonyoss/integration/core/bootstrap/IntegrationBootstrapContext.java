@@ -67,6 +67,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBootstrapContext.class);
 
+  private static final int MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION = 5;
+
   public static final Integer DEFAULT_POOL_SIZE = 10;
 
   public static final String INITAL_DELAY = "50";
@@ -317,14 +319,14 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
+      
       logIntegrationHealthCheck(integration);
-
-    } catch (ConnectivityException | RetryLifecycleException e) {
-      LOGGER.error(
-          String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser),
-          e);
+    } catch (ConnectivityException e) {
+      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
-      //Sets the application health to be logged since there has been an exception
+      logHealthApplication.set(true);
+    } catch (RetryLifecycleException e) {
+      checkRetryAttempt(info, e);
       logHealthApplication.set(true);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
@@ -332,6 +334,16 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       logHealthApplication.set(true);
     }finally {
       logHealthCheck();
+    }
+  }
+
+  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo, RetryLifecycleException e) {
+    int retryAttempts = integrationInfo.registerRetryAttempt();
+    if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
+      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationInfo.getConfigurationType()), e);
+      integrationsToRegister.offer(integrationInfo);
+    } else {
+      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationInfo.getConfigurationType()), e);
     }
   }
 
