@@ -29,7 +29,7 @@ public class IntegrationBootstrapInfo {
 
   private Integration integration;
 
-  private AtomicInteger retryAttempts = new AtomicInteger();
+  private int retryAttempts;
 
   public IntegrationBootstrapInfo(String configurationType, Integration integration) {
     this.configurationType = configurationType;
@@ -45,14 +45,14 @@ public class IntegrationBootstrapInfo {
   }
 
   public int getRetryAttemptCounter() {
-    return retryAttempts.get();
+    return retryAttempts;
   }
 
-  public int registerRetryAttempt() {
-    if (retryAttempts.get() < Integer.MAX_VALUE) {
-      return retryAttempts.incrementAndGet();
+  synchronized public int registerRetryAttempt() {
+    if (retryAttempts < Integer.MAX_VALUE) {
+      return ++retryAttempts;
     } else {
-      return retryAttempts.get();
+      return retryAttempts;
     }
   }
 }
