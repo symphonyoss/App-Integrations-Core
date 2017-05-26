@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.Certificate;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -83,12 +84,13 @@ public class KeyPairService {
 
   /**
    * Export user certificate
+   * @param settings Integration settings associated with the application.
    * @param application Application object
    */
-  public void exportCertificate(Application application) {
+  public void exportCertificate(IntegrationSettings settings, Application application) {
     if (shouldGenerateCertificate()) {
       String keyFileName = generateKeyPair(application);
-      String reqFileName = generateCSR(application, keyFileName);
+      String reqFileName = generateCSR(settings.getUsername(), application, keyFileName);
       generateCertificate(application, keyFileName, reqFileName);
     }
   }
@@ -132,12 +134,11 @@ public class KeyPairService {
    * @param appKeyFilename Key filename
    * @return Request filename
    */
-  private String generateCSR(Application application, String appKeyFilename) {
+  private String generateCSR(String username, Application application, String appKeyFilename) {
     LOGGER.info("Generating certificate signing request: {}", application.getComponent());
 
     String password = String.format("pass:%s", getTempPassword(application));
-    String subject = String.format("/CN=%s/O=%s/C=%s", application.getComponent(),
-        DEFAULT_ORGANIZATION, Locale.US.getCountry());
+    String subject = String.format("/CN=%s/O=%s/C=%s", username, DEFAULT_ORGANIZATION, Locale.US.getCountry());
 
     String appReqFilename = String.format("%s/%s-req.pem", System.getProperty("java.io.tmpdir"),
         application.getId());

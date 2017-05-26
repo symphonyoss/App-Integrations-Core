@@ -18,7 +18,6 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -62,6 +61,9 @@ public class ConfigurationProvisioningServiceTest {
 
   @Mock
   private IntegrationService integrationService;
+
+  @Mock
+  private UserService userService;
 
   @InjectMocks
   private ConfigurationProvisioningService service;
@@ -107,8 +109,6 @@ public class ConfigurationProvisioningServiceTest {
 
     assertEquals(MOCK_APP_TYPE, result.getType());
     assertEquals(MOCK_APP_NAME, result.getName());
-    assertTrue(result.getEnabled());
-    assertTrue(result.getVisible());
     assertNull(result.getDescription());
     assertNull(result.getConfigurationId());
     assertNull(result.getOwner());
@@ -129,11 +129,9 @@ public class ConfigurationProvisioningServiceTest {
 
     assertEquals(MOCK_APP_TYPE, result.getType());
     assertEquals(MOCK_APP_NAME, result.getName());
-    assertTrue(result.getEnabled());
-    assertTrue(result.getVisible());
     assertEquals(MOCK_APP_DESC, result.getDescription());
     assertEquals(MOCK_CONFIGURATION_ID, result.getConfigurationId());
-    assertEquals(MOCK_USER_ID, result.getOwner());
+    assertNull(result.getOwner());
   }
 
   @Test

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
@@ -98,7 +99,7 @@ public class IntegrationProvisioningService {
     Map<String, ApplicationState> summary = new LinkedHashMap<>();
     Map<String, Application> applications = properties.getApplications();
 
-    String appId = null;
+    String appId = StringUtils.EMPTY;
 
     try {
       for (String app : applications.keySet()) {
@@ -119,11 +120,12 @@ public class IntegrationProvisioningService {
 
         summary.put(appId, application.getState());
       }
+    } catch (IntegrationRuntimeException e) {
+      LOGGER.error("Failed to configure application: {}. {}", appId, e.getMessage());
+      summary.put(appId, ApplicationState.FAILED);
     } catch (Exception e) {
-      if (appId != null) {
-        LOGGER.error("Failed to configure application: " + appId, e);
-        summary.put(appId, ApplicationState.FAILED);
-      }
+      LOGGER.error("Failed to configure application: " + appId, e);
+      summary.put(appId, ApplicationState.FAILED);
     } finally {
       printSummary(summary);
     }
@@ -159,11 +161,11 @@ public class IntegrationProvisioningService {
     LOGGER.info("Provisioning application: {}", application.getId());
 
     IntegrationSettings settings = configurationService.setupConfiguration(application);
-    applicationService.setupApplication(settings.getConfigurationId(), application);
+    applicationService.setupApplication(settings, application);
 
-    userService.setupBotUser(application);
+    userService.setupBotUser(settings, application);
 
-    keyPairService.exportCertificate(application);
+    keyPairService.exportCertificate(settings, application);
     companyCertificateService.importCertificate(application);
 
     LOGGER.info("Application {} provisioned\n", application.getId());
@@ -201,7 +203,7 @@ public class IntegrationProvisioningService {
    * @param application Application object to be filled in with pre-defined information.
    */
   private void fillInApplicationInfo(String appId, Application application) {
-    LOGGER.info("Filling in application data for: {}", appId);
+    LOGGER.debug("Filling in application data for: {}", appId);
 
     application.setId(appId);
 

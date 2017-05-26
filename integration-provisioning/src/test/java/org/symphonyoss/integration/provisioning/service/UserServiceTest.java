@@ -16,12 +16,15 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +34,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
@@ -39,6 +44,7 @@ import org.symphonyoss.integration.pod.api.model.UserCreate;
 import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
+import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
 
 /**
  * Unit test for {@link UserService}
@@ -58,18 +64,37 @@ public class UserServiceTest {
   private static final String MOCK_AVATAR =
       "zJaibaj9CI1hsjQEhkOuTzMwPK0Maht8No0zb5pHkz4af++s59u3vSnpIui7oHtAo1WL4Lf0TkHvgp7OjN9Or3==";
 
+  private static final String MOCK_INVALID_USERNAME = "invaliduser";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
   @Mock
   private UserApiClient userApiClient;
 
+  @Mock
+  private CompanyCertificateService certificateService;
+
+  @Mock
+  private LogMessageSource logMessage;
+
   @InjectMocks
   private UserService userService;
 
+  private IntegrationSettings settings;
+
   @Before
-  public void init() {
+  public void init() throws RemoteApiException {
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
+
+    User user = new User();
+    user.setId(MOCK_USER_ID);
+    user.setUserName(MOCK_USERNAME);
+
+    doReturn(user).when(userApiClient).getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
+
+    this.settings = new IntegrationSettings();
+    this.settings.setOwner(MOCK_USER_ID);
   }
 
   @Test(expected = UserSearchException.class)
@@ -80,14 +105,19 @@ public class UserServiceTest {
     userService.getUser(MOCK_USERNAME);
   }
 
-  @Test(expected = CreateUserException.class)
-  public void testCreateNewUserRemoteApiException() throws RemoteApiException {
-    doThrow(RemoteApiException.class).when(userApiClient)
-        .createUser(eq(MOCK_SESSION_ID), any(UserCreate.class));
+  @Test(expected = UserSearchException.class)
+  public void testUserUndefined() throws RemoteApiException {
+    Application application = mockApplication();
+    userService.setupBotUser(new IntegrationSettings(), application);
+  }
+
+  @Test(expected = UserSearchException.class)
+  public void testUserNotFound() throws RemoteApiException {
+    doReturn(null).when(userApiClient).getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
 
     Application application = mockApplication();
 
-    userService.setupBotUser(application);
+    userService.setupBotUser(settings, application);
   }
 
   private Application mockApplication() {
@@ -95,6 +125,7 @@ public class UserServiceTest {
     application.setComponent(MOCK_USERNAME);
     application.setName(MOCK_APP_NAME);
     application.setAvatar(MOCK_AVATAR);
+    application.setUsername(MOCK_USERNAME);
 
     return application;
   }
@@ -112,7 +143,7 @@ public class UserServiceTest {
 
     Application application = mockApplication();
 
-    userService.setupBotUser(application);
+    userService.setupBotUser(settings, application);
   }
 
   @Test(expected = UpdateUserException.class)
@@ -128,7 +159,34 @@ public class UserServiceTest {
 
     Application application = mockApplication();
 
-    userService.setupBotUser(application);
+    userService.setupBotUser(settings, application);
   }
 
+  @Test(expected = UsernameMismatchException.class)
+  public void testUserMismatch() {
+    Application application = mockApplication();
+
+    doReturn(MOCK_INVALID_USERNAME).when(certificateService)
+        .getCommonNameFromApplicationCertificate(application);
+
+    userService.getUsername(application);
+  }
+
+  @Test
+  public void testGetUsername() {
+    Application application = mockApplication();
+
+    assertEquals(MOCK_USERNAME, userService.getUsername(application));
+
+    application.setUsername(StringUtils.EMPTY);
+
+    doReturn(MOCK_INVALID_USERNAME).when(certificateService)
+        .getCommonNameFromApplicationCertificate(application);
+
+    assertEquals(MOCK_INVALID_USERNAME, userService.getUsername(application));
+
+    doReturn(StringUtils.EMPTY).when(certificateService).getCommonNameFromApplicationCertificate(application);
+
+    assertEquals(StringUtils.EMPTY, userService.getUsername(application));
+  }
 }

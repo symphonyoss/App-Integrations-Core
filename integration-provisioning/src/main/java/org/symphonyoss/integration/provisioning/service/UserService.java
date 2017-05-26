@@ -26,18 +26,19 @@ import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
-import org.symphonyoss.integration.pod.api.model.UserCreate;
-import org.symphonyoss.integration.pod.api.model.UserDetail;
-import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
+import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
 
-import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -49,11 +50,16 @@ import javax.annotation.PostConstruct;
 @Service
 public class UserService {
 
+  private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+      Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
   private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
 
-  private static final String[] BOT_ROLES = { "INDIVIDUAL" };
+  private static final String USER_MISMATCH_DESCRIPTION = "provisioning.config.user.mismatch";
+
+  private static final String USER_MISMATCH_SOLUTION = USER_MISMATCH_DESCRIPTION + ".solution";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -63,6 +69,12 @@ public class UserService {
 
   private UserApiClient userApiClient;
 
+  @Autowired
+  private CompanyCertificateService certificateService;
+
+  @Autowired
+  private LogMessageSource logMessage;
+
   @PostConstruct
   public void init() {
     this.userApiClient = new UserApiClient(podHttpApiClient);
@@ -71,22 +83,30 @@ public class UserService {
   /**
    * Setup a bot user on the SBE according to the application info provided in the YAML file. If
    * the user already exists, this process should update the user attributes and avatar.
+   * @param settings Integration settings associated with the application.
    * @param app Application details
    */
-  public void setupBotUser(Application app) {
+  public void setupBotUser(IntegrationSettings settings, Application app) {
     LOGGER.info("Setup new user: {}", app.getComponent());
 
-    String username = app.getComponent();
+    Long userId = settings.getOwner();
+
+    if (userId == null) {
+      throw new UserSearchException("Fail to retrieve user information. User id undefined");
+    }
+
     String name = app.getName();
     String avatar = app.getAvatar();
 
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
-    User user = getUser(username);
+
+    User user = getUser(settings.getOwner());
 
     if (user == null) {
-      createNewUser(sessionToken, username, name, avatar);
+      throw new UserSearchException("User not found. UserId: " + userId);
     } else {
       updateUser(sessionToken, user, name, avatar);
+      settings.setUsername(user.getUsername());
     }
   }
 
@@ -106,19 +126,17 @@ public class UserService {
   }
 
   /**
-   * Create a new user at the Symphony backend, using User API.
-   * @param sessionToken Token to access the User API.
-   * @param username User login.
-   * @param name User display name.
+   * Retrieves user information for the given userId.
+   * @param userId User identifier.
+   * @return User information (retrieved from the backend).
    */
-  private void createNewUser(String sessionToken, String username, String name, String avatar) {
-    UserCreate userInfo = createUserInformation(username, name);
+  public User getUser(Long userId) {
+    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     try {
-      UserDetail createdUser = userApiClient.createUser(sessionToken, userInfo);
-      updateUserAvatar(sessionToken, createdUser.getUserSystemInfo().getId(), avatar);
+      return userApiClient.getUserById(sessionToken, userId);
     } catch (RemoteApiException e) {
-      throw new CreateUserException("Fail to create user " + username, e);
+      throw new UserSearchException("Fail to retrieve user information. UserId: " + userId, e);
     }
   }
 
@@ -161,29 +179,13 @@ public class UserService {
   }
 
   /**
-   * Instantiates the data to create a user on the back end.
-   * @param username User login
-   * @param name User display name
-   * @return Data to create the user in the backend.
-   */
-  private UserCreate createUserInformation(String username, String name) {
-    UserAttributes userAttributes = createUserAttributes(username, name);
-
-    UserCreate userCreate = new UserCreate();
-    userCreate.setUserAttributes(userAttributes);
-    userCreate.setRoles(Arrays.asList(BOT_ROLES));
-
-    return userCreate;
-  }
-
-  /**
    * Creates the user attributes
    * @param username User login
    * @param name User display name
    * @return User attributes
    */
   private UserAttributes createUserAttributes(String username, String name) {
-    String emailAddress = username + EMAIL_DOMAIN;
+    String emailAddress = getEmail(username);
 
     UserAttributes userAttributes = new UserAttributes();
     userAttributes.setUserName(username);
@@ -193,4 +195,40 @@ public class UserService {
 
     return userAttributes;
   }
+
+  /**
+   * Check if the username is a valid email address. If true return the username as the user email.
+   * Otherwise return the 'username@symphony.com'
+   * @param username Username
+   * @return username if it's a valid email address or 'username@symphony.com' otherwise.
+   */
+  private String getEmail(String username) {
+    Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(username);
+    if (matcher.matches()) {
+      return username;
+    }
+
+    return username + EMAIL_DOMAIN;
+  }
+
+  /**
+   * Retrieve the integration username based on the application certificate or
+   * @param application
+   * @return
+   */
+  public String getUsername(Application application) {
+    String username = application.getUsername();
+    String cname = certificateService.getCommonNameFromApplicationCertificate(application);
+
+    // Compare the application certificate CN with the username provided in the YAML file
+    if (StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(cname) && !username.equals(cname)) {
+      String message = logMessage.getMessage(USER_MISMATCH_DESCRIPTION, cname, username);
+      String solution = logMessage.getMessage(USER_MISMATCH_SOLUTION);
+
+      throw new UsernameMismatchException(message, solution);
+    }
+
+    return StringUtils.isNotEmpty(username) ? username : cname;
+  }
+
 }

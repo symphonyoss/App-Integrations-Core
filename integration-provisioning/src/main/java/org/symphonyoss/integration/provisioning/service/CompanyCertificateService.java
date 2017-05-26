@@ -16,6 +16,7 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
+import static org.symphonyoss.integration.model.yaml.Keystore.DEFAULT_KEYSTORE_TYPE_SUFFIX;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
@@ -40,12 +42,19 @@ import org.symphonyoss.integration.provisioning.exception.CompanyCertificateExce
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.Principal;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -101,7 +110,7 @@ public class CompanyCertificateService {
   /**
    * Get an X509 certificate in PEM format.
    * @param application Application object
-   * @return
+   * @return X509 certificate content or empty string if the certificate doesn't exist.
    */
   public String getPem(Application application) {
     String fileName = utils.getCertsDirectory() + application.getId() + ".pem";
@@ -121,6 +130,82 @@ public class CompanyCertificateService {
         throw new CompanyCertificateException("Failed to encode PEM", e);
       }
     }
+  }
+
+  /**
+   * Get a common name from the application certificate
+   * @param application Application object
+   * @return CNAME from the application certificate or empty string if the certificate doesn't exist
+   */
+  public String getCommonNameFromApplicationCertificate(Application application) {
+    X509Certificate certificate = readPKCS12Certificate(application);
+
+    if (certificate != null) {
+      Principal principal = certificate.getSubjectX500Principal();
+
+      // parse the CN out from the DN (distinguished name)
+
+      Pattern p = Pattern.compile("(^|,)CN=([^,]*)(,|$)");
+      Matcher m = p.matcher(principal.getName());
+
+      m.find();
+
+      return m.group(2);
+    }
+
+    return StringUtils.EMPTY;
+  }
+
+  /**
+   * Read PKCS12 application certificate
+   * @param application Application object
+   * @return Certificate object if the application certificate file exists or null otherwise
+   */
+  private X509Certificate readPKCS12Certificate(Application application) {
+    String fileName = getApplicationCertificateFileName(application);
+
+    if (StringUtils.isEmpty(fileName)) {
+      return null;
+    }
+
+    String password = application.getKeystore().getPassword();
+
+    try(FileInputStream inputStream = new FileInputStream(fileName)) {
+      final KeyStore ks = KeyStore.getInstance("pkcs12");
+      ks.load(inputStream, password.toCharArray());
+
+      Enumeration<String> aliases = ks.aliases();
+      if (aliases.hasMoreElements()) {
+        String alias = aliases.nextElement();
+        return (X509Certificate) ks.getCertificate(alias);
+      }
+
+      return null;
+    } catch (GeneralSecurityException | IOException e) {
+      throw new LoadKeyStoreException(
+          String.format("Fail to load keystore file at %s", fileName), e);
+    }
+  }
+
+  /**
+   * Get the X509 certificate filename within of the certificates directory.
+   * @param application Application object
+   * @return Certificate filename if the file exists or empty string otherwise
+   */
+  private String getApplicationCertificateFileName(Application application) {
+    String locationFile = application.getKeystore().getFile();
+    if (StringUtils.isBlank(locationFile)) {
+      locationFile = application.getId() + DEFAULT_KEYSTORE_TYPE_SUFFIX;
+    }
+
+    String keystoreLocation = utils.getCertsDirectory() + locationFile;
+
+    File pemFile = new File(keystoreLocation);
+    if (pemFile.isFile()) {
+      return keystoreLocation;
+    }
+
+    return StringUtils.EMPTY;
   }
 
   /**

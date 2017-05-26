@@ -167,6 +167,7 @@ public class RemoteIntegrationService implements IntegrationService {
     create.setType(settings.getType());
     create.setName(settings.getName());
     create.setDescription(settings.getDescription());
+    create.setUsername(settings.getUsername());
 
     return create;
   }

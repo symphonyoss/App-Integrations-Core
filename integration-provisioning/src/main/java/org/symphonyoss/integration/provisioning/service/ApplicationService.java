@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.pod.api.client.AppEntitlementApiClient;
@@ -35,6 +36,7 @@ import org.symphonyoss.integration.provisioning.client.model.AppStoreBuilder;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
+import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -77,22 +79,30 @@ public class ApplicationService {
 
   /**
    * Creates or updates an application on Symphony store.
-   * @param configurationId The identifier for the integration configuration associated with the
-   * application.
+   * @param settings Integration settings associated with the application.
    * @param application Application object.
    */
-  public void setupApplication(String configurationId, Application application) {
+  public void setupApplication(IntegrationSettings settings, Application application) {
     String appType = application.getComponent();
 
     LOGGER.info("Provisioning Symphony store data for application: {}", appType);
 
-    User user = userService.getUser(appType);
-    String botUserId = user.getId().toString();
+    if (settings.getOwner() == null) {
+      User user = userService.getUser(appType);
+
+      if (user == null) {
+        throw new UserSearchException("Fail to retrieve user information. Username: " + appType);
+      }
+
+      settings.setOwner(user.getId());
+    }
 
     try {
       String domain = properties.getIntegrationBridge().getDomain();
-      AppStoreWrapper wrapper = AppStoreBuilder.build(application, domain, configurationId,
-          botUserId);
+      String botUserId = settings.getOwner().toString();
+
+      AppStoreWrapper wrapper =
+          AppStoreBuilder.build(application, domain, settings.getConfigurationId(), botUserId);
 
       Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
       if (app != null) {
