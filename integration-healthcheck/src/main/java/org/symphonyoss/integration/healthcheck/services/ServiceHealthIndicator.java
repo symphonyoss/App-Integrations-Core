@@ -163,7 +163,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
       String version = retrieveCurrentVersion(healthResponse);
 
-      if (StringUtils.isNotEmpty(version) && (!version.equals(currentVersion))) {
+      if (StringUtils.isNotEmpty(version)) {
         fireUpdatedServiceVersionEvent(version);
       }
 
