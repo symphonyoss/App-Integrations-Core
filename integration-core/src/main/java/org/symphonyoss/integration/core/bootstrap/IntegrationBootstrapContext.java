@@ -55,7 +55,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Bootstraps all {@link Integration} that exists on the Spring context.
@@ -120,12 +120,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   /**
   *
-  * Atomic boolean used to control when the application should log its health.
-  * The application health should only be logged after the first integration finishes
-  * its bootstrap process, after new integrations are added or after an exception
-  * happens when trying to bootstrap an integration.
-    */
-  private AtomicBoolean logHealthApplication = new AtomicBoolean(true);
+  * Atomic  Integer used to control when the application should log its health.
+  * The application health should only be logged after the last default integration finishes
+  * to try its bootstrap process. After new integrations are added and try to bootstrap the
+  * health should also be logged.
+  */
+  private AtomicInteger logHealthApplicationCounter = new AtomicInteger();
 
   @Override
   public void startup() {
@@ -242,7 +242,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private void handleIntegrations() {
     try {
       LOGGER.debug("Verify new integrations");
-      logHealthApplication.set(true);
+
+      // Sets the new application health check counter
+      this.logHealthApplicationCounter.set(integrationsToRegister.size());
 
       while (!integrationsToRegister.isEmpty()) {
         IntegrationBootstrapInfo info = integrationsToRegister.poll(5, TimeUnit.SECONDS);
@@ -276,7 +278,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
    */
   public void logHealthCheck() {
     try {
-      if(logHealthApplication.getAndSet(false) == true) {
+      if(logHealthApplicationCounter.decrementAndGet() == 0) {
         Health health = asyncCompositeHealthEndpoint.invoke();
         String applicationHealthString = jsonUtils.serialize(health);
         String applicationHealthLog = String.format("Application Health Status: %s",applicationHealthString);
@@ -324,14 +326,10 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     } catch (ConnectivityException e) {
       LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
-      logHealthApplication.set(true);
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
-      logHealthApplication.set(true);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
-      //Sets the application health to be logged since there has been an exception
-      logHealthApplication.set(true);
     }finally {
       logHealthCheck();
     }
