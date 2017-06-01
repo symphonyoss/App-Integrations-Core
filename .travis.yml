@@ -30,3 +30,16 @@ script:
 jdk:
   - oraclejdk8
 
+env:
+  global:
+    - secure: "sKp9fUZpV4qePCL3AjLCIkh2yi3eVrJHAg1WsE0lxqSN9l9t7BLMF67XO6UVrjVpKFx/Z396X+Oj5mVxuE2uTkvly3kkfLBQkpblbnbUSUGmMJ9pQGnXwwzGWNZddVZVWv5STG2eoY8Gu8V/F7kbzJRh/G4DtfAk8R+B2iM6xYvbZx3gsd7h0gkjsNI1mP1VuVxc94aWccnlSdZGB6LIS5UWpqIzHNhclSufZIQ6rgo5SZwx0SxAdoBKGKuP7Y+vS9nKLD1rhTGzw+74o+MV/QtuqwdPOXmyz/zY7eIO/iw8bhfhp4eWAmUPq7jcb8P3rz32EutCNae63bMOITSB2x7xyddqyJoTtRHVHTjkRolAXKpv9c6INs0XMx9o6WmbfMdl8hjBwPTgZ4D2CuQ8myB4dI7XUzV/oRM7FhXVeWUP+q0x6rn0GIeE5A4RkEqi05ka31O32dsFHliHnAQ/IZBqUYNkBi+g6iNpYvSDEUmHpC7GaKvddLBz1byyOUT95oCw91wpZiYB8AbwR1F7lf42q6nVl9dztQwBN5Z4aOyd3ZzPEfVdcC1JDHU3W8cGFWvKDD8gSyG24xDWL/69vk9qtVykZL7r1xsACckNFsuaIRQPAdYZFsWuckwd67fWmJbDgOOuPdbqVrk6sy2TbUICpcn8rpCYQc0e8OWgUBs="
+
+addons:
+  coverity_scan:
+    project:
+      name: "symphonyoss/App-Integrations-Core"
+      description: "Build submitted via Travis CI"
+    notification_email: $COVERITY_NOTIFICATION_EMAIL
+    build_command_prepend: "mvn clean"
+    build_command:   "mvn -DsymphonySkipUnitTests=true install"
+    branch_pattern: $COVERITY_BRANCH_PATTERN
