@@ -18,7 +18,6 @@ package org.symphonyoss.integration.core.bootstrap;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +49,6 @@ import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
-import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -68,7 +65,7 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests for {@link IntegrationBootstrapContext}.
@@ -116,7 +113,7 @@ public class IntegrationBootstrapContextTest {
   private IntegrationProperties properties = new IntegrationProperties();
 
   @Spy
-  private AtomicBoolean logHealthApplication;
+  private AtomicInteger logHealthApplicationCounter;
 
   /**
    * Setting up the mocks needed for most tests.
@@ -377,8 +374,7 @@ public class IntegrationBootstrapContextTest {
    */
   @Test
   public void testHealthLog(){
-
-    //Spies the bootstrap context
+    // Spies the bootstrap context
     IntegrationBootstrapContext spyContext = Mockito.spy(this.integrationBootstrapContext);
 
     spyContext.initIntegrations();
@@ -386,8 +382,7 @@ public class IntegrationBootstrapContextTest {
     assertNotNull(integration);
     assertEquals(this.integration, integration);
 
-    //Verify if logging method was called
-    assertFalse(this.logHealthApplication.get());
-
+    // Verify if logging method was called
+    assertEquals(this.logHealthApplicationCounter.get(), 0);
   }
 }
