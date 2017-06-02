@@ -39,7 +39,7 @@ addons:
     project:
       name: "symphonyoss/App-Integrations-Core"
       description: "Build submitted via Travis CI"
-    notification_email: $COVERITY_NOTIFICATION_EMAIL
+    notification_email: "integrations-team@symphony.com"
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DsymphonySkipUnitTests=true install"
-    branch_pattern: $COVERITY_BRANCH_PATTERN
+    branch_pattern: "dev"
