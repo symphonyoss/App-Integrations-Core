@@ -42,4 +42,4 @@ addons:
     notification_email: "integrations-team@symphony.com"
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DsymphonySkipUnitTests=true install"
-    branch_pattern: "dev"
+    branch_pattern: "coverity_issues"
