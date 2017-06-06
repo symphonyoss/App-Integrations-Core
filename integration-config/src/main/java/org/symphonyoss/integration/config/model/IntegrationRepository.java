@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * Created by rsanchez on 09/05/16.
  */
-public class IntegrationRepository implements Cloneable {
+public class IntegrationRepository {
 
   private Map<String, IntegrationSettings> integrationMap = new HashMap<>();
 
