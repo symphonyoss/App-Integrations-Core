@@ -107,7 +107,7 @@ public class WebHookOriginCheckFilter implements Filter {
   @Override
   public void init(FilterConfig config) throws ServletException {
     this.springContext =
-        WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
+        WebApplicationContextUtils.getRequiredWebApplicationContext(config.getServletContext());
     this.properties = springContext.getBean(IntegrationProperties.class);
     this.logMessage = springContext.getBean(LogMessageSource.class);
   }

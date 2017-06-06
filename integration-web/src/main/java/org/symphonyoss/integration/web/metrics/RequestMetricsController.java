@@ -163,7 +163,7 @@ public class RequestMetricsController implements IntegrationController {
         this.otherMeter.mark();
       }
 
-      context.stop();
+      context.close();
     }
   }
 
@@ -174,7 +174,7 @@ public class RequestMetricsController implements IntegrationController {
    */
   public void finishIntegrationExecution(Timer.Context context) {
     if (context != null) {
-      context.stop();
+      context.close();
     }
   }
 }

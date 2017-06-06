@@ -80,7 +80,8 @@ public class NullIntegration extends BaseIntegration {
   public void registerUser(String integrationUser) {
     String certsDir = utils.getCertsDirectory();
 
-    if ((application.getKeystore() == null) || (StringUtils.isEmpty(application.getKeystore().getPassword()))) {
+    if ((application == null) || (application.getKeystore() == null) || (StringUtils.isEmpty(
+        application.getKeystore().getPassword()))) {
       String appId = application != null ? application.getId() : integrationUser;
       throw new LoadKeyStoreException(
           "Fail to retrieve the keystore password. Application: " + appId);
