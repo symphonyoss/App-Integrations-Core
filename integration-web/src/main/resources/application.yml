@@ -5,7 +5,7 @@
 
 server:
   address: 127.0.0.1
-  port: ${integration_bridge.http_port:8186}
+  port: 8186
   display-name: Integration Bridge
   context-path: /
   connection-timeout: 20000

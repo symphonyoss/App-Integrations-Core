@@ -1,7 +1,9 @@
 integration_bridge:
   domain: <<IB_DOMAIN>>
   host: <<IB_HOST>>
-  http_port: <<IB_PORT>>
+
+server:
+  port: <<IB_PORT>>
 
 #
 # Indicate the host and port for the Symphony POD the Apps are associated with.
