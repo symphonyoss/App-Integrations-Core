@@ -40,6 +40,7 @@ import org.symphonyoss.integration.provisioning.service.KeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -307,8 +308,10 @@ public class IntegrationProvisioningService {
    * @throws IOException
    */
   private String getAvatarImage(Resource avatarResource) throws IOException {
-    byte[] imageBytes = IOUtils.toByteArray(avatarResource.getInputStream());
-    return Base64.encodeBase64String(imageBytes);
+    try (InputStream inputStream = avatarResource.getInputStream()) {
+      byte[] imageBytes = IOUtils.toByteArray(inputStream);
+      return Base64.encodeBase64String(imageBytes);
+    }
   }
 
 }

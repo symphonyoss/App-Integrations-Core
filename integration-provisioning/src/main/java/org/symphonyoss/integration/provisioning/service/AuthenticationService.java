@@ -64,9 +64,6 @@ public class AuthenticationService {
     } catch (RemoteApiException e) {
       LOGGER.error("Failed: status=" + e.getCode(), e);
       throw new IntegrationProvisioningAuthException(e);
-    } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-      LOGGER.error("Verify the admin user certificate", e);
-      throw new IntegrationProvisioningAuthException(e);
     }
   }
 
@@ -75,9 +72,7 @@ public class AuthenticationService {
    * backend.
    */
   private void setupSSLContext(String userId, String trustStore, String trustStorePassword,
-      String trustStoreType, String keystore, String keyStorePassword, String keyStoreType)
-      throws KeyStoreException, IOException, CertificateException,
-      NoSuchAlgorithmException {
+      String trustStoreType, String keystore, String keyStorePassword, String keyStoreType) {
     if (!StringUtils.isEmpty(trustStore)) {
       System.setProperty("javax.net.ssl.trustStore", trustStore);
     }
@@ -90,9 +85,14 @@ public class AuthenticationService {
       System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
     }
 
-    KeyStore ks = KeyStore.getInstance(keyStoreType);
-    ks.load(new FileInputStream(keystore), keyStorePassword.toCharArray());
+    try (FileInputStream is = new FileInputStream(keystore)) {
+      KeyStore ks = KeyStore.getInstance(keyStoreType);
+      ks.load(is, keyStorePassword.toCharArray());
 
-    authenticationProxy.registerUser(userId, ks, keyStorePassword);
+      authenticationProxy.registerUser(userId, ks, keyStorePassword);
+    } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+      LOGGER.error("Verify the admin user certificate", e);
+      throw new IntegrationProvisioningAuthException(e);
+    }
   }
 }
