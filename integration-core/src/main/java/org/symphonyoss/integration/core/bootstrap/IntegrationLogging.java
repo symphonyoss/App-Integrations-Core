@@ -123,14 +123,14 @@ public class IntegrationLogging {
   public void ready() {
     this.ready.set(Boolean.TRUE);
 
-    queueIntegrationsToLogIntegrationHealthCheck();
+    executeLogging();
   }
 
   /*
    *Log the integration health for each integration in the queue and after that,
    * if required, log the Integration Bridge healthcheck
    */
-  private void queueIntegrationsToLogIntegrationHealthCheck() {
+  private void executeLogging() {
     while (!queue.isEmpty()) {
       try {
         Integration integration = queue.poll(5, TimeUnit.SECONDS);
