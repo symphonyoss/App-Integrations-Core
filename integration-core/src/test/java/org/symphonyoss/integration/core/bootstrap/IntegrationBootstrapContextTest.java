@@ -115,6 +115,9 @@ public class IntegrationBootstrapContextTest {
   @Spy
   private AtomicInteger logHealthApplicationCounter;
 
+  @Mock
+  private IntegrationLogging logging;
+
   /**
    * Setting up the mocks needed for most tests.
    * @throws Exception

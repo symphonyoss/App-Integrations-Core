@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,6 @@ import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
-import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
@@ -115,6 +113,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private ApplicationEventPublisher publisher;
+
+  @Autowired
+  private IntegrationLogging logging;
 
   private JsonUtils jsonUtils = new JsonUtils();
 
@@ -277,30 +278,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
    * happens when trying to bootstrap an integration.
    */
   public void logHealthCheck() {
-    try {
-      if(logHealthApplicationCounter.decrementAndGet() == 0) {
-        Health health = asyncCompositeHealthEndpoint.invoke();
-        String applicationHealthString = jsonUtils.serialize(health);
-        String applicationHealthLog = String.format("Application Health Status: %s",applicationHealthString);
-        LOGGER.info(applicationHealthLog);
-      }
-    } catch (RemoteApiException e) {
-      LOGGER.error("Failed to log the Application Health", e);
-    }
-  }
-
-  /**
-   * Logs the health of one integration. This method is called after an integration finishes its bootstrap
-   * process.
-   */
-  public void logIntegrationHealthCheck(Integration integration) {
-    try {
-      String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
-      String integrationName = integration.getSettings().getName();
-      String integrationHealthLog = String.format("Integration: %s %s %s",integrationName," health status: ", integrationHealthString);
-      LOGGER.info(integrationHealthLog);
-    } catch (RemoteApiException e)  {
-      LOGGER.error("Failed to log the " + integration.getSettings().getName()+ " Integration Health", e);
+    if (logHealthApplicationCounter.decrementAndGet() == 0) {
+      logging.logHealth();
     }
   }
 
@@ -321,8 +300,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       metricsController.addIntegrationTimer(integrationUser);
 
       LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
-      
-      logIntegrationHealthCheck(integration);
+
+      logging.logIntegration(integration);
     } catch (ConnectivityException e) {
       LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
       integrationsToRegister.offer(info);
@@ -330,7 +309,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
       LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
-    }finally {
+    } finally {
       logHealthCheck();
     }
   }
