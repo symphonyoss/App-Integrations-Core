@@ -119,12 +119,18 @@ public class IntegrationLogging {
 
   /**
    * Indicates the application is able to service requests.
-   * Log the integration health for each integration in the queue and after that,
-   * if required, log the Integration Bridge healthcheck
    */
   public void ready() {
     this.ready.set(Boolean.TRUE);
 
+    queueIntegrationsToLogIntegrationHealthCheck();
+  }
+
+  /*
+   *Log the integration health for each integration in the queue and after that,
+   * if required, log the Integration Bridge healthcheck
+   */
+  private void queueIntegrationsToLogIntegrationHealthCheck() {
     while (!queue.isEmpty()) {
       try {
         Integration integration = queue.poll(5, TimeUnit.SECONDS);
