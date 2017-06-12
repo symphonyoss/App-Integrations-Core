@@ -29,8 +29,4 @@ public class UnregisteredSessionTokenException extends AuthenticationException {
   public UnregisteredSessionTokenException(String message) {
     super(message);
   }
-
-  public UnregisteredSessionTokenException(String message, Throwable cause) {
-    super(message, cause);
-  }
 }

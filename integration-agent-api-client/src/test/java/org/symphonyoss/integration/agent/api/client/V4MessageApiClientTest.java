@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -53,27 +52,33 @@ import java.util.Map;
 @RunWith(MockitoJUnitRunner.class)
 public class V4MessageApiClientTest {
 
-  private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
+  private static final String MOCK_SESSION =
+      "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
-  private static final String MOCK_KM_SESSION = "48ff7175a02508c41f3b88a49f30df59fa1513b0368871a031c6ed0163bd";
+  private static final String MOCK_KM_SESSION =
+      "48ff7175a02508c41f3b88a49f30df59fa1513b0368871a031c6ed0163bd";
 
   private static final String MOCK_STREAM_ID = "Bm42DA4wtrPT2IeX5g6J4n///qrJ+Ev3dA==";
 
   private static final String MOCK_PRESENTATION_ML = "<presentationML>\n"
       + "   <div class=\"entity\" data-entity-id=\"jiraUpdated\">\n"
-      + "        ${entity[\"jiraUpdated\"].user.displayName} updated Bug ${entity[\"jiraUpdated\"].issue.key},\n"
+      + "        ${entity[\"jiraUpdated\"].user.displayName} updated Bug "
+      + "${entity[\"jiraUpdated\"].issue.key},\n"
       + "        ${entity[\"jiraUpdated\"].issue.subject} (\n"
       + "        <a href=\"${entity[\"jiraUpdated\"].issue.link}\" />\n"
       + "        )\n"
       + "        <table>\n"
       + "        <tr><th>Field</th><th>Old Value</th><th>New Value</th></tr>\n"
       + "        <#list entity[\"jiraUpdated\"].issue.changelog.change as change>\n"
-      + "        <tr><td>${change.fieldName}</td><td>${change.oldValue}</td><td>${change.newValue}</td></tr>\n"
+      + "        <tr><td>${change.fieldName}</td><td>${change.oldValue}</td><td>${change"
+      + ".newValue}</td></tr>\n"
       + "        </#list>\n"
       + "        </table>\n"
       + "        <table>\n"
-      + "        <tr><th>Assignee</th><td>${entity[\"jiraUpdated\"].issue.assignee.displayName}</td></tr>\n"
-      + "        <tr><th>Labels</th><td><#list entity[\"jiraUpdated\"].labels as label><a class=\"hashTag\">#${label}</a> </#list></td></tr>\n"
+      + "        <tr><th>Assignee</th><td>${entity[\"jiraUpdated\"].issue.assignee"
+      + ".displayName}</td></tr>\n"
+      + "        <tr><th>Labels</th><td><#list entity[\"jiraUpdated\"].labels as "
+      + "label><a class=\"hashTag\">#${label}</a> </#list></td></tr>\n"
       + "        <tr><th>Priority</th><td>${entity[\"jiraUpdated\"].issue.priority}</td></tr>\n"
       + "        <tr><th>Status</th><td>${entity[\"jiraUpdated\"].issue.status}</td></tr>\n"
       + "    </div>\n"
@@ -128,7 +133,8 @@ public class V4MessageApiClientTest {
 
     Message message = mockMessage();
 
-    JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
+    JsonNode node =
+        JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
     message.setData(node.toString());
 
     String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
@@ -175,8 +181,7 @@ public class V4MessageApiClientTest {
   }
 
   @Test(expected = RemoteApiException.class)
-  public void testPostMessageThenReturnedRemoteApiException() throws RemoteApiException,
-      IOException {
+  public void testPostMessageWithRemoteApiException() throws RemoteApiException, IOException {
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("sessionToken", MOCK_SESSION);
@@ -186,17 +191,18 @@ public class V4MessageApiClientTest {
 
     Message message = mockMessage();
 
-    JsonNode node = JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
+    JsonNode node =
+        JsonUtils.readTree(getClass().getClassLoader().getResourceAsStream(FILENAME_ENTITY_JSON));
     message.setData(node.toString());
 
     String path = "/v4/stream/" + MOCK_STREAM_ID + "/message/create";
 
     doReturn(MOCK_STREAM_ID).when(httpClient).escapeString(MOCK_STREAM_ID);
-    doThrow(RemoteApiException.class).when(httpClient).doPost(eq(path), eq(headerParams), anyMap(), any(MultiPart.class),
-        eq(Message.class));
+    doThrow(IOException.class).when(httpClient)
+        .doPost(eq(path), eq(headerParams), anyMap(), any(MultiPart.class),
+            eq(Message.class));
 
     apiClient.postMessage(MOCK_SESSION, MOCK_KM_SESSION, MOCK_STREAM_ID, message);
 
   }
-
 }

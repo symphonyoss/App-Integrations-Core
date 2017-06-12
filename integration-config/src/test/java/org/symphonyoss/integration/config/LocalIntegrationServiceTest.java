@@ -20,17 +20,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.LAST_POSTED_DATE;
 import static org.symphonyoss.integration.utils.WebHookConfigurationUtils.OWNER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.env.Environment;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
@@ -38,13 +45,19 @@ import org.symphonyoss.integration.config.exception.InitializationConfigExceptio
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
 import org.symphonyoss.integration.config.exception.InvalidConfigurationIdException;
 import org.symphonyoss.integration.config.exception.InvalidInstanceIdException;
+import org.symphonyoss.integration.config.exception.SaveConfigurationException;
+import org.symphonyoss.integration.config.exception.SaveInstanceException;
+import org.symphonyoss.integration.config.model.IntegrationRepository;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Test class responsible to test the flows in the Integration Service.
@@ -58,18 +71,112 @@ public class LocalIntegrationServiceTest {
 
   private static final String CONFIG_ENV_PROPERTY = "config.filename";
 
+  private static final String MOCK_CONFIGURATION = "mock-configuration.json";
+
+  private static final String OPTIONAL_PROPERTIES =
+      "{ \"lastPostedDate\": 1, \"owner\": \"owner\", \"streams\": [ \"stream1\", \"stream2\"] }";
+
   private final String TEST_USER = "jiraWebHookIntegration";
+
+  @Spy
+  private ObjectMapper objectMapper;
 
   @Mock
   private Environment environment;
 
   @InjectMocks
-  private IntegrationService service = new LocalIntegrationService();
+  private LocalIntegrationService service;
 
   @Before
   public void init() throws JsonProcessingException {
-    doReturn("mock-configuration.json").when(environment)
+    doReturn(MOCK_CONFIGURATION).when(environment)
         .getProperty(CONFIG_ENV_PROPERTY, DEFAULT_FILE_NAME);
+  }
+
+  @After
+  public void finish() {
+    File file = new File(MOCK_CONFIGURATION);
+    if (file.exists()) {
+     file.delete();
+    }
+  }
+
+  @Test(expected = InvalidConfigurationIdException.class)
+  public void testInvalidConfigurationIdException() throws IntegrationConfigException {
+    service.save((IntegrationSettings) null, null);
+  }
+
+  @Test(expected = InvalidInstanceIdException.class)
+  public void testInvalidInstanceIdException() throws IntegrationConfigException {
+    service.save((IntegrationInstance) null, null);
+  }
+
+  @Test(expected = SaveConfigurationException.class)
+  public void testSaveConfigurationException() throws IntegrationConfigException, IOException {
+    doThrow(IOException.class).when(objectMapper).
+        writeValue(any(OutputStream.class), any(IntegrationRepository.class));
+
+    service.init();
+
+    IntegrationSettings jira = service.getIntegrationById("575062074b54ba5e759c0fd9", TEST_USER);
+    jira.setDescription("Integrating new app with Symphony");
+    jira.setEnabled(false);
+    jira.setVisible(true);
+
+    Whitebox.setInternalState(service, "saveFile", true);
+    service.save(jira, TEST_USER);
+  }
+
+  @Test(expected = SaveInstanceException.class)
+  public void testSaveInstanceException() throws IntegrationConfigException, IOException {
+    doThrow(IOException.class).when(objectMapper).
+        writeValue(any(OutputStream.class), any(IntegrationRepository.class));
+
+    service.init();
+
+    IntegrationInstance instance =
+        service.getInstanceById("575062074b54ba5e759c0fd0", "4321", TEST_USER);
+    instance.setCreatorId("new-user");
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
+
+    Whitebox.setInternalState(service, "saveFile", true);
+    service.save(instance, TEST_USER);
+  }
+
+  @Test
+  public void testSaveRepositoryLocally() throws IntegrationConfigException, IOException {
+    // Creates a temp file in a temp dir
+    TemporaryFolder tmpDir = new TemporaryFolder();
+    tmpDir.create();
+    String fileName = tmpDir.getRoot().getPath() + "/mock-configuration-tmp.json";
+    File file = new File(fileName);
+    file.createNewFile();
+
+    // Writes mock config values into this temp file
+    InputStream initialStream = getClass().getClassLoader().getResourceAsStream(MOCK_CONFIGURATION);
+    byte[] buffer = new byte[initialStream.available()];
+    initialStream.read(buffer);
+    OutputStream outStream = new FileOutputStream(file);
+    outStream.write(buffer);
+
+    doReturn(fileName).when(environment).getProperty(CONFIG_ENV_PROPERTY, DEFAULT_FILE_NAME);
+
+    service.init();
+
+    IntegrationSettings jira = service.getIntegrationById("575062074b54ba5e759c0fd9", TEST_USER);
+    jira.setDescription("Integrating new app with Symphony");
+    jira.setEnabled(false);
+    jira.setVisible(true);
+    service.save(jira, TEST_USER);
+
+    IntegrationSettings saved = service.getIntegrationById("575062074b54ba5e759c0fd9", TEST_USER);
+
+    assertEquals("575062074b54ba5e759c0fd9", saved.getConfigurationId());
+    assertEquals("jiraWebHookIntegration", saved.getType());
+    assertEquals("Jira Webhook Integration", saved.getName());
+    assertEquals("Integrating new app with Symphony", saved.getDescription());
+    assertFalse(saved.getEnabled());
+    assertTrue(saved.getVisible());
   }
 
   /**
@@ -236,17 +343,16 @@ public class LocalIntegrationServiceTest {
    * @throws IntegrationConfigException
    */
   @Test
-  public void saveConfigurationInstanceInClasspath() throws IntegrationConfigException, IOException {
+  public void saveConfigurationInstanceInClasspath()
+      throws IntegrationConfigException, IOException {
     service.init();
 
-    String optionalProperties =
-        "{ \"lastPostedDate\": 1, \"owner\": \"owner\", \"streams\": [ \"stream1\", \"stream2\"] }";
-    JsonNode whiConfInstance = WebHookConfigurationUtils.fromJsonString(optionalProperties);
+    JsonNode whiConfInstance = WebHookConfigurationUtils.fromJsonString(OPTIONAL_PROPERTIES);
 
     IntegrationInstance instance =
         service.getInstanceById("575062074b54ba5e759c0fd0", "4321", TEST_USER);
     instance.setCreatorId("new-user");
-    instance.setOptionalProperties(optionalProperties);
+    instance.setOptionalProperties(OPTIONAL_PROPERTIES);
     service.save(instance, TEST_USER);
 
     IntegrationInstance saved =
@@ -264,7 +370,7 @@ public class LocalIntegrationServiceTest {
     assertEquals(whiConfInstance.path(LAST_POSTED_DATE).asLong(),
         savedWhInstance.path(LAST_POSTED_DATE).asLong());
     assertEquals(whiConfInstance.path(OWNER).asText(), savedWhInstance.path(OWNER).asText());
-    assertEquals(WebHookConfigurationUtils.getStreams(optionalProperties),
+    assertEquals(WebHookConfigurationUtils.getStreams(OPTIONAL_PROPERTIES),
         WebHookConfigurationUtils.getStreams(saved.getOptionalProperties()));
   }
 

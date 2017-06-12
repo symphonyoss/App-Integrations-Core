@@ -71,6 +71,8 @@ public class AuthenticationApiClientTest {
 
     Token result = authenticationApiClient.authenticate(MOCK_USER);
 
+    assertEquals(token.getName(), result.getName());
+    assertEquals(token.getToken(), result.getToken());
     assertEquals(token, result);
   }
 

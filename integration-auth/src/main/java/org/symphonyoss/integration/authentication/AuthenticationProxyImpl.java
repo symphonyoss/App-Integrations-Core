@@ -189,8 +189,6 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
           authenticate(userId);
         } catch (RemoteApiException e1) {
           checkAndThrowException(e1, userId);
-        } catch (ConnectivityException e2) {
-          throw e2;
         } catch (Exception e3) {
           throw new UnexpectedAuthException("Failed to process certificate login", e3);
         }

@@ -18,6 +18,7 @@ package org.symphonyoss.integration.authentication;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,12 +43,18 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
 import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
+import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
+import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
@@ -124,6 +132,37 @@ public class AuthenticationProxyImplTest {
     kmToken2.setToken(KM_TOKEN2);
   }
 
+  @Test(expected = UnregisteredUserAuthException.class)
+  public void testUnregisteredUserAuthException() throws RemoteApiException {
+    Whitebox.setInternalState(proxy, "authContexts", new ConcurrentHashMap<>());
+    proxy.authenticate(JIRAWEBHOOK);
+  }
+
+  @Test(expected = UnregisteredSessionTokenException.class)
+  public void UnregisteredSessionTokenException() throws RemoteApiException {
+    proxy.httpClientForSessionToken(SESSION_TOKEN);
+  }
+
+  @Test(expected = UnexpectedAuthException.class)
+  public void testUnexpectedAuthException() throws RemoteApiException {
+    doThrow(NullPointerException.class).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+  }
+
+  @Test(expected = UnauthorizedUserException.class)
+  public void testUnauthorizedUserException() throws RemoteApiException {
+    RemoteApiException rae = new RemoteApiException(401, "testUnauthorizedUserException");
+    doThrow(rae).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+  }
+
+  @Test(expected = ForbiddenAuthException.class)
+  public void testForbiddenAuthException() throws RemoteApiException {
+    RemoteApiException rae = new RemoteApiException(403, "testForbiddenAuthException");
+    doThrow(rae).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+  }
+
   @Test
   public void testFailAuthenticationSBE() throws RemoteApiException {
     doThrow(RemoteApiException.class).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
@@ -163,6 +202,7 @@ public class AuthenticationProxyImplTest {
     proxy.authenticate(SIMPLEWEBHOOK);
 
     assertTrue(proxy.isAuthenticated(JIRAWEBHOOK));
+    assertEquals(SESSION_TOKEN, proxy.getSessionToken(JIRAWEBHOOK));
     assertEquals(sessionToken.getToken(), proxy.getToken(JIRAWEBHOOK).getSessionToken());
     assertEquals(kmToken.getToken(), proxy.getToken(JIRAWEBHOOK).getKeyManagerToken());
 
@@ -183,6 +223,7 @@ public class AuthenticationProxyImplTest {
     assertEquals(properties.getApiClientConfig().getConnectTimeout(), clientConnectTimeout);
     assertEquals(properties.getApiClientConfig().getMaxConnections(), clientTotalConn);
     assertEquals(properties.getApiClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+
   }
 
   @Test
