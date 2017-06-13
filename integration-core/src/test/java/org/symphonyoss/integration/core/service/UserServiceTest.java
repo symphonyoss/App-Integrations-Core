@@ -47,6 +47,12 @@ public class UserServiceTest {
 
   private static final String SESSION_TOKEN = "95248a7075f53c5458b276d";
 
+  private static final Long USER_ID = 123L;
+
+  private static final String USER_NAME = "symphony";
+
+  private static final String USER_EMAIL = "symphony@symphony.com";
+
   @Mock
   private UserApiClient usersApi;
 
@@ -54,7 +60,7 @@ public class UserServiceTest {
   private AuthenticationProxy authenticationProxy;
 
   @InjectMocks
-  private UserService userService = new UserServiceImpl();
+  private UserServiceImpl userService;
 
   @Before
   public void setup() {
@@ -71,9 +77,8 @@ public class UserServiceTest {
   public void testFindUserByEmailNotFound() throws RemoteApiException {
     doThrow(RemoteApiException.class).when(usersApi).getUserByEmail(anyString(), anyString());
 
-    String email = "symphony@symphony.com";
-    User user = userService.getUserByEmail(null, email);
-    assertEquals(email, user.getEmailAddress());
+    User user = userService.getUserByEmail(null, USER_EMAIL);
+    assertEquals(USER_EMAIL, user.getEmailAddress());
     assertNull(user.getId());
   }
 
@@ -81,9 +86,8 @@ public class UserServiceTest {
   public void testFindUserByEmail() throws RemoteApiException {
     prepareToReturnUser();
 
-    String email = "symphony@symphony.com";
-    User user = userService.getUserByEmail(null, email);
-    assertEquals(email, user.getEmailAddress());
+    User user = userService.getUserByEmail(null, USER_EMAIL);
+    assertEquals(USER_EMAIL, user.getEmailAddress());
     assertEquals("Symphony Display Name", user.getDisplayName());
   }
 
@@ -91,36 +95,49 @@ public class UserServiceTest {
   public void testFindUserByUserName() throws RemoteApiException {
     prepareToReturnUser();
 
-    String userName = "symphony";
-    User user = userService.getUserByUserName(null, userName);
-    assertEquals(userName, user.getUsername());
+    User user = userService.getUserByUserName(null, USER_NAME);
+    assertEquals(USER_NAME, user.getUsername());
     assertEquals("Symphony Display Name", user.getDisplayName());
   }
 
+  @Test
+  public void testFindUserByUserId() throws RemoteApiException {
+    prepareToReturnUser();
+
+    User user = userService.getUserByUserId(null, null);
+    assertNull(user);
+
+    user = userService.getUserByUserId(null, USER_ID);
+    assertEquals(USER_ID, user.getId());
+    assertEquals("Symphony Display Name", user.getDisplayName());
+  }
+
+  @Test
+  public void testFindUserByUserIdNotFound() throws RemoteApiException {
+    doThrow(RemoteApiException.class).when(usersApi).getUserById(SESSION_TOKEN, USER_ID);
+
+    User user = userService.getUserByUserId(null, USER_ID);
+    assertNull(user);
+  }
+
   private void prepareToReturnUser() throws RemoteApiException {
-    String email = "symphony@symphony.com";
-    String username = "symphony";
-    Long userId = 123L;
-
     User user = new User();
-    user.setEmailAddress(email);
-    user.setId(userId);
+    user.setEmailAddress(USER_EMAIL);
+    user.setId(USER_ID);
     user.setDisplayName("Symphony Display Name");
-    user.setUserName(username);
+    user.setUserName(USER_NAME);
 
-    doReturn(user).when(usersApi).getUserByEmail(SESSION_TOKEN, email);
-    doReturn(user).when(usersApi).getUserByUsername(SESSION_TOKEN, username);
-    doReturn(user).when(usersApi).getUserById(SESSION_TOKEN, userId);
+    doReturn(user).when(usersApi).getUserByEmail(SESSION_TOKEN, USER_EMAIL);
+    doReturn(user).when(usersApi).getUserByUsername(SESSION_TOKEN, USER_NAME);
+    doReturn(user).when(usersApi).getUserById(SESSION_TOKEN, USER_ID);
   }
 
   @Test
   public void testFindUserByUserNameNotFound() throws RemoteApiException {
-    String userName = "symphony";
+    doThrow(RemoteApiException.class).when(usersApi).getUserByUsername(SESSION_TOKEN, USER_NAME);
 
-    doThrow(RemoteApiException.class).when(usersApi).getUserByUsername(SESSION_TOKEN, userName);
-
-    User user = userService.getUserByUserName(null, userName);
-    assertEquals(userName, user.getUsername());
+    User user = userService.getUserByUserName(null, USER_NAME);
+    assertEquals(USER_NAME, user.getUsername());
     assertNull(user.getId());
   }
 

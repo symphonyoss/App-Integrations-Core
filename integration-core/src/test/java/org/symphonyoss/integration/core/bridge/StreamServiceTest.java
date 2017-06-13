@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
@@ -50,6 +51,7 @@ import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test class responsible to test the flows in the Stream Service.
@@ -96,6 +98,20 @@ public class StreamServiceTest {
   public void init() {
     apiResolver.put(MessageMLVersion.V1, messageApiClient);
     apiResolver.put(MessageMLVersion.V2, messageApiClient);
+  }
+
+  @Test
+  public void testInit() {
+    streamService.init();
+
+    Map<MessageMLVersion, MessageApiClient> apiResolver =
+        (Map<MessageMLVersion, MessageApiClient>) Whitebox.getInternalState(streamService,
+            "apiResolver");
+
+    assertNotNull(apiResolver);
+    assertEquals(2, apiResolver.size());
+    assertTrue(apiResolver.containsKey(MessageMLVersion.V1));
+    assertTrue(apiResolver.containsKey(MessageMLVersion.V2));
   }
 
   @Test

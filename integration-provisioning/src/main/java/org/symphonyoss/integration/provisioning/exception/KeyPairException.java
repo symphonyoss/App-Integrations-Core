@@ -29,8 +29,4 @@ public class KeyPairException extends RuntimeException {
     super(message, cause);
   }
 
-  public KeyPairException(Throwable cause) {
-    super(cause);
-  }
-
 }

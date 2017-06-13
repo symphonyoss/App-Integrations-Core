@@ -19,7 +19,8 @@ package org.symphonyoss.integration.pod.api.model;
 import java.util.ArrayList;
 
 /**
- * Holds a list of application entitlements.
+ * Holds a list of {@link AppEntitlement} to simplify the deserialization of the JSON array
+ * received from the Integration API.
  * Created by rsanchez on 08/03/17.
  */
 public class AppEntitlementList extends ArrayList<AppEntitlement> {

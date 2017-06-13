@@ -119,7 +119,11 @@ public class AppEntitlementApiClientTest {
 
     AppEntitlement result = apiClient.updateAppEntitlement(MOCK_SESSION, entitlement);
 
-    assertEquals(entitlement, result);
+    assertEquals(entitlement.getAppId(), result.getAppId());
+    assertEquals(entitlement.getAppName(), result.getAppName());
+    assertEquals(entitlement.getEnable(), result.getEnable());
+    assertEquals(entitlement.getListed(), result.getListed());
+    assertEquals(entitlement.getInstall(), result.getInstall());
   }
 
   private AppEntitlement mockEntitlement() {

@@ -19,7 +19,7 @@ package org.symphonyoss.integration.core.bridge;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -35,6 +35,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.core.NullIntegration;
+import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
@@ -67,6 +70,9 @@ public class IntegrationBridgeTest {
 
   @Mock
   private IntegrationBridgeExceptionHandler exceptionHandler;
+
+  @Mock
+  private IntegrationBootstrapContext bootstrap;
 
   @InjectMocks
   private IntegrationBridge bridge = new IntegrationBridgeImpl();
@@ -226,4 +232,22 @@ public class IntegrationBridgeTest {
     List<Message> result = bridge.sendMessage(instance, INTEGRATION_USER, new Message());
   }
 
+  @Test
+  public void testGetIntegrationById() {
+    Integration integration = new NullIntegration(null, null, null, null);
+    String integrationID = "null";
+
+    doReturn(integration).when(bootstrap).getIntegrationById(integrationID);
+
+    assertEquals(integration, bridge.getIntegrationById(integrationID));
+  }
+
+  @Test
+  public void testRemoveIntegration() {
+    String integrationID = "null";
+    doReturn(null).when(bootstrap).getIntegrationById(integrationID);
+
+    bridge.removeIntegration(integrationID);
+    assertNull(bridge.getIntegrationById(integrationID));
+  }
 }

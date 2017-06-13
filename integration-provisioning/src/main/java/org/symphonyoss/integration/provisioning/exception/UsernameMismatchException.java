@@ -13,9 +13,4 @@ public class UsernameMismatchException extends IntegrationRuntimeException {
   public UsernameMismatchException(String message, String... solutions) {
     super(COMPONENT, message, solutions);
   }
-
-  public UsernameMismatchException(String message, Throwable cause, String... solutions) {
-    super(COMPONENT, message, cause, solutions);
-  }
-
 }

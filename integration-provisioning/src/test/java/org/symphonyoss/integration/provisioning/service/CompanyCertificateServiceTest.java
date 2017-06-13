@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -32,12 +33,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.Keystore;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
 import org.symphonyoss.integration.pod.api.model.CompanyCertAttributes;
@@ -103,6 +106,12 @@ public class CompanyCertificateServiceTest {
       + "CEuc8SaA/5dOJDEAPy5b1KdRR1lJnEHfgisGhc2S5h0KQYdGDkRNtMLNmg==\n"
       + "-----END CERTIFICATE-----\n";
 
+  private static final String APP_ID = "jira";
+
+  private static final String APP_TYPE = "jiraWebHookIntegration";
+
+  private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
@@ -132,6 +141,27 @@ public class CompanyCertificateServiceTest {
     doReturn(certDir).when(utils).getCertsDirectory();
 
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
+  }
+
+  @Test
+  public void testInit() {
+    service.init();
+    Object obj = Whitebox.getInternalState(service, "securityApi");
+    assertNotNull(obj);
+  }
+
+  @Test
+  public void testGetEmptyCommonNameFromApplicationCertificate() {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+
+    Application application2 = new Application();
+    application2.setId(APP_ID);
+    application2.setComponent(APP_TYPE);
+    application2.setKeystore(keystore);
+
+    String name = service.getCommonNameFromApplicationCertificate(application2);
+    assertTrue(StringUtils.isEmpty(name));
   }
 
   @Test

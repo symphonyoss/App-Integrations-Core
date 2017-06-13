@@ -17,12 +17,13 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
-
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .DEFAULT_USER_ID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -30,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
@@ -40,8 +42,6 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
-import org.symphonyoss.integration.pod.api.model.UserCreate;
-import org.symphonyoss.integration.provisioning.exception.CreateUserException;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
@@ -97,12 +97,27 @@ public class UserServiceTest {
     this.settings.setOwner(MOCK_USER_ID);
   }
 
+  @Test
+  public void testInit() throws RemoteApiException {
+    userService.init();
+    Object obj= Whitebox.getInternalState(userService, "userApiClient");
+    assertNotNull(obj);
+  }
+
   @Test(expected = UserSearchException.class)
   public void testGetUserRemoteApiException() throws RemoteApiException {
     doThrow(RemoteApiException.class).when(userApiClient)
         .getUserByUsername(MOCK_SESSION_ID, MOCK_USERNAME);
 
     userService.getUser(MOCK_USERNAME);
+  }
+
+  @Test(expected = UserSearchException.class)
+  public void testGetUserByIdRemoteApiException() throws RemoteApiException {
+    doThrow(RemoteApiException.class).when(userApiClient)
+        .getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
+
+    userService.getUser(MOCK_USER_ID);
   }
 
   @Test(expected = UserSearchException.class)

@@ -25,8 +25,4 @@ public class UpdateUserException extends RuntimeException {
     super(message, cause);
   }
 
-  public UpdateUserException(Throwable cause) {
-    super(cause);
-  }
-
 }

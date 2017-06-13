@@ -28,9 +28,4 @@ public class UserSearchException extends RuntimeException {
   public UserSearchException(String message, Throwable cause) {
     super(message, cause);
   }
-
-  public UserSearchException(Throwable cause) {
-    super(cause);
-  }
-
 }

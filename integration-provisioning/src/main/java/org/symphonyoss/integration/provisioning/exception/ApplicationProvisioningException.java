@@ -29,8 +29,4 @@ public class ApplicationProvisioningException extends RuntimeException {
     super(message, cause);
   }
 
-  public ApplicationProvisioningException(Throwable cause) {
-    super(cause);
-  }
-
 }

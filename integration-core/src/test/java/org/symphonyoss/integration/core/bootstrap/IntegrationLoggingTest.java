@@ -19,6 +19,7 @@ package org.symphonyoss.integration.core.bootstrap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -98,6 +100,13 @@ public class IntegrationLoggingTest {
     assertTrue(queue.isEmpty());
   }
 
+  @Test(expected = RemoteApiException.class)
+  public void testLogIntegrationRemoteApiException() throws InterruptedException {
+    doThrow(RemoteApiException.class).when(integration).getSettings();
+    integrationLogging.ready();
+    integrationLogging.logIntegration(integration);
+  }
+
   @Test
   public void testLogIntegrationNotReady() throws InterruptedException {
     integrationLogging.logIntegration(integration);
@@ -112,6 +121,14 @@ public class IntegrationLoggingTest {
 
     assertFalse(executeHealthcheck.get());
     verify(asyncCompositeHealthEndpoint, times(1)).invoke();
+  }
+
+  @Test
+  public void testlogHealthRemoteApiException() throws InterruptedException {
+    doThrow(RemoteApiException.class).when(asyncCompositeHealthEndpoint).invoke();
+    integrationLogging.ready();
+    integrationLogging.logHealth();
+    assertEquals(0, queue.size());
   }
 
   @Test

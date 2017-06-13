@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.healthcheck;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -28,7 +29,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -51,10 +55,29 @@ public class AsyncCompositeHealthIndicatorTest {
   @Spy
   private HealthAggregator aggregator = new MockHealthAggregator();
 
+  @Mock
+  private HealthAggregator aggregatorMock;
+
   private AsyncCompositeHealthIndicator healthIndicator = new AsyncCompositeHealthIndicator(aggregator);
 
   @Test
   public void testEmpty() {
+    Health result = healthIndicator.health();
+    Health expected = Health.up().build();
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testInterrupted() {
+    HealthIndicator hi = new AsyncCompositeHealthIndicator(aggregatorMock);
+    doThrow(InterruptedException.class).when(aggregatorMock).aggregate(any(LinkedHashMap.class));
+
+    Health result = hi.health();
+    assertEquals(Status.DOWN, result.getStatus());
+  }
+
+  @Test
+  public void testGetExecutionValueInterrupted() {
     Health result = healthIndicator.health();
     Health expected = Health.up().build();
     assertEquals(expected, result);
