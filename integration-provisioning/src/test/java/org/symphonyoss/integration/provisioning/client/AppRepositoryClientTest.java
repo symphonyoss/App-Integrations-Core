@@ -132,6 +132,7 @@ public class AppRepositoryClientTest {
 
     assertFalse(result.isEmpty());
     assertEquals(expected, result.get(0));
+    assertEquals("RequestEnvelope{data=[" + expected + "]}", envelope.toString());
   }
 
   private AppStoreWrapper mockAppStoreWrapper() throws MalformedURLException {

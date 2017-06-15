@@ -19,20 +19,28 @@ package org.symphonyoss.integration.provisioning.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .DEFAULT_USER_ID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -58,6 +66,8 @@ public class UserServiceTest {
   private static final String MOCK_APP_NAME = "Application Test";
 
   private static final String MOCK_USERNAME = "testuser";
+
+  private static final String MOCK_EMAIL = "testuser@test.com";
 
   private static final Long MOCK_USER_ID = 123456L;
 
@@ -87,11 +97,21 @@ public class UserServiceTest {
   public void init() throws RemoteApiException {
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
 
-    User user = new User();
+    final User user = new User();
     user.setId(MOCK_USER_ID);
     user.setUserName(MOCK_USERNAME);
 
     doReturn(user).when(userApiClient).getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
+
+    Application application = mockApplication();
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Assert.assertEquals(MOCK_SESSION_ID, invocationOnMock.getArguments()[0].toString());
+        Assert.assertEquals(MOCK_USER_ID, invocationOnMock.getArguments()[1].toString());
+        return user;
+      }
+    }).when(userApiClient).getUserByUsername(anyString(), eq(application.getComponent()));
 
     this.settings = new IntegrationSettings();
     this.settings.setOwner(MOCK_USER_ID);
@@ -203,5 +223,12 @@ public class UserServiceTest {
     doReturn(StringUtils.EMPTY).when(certificateService).getCommonNameFromApplicationCertificate(application);
 
     assertEquals(StringUtils.EMPTY, userService.getUsername(application));
+  }
+
+  @Test
+  public void testSuccessfulSetup() {
+    Application application = mockApplication();
+    userService.setupBotUser(settings, application);
+    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
   }
 }
