@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -53,8 +52,6 @@ public class AgentApiClientTest {
 
   @Test (expected = MissingConfigurationException.class)
   public void testBlankURL() throws RemoteApiException {
-    doReturn(null).when(properties).getAgentUrl();
-
     agentApiClient.getBasePath();
   }
 }

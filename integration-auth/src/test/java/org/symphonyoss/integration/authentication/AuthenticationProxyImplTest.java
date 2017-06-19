@@ -134,8 +134,7 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = UnregisteredUserAuthException.class)
   public void testUnregisteredUserAuthException() throws RemoteApiException {
-    Whitebox.setInternalState(proxy, "authContexts", new ConcurrentHashMap<>());
-    proxy.authenticate(JIRAWEBHOOK);
+    proxy.authenticate("test");
   }
 
   @Test(expected = UnregisteredSessionTokenException.class)

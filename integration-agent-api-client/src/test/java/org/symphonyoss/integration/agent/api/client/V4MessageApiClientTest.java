@@ -181,13 +181,11 @@ public class V4MessageApiClientTest {
   }
 
   @Test(expected = RemoteApiException.class)
-  public void testPostMessageWithRemoteApiException() throws RemoteApiException, IOException {
+  public void testPostMessageWithIOException() throws RemoteApiException, IOException {
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("sessionToken", MOCK_SESSION);
     headerParams.put("keyManagerToken", MOCK_KM_SESSION);
-
-    Map<String, String> queryParams = new HashMap<>();
 
     Message message = mockMessage();
 
