@@ -32,8 +32,6 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Unit test for {@link AsyncCompositeHealthIndicator}
@@ -74,13 +72,6 @@ public class AsyncCompositeHealthIndicatorTest {
 
     Health result = hi.health();
     assertEquals(Status.DOWN, result.getStatus());
-  }
-
-  @Test
-  public void testGetExecutionValueInterrupted() {
-    Health result = healthIndicator.health();
-    Health expected = Health.up().build();
-    assertEquals(expected, result);
   }
 
   @Test

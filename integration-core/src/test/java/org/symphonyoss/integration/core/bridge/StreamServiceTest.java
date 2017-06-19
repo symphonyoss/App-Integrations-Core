@@ -102,11 +102,8 @@ public class StreamServiceTest {
 
   @Test
   public void testInit() {
+    apiResolver.clear();
     streamService.init();
-
-    Map<MessageMLVersion, MessageApiClient> apiResolver =
-        (Map<MessageMLVersion, MessageApiClient>) Whitebox.getInternalState(streamService,
-            "apiResolver");
 
     assertNotNull(apiResolver);
     assertEquals(2, apiResolver.size());

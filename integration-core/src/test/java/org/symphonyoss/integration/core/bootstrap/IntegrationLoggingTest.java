@@ -19,6 +19,7 @@ package org.symphonyoss.integration.core.bootstrap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -72,6 +74,9 @@ public class IntegrationLoggingTest {
   @Spy
   private AtomicBoolean ready = new AtomicBoolean();
 
+  @Spy
+  private JsonUtils jsonUtils;
+
   @Before
   public void setUp() throws Exception {
     // Mocking configuration
@@ -100,11 +105,13 @@ public class IntegrationLoggingTest {
     assertTrue(queue.isEmpty());
   }
 
-  @Test(expected = RemoteApiException.class)
-  public void testLogIntegrationRemoteApiException() throws InterruptedException {
-    doThrow(RemoteApiException.class).when(integration).getSettings();
+  @Test
+  public void testLogIntegrationRemoteApiException() throws InterruptedException,
+      RemoteApiException {
+    doThrow(RemoteApiException.class).when(jsonUtils).serialize(any());
     integrationLogging.ready();
     integrationLogging.logIntegration(integration);
+    assertEquals(0, queue.size());
   }
 
   @Test

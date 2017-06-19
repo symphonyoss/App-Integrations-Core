@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.config;
 
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -58,6 +60,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Test class responsible to test the flows in the Integration Service.
@@ -144,22 +153,19 @@ public class LocalIntegrationServiceTest {
   }
 
   @Test
-  public void testSaveRepositoryLocally() throws IntegrationConfigException, IOException {
+  public void testSaveRepositoryLocally() throws IntegrationConfigException,
+      IOException, URISyntaxException {
     // Creates a temp file in a temp dir
     TemporaryFolder tmpDir = new TemporaryFolder();
     tmpDir.create();
-    String fileName = tmpDir.getRoot().getPath() + "/mock-configuration-tmp.json";
-    File file = new File(fileName);
-    file.createNewFile();
 
     // Writes mock config values into this temp file
-    InputStream initialStream = getClass().getClassLoader().getResourceAsStream(MOCK_CONFIGURATION);
-    byte[] buffer = new byte[initialStream.available()];
-    initialStream.read(buffer);
-    OutputStream outStream = new FileOutputStream(file);
-    outStream.write(buffer);
+    String toPathAsString = tmpDir.getRoot().getPath() + "/mock-configuration-tmp.json";
+    Path toPath = Paths.get(toPathAsString);
+    Path fromPath = Paths.get(getClass().getClassLoader().getResource(MOCK_CONFIGURATION).toURI());
+    Files.copy(fromPath, toPath, REPLACE_EXISTING, COPY_ATTRIBUTES);
 
-    doReturn(fileName).when(environment).getProperty(CONFIG_ENV_PROPERTY, DEFAULT_FILE_NAME);
+    doReturn(toPathAsString).when(environment).getProperty(CONFIG_ENV_PROPERTY, DEFAULT_FILE_NAME);
 
     service.init();
 

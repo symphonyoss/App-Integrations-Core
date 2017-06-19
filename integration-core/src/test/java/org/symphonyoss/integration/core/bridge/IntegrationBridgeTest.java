@@ -28,6 +28,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -235,19 +236,15 @@ public class IntegrationBridgeTest {
   @Test
   public void testGetIntegrationById() {
     Integration integration = new NullIntegration(null, null, null, null);
-    String integrationID = "null";
 
-    doReturn(integration).when(bootstrap).getIntegrationById(integrationID);
+    doReturn(integration).when(bootstrap).getIntegrationById(any(String.class));
 
-    assertEquals(integration, bridge.getIntegrationById(integrationID));
+    assertEquals(integration, bridge.getIntegrationById(null));
   }
 
   @Test
   public void testRemoveIntegration() {
-    String integrationID = "null";
-    doReturn(null).when(bootstrap).getIntegrationById(integrationID);
-
-    bridge.removeIntegration(integrationID);
-    assertNull(bridge.getIntegrationById(integrationID));
+    bridge.removeIntegration(null);
+    assertNull(bridge.getIntegrationById(null));
   }
 }

@@ -164,10 +164,7 @@ public class CompanyCertificateServiceTest {
     Keystore keystore = new Keystore();
     keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
 
-    Application application = new Application();
-    application.setId(APP_ID);
-    application.setComponent(APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(keystore);
 
     String name = service.getCommonNameFromApplicationCertificate(application);
     assertTrue(StringUtils.isEmpty(name));
@@ -180,10 +177,7 @@ public class CompanyCertificateServiceTest {
     keystore.setPassword(INVALID_KEYSTORE_PASSWORD);
     keystore.setFile(MOCK_KEYSTORE_FILE);
 
-    Application application = new Application();
-    application.setId(APP_ID);
-    application.setComponent(APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(keystore);
 
     service.getCommonNameFromApplicationCertificate(application);
   }
@@ -195,10 +189,7 @@ public class CompanyCertificateServiceTest {
     keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
     keystore.setFile(MOCK_KEYSTORE_FILE);
 
-    Application application = new Application();
-    application.setId(APP_ID);
-    application.setComponent(APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(keystore);
 
     String name = service.getCommonNameFromApplicationCertificate(application);
     assertEquals(MOCK_USER, name);
@@ -251,5 +242,13 @@ public class CompanyCertificateServiceTest {
     assertEquals(application.getId(), attributes.getName());
     assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
     assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
+  }
+
+  private Application getApplication(Keystore keystore) {
+    Application application = new Application();
+    application.setId(APP_ID);
+    application.setComponent(APP_TYPE);
+    application.setKeystore(keystore);
+    return application;
   }
 }

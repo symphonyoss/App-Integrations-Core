@@ -157,9 +157,7 @@ public class KeyPairServiceTest {
 
   @Test(expected = KeyPairException.class)
   public void testFailGenerateKeyPair() throws IOException {
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
+    Application application = getApplication(false);
 
     doReturn(-1).when(process).exitValue();
 
@@ -168,9 +166,7 @@ public class KeyPairServiceTest {
 
   @Test(expected = KeyPairException.class)
   public void testFailGenerateCSR() throws IOException, InterruptedException {
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
+    Application application = getApplication(false);
 
     IntegrationSettings settings = new IntegrationSettings();
     settings.setUsername(MOCK_APP_TYPE);
@@ -183,13 +179,7 @@ public class KeyPairServiceTest {
 
   @Test(expected = KeyPairException.class)
   public void testFailGenerateCertificate() throws IOException, InterruptedException {
-    Keystore keystore = new Keystore();
-    keystore.setPassword(MOCK_KEY_PASSWORD);
-
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(true);
 
     IntegrationSettings settings = new IntegrationSettings();
     settings.setUsername(MOCK_APP_TYPE);
@@ -202,13 +192,7 @@ public class KeyPairServiceTest {
 
   @Test(expected = KeyPairException.class)
   public void testFailGeneratePKCS12() throws IOException, InterruptedException {
-    Keystore keystore = new Keystore();
-    keystore.setPassword(MOCK_KEY_PASSWORD);
-
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(true);
 
     IntegrationSettings settings = new IntegrationSettings();
     settings.setUsername(MOCK_APP_TYPE);
@@ -220,13 +204,7 @@ public class KeyPairServiceTest {
 
   @Test(expected = KeyPairException.class)
   public void testFailSetOwnership() throws IOException, InterruptedException {
-    Keystore keystore = new Keystore();
-    keystore.setPassword(MOCK_KEY_PASSWORD);
-
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(true);
 
     IntegrationSettings settings = new IntegrationSettings();
     settings.setUsername(MOCK_APP_TYPE);
@@ -239,13 +217,7 @@ public class KeyPairServiceTest {
 
   @Test
   public void testSuccess() throws IOException {
-    Keystore keystore = new Keystore();
-    keystore.setPassword(MOCK_KEY_PASSWORD);
-
-    Application application = new Application();
-    application.setId(MOCK_APP_ID);
-    application.setComponent(MOCK_APP_TYPE);
-    application.setKeystore(keystore);
+    Application application = getApplication(true);
 
     IntegrationSettings settings = new IntegrationSettings();
     settings.setUsername(MOCK_APP_TYPE);
@@ -262,5 +234,19 @@ public class KeyPairServiceTest {
 
     verify(attributeView, times(2)).setOwner(userPrincipal);
     verify(attributeView, times(2)).setGroup(groupPrincipal);
+  }
+
+  private Application getApplication(boolean addKeystore) {
+    Application application = new Application();
+    application.setId(MOCK_APP_ID);
+    application.setComponent(MOCK_APP_TYPE);
+
+    if (addKeystore) {
+      Keystore keystore = new Keystore();
+      keystore.setPassword(MOCK_KEY_PASSWORD);
+      application.setKeystore(keystore);
+    }
+
+    return application;
   }
 }
