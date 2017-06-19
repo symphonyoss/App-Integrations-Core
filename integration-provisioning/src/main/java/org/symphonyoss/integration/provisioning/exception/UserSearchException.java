@@ -16,21 +16,21 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class UserSearchException extends RuntimeException {
+public class UserSearchException extends IntegrationRuntimeException {
 
-  public UserSearchException(String message) {
-    super(message);
+  private static final String COMPONENT = "User Provisioning";
+
+  public UserSearchException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
   }
 
-  public UserSearchException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public UserSearchException(Throwable cause) {
-    super(cause);
+  public UserSearchException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
 
 }

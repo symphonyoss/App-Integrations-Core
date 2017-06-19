@@ -18,6 +18,11 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.model.yaml.Keystore.DEFAULT_KEYSTORE_TYPE_SUFFIX;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_IMPORT_CERT;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT_INVALID_FILE;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT_PERMISSION;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -30,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
@@ -78,6 +83,9 @@ public class CompanyCertificateService {
 
   private SecurityApiClient securityApi;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   @PostConstruct
   public void init() {
     Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -102,7 +110,9 @@ public class CompanyCertificateService {
       try {
         securityApi.createCompanyCert(sessionToken, companyCert);
       } catch (RemoteApiException e) {
-        throw new CompanyCertificateException("Failed to import company certificate", e);
+        String message = logMessage.getMessage(FAIL_IMPORT_CERT);
+        String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+        throw new CompanyCertificateException(message, e, solution);
       }
     }
   }
@@ -127,7 +137,8 @@ public class CompanyCertificateService {
         pemWriter.flush();
         return sw.toString();
       } catch (IOException e) {
-        throw new CompanyCertificateException("Failed to encode PEM", e);
+        throw new CompanyCertificateException(logMessage.getMessage(FAIL_READ_CERT, fileName),
+            logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
       }
     }
   }
@@ -170,7 +181,7 @@ public class CompanyCertificateService {
 
     String password = application.getKeystore().getPassword();
 
-    try(FileInputStream inputStream = new FileInputStream(fileName)) {
+    try (FileInputStream inputStream = new FileInputStream(fileName)) {
       final KeyStore ks = KeyStore.getInstance("pkcs12");
       ks.load(inputStream, password.toCharArray());
 
@@ -182,8 +193,11 @@ public class CompanyCertificateService {
 
       return null;
     } catch (GeneralSecurityException | IOException e) {
-      throw new LoadKeyStoreException(
-          String.format("Fail to load keystore file at %s", fileName), e);
+      String message = logMessage.getMessage(FAIL_READ_CERT, fileName);
+      String permissionSolution = logMessage.getMessage(FAIL_READ_CERT_PERMISSION, fileName);
+      String invalidSolution = logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName);
+      throw new CompanyCertificateException(message, new Exception(), permissionSolution,
+          invalidSolution);
     }
   }
 
@@ -225,9 +239,13 @@ public class CompanyCertificateService {
             .getCertificate((X509CertificateHolder) cert);
       }
 
-      throw new CompanyCertificateException("Invalid cerficate " + fileName);
+      throw new CompanyCertificateException(logMessage.getMessage(FAIL_READ_CERT, fileName),
+          logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
     } catch (IOException | CertificateException e) {
-      throw new CompanyCertificateException("Failed to read PEM file", e);
+      String message = logMessage.getMessage(FAIL_READ_CERT, fileName);
+      String permissionSolution = logMessage.getMessage(FAIL_READ_CERT_PERMISSION, fileName);
+      String invalidSolution = logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName);
+      throw new CompanyCertificateException(message, e, permissionSolution, invalidSolution);
     }
   }
 

@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
@@ -113,6 +114,9 @@ public class CompanyCertificateServiceTest {
   private IntegrationUtils utils;
 
   private Application application;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private CompanyCertificateService service;

@@ -16,8 +16,13 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
+import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.FAIL_GET_USER_BY_USERNAME;
+import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.FAIL_SAVE_APP;
+import static org.symphonyoss.integration.provisioning.properties.ApplicationProperties.FAIL_UPDATE_APP_SETTINGS;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -70,6 +76,9 @@ public class ApplicationService {
   @Autowired
   private IntegrationProperties properties;
 
+  @Autowired
+  private LogMessageSource logMessage;
+  
   private AppEntitlementApiClient appEntitlementApi;
 
   @PostConstruct
@@ -91,7 +100,9 @@ public class ApplicationService {
       User user = userService.getUser(appType);
 
       if (user == null) {
-        throw new UserSearchException("Fail to retrieve user information. Username: " + appType);
+        String message = logMessage.getMessage(FAIL_GET_USER_BY_USERNAME, appType);
+        String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+        throw new UserSearchException(message, solution);
       }
 
       settings.setOwner(user.getId());
@@ -112,8 +123,9 @@ public class ApplicationService {
         updateAppSettings(application);
       }
     } catch (AppRepositoryClientException | MalformedURLException e) {
-      throw new ApplicationProvisioningException("Fail to provisioning application. AppId: " +
-          application.getId(), e);
+      String message = logMessage.getMessage(FAIL_SAVE_APP, application.getId(), StringUtils.EMPTY);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new ApplicationProvisioningException(message, e, solution);
     }
   }
 
@@ -146,8 +158,9 @@ public class ApplicationService {
         return false;
       }
     } catch (AppRepositoryClientException | RemoteApiException e) {
-      throw new ApplicationProvisioningException("Fail to update application settings. AppId: " +
-          appType, e);
+      String message = logMessage.getMessage(FAIL_UPDATE_APP_SETTINGS, appType);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new ApplicationProvisioningException(message, e, solution);
     }
   }
 }

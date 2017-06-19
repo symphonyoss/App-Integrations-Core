@@ -26,9 +26,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.AdminUser;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 import org.symphonyoss.integration.provisioning.service.AuthenticationService;
 
 /**
@@ -47,6 +50,8 @@ public class IntegrationProvisioningApp {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationProvisioningApp.class);
 
+  private static final String FAIL_AUTH_ADMIN_USER = "provisioning.auth.unknown.exception";
+
   /**
    * Default keystore type.
    */
@@ -60,6 +65,9 @@ public class IntegrationProvisioningApp {
 
   @Autowired
   private IntegrationProperties properties;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Entry point for the Provisioning App.
@@ -127,8 +135,12 @@ public class IntegrationProvisioningApp {
       authService.authenticate(DEFAULT_USER_ID, trustStore, trustStorePassword, trustStoreType,
           keyStore, keyStorePassword, DEFAULT_KEYSTORE_TYPE);
       return true;
+    } catch (IntegrationRuntimeException e) {
+      LOGGER.error(e.getMessage());
+      return false;
     } catch (Exception e) {
-      LOGGER.error("Failed to authenticate the provisioning user.", e);
+      String message = logMessage.getMessage(FAIL_AUTH_ADMIN_USER);
+      LOGGER.error(message, e);
       return false;
     }
   }

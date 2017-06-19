@@ -16,21 +16,17 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class IntegrationProvisioningAuthException extends RuntimeException {
+public class IntegrationProvisioningAuthException extends IntegrationRuntimeException {
 
-  public IntegrationProvisioningAuthException(String message) {
-    super(message);
-  }
+  private static final String COMPONENT = "Auth Provisioning";
 
-  public IntegrationProvisioningAuthException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public IntegrationProvisioningAuthException(Throwable cause) {
-    super(cause);
+  public IntegrationProvisioningAuthException(String message, Throwable cause, String... solution) {
+    super(COMPONENT, message, cause, solution);
   }
 
 }

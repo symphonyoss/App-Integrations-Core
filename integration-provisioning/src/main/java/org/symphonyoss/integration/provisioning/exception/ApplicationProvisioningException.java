@@ -16,21 +16,21 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class ApplicationProvisioningException extends RuntimeException {
+public class ApplicationProvisioningException extends IntegrationRuntimeException {
 
-  public ApplicationProvisioningException(String message) {
-    super(message);
+  private static final String COMPONENT = "Application Provisioning";
+
+  public ApplicationProvisioningException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
   }
 
-  public ApplicationProvisioningException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public ApplicationProvisioningException(Throwable cause) {
-    super(cause);
+  public ApplicationProvisioningException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
 
 }

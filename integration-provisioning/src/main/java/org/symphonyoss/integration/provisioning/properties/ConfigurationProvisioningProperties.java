@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.exception;
+package org.symphonyoss.integration.provisioning.properties;
 
-import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
 
 /**
- * Created by rsanchez on 29/06/16.
+ * Exception message keys used by the component {@link ConfigurationProvisioningService}
+ * Created by rsanchez on 19/06/17.
  */
-public class UpdateUserException extends IntegrationRuntimeException {
+public class ConfigurationProvisioningProperties {
 
-  private static final String COMPONENT = "User Provisioning";
+  public static final String GET_CONFIG_FAIL = "provisioning.config.get.fail";
 
-  public UpdateUserException(String message, Throwable cause, String... solution) {
-    super(COMPONENT, message, cause, solution);
-  }
+  public static final String SAVE_CONFIG_FAIL = "provisioning.config.save.fail";
 
 }

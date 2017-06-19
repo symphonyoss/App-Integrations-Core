@@ -16,21 +16,21 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class CompanyCertificateException extends RuntimeException {
+public class CompanyCertificateException extends IntegrationRuntimeException {
 
-  public CompanyCertificateException(String message) {
-    super(message);
+  private static final String COMPONENT = "Company Certificate Provisioning";
+
+  public CompanyCertificateException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
   }
 
-  public CompanyCertificateException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public CompanyCertificateException(Throwable cause) {
-    super(cause);
+  public CompanyCertificateException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
 
 }

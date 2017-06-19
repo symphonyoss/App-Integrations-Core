@@ -16,6 +16,12 @@
 
 package org.symphonyoss.integration.provisioning;
 
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_AVATAR_FAIL;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_AVATAR_NOT_FOUND;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_FAIL;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_MISSING_INFO;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_MISSING_INFO_SOLUTION;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
@@ -86,6 +93,9 @@ public class IntegrationProvisioningService {
   @Value("${spring.config.name:application}")
   private String configName;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   /**
    * The entry point for the provisioning service, responsible for provisioning Symphony Apps, Bot
    * Users, Bot Users's authentication certificates, and Webhook Configurations.
@@ -98,11 +108,12 @@ public class IntegrationProvisioningService {
     LOGGER.info("Retrieving applications.\n");
 
     Map<String, ApplicationState> summary = new LinkedHashMap<>();
-    Map<String, Application> applications = properties.getApplications();
 
     String appId = StringUtils.EMPTY;
 
     try {
+      Map<String, Application> applications = properties.getApplications();
+
       for (String app : applications.keySet()) {
         summary.put(app, ApplicationState.SKIPPED);
       }
@@ -122,10 +133,10 @@ public class IntegrationProvisioningService {
         summary.put(appId, application.getState());
       }
     } catch (IntegrationRuntimeException e) {
-      LOGGER.error("Failed to configure application: {}. {}", appId, e.getMessage());
+      LOGGER.error(logMessage.getMessage(APP_FAIL, appId, e.getMessage()));
       summary.put(appId, ApplicationState.FAILED);
     } catch (Exception e) {
-      LOGGER.error("Failed to configure application: " + appId, e);
+      LOGGER.error(logMessage.getMessage(APP_FAIL, appId, StringUtils.EMPTY), e);
       summary.put(appId, ApplicationState.FAILED);
     } finally {
       printSummary(summary);
@@ -217,7 +228,9 @@ public class IntegrationProvisioningService {
 
       loadApplicationAvatar(application);
     } else {
-      throw new ApplicationProvisioningException("Failed to get application info (app id: " + appId + ")");
+      String message = logMessage.getMessage(APP_MISSING_INFO, appId);
+      String solution = logMessage.getMessage(APP_MISSING_INFO_SOLUTION);
+      throw new ApplicationProvisioningException(message, solution);
     }
   }
 
@@ -239,10 +252,10 @@ public class IntegrationProvisioningService {
         String avatar = getAvatarImage(resource);
         application.setAvatar(avatar);
       } else {
-        LOGGER.info("Avatar image to {} not exists.",  applicationId);
+        LOGGER.info(logMessage.getMessage(APP_AVATAR_NOT_FOUND, applicationId));
       }
     } catch (IOException e) {
-      LOGGER.error("Can't find the avatar to " + applicationId, e);
+      LOGGER.error(logMessage.getMessage(APP_AVATAR_FAIL, applicationId), e);
     }
   }
 
