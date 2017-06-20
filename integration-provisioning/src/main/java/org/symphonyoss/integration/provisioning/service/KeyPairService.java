@@ -16,7 +16,8 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.GENERATE_CERTIFICATE;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
+    .GENERATE_CERTIFICATE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,10 +55,6 @@ public class KeyPairService {
   private static final Logger LOGGER = LoggerFactory.getLogger(KeyPairService.class);
 
   private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
-
-  public static final String FILE_OWNERSHIP_USER = "ibridge";
-
-  public static final String FILE_OWNERSHIP_GROUP = "ibridge";
 
   private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
       + " %s 2048";
@@ -138,7 +135,8 @@ public class KeyPairService {
     LOGGER.info("Generating certificate signing request: {}", application.getComponent());
 
     String password = String.format("pass:%s", getTempPassword(application));
-    String subject = String.format("/CN=%s/O=%s/C=%s", username, DEFAULT_ORGANIZATION, Locale.US.getCountry());
+    String subject =
+        String.format("/CN=%s/O=%s/C=%s", username, DEFAULT_ORGANIZATION, Locale.US.getCountry());
 
     String appReqFilename = String.format("%s/%s-req.pem", System.getProperty("java.io.tmpdir"),
         application.getId());
@@ -188,33 +186,6 @@ public class KeyPairService {
     }
 
     executeProcess(genPKCS12Command);
-
-    setFileOwnership(appCertFilename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
-    setFileOwnership(appPKCS12Filename, FILE_OWNERSHIP_USER, FILE_OWNERSHIP_GROUP);
-  }
-
-  /**
-   * Sets the ownership of the given file with according to the user
-   */
-  private void setFileOwnership(String filename, String user, String group) {
-    LOGGER.info("Setting ownership for {} ({}:{})", filename, user, group);
-
-    UserPrincipalLookupService lookupService = FileSystems.getDefault().getUserPrincipalLookupService();
-    File targetFile = new File(filename);
-    PosixFileAttributeView fileAttributeView =
-        Files.getFileAttributeView(targetFile.toPath(), PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
-
-    try {
-      UserPrincipal userPrincipal = lookupService.lookupPrincipalByName(user);
-      GroupPrincipal groupPrincipal = lookupService.lookupPrincipalByGroupName(group);
-      fileAttributeView.setOwner(userPrincipal);
-      fileAttributeView.setGroup(groupPrincipal);
-    } catch (IOException e) {
-      throw new KeyPairException(
-          String.format("Cannot set ownership for %s. Failed to lookup user or group (%s:%s)", filename, user, group),
-          e);
-    }
-
   }
 
   /**
