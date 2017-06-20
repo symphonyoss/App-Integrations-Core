@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
 
@@ -42,4 +43,15 @@ public class IntegrationBootstrapInfoTest {
     assertEquals(2, integrationInfo.getRetryAttemptCounter());
   }
 
+  @Test
+  public void testMaxRetryAttemptRegistry() throws InterruptedException {
+    IntegrationBootstrapInfo integrationInfo = new IntegrationBootstrapInfo("jira", mock(Integration.class));
+    Whitebox.setInternalState(integrationInfo, "retryAttempts", Integer.MAX_VALUE);
+
+    assertEquals(Integer.MAX_VALUE, integrationInfo.getRetryAttemptCounter());
+    assertEquals(Integer.MAX_VALUE, integrationInfo.getRetryAttemptCounter());
+    assertEquals(Integer.MAX_VALUE, integrationInfo.registerRetryAttempt());
+    assertEquals(Integer.MAX_VALUE, integrationInfo.registerRetryAttempt());
+    assertEquals(Integer.MAX_VALUE, integrationInfo.getRetryAttemptCounter());
+  }
 }

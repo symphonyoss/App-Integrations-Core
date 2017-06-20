@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -31,10 +32,13 @@ import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.pod.api.model.Avatar;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
 import org.symphonyoss.integration.pod.api.model.UserCreate;
 import org.symphonyoss.integration.pod.api.model.UserDetail;
+import org.symphonyoss.integration.pod.api.model.UserPassword;
+import org.symphonyoss.integration.pod.api.model.UserSystemInfo;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -250,15 +254,46 @@ public class UserApiClientTest {
     UserCreate userInfo = new UserCreate();
     userInfo.setUserAttributes(userAttributes);
 
+    UserPassword userPassword = new UserPassword();
+    userPassword.sethPassword("hPassword");
+    userPassword.sethSalt("hSalt");
+    userPassword.setKhPassword("khPassword");
+    userPassword.setKhSalt("khSalt");
+    userInfo.setPassword(userPassword);
+
+    userInfo.setRoles(Collections.<String>emptyList());
+
     UserDetail expected = new UserDetail();
     expected.setUserAttributes(userAttributes);
+
+    expected.setApps(Collections.<Long>emptyList());
+
+    Avatar avatar = new Avatar();
+    avatar.setSize("size");
+    avatar.setUrl("url");
+    expected.setAvatar(avatar);
+
+    expected.setDisclaimers(Collections.<Long>emptyList());
+    expected.setFeatures(Collections.<Long>emptyList());
+    expected.setGroups(Collections.<Long>emptyList());
+    expected.setRoles(Collections.<String>emptyList());
+
+    UserSystemInfo userSystemInfo = new UserSystemInfo();
+    userSystemInfo.setCreatedBy("createdBy");
+    userSystemInfo.setCreatedDate(0l);
+    userSystemInfo.setId(0l);
+    userSystemInfo.setLastLoginDate(0l);
+    userSystemInfo.setLastPasswordReset(0l);
+    userSystemInfo.setLastUpdatedDate(0l);
+    userSystemInfo.setStatus(UserSystemInfo.StatusEnum.ENABLED);
+    expected.setUserSystemInfo(userSystemInfo);
 
     doReturn(expected).when(httpClient)
         .doPost("/v1/admin/user/create", headerParams, Collections.<String, String>emptyMap(),
             userInfo, UserDetail.class);
 
     UserDetail result = apiClient.createUser(MOCK_SESSION, userInfo);
-
+    assertTrue(equalsUserAttributes(expected.getUserAttributes(), result.getUserAttributes()));
     assertEquals(expected, result);
   }
 
@@ -385,7 +420,37 @@ public class UserApiClientTest {
     attributes.setDisplayName(MOCK_FIRST_NAME + " " + MOCK_LAST_NAME);
     attributes.setEmailAddress(MOCK_USERNAME + "@symphony.com");
 
+    attributes.setDepartment("department");
+    attributes.setDivision("division");
+    attributes.setTitle("title");
+    attributes.setWorkPhoneNumber("workPhoneNumber");
+    attributes.setMobilePhoneNumber("mobilePhoneNumber");
+    attributes.setSmsNumber("smsNumber");
+    attributes.setAccountType(UserAttributes.AccountTypeEnum.NORMAL);
+    attributes.setLocation("location");
+    attributes.setJobFunction("jobFunction");
+    attributes.setAssetClasses(Collections.<String>emptyList());
+    attributes.setIndustries(Collections.<String>emptyList());
+
     return attributes;
   }
 
+  private boolean equalsUserAttributes(UserAttributes expected, UserAttributes result) {
+    return expected.getUserName().equals(result.getUserName()) &&
+        expected.getFirstName().equals(result.getFirstName()) &&
+        expected.getLastName().equals(result.getLastName()) &&
+        expected.getDisplayName().equals(result.getDisplayName()) &&
+        expected.getEmailAddress().equals(result.getEmailAddress()) &&
+        expected.getDepartment().equals(result.getDepartment()) &&
+        expected.getDivision().equals(result.getDivision()) &&
+        expected.getTitle().equals(result.getTitle()) &&
+        expected.getWorkPhoneNumber().equals(result.getWorkPhoneNumber()) &&
+        expected.getMobilePhoneNumber().equals(result.getMobilePhoneNumber()) &&
+        expected.getSmsNumber().equals(result.getSmsNumber()) &&
+        expected.getAccountType().equals(result.getAccountType()) &&
+        expected.getLocation().equals(result.getLocation()) &&
+        expected.getJobFunction().equals(result.getJobFunction()) &&
+        expected.getAssetClasses().equals(result.getAssetClasses()) &&
+        expected.getIndustries().equals(result.getIndustries());
+  }
 }

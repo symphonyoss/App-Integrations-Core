@@ -27,7 +27,4 @@ public class IntegrationUnavailableException extends IntegrationException {
     super(String.format("Configuration %s unavailable!", configurationType));
   }
 
-  public IntegrationUnavailableException(String configurationType, String message) {
-    super(String.format("Configuration %s unavailable! %s", configurationType, message));
-  }
 }

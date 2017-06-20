@@ -59,6 +59,8 @@ public class WebHookOriginCheckFilterTest {
 
   private static final String BEAN_NAME = "jiraWebHookIntegration";
 
+  private static final String UNKNOWN_ADDRESS = "unknown";
+
   private static final String REMOTE_ADDRESS = "192.30.252.40";
 
   private static final String REMOTE_ADDRESS_LIST_FIRST_IP_ALLOWED = "192.30.252.40, 168.140.252.55";
@@ -130,6 +132,13 @@ public class WebHookOriginCheckFilterTest {
 
   @Test
   public void testRemoteAddressNotAllowed() throws IOException, ServletException {
+    filter.doFilter(request, response, new MockFilterChain());
+    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testUnknownHost() throws IOException, ServletException {
+    doReturn(UNKNOWN_ADDRESS).when(request).getHeader(FORWARD_HEADER);
     filter.doFilter(request, response, new MockFilterChain());
     assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
   }

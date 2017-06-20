@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -26,19 +27,21 @@ import static org.mockito.Mockito.doThrow;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.Keystore;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
 import org.symphonyoss.integration.pod.api.model.CompanyCertAttributes;
@@ -48,8 +51,12 @@ import org.symphonyoss.integration.pod.api.model.CompanyCertType;
 import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.io.IOException;
 import java.net.URL;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateException;
 
 /**
  * Unit test for {@link CompanyCertificateService}
@@ -104,6 +111,18 @@ public class CompanyCertificateServiceTest {
       + "CEuc8SaA/5dOJDEAPy5b1KdRR1lJnEHfgisGhc2S5h0KQYdGDkRNtMLNmg==\n"
       + "-----END CERTIFICATE-----\n";
 
+  private static final String APP_ID = "jira";
+
+  private static final String APP_TYPE = "jiraWebHookIntegration";
+
+  private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
+
+  private static final String INVALID_KEYSTORE_PASSWORD = "invalidPassword";
+
+  private static final String MOCK_KEYSTORE_FILE = "mock.p12";
+
+  private static final String MOCK_USER = "testuser";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
@@ -129,13 +148,55 @@ public class CompanyCertificateServiceTest {
     this.application.setId(MOCK_APP_ID);
     this.application.setComponent(MOCK_APP_TYPE);
 
-
     URL certResource = getClass().getClassLoader().getResource(CERT_NAME);
     String certDir = certResource.getFile().replace(CERT_NAME, "");
 
     doReturn(certDir).when(utils).getCertsDirectory();
 
     doReturn(MOCK_SESSION_ID).when(authenticationProxy).getSessionToken(DEFAULT_USER_ID);
+  }
+
+  @Test
+  public void testInit() {
+    service.init();
+    Object obj = Whitebox.getInternalState(service, "securityApi");
+    assertNotNull(obj);
+  }
+
+  @Test
+  public void testGetEmptyCommonNameFromApplicationCertificate() {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+
+    Application application = getApplication(keystore);
+
+    String name = service.getCommonNameFromApplicationCertificate(application);
+    assertTrue(StringUtils.isEmpty(name));
+  }
+
+  @Test(expected = CompanyCertificateException.class)
+  public void testFailGetCommonNameFromApplicationCertificate()
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(INVALID_KEYSTORE_PASSWORD);
+    keystore.setFile(MOCK_KEYSTORE_FILE);
+
+    Application application = getApplication(keystore);
+
+    service.getCommonNameFromApplicationCertificate(application);
+  }
+
+  @Test
+  public void testGetCommonNameFromApplicationCertificateEmptyAliases()
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    keystore.setFile(MOCK_KEYSTORE_FILE);
+
+    Application application = getApplication(keystore);
+
+    String name = service.getCommonNameFromApplicationCertificate(application);
+    assertEquals(MOCK_USER, name);
   }
 
   @Test
@@ -185,5 +246,13 @@ public class CompanyCertificateServiceTest {
     assertEquals(application.getId(), attributes.getName());
     assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
     assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
+  }
+
+  private Application getApplication(Keystore keystore) {
+    Application application = new Application();
+    application.setId(APP_ID);
+    application.setComponent(APP_TYPE);
+    application.setKeystore(keystore);
+    return application;
   }
 }

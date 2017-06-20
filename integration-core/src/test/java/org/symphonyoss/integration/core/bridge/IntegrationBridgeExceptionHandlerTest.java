@@ -105,6 +105,15 @@ public class IntegrationBridgeExceptionHandlerTest {
   }
 
   @Test
+  public void testBadRequestConfigurationException() throws IntegrationConfigException, IOException {
+    IntegrationInstance instance = mockInstance();
+
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(400, new RuntimeException()),
+        instance, INTEGRATION_USER, STREAM);
+    assertTrue(messagePosted.isEmpty());
+  }
+
+  @Test
   public void testForbiddenConfigurationException() throws IntegrationConfigException, IOException {
     IntegrationInstance instance = mockInstance();
 

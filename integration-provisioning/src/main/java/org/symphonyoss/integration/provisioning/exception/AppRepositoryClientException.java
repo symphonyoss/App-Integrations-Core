@@ -21,14 +21,6 @@ package org.symphonyoss.integration.provisioning.exception;
  */
 public class AppRepositoryClientException extends Exception {
 
-  public AppRepositoryClientException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public AppRepositoryClientException(Throwable cause) {
-    super(cause);
-  }
-
   public AppRepositoryClientException(String message) {
     super(message);
   }

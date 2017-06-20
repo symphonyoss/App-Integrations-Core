@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -179,12 +180,28 @@ public class NullIntegrationTest extends MockKeystore {
 
     integration.onCreate(APP_TYPE);
 
-    IntegrationHealth health = integration.getHealthManager().getHealth();
+    IntegrationHealth health = integration.getHealthStatus();
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.OK, flags.getCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+  }
+
+  @Test
+  public void testGetSettings() {
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+
+    assertNull(integration.getSettings());
+  }
+
+  @Test
+  public void testGetIntegrationWhiteList() {
+    NullIntegration integration =
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+
+    assertEquals(Collections.emptySet(), integration.getIntegrationWhiteList());
   }
 }

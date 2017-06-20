@@ -60,9 +60,9 @@ public class KeyPairService {
 
   private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
 
-  private static final String FILE_OWNERSHIP_USER = "ibridge";
+  public static final String FILE_OWNERSHIP_USER = "ibridge";
 
-  private static final String FILE_OWNERSHIP_GROUP = "ibridge";
+  public static final String FILE_OWNERSHIP_GROUP = "ibridge";
 
   private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
       + " %s 2048";

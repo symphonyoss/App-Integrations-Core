@@ -31,6 +31,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
 import org.symphonyoss.integration.pod.api.model.CompanyCertAttributes;
 import org.symphonyoss.integration.pod.api.model.CompanyCertDetail;
+import org.symphonyoss.integration.pod.api.model.CompanyCertInfo;
 import org.symphonyoss.integration.pod.api.model.CompanyCertStatus;
 import org.symphonyoss.integration.pod.api.model.CompanyCertType;
 
@@ -99,12 +100,24 @@ public class SecurityApiClientTest {
     CompanyCertDetail expected = new CompanyCertDetail();
     expected.setCompanyCertAttributes(companyCert.getAttributes());
 
+    CompanyCertInfo companyCertInfo = new CompanyCertInfo();
+    companyCertInfo.setCommonName("commonName");
+    companyCertInfo.setExpiryDate(0l);
+    companyCertInfo.setFingerPrint("fingerPrint");
+    companyCertInfo.setIssuerFingerPrint("issuerFingerPrint");
+    companyCertInfo.setLastSeen(0l);
+    companyCertInfo.setUpdatedAt(0l);
+    companyCertInfo.setUpdatedBy(0l);
+    expected.setCompanyCertInfo(companyCertInfo);
+
     doReturn(expected).when(httpClient)
         .doPost("/v2/companycert/create", headerParams, Collections.<String, String>emptyMap(),
             companyCert, CompanyCertDetail.class);
 
     CompanyCertDetail result = apiClient.createCompanyCert(MOCK_SESSION, companyCert);
 
+    assertEquals(expected.getCompanyCertAttributes(), result.getCompanyCertAttributes());
+    assertEquals(expected.getCompanyCertInfo(), result.getCompanyCertInfo());
     assertEquals(expected, result);
   }
 

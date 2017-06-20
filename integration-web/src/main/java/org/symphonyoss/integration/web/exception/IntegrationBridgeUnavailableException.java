@@ -18,8 +18,6 @@ package org.symphonyoss.integration.web.exception;
 
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 
-import java.util.List;
-
 /**
  * Should be used when Integration Bridge is refusing all kinds of messages for any reason.
  *
@@ -32,15 +30,4 @@ public class IntegrationBridgeUnavailableException extends IntegrationRuntimeExc
     super(COMPONENT, message);
   }
 
-  public IntegrationBridgeUnavailableException(String message, String... solutions) {
-    super(COMPONENT, message, solutions);
-  }
-
-  public IntegrationBridgeUnavailableException(String message, Throwable cause, String... solutions) {
-    super(COMPONENT, message, cause, solutions);
-  }
-
-  public IntegrationBridgeUnavailableException(String message, Throwable cause) {
-    super(COMPONENT, message, cause);
-  }
 }

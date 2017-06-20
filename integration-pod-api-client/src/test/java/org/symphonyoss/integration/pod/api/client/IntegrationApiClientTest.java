@@ -17,6 +17,8 @@
 package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 
@@ -29,6 +31,7 @@ import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
+import org.symphonyoss.integration.pod.api.model.IntegrationSettingsList;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
 
 import java.util.Collections;
@@ -112,6 +115,62 @@ public class IntegrationApiClientTest {
     integration.setVisible(Boolean.FALSE);
 
     return integration;
+  }
+
+  @Test
+  public void testNullListIntegrations() throws RemoteApiException {
+    IntegrationSettingsList list = apiClient.listIntegrations(MOCK_SESSION, 0, 10);
+    assertNull(list);
+  }
+
+  @Test
+  public void testActivateIntegration() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+
+    IntegrationSettings integration = mockIntegration();
+
+    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID;
+
+    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
+    doReturn(integration).when(httpClient)
+        .doGet(path, headerParams, Collections.<String, String>emptyMap(),
+            IntegrationSettings.class);
+
+    IntegrationSettings is = apiClient.activateIntegration(MOCK_SESSION, MOCK_CONFIGURATION_ID);
+    assertNull(is);
+
+    try {
+      is = apiClient.activateIntegration(MOCK_SESSION, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+    }
+  }
+
+  @Test
+  public void testDeactivateIntegration() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("sessionToken", MOCK_SESSION);
+
+    IntegrationSettings integration = mockIntegration();
+
+    String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID;
+
+    doReturn(MOCK_CONFIGURATION_ID).when(httpClient).escapeString(MOCK_CONFIGURATION_ID);
+    doReturn(integration).when(httpClient)
+        .doGet(path, headerParams, Collections.<String, String>emptyMap(),
+            IntegrationSettings.class);
+
+    IntegrationSettings is = apiClient.deactivateIntegration(MOCK_SESSION, MOCK_CONFIGURATION_ID);
+    assertNull(is);
+
+    try {
+      is = apiClient.deactivateIntegration(MOCK_SESSION, null);
+      fail();
+    } catch (RemoteApiException e) {
+      assertEquals(400, e.getCode());
+    }
   }
 
   @Test

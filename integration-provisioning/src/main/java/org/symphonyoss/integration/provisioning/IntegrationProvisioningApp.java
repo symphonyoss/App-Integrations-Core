@@ -102,7 +102,7 @@ public class IntegrationProvisioningApp {
    * Executes the Provisioning process.
    * @return Success indication (boolean).
    */
-  private boolean execute() {
+  public boolean execute() {
     boolean success = authenticate();
     if (success) {
       success = service.configure();
