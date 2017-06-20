@@ -16,6 +16,9 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
@@ -25,10 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,11 +55,12 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.HashMap;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -117,6 +118,9 @@ public class IntegrationBootstrapContextTest {
 
   @Mock
   private IntegrationLogging logging;
+
+  @Mock
+  private IntegrationUtils integrationUtils;
 
   /**
    * Setting up the mocks needed for most tests.
@@ -387,5 +391,25 @@ public class IntegrationBootstrapContextTest {
 
     // Verify if logging method was called
     assertEquals(this.logHealthApplicationCounter.get(), 0);
+  }
+
+  @Test
+  public void testStartupBootstrappingNullIntegration() {
+    Application application = new Application();
+    application.setComponent(StringUtils.EMPTY);
+    application.setState(ApplicationState.PROVISIONED);
+
+    String appID = "null";
+    Map<String, Application> apps = new HashMap<>();
+    apps.put(appID, application);
+
+    doReturn(apps).when(properties).getApplications();
+
+    doThrow(IntegrationRuntimeException.class).when(integrationUtils).getCertsDirectory();
+
+    integrationBootstrapContext.initIntegrations();
+
+    Integration integration = integrationBootstrapContext.getIntegrationById(appID);
+    assertNull(integration);
   }
 }

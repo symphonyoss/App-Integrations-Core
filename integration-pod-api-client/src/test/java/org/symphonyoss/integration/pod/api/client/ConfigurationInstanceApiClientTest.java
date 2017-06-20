@@ -108,6 +108,8 @@ public class ConfigurationInstanceApiClientTest {
     IntegrationInstanceSubmissionCreate create = new IntegrationInstanceSubmissionCreate();
     create.setConfigurationId(instance.getConfigurationId());
     create.setOptionalProperties(instance.getOptionalProperties());
+    create.setName("name");
+    create.setCreatorId("creatorId");
 
     String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID + "/instance/create";
 
@@ -199,6 +201,7 @@ public class ConfigurationInstanceApiClientTest {
     update.setConfigurationId(instance.getConfigurationId());
     update.setInstanceId(instance.getInstanceId());
     update.setOptionalProperties(instance.getOptionalProperties());
+    update.setName(instance.getName());
 
     String path =
         "/v1/admin/configuration/" + MOCK_CONFIGURATION_ID + "/instance/" + MOCK_INSTANCE_ID +

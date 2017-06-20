@@ -33,6 +33,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -89,6 +90,18 @@ public class IntegrationProvisioningServiceTest {
 
     doReturn(settings).when(configurationService).setupConfiguration(any(Application.class));
     doReturn(Boolean.TRUE).when(applicationService).updateAppSettings(any(Application.class));
+  }
+
+  @Test
+  public void testConfigureIntegrationRuntimeException() {
+    doThrow(IntegrationRuntimeException.class).when(properties).getIntegrationBridge();
+    assertFalse(service.configure());
+  }
+
+  @Test
+  public void testSkippedApplication() {
+    doReturn(Boolean.FALSE).when(applicationService).updateAppSettings(any(Application.class));
+    assertFalse(service.configure());
   }
 
   @Test

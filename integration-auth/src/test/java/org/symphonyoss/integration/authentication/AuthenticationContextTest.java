@@ -22,14 +22,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+
+import java.security.KeyStore;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Configuration;
@@ -62,9 +66,17 @@ public class AuthenticationContextTest {
 
   private AuthenticationContext authContext;
 
+  @Mock
+  private KeyStore keyStore;
+
   @Before
   public void initAuthenticationContext() {
-    authContext = new AuthenticationContext(USER_ID, null, null, new ApiClientConfig());
+    authContext = new AuthenticationContext(USER_ID, null, null, null);
+  }
+
+  @Test (expected = IllegalStateException.class)
+  public void testInvalidKeystore() throws RemoteApiException {
+    authContext = new AuthenticationContext(USER_ID, keyStore, "12345", null);
   }
 
   @Test

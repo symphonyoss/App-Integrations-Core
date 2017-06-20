@@ -24,9 +24,4 @@ public class ConfigurationProvisioningException extends RuntimeException {
   public ConfigurationProvisioningException(String message, Throwable cause) {
     super(message, cause);
   }
-
-  public ConfigurationProvisioningException(Throwable cause) {
-    super(cause);
-  }
-
 }

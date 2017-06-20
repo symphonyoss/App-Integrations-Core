@@ -28,9 +28,4 @@ public class CompanyCertificateException extends RuntimeException {
   public CompanyCertificateException(String message, Throwable cause) {
     super(message, cause);
   }
-
-  public CompanyCertificateException(Throwable cause) {
-    super(cause);
-  }
-
 }

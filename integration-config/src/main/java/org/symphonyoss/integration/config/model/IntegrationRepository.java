@@ -64,17 +64,6 @@ public class IntegrationRepository {
     return new ArrayList<>(instanceMap.values());
   }
 
-  public List<IntegrationInstance> getInstances(String configurationId) {
-    List<IntegrationInstance> result = new ArrayList<>();
-    for (IntegrationInstance instance : instanceMap.values()) {
-      if (configurationId.equals(instance.getConfigurationId())) {
-        result.add(instance);
-      }
-    }
-
-    return result;
-  }
-
   public void setInstances(List<IntegrationInstance> instances) {
     for (IntegrationInstance instance : instances) {
       this.instanceMap.put(instance.getInstanceId(), instance);

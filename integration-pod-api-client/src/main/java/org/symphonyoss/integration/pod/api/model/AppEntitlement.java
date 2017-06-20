@@ -34,15 +34,6 @@ public class AppEntitlement {
 
   public AppEntitlement() {}
 
-  public AppEntitlement(String appId, String appName, Boolean enable, Boolean listed,
-      Boolean install) {
-    this.appId = appId;
-    this.appName = appName;
-    this.enable = enable;
-    this.listed = listed;
-    this.install = install;
-  }
-
   public String getAppId() {
     return appId;
   }

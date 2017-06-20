@@ -57,10 +57,12 @@ public class WebHookTracingFilterTest {
    */
   @Test
   public void testDoFilterNoHeaderDefaultBehavior() throws IOException, ServletException {
+    webHookTracingFilter.init(null);
     webHookTracingFilter.doFilter(mock(HttpServletRequest.class), mock(ServletResponse.class), mock(
         FilterChain.class));
     // should have already cleared MDC after filter is done
     assertNull(MDC.get(TRACE_ID));
+    webHookTracingFilter.destroy();
   }
 
   /**

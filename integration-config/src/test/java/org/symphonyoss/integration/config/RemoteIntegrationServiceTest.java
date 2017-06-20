@@ -42,7 +42,6 @@ import org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
-import org.symphonyoss.integration.service.IntegrationService;
 
 import javax.ws.rs.core.Response;
 
@@ -76,7 +75,7 @@ public class RemoteIntegrationServiceTest {
   private ConfigurationInstanceApiClient instanceApiClient;
 
   @InjectMocks
-  private IntegrationService remoteIntegrationService = new RemoteIntegrationService();
+  private RemoteIntegrationService remoteIntegrationService;
 
   @Before
   public void setUp() throws Exception {

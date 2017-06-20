@@ -28,9 +28,4 @@ public class UnregisteredUserAuthException extends AuthenticationException {
   public UnregisteredUserAuthException(String message) {
     super(message);
   }
-
-  public UnregisteredUserAuthException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
 }

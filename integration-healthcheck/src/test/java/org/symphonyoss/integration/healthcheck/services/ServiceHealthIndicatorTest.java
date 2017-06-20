@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -71,6 +72,8 @@ public class ServiceHealthIndicatorTest {
   private static final String MOCK_APP_TYPE = "testWebHookIntegration";
 
   private static final String MOCK_APP2_TYPE = "test2WebHookIntegration";
+
+  private static final String MOCK_SERVICE_NAME = "POD";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -170,6 +173,8 @@ public class ServiceHealthIndicatorTest {
 
     ServiceVersionUpdatedEventData event = publisher.getEvent();
     assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
+    assertEquals(MOCK_SERVICE_NAME, event.getServiceName());
+    assertTrue(StringUtils.isEmpty(event.getOldVersion()));
   }
 
   private void mockServiceUp() {
