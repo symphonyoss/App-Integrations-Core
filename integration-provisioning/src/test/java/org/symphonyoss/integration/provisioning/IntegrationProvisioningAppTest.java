@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.AdminUser;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -23,7 +24,10 @@ public class IntegrationProvisioningAppTest {
   private IntegrationProvisioningApp app;
 
   @Mock
-  IntegrationProperties properties;
+  private IntegrationProperties properties;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @Test
   public void testFailExecute() {

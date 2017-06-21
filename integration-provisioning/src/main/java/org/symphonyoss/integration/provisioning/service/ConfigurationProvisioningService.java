@@ -17,6 +17,9 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.ConfigurationProvisioningProperties.GET_CONFIG_FAIL;
+import static org.symphonyoss.integration.provisioning.properties.ConfigurationProvisioningProperties.SAVE_CONFIG_FAIL;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
@@ -48,6 +52,9 @@ public class ConfigurationProvisioningService {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   /**
    * Creates or updates the integration settings for the given application, using Integration API.
    * @param application Application object.
@@ -69,8 +76,9 @@ public class ConfigurationProvisioningService {
 
       return integrationService.save(settings, DEFAULT_USER_ID);
     } catch (IntegrationConfigException e) {
-      throw new ConfigurationProvisioningException("Fail to provisioning configuration: " + appType,
-          e);
+      String message = logMessage.getMessage(SAVE_CONFIG_FAIL, appType);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new ConfigurationProvisioningException(message, e, solution);
     }
   }
 
@@ -85,7 +93,9 @@ public class ConfigurationProvisioningService {
     } catch (ConfigurationNotFoundException e) {
       return null;
     } catch (IntegrationConfigException e) {
-      throw new ConfigurationProvisioningException("Fail to get configuration " + appType, e);
+      String message = logMessage.getMessage(GET_CONFIG_FAIL, appType);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new ConfigurationProvisioningException(message, e, solution);
     }
   }
 

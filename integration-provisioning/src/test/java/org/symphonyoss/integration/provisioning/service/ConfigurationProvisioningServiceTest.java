@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.provisioning.exception.ConfigurationProvisioningException;
@@ -64,6 +65,9 @@ public class ConfigurationProvisioningServiceTest {
 
   @Mock
   private UserService userService;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private ConfigurationProvisioningService service;

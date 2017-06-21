@@ -16,21 +16,23 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.FAIL_AUTH_API;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.FAIL_AUTH_API_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.INVALID_ADMIN_CERT;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.INVALID_ADMIN_CERT_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 /**
  * Service class to perform the authentication of the provisioning user.
@@ -40,10 +42,11 @@ import java.security.cert.CertificateException;
 @Service
 public class AuthenticationService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
-
   @Autowired
   private AuthenticationProxy authenticationProxy;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Authenticates the given user.
@@ -62,8 +65,10 @@ public class AuthenticationService {
           keyStorePassword, keyStoreType);
       authenticationProxy.authenticate(userId);
     } catch (RemoteApiException e) {
-      LOGGER.error("Failed: status=" + e.getCode(), e);
-      throw new IntegrationProvisioningAuthException(e);
+      String message = logMessage.getMessage(FAIL_AUTH_API, String.valueOf(e.getCode()));
+      String solution = logMessage.getMessage(FAIL_AUTH_API_SOLUTION);
+
+      throw new IntegrationProvisioningAuthException(message, e, solution);
     }
   }
 
@@ -90,9 +95,11 @@ public class AuthenticationService {
       ks.load(is, keyStorePassword.toCharArray());
 
       authenticationProxy.registerUser(userId, ks, keyStorePassword);
-    } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-      LOGGER.error("Verify the admin user certificate", e);
-      throw new IntegrationProvisioningAuthException(e);
+    } catch (GeneralSecurityException | IOException e) {
+      String message = logMessage.getMessage(INVALID_ADMIN_CERT);
+      String solution = logMessage.getMessage(INVALID_ADMIN_CERT_SOLUTION);
+
+      throw new IntegrationProvisioningAuthException(message, e, solution);
     }
   }
 }

@@ -17,6 +17,15 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.FAIL_GET_USER_BY_ID;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.FAIL_GET_USER_BY_USERNAME;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.FAIL_UPDATE_ATTRIBUTES;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.FAIL_UPDATE_AVATAR;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.USER_MISMATCH_DESCRIPTION;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.USER_MISMATCH_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.USER_NOT_FOUND_MESSAGE;
+import static org.symphonyoss.integration.provisioning.properties.UserProperties.USER_UNDEFINED_MESSAGE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -57,10 +66,6 @@ public class UserService {
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
 
-  private static final String USER_MISMATCH_DESCRIPTION = "provisioning.config.user.mismatch";
-
-  private static final String USER_MISMATCH_SOLUTION = USER_MISMATCH_DESCRIPTION + ".solution";
-
   @Autowired
   private AuthenticationProxy authenticationProxy;
 
@@ -92,7 +97,8 @@ public class UserService {
     Long userId = settings.getOwner();
 
     if (userId == null) {
-      throw new UserSearchException("Fail to retrieve user information. User id undefined");
+      String message = logMessage.getMessage(USER_UNDEFINED_MESSAGE);
+      throw new UserSearchException(message);
     }
 
     String name = app.getName();
@@ -103,7 +109,8 @@ public class UserService {
     User user = getUser(settings.getOwner());
 
     if (user == null) {
-      throw new UserSearchException("User not found. UserId: " + userId);
+      String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
+      throw new UserSearchException(message);
     } else {
       updateUser(sessionToken, user, name, avatar);
       settings.setUsername(user.getUsername());
@@ -121,7 +128,9 @@ public class UserService {
     try {
       return userApiClient.getUserByUsername(sessionToken, username);
     } catch (RemoteApiException e) {
-      throw new UserSearchException("Fail to retrieve user information. Username: " + username, e);
+      String message = logMessage.getMessage(FAIL_GET_USER_BY_USERNAME, username);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UserSearchException(message, e, solution);
     }
   }
 
@@ -136,7 +145,9 @@ public class UserService {
     try {
       return userApiClient.getUserById(sessionToken, userId);
     } catch (RemoteApiException e) {
-      throw new UserSearchException("Fail to retrieve user information. UserId: " + userId, e);
+      String message = logMessage.getMessage(FAIL_GET_USER_BY_ID, userId.toString());
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UserSearchException(message, e, solution);
     }
   }
 
@@ -154,7 +165,9 @@ public class UserService {
       UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
       userApiClient.updateUser(sessionToken, userId, userAttributes);
     } catch (RemoteApiException e) {
-      throw new UpdateUserException("Failed to update user attributes", e);
+      String message = logMessage.getMessage(FAIL_UPDATE_ATTRIBUTES);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UpdateUserException(message, e, solution);
     }
 
     updateUserAvatar(sessionToken, userId, avatar);
@@ -174,7 +187,9 @@ public class UserService {
         userApiClient.updateUserAvatar(sessionToken, uid, avatarUpdate);
       }
     } catch (RemoteApiException e) {
-      throw new UpdateUserException("Failed to update user avatar", e);
+      String message = logMessage.getMessage(FAIL_UPDATE_AVATAR);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UpdateUserException(message, e, solution);
     }
   }
 

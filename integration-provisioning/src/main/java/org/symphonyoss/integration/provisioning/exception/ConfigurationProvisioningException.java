@@ -16,12 +16,17 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class ConfigurationProvisioningException extends RuntimeException {
+public class ConfigurationProvisioningException extends IntegrationRuntimeException {
 
-  public ConfigurationProvisioningException(String message, Throwable cause) {
-    super(message, cause);
+  private static final String COMPONENT = "Configuration Provisioning";
+
+  public ConfigurationProvisioningException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
+
 }

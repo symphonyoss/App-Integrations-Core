@@ -44,6 +44,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.ApplicationArguments;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.Certificate;
@@ -108,6 +109,9 @@ public class KeyPairServiceTest {
 
   @Spy
   private IntegrationProperties properties = new IntegrationProperties();
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private KeyPairService keyPairService = new KeyPairService(arguments);

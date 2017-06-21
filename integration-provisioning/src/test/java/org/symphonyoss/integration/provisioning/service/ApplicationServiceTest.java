@@ -35,6 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
@@ -85,6 +86,9 @@ public class ApplicationServiceTest {
 
   @Mock
   private IntegrationProperties properties;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private ApplicationService service;

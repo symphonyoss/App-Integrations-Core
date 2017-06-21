@@ -34,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
 import java.io.FileNotFoundException;
@@ -67,6 +68,9 @@ public class AuthenticationServiceTest extends MockKeystore {
 
   @Mock
   private AuthenticationProxy authenticationProxy;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private AuthenticationService service;

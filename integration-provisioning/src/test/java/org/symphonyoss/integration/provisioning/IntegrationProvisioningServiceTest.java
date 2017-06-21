@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -79,6 +80,9 @@ public class IntegrationProvisioningServiceTest {
 
   @MockBean
   private UserService userService;
+
+  @MockBean
+  private LogMessageSource logMessage;
 
   @Autowired
   private IntegrationProvisioningService service;

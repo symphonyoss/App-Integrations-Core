@@ -2,14 +2,14 @@
 <Configuration>
     <Properties>
         <Property name="log.dir">logs</Property>
-        <Property name="log4j2.consoleLogLevel">INFO</Property>
-        <Property name="log4j2.outputAllToConsole">false</Property>
+        <Property name="log4j2.logLevel">INFO</Property>
+        <Property name="log4j2.verbose">none</Property>
     </Properties>
 
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <ThresholdFilter level="${sys:log4j2.consoleLogLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M - %m%n"/>
+            <ThresholdFilter level="${sys:log4j2.logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M - %m%n%ex{${sys:log4j2.verbose}}"/>
         </Console>
         <RollingFile name="error-rolling-file"
                      fileName="${sys:log.dir}/integration-provisioning-error.log"
@@ -34,8 +34,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <AsyncLogger name="org.symphonyoss.integration" level="${sys:log4j2.consoleLogLevel}"
-                     additivity="${sys:log4j2.outputAllToConsole}">
+        <AsyncLogger name="org.symphonyoss.integration" level="${sys:log4j2.logLevel}" additivity="false">
             <AppenderRef ref="console"/>
             <AppenderRef ref="rolling-file"/>
             <AppenderRef ref="error-rolling-file"/>
