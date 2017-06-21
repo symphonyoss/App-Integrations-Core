@@ -29,8 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
     .GENERATE_CERTIFICATE;
-import static org.symphonyoss.integration.provisioning.service.KeyPairService.FILE_OWNERSHIP_GROUP;
-import static org.symphonyoss.integration.provisioning.service.KeyPairService.FILE_OWNERSHIP_USER;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -74,7 +72,7 @@ import java.util.List;
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@PrepareForTest({ KeyPairService.class })
+@PrepareForTest({KeyPairService.class})
 public class KeyPairServiceTest {
 
   private static final String MOCK_APP_TYPE = "appTest";
@@ -137,7 +135,7 @@ public class KeyPairServiceTest {
     doReturn(process).when(runtime).exec(anyString());
     doReturn(process).when(runtime).exec(any(String[].class));
 
-    doReturn(new ByteArrayInputStream(new byte[]{})).when(process).getErrorStream();
+    doReturn(new ByteArrayInputStream(new byte[] {})).when(process).getErrorStream();
 
     Certificate certificateInfo = new Certificate();
     certificateInfo.setCaKeyPassword(MOCK_KEY_PASSWORD);
@@ -206,19 +204,6 @@ public class KeyPairServiceTest {
     keyPairService.exportCertificate(settings, application);
   }
 
-  @Test(expected = KeyPairException.class)
-  public void testFailSetOwnership() throws IOException, InterruptedException {
-    Application application = getApplication(true);
-
-    IntegrationSettings settings = new IntegrationSettings();
-    settings.setUsername(MOCK_APP_TYPE);
-
-    doReturn(0).when(process).exitValue();
-    doThrow(IOException.class).when(lookupService).lookupPrincipalByName(anyString());
-
-    keyPairService.exportCertificate(settings, application);
-  }
-
   @Test
   public void testSuccess() throws IOException {
     Application application = getApplication(true);
@@ -228,16 +213,8 @@ public class KeyPairServiceTest {
 
     doReturn(0).when(process).exitValue();
 
-    UserPrincipal userPrincipal = mock(UserPrincipal.class);
-    GroupPrincipal groupPrincipal = mock(GroupPrincipal.class);
-
-    doReturn(userPrincipal).when(lookupService).lookupPrincipalByName(FILE_OWNERSHIP_USER);
-    doReturn(groupPrincipal).when(lookupService).lookupPrincipalByGroupName(FILE_OWNERSHIP_GROUP);
-
     keyPairService.exportCertificate(settings, application);
 
-    verify(attributeView, times(2)).setOwner(userPrincipal);
-    verify(attributeView, times(2)).setGroup(groupPrincipal);
   }
 
   private Application getApplication(boolean addKeystore) {
