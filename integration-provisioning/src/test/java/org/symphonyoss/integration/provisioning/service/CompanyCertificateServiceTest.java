@@ -39,6 +39,7 @@ import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.Keystore;
 import org.symphonyoss.integration.pod.api.client.SecurityApiClient;
@@ -133,6 +134,9 @@ public class CompanyCertificateServiceTest {
 
   private Application application;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   @InjectMocks
   private CompanyCertificateService service;
 
@@ -170,7 +174,7 @@ public class CompanyCertificateServiceTest {
     assertTrue(StringUtils.isEmpty(name));
   }
 
-  @Test(expected = LoadKeyStoreException.class)
+  @Test(expected = CompanyCertificateException.class)
   public void testFailGetCommonNameFromApplicationCertificate()
       throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
     Keystore keystore = new Keystore();

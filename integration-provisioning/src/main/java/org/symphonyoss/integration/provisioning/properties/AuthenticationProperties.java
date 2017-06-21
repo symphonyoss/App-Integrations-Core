@@ -32,6 +32,15 @@ public final class AuthenticationProperties {
    */
   public static final String DEFAULT_USER_ID = "admin";
 
+  /* Exception message keys */
+  public static final String INVALID_ADMIN_CERT = "provisioning.auth.invalid.admin.certificate";
+
+  public static final String INVALID_ADMIN_CERT_SOLUTION = INVALID_ADMIN_CERT + ".solution";
+
+  public static final String FAIL_AUTH_API = "provisioning.auth.api.fail";
+
+  public static final String FAIL_AUTH_API_SOLUTION = FAIL_AUTH_API + ".solution";
+
   /**
    * A private constructor to avoid class instantiation.
    */

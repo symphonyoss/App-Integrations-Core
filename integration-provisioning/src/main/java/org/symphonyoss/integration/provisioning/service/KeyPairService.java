@@ -16,8 +16,11 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties
-    .GENERATE_CERTIFICATE;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.FAIL_MESSAGE;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.FAIL_PERMISSION_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.FAIL_PROCESS_MESSAGE;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.FAIL_YAML_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.GENERATE_CERTIFICATE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.Certificate;
@@ -73,6 +77,9 @@ public class KeyPairService {
 
   @Autowired
   private ApplicationArguments arguments;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   @Autowired
   public KeyPairService(ApplicationArguments args) {
@@ -199,7 +206,7 @@ public class KeyPairService {
 
       validateExitValue(process);
     } catch (IOException | InterruptedException e) {
-      throw new KeyPairException("Fail to generate user certificate.", e);
+      throwKeyPairException(logMessage.getMessage(FAIL_MESSAGE));
     }
   }
 
@@ -214,7 +221,7 @@ public class KeyPairService {
 
       validateExitValue(process);
     } catch (IOException | InterruptedException e) {
-      throw new KeyPairException("Fail to generate user certificate.", e);
+      throwKeyPairException(logMessage.getMessage(FAIL_MESSAGE));
     }
   }
 
@@ -232,8 +239,8 @@ public class KeyPairService {
         LOGGER.error(sc.nextLine());
       }
 
-      throw new KeyPairException(
-          "Fail to generate user certificate. Exit code: " + process.exitValue());
+      String message = logMessage.getMessage(FAIL_PROCESS_MESSAGE, String.valueOf(process.exitValue()));
+      throwKeyPairException(message);
     }
   }
 
@@ -244,5 +251,12 @@ public class KeyPairService {
    */
   private String getTempPassword(Application application) {
     return application.getId();
+  }
+
+  private void throwKeyPairException(String errorMessage) {
+    String yamlSolution = logMessage.getMessage(FAIL_YAML_SOLUTION);
+    String permissionSolution = logMessage.getMessage(FAIL_PERMISSION_SOLUTION);
+
+    throw new KeyPairException(errorMessage, yamlSolution, permissionSolution);
   }
 }

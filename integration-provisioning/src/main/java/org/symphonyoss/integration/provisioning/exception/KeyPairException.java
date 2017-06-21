@@ -16,17 +16,21 @@
 
 package org.symphonyoss.integration.provisioning.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Created by rsanchez on 29/06/16.
  */
-public class KeyPairException extends RuntimeException {
+public class KeyPairException extends IntegrationRuntimeException {
 
-  public KeyPairException(String message) {
-    super(message);
+  private static final String COMPONENT = "Key Pair Provisioning";
+
+  public KeyPairException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
   }
 
-  public KeyPairException(String message, Throwable cause) {
-    super(message, cause);
+  public KeyPairException(String message, Throwable cause, String... solutions) {
+    super(COMPONENT, message, cause, solutions);
   }
 
 }

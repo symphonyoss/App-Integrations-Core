@@ -29,4 +29,13 @@ public class KeyPairProperties {
    */
   public static final String GENERATE_CERTIFICATE = "generateCerts";
 
+  /* Exception message keys */
+  public static final String FAIL_MESSAGE = "provisioning.key.fail";
+
+  public static final String FAIL_PROCESS_MESSAGE = "provisioning.key.process.fail";
+
+  public static final String FAIL_YAML_SOLUTION = "provisioning.key.fail.yaml.solution";
+
+  public static final String FAIL_PERMISSION_SOLUTION = "provisioning.key.fail.permission.solution";
+
 }
