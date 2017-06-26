@@ -112,8 +112,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     AuthenticationContext context = this.authContexts.get(userId);
 
     if (context == null) {
-      throw new UnregisteredUserAuthException("Internal Integration Bridge error. Authentication invoked for unknown user - ID " + userId,
-          logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_USER));
+      throw new UnregisteredUserAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_USER_MESSAGE, userId),
+          logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_USER_SOLUTION));
     }
 
     return context;
@@ -136,8 +136,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
       }
     }
 
-    throw new UnregisteredSessionTokenException("Internal Integration Bridge error. Authentication invoked for unknown user - ID",
-        logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN));
+    throw new UnregisteredSessionTokenException(logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_MESSAGE),
+        logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_SOLUTION));
   }
 
   @Override
@@ -196,11 +196,12 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         } catch (ConnectivityException e2) {
           throw e2;
         } catch (Exception e3) {
-          throw new UnexpectedAuthException("Failed to process certificate login", e3, logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN));
+          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE1), e3,
+              logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
         }
       }
     } else {
-      throw new RemoteApiException(code, e, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER));
+      throw new RemoteApiException(code, e, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
     }
   }
 
@@ -208,14 +209,14 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     int code = e.getCode();
 
     if (sessionUnauthorized(code)) {
-      throw new UnauthorizedUserException("Certificate authentication is unauthorized for the requested user - ID: " + userId, e,
-          logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN));
+      throw new UnauthorizedUserException(logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_MESSAGE, userId), e,
+          logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION));
     } else if (sessionNoLongerEntitled(code)) {
-      throw new ForbiddenAuthException("Certificate authentication is forbidden for the requested user - ID: " + userId, e,
-          logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN));
+      throw new ForbiddenAuthException(logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE, userId), e,
+          logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION));
     } else {
-      throw new UnexpectedAuthException("Failed to process certificate login for the user - ID: " + userId, e,
-          logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN));
+      throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE2, userId), e,
+          logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
     }
   }
 
