@@ -49,6 +49,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
@@ -108,6 +109,9 @@ public class AuthenticationProxyImplTest {
   @InjectMocks
   @Autowired
   private AuthenticationProxyImpl proxy;
+
+  @MockBean
+  private LogMessageSource logMessage;
 
   private Token sessionToken = new Token();
   private Token kmToken = new Token();
