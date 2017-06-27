@@ -44,6 +44,19 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response.Status;
 
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE;
+
+
 /**
  * Perform the user authentication and keep the tokens for each configuration.
  *
@@ -112,8 +125,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     AuthenticationContext context = this.authContexts.get(userId);
 
     if (context == null) {
-      throw new UnregisteredUserAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_USER_MESSAGE, userId),
-          logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_USER_SOLUTION));
+      throw new UnregisteredUserAuthException(logMessage.getMessage(UNREGISTERED_USER_MESSAGE, userId),
+          logMessage.getMessage(UNREGISTERED_USER_SOLUTION));
     }
 
     return context;
@@ -136,8 +149,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
       }
     }
 
-    throw new UnregisteredSessionTokenException(logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_MESSAGE),
-        logMessage.getMessage(AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_SOLUTION));
+    throw new UnregisteredSessionTokenException(logMessage.getMessage(UNREGISTERED_SESSION_TOKEN_MESSAGE),
+        logMessage.getMessage(UNREGISTERED_SESSION_TOKEN_SOLUTION));
   }
 
   @Override
@@ -195,12 +208,12 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         } catch (ConnectivityException e) {
           throw e;
         } catch (Exception e) {
-          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
-              logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
+          throw new UnexpectedAuthException(logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
+              logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_SOLUTION));
         }
       }
     } else {
-      throw new RemoteApiException(remoteApiException.getCode(), remoteApiException, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
+      throw new RemoteApiException(remoteApiException.getCode(), remoteApiException, logMessage.getMessage(UNAUTHORIZED_USER_SOLUTION));
     }
   }
 
@@ -208,14 +221,14 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     int code = e.getCode();
 
     if (sessionUnauthorized(code)) {
-      throw new UnauthorizedUserException(logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_MESSAGE, userId), e,
-          logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION, userId));
+      throw new UnauthorizedUserException(logMessage.getMessage(UNAUTHORIZED_SESSION_TOKEN_MESSAGE, userId), e,
+          logMessage.getMessage(UNAUTHORIZED_SESSION_TOKEN_SOLUTION, userId));
     } else if (sessionNoLongerEntitled(code)) {
-      throw new ForbiddenAuthException(logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE, userId), e,
-          logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION, userId));
+      throw new ForbiddenAuthException(logMessage.getMessage(FORBIDDEN_SESSION_TOKEN_MESSAGE, userId), e,
+          logMessage.getMessage(FORBIDDEN_SESSION_TOKEN_SOLUTION, userId));
     } else {
-      throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
-          logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
+      throw new UnexpectedAuthException(logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
+          logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_SOLUTION));
     }
   }
 
