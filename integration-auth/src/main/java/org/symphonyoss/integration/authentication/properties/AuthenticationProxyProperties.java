@@ -28,8 +28,6 @@ public class AuthenticationProxyProperties {
 
   public static final String UNEXPECTED_SESSION_TOKEN_SOLUTION = "auth.session.token.unexpected.solution";
 
-  public static final String UNEXPECTED_SESSION_TOKEN_MESSAGE1 = "auth.session.token.unexpected.message1";
-
-  public static final String UNEXPECTED_SESSION_TOKEN_MESSAGE2 = "auth.session.token.unexpected.message2";
+  public static final String UNEXPECTED_SESSION_TOKEN_MESSAGE = "auth.session.token.unexpected.message";
 
 }

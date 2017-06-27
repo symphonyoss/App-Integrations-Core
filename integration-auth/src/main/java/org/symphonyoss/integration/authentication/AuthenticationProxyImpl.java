@@ -196,7 +196,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         } catch (ConnectivityException e2) {
           throw e2;
         } catch (Exception e3) {
-          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE1), e3,
+          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e3,
               logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
         }
       }
@@ -215,7 +215,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
       throw new ForbiddenAuthException(logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE, userId), e,
           logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION));
     } else {
-      throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE2, userId), e,
+      throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
           logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
     }
   }
