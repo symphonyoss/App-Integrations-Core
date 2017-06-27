@@ -12,8 +12,6 @@ public class AuthenticationProxyProperties {
 
   public static final String UNREGISTERED_USER_MESSAGE = "auth.user.unregistered.message";
 
-  public static final String UNAUTHORIZED_USER_SOLUTION = "auth.user.unauthorized.solution";
-
   public static final String UNREGISTERED_SESSION_TOKEN_SOLUTION = "auth.session.token.unregistered.solution";
 
   public static final String UNREGISTERED_SESSION_TOKEN_MESSAGE = "auth.session.token.unregistered.message";

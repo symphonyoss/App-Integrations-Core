@@ -46,7 +46,6 @@ import javax.ws.rs.core.Response.Status;
 
 import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_SOLUTION;
 import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION;
 import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_SOLUTION;
 import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_MESSAGE;
 import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION;
@@ -213,7 +212,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         }
       }
     } else {
-      throw new RemoteApiException(remoteApiException.getCode(), remoteApiException, logMessage.getMessage(UNAUTHORIZED_USER_SOLUTION));
+      throw remoteApiException;
     }
   }
 
