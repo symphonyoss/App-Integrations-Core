@@ -179,14 +179,13 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * If the provided exception is of type unauthorized, then authenticate again, else rethrow the
    * same exception
    * @param userId
-   * @param code
-   * @param exception
+   * @param remoteApiException
    * @throws RemoteApiException the original exception
    */
   @Override
-  public synchronized void reAuthOrThrow(String userId, int code, Exception exception)
+  public synchronized void reAuthOrThrow(String userId, RemoteApiException remoteApiException)
       throws RemoteApiException {
-    if (validateResponseCode(Status.UNAUTHORIZED, code)) {
+    if (validateResponseCode(Status.UNAUTHORIZED, remoteApiException.getCode())) {
       if (shouldInvalidateSession(userId)) {
         invalidate(userId);
         try {
@@ -201,7 +200,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
         }
       }
     } else {
-      throw new RemoteApiException(code, exception, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
+      throw new RemoteApiException(remoteApiException.getCode(), remoteApiException, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
     }
   }
 
@@ -221,10 +220,10 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   }
 
   @Override
-  public synchronized AuthenticationToken reAuthSessionOrThrow(String sessionToken, int code, Exception e)
+  public synchronized AuthenticationToken reAuthSessionOrThrow(String sessionToken, RemoteApiException remoteApiException)
       throws RemoteApiException {
     AuthenticationContext authContext = contextForSessionToken(sessionToken);
-    reAuthOrThrow(authContext.getUserId(), code, e);
+    reAuthOrThrow(authContext.getUserId(), remoteApiException);
     return authContext.getToken();
   }
 
