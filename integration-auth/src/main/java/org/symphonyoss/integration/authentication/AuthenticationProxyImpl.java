@@ -180,28 +180,28 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * same exception
    * @param userId
    * @param code
-   * @param e
+   * @param exception
    * @throws RemoteApiException the original exception
    */
   @Override
-  public synchronized void reAuthOrThrow(String userId, int code, Exception e)
+  public synchronized void reAuthOrThrow(String userId, int code, Exception exception)
       throws RemoteApiException {
     if (validateResponseCode(Status.UNAUTHORIZED, code)) {
       if (shouldInvalidateSession(userId)) {
         invalidate(userId);
         try {
           authenticate(userId);
-        } catch (RemoteApiException e1) {
-          checkAndThrowException(e1, userId);
-        } catch (ConnectivityException e2) {
-          throw e2;
-        } catch (Exception e3) {
-          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e3,
+        } catch (RemoteApiException e) {
+          checkAndThrowException(e, userId);
+        } catch (ConnectivityException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
               logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
         }
       }
     } else {
-      throw new RemoteApiException(code, e, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
+      throw new RemoteApiException(code, exception, logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_USER_SOLUTION));
     }
   }
 
@@ -210,10 +210,10 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
     if (sessionUnauthorized(code)) {
       throw new UnauthorizedUserException(logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_MESSAGE, userId), e,
-          logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION));
+          logMessage.getMessage(AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION, userId));
     } else if (sessionNoLongerEntitled(code)) {
       throw new ForbiddenAuthException(logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE, userId), e,
-          logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION));
+          logMessage.getMessage(AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION, userId));
     } else {
       throw new UnexpectedAuthException(logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
           logMessage.getMessage(AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION));
