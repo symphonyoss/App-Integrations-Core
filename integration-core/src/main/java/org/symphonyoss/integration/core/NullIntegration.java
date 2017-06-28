@@ -28,7 +28,6 @@ import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.Val
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
