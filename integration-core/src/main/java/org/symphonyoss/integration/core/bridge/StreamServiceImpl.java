@@ -16,6 +16,10 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
+    .ERROR_GET_STREAM_INSTANCE;
+import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
+    .ERROR_GET_STREAM_JSON;
 import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator.AGENT_MESSAGEML_VERSION2;
 
 import com.github.zafarkhaja.semver.Version;
@@ -32,6 +36,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -74,6 +79,9 @@ public class StreamServiceImpl implements StreamService {
   @Autowired
   private PodHttpApiClient podApiClient;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   /**
    * Pod Stream API Client
    */
@@ -109,7 +117,7 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreams(optionalProperties);
     } catch (IOException e) {
-      LOG.warn("Error trying to get streams from JSON Object " + optionalProperties, e);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_JSON,optionalProperties), e);
       return Collections.emptyList();
     }
   }
@@ -119,7 +127,7 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
     } catch (IOException e) {
-      LOG.warn("Error trying to get stream type from instance " + instance.getInstanceId(), e);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_INSTANCE ,instance.getInstanceId()), e);
       return StreamType.NONE;
     }
   }

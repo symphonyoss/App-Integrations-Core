@@ -16,15 +16,20 @@
 
 package org.symphonyoss.integration.core.service;
 
+import static org.symphonyoss.integration.core.properties.UserProperties.FAIL_GET_USER_BY_EMAIL;
+import static org.symphonyoss.integration.core.properties.UserProperties.FAIL_GET_USER_BY_USERID;
+import static org.symphonyoss.integration.core.properties.UserProperties.FAIL_GET_USER_BY_USERNAME;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.service.UserService;
 
@@ -45,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
   @Autowired
   private PodHttpApiClient podHttpApiClient;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   private UserApiClient userApiClient;
 
@@ -73,7 +81,7 @@ public class UserServiceImpl implements UserService {
         user.setId(remoteUser.getId());
       }
     } catch (RemoteApiException e) {
-      LOGGER.debug("Fail to retrieve user info. UserId: {}", userId);
+      LOGGER.debug(logMessage.getMessage(FAIL_GET_USER_BY_USERID, String.valueOf(userId)));
     }
 
     return user;
@@ -101,7 +109,7 @@ public class UserServiceImpl implements UserService {
         user.setId(userRemote.getId());
       }
     } catch (RemoteApiException e) {
-      LOGGER.debug("Fail to retrieve user info. Username: {}", userName);
+      LOGGER.debug(logMessage.getMessage(FAIL_GET_USER_BY_USERNAME,userName));
     }
 
     return user;
@@ -128,7 +136,7 @@ public class UserServiceImpl implements UserService {
         user.setUserName(remoteUser.getUsername());
       }
     } catch (RemoteApiException e) {
-      LOGGER.debug("Fail to retrieve user info. Email: {}", email);
+      LOGGER.debug(logMessage.getMessage(FAIL_GET_USER_BY_EMAIL, email));
     }
 
     return user;

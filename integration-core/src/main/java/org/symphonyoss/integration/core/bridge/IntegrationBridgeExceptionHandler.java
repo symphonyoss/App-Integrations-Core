@@ -17,6 +17,18 @@
 package org.symphonyoss.integration.core.bridge;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.FAIL_NOTIFY_OWNER;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.FAIL_POST_MESSAGE;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.FAIL_UPDATE_STREAM;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.INVALID_MESSAGE;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.UNABLE_POST_STREAM;
+import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.UPDATE_INSTANCE_NOTIFY;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +43,7 @@ import org.symphonyoss.integration.exception.ExceptionHandler;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -56,22 +69,27 @@ import javax.ws.rs.core.Response.Status;
 @Component
 public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
 
   /**
-   * We use this message when we want to notify an instance owner that one of his instances has an unreachable room
+   * We use this message when we want to notify an instance owner that one of his instances has an
+   * unreachable room
    * for the Integration User.
    */
   private static final String DEFAULT_NOTIFICATION =
-      "<messageML>%s has been removed from %s, I can no longer post messages in %s unless I am reconfigured to do so."
+      "<messageML>%s has been removed from %s, I can no longer post messages in %s unless I am "
+          + "reconfigured to do so."
           + "</messageML>";
   /**
-   * Used when we want to notify an instance owner that one of his instances has an unreachable room for the
+   * Used when we want to notify an instance owner that one of his instances has an unreachable room
+   * for the
    * Integration User but we can't determine its room name.
    */
   private static final String UNDETERMINED_ROOM_NOTIFICATION =
       "<messageML>%s has been removed from a room belonging to web hook instance %s, "
-          + "I can no longer post messages for some of the rooms in this instance unless I am reconfigured to do so.</messageML>";
+          + "I can no longer post messages for some of the rooms in this instance unless I am "
+          + "reconfigured to do so.</messageML>";
 
   private static final String STREAM_ID = "streamId";
 
@@ -94,6 +112,9 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   private UserApiClient usersApi;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   @PostConstruct
   public void init() {
     usersApi = new UserApiClient(podApiClient);
@@ -104,38 +125,40 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     int code = remoteException.getCode();
     Status status = Status.fromStatusCode(code);
 
-    LOGGER.error(
-        String.format("The Integration Bridge was unable to post to stream %s due to error code %d",
-            stream, code), remoteException);
+    LOGGER.error(logMessage.getMessage(UNABLE_POST_STREAM, stream, String.valueOf(code)),
+        remoteException);
 
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
-      String logMessage =
-          String.format("Invalid message posted to stream %s.\nInstance: %s", stream,
-              instance.getInstanceId());
-      LOGGER.warn(logMessage, remoteException);
+      LOGGER.warn(logMessage.getMessage(INVALID_MESSAGE, stream, instance.getInstanceId()),
+          remoteException);
     }
   }
 
   public void handleUnexpectedException(Exception e) {
-    LOGGER.error("Fail to post message", e);
+    LOGGER.error(logMessage.getMessage(FAIL_POST_MESSAGE), e);
   }
 
   /**
    * Update the integration instance removing the stream. Needs to notify the instance owner.
-   * @param instance to determine the unreachable room name and provide info for the remaining process.
-   * @param integrationUser to remove the stream from the instance and to notify the instance owner.
+   * @param instance to determine the unreachable room name and provide info for the remaining
+   * process.
+   * @param integrationUser to remove the stream from the instance and to notify the instance
+   * owner.
    * @param stream to be removed from the instance.
    */
   private void updateStreams(IntegrationInstance instance, String integrationUser, String stream) {
     try {
       String roomName = StringUtils.EMPTY;
       Iterator<JsonNode> rooms =
-          WebHookConfigurationUtils.fromJsonString(instance.getOptionalProperties()).path(ROOMS).iterator();
+          WebHookConfigurationUtils.fromJsonString(instance.getOptionalProperties())
+              .path(ROOMS)
+              .iterator();
       while (rooms.hasNext()) {
         JsonNode room = rooms.next();
-        // removes url unsafe chars from the streamId field, so it can be compared to the stream being processed
+        // removes url unsafe chars from the streamId field, so it can be compared to the stream
+        // being processed
         String roomStream = room.path(STREAM_ID).asText().replaceAll("/", "_").replace("==", "");
         if (stream.equals(roomStream)) {
           roomName = room.path(ROOM_NAME).asText();
@@ -146,7 +169,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       removeStreamFromInstance(instance, integrationUser, stream);
       notifyInstanceOwner(instance, integrationUser, roomName);
     } catch (IntegrationRuntimeException | IOException e) {
-      LOGGER.error("Fail to update streams", e);
+      LOGGER.error(logMessage.getMessage(FAIL_UPDATE_STREAM) ,e);
     }
   }
 
@@ -173,12 +196,14 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   }
 
   /**
-   * Notifies the instance owner about the integration bridge not being able to post the message to the configured room.
+   * Notifies the instance owner about the integration bridge not being able to post the message to
+   * the configured room.
    * @param instance to determine the owner of this instance.
    * @param integrationUser to determine which integration user is going to post the message.
    * @param roomName to tell the user which room we can't reach.
    */
-  private void notifyInstanceOwner(IntegrationInstance instance, String integrationUser, String roomName) {
+  private void notifyInstanceOwner(IntegrationInstance instance, String integrationUser,
+      String roomName) {
     try {
       // Create IM
       Long ownerUserId = WebHookConfigurationUtils.getOwner(instance.getOptionalProperties());
@@ -187,7 +212,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       // Posting message through the IM
       postIM(integrationUser, roomName, im.getId(), instance.getName());
     } catch (RemoteApiException | IOException e) {
-      LOGGER.error("Fail to notify owner", e);
+      LOGGER.error(logMessage.getMessage(FAIL_NOTIFY_OWNER), e);
     }
   }
 
@@ -208,7 +233,8 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     String message;
 
     if (isBlank(roomName)) {
-      message = String.format(UNDETERMINED_ROOM_NOTIFICATION, userInfo.getDisplayName(), instanceName);
+      message =
+          String.format(UNDETERMINED_ROOM_NOTIFICATION, userInfo.getDisplayName(), instanceName);
     } else {
       message = String.format(DEFAULT_NOTIFICATION, userInfo.getDisplayName(), roomName, roomName);
     }
@@ -219,6 +245,6 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     messageSubmission.setVersion(MessageMLVersion.V1);
 
     streamService.postMessage(integrationUser, im, messageSubmission);
-    LOGGER.info("User notified about the instance updated");
+    LOGGER.info(logMessage.getMessage(UPDATE_INSTANCE_NOTIFY));
   }
 }
