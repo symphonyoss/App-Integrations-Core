@@ -39,6 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.stream.Stream;
@@ -89,6 +90,9 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   @Mock
   private UserApiClient usersApi;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private IntegrationBridgeExceptionHandler exceptionHandler =

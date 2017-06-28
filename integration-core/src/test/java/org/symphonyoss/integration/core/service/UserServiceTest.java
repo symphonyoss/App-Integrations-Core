@@ -35,6 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.service.UserService;
 
@@ -61,6 +62,9 @@ public class UserServiceTest {
 
   @InjectMocks
   private UserServiceImpl userService;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @Before
   public void setup() {

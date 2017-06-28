@@ -232,7 +232,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
         NullIntegration integration =
             new NullIntegration(applicationsHealthIndicator, application, utils,
-                authenticationProxy);
+                authenticationProxy, logMessage);
 
         try {
           integration.onCreate(appId);

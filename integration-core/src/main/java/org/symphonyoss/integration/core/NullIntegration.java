@@ -52,22 +52,22 @@ import java.util.Set;
  */
 public class NullIntegration extends BaseIntegration {
 
-  @Autowired
-  private LogMessageSource logMessage;
-
   private static final Logger LOG = LoggerFactory.getLogger(NullIntegration.class);
 
   private final ApplicationsHealthIndicator healthIndicator;
 
   private final Application application;
 
+  private LogMessageSource logMessage;
+
   public NullIntegration(ApplicationsHealthIndicator healthIndicator, Application application,
-      IntegrationUtils utils, AuthenticationProxy authenticationProxy) {
+      IntegrationUtils utils, AuthenticationProxy authenticationProxy, LogMessageSource logMessage) {
     this.healthIndicator = healthIndicator;
     this.application = application;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
     this.healthManager = new IntegrationHealthManager();
+    this.logMessage = logMessage;
   }
 
   @Override
@@ -95,7 +95,7 @@ public class NullIntegration extends BaseIntegration {
         application.getKeystore().getPassword()))) {
       String appId = application != null ? application.getId() : integrationUser;
       String message = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND, appId);
-      String solution = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION, appId);
+      String solution = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION);
       throw new LoadKeyStoreException(message, solution);
     }
 

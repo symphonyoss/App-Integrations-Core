@@ -41,6 +41,7 @@ import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
@@ -77,6 +78,9 @@ public class IntegrationBridgeTest {
 
   @InjectMocks
   private IntegrationBridge bridge = new IntegrationBridgeImpl();
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @Test
   public void testSendMessageWithoutStreamsConfigured() throws RemoteApiException {
@@ -235,7 +239,7 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testGetIntegrationById() {
-    Integration integration = new NullIntegration(null, null, null, null);
+    Integration integration = new NullIntegration(null, null, null, null, null);
 
     doReturn(integration).when(bootstrap).getIntegrationById(any(String.class));
 
