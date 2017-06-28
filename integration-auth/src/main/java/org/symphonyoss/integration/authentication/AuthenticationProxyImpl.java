@@ -150,7 +150,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
     if (context == null) {
       throw new UnregisteredUserAuthException(logMessage.getMessage(UNREGISTERED_USER_MESSAGE, userId),
-          logMessage.getMessage(UNREGISTERED_USER_SOLUTION));
+          logMessage.getMessage(UNREGISTERED_USER_SOLUTION, userId));
     }
 
     return context;
