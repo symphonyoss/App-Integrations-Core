@@ -22,8 +22,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
-
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .DEFAULT_USER_ID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
@@ -96,20 +97,20 @@ public class AuthenticationServiceTest extends MockKeystore {
   }
 
   @Test
-  public void testAuthenticateRemoteApiException()
+  public void testAuthenticateUnauthorizedUserException()
       throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException,
       RemoteApiException {
     String certDir = mockKeyStore();
     String keystore = certDir + KEYSTORE;
 
-    doThrow(RemoteApiException.class).when(authenticationProxy).authenticate(DEFAULT_USER_ID);
+    doThrow(UnauthorizedUserException.class).when(authenticationProxy).authenticate(DEFAULT_USER_ID);
 
     try {
       service.authenticate(DEFAULT_USER_ID, TRUSTSTORE, TRUSTSTORE_PASSWORD, KEYSTORE_TYPE,
           keystore, KEYSTORE_PASSWORD, KEYSTORE_TYPE);
       fail();
     } catch (IntegrationProvisioningAuthException e) {
-      assertEquals(RemoteApiException.class, e.getCause().getClass());
+      assertEquals(UnauthorizedUserException.class, e.getCause().getClass());
       assertEquals(TRUSTSTORE, System.getProperty(TRUSTSTORE_PROP));
       assertEquals(TRUSTSTORE_PASSWORD, System.getProperty(TRUSTSTORE_PASSWORD_PROP));
       assertEquals(KEYSTORE_TYPE, System.getProperty(TRUSTSTORE_TYPE_PROP));

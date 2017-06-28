@@ -47,6 +47,7 @@ import org.symphonyoss.integration.auth.api.model.Token;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
@@ -188,7 +189,7 @@ public class AuthenticationProxyImplTest {
     try {
       proxy.authenticate(JIRAWEBHOOK);
       fail();
-    } catch (RemoteApiException e) {
+    } catch (AuthenticationException e) {
       assertTrue(proxy.getToken(JIRAWEBHOOK).equals(AuthenticationToken.VOID_AUTH_TOKEN));
       assertFalse(proxy.isAuthenticated(JIRAWEBHOOK));
     }

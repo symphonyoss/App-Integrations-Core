@@ -16,6 +16,27 @@
 
 package org.symphonyoss.integration.authentication;
 
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .FORBIDDEN_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .FORBIDDEN_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNAUTHORIZED_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNAUTHORIZED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNEXPECTED_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNEXPECTED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNREGISTERED_SESSION_TOKEN_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNREGISTERED_SESSION_TOKEN_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNREGISTERED_USER_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties
+    .UNREGISTERED_USER_SOLUTION;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +47,8 @@ import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
-import org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
@@ -43,17 +64,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response.Status;
-
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_SOLUTION;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_USER_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_SOLUTION;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNREGISTERED_SESSION_TOKEN_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_SOLUTION;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNAUTHORIZED_SESSION_TOKEN_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_SOLUTION;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.FORBIDDEN_SESSION_TOKEN_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_SOLUTION;
-import static org.symphonyoss.integration.authentication.properties.AuthenticationProxyProperties.UNEXPECTED_SESSION_TOKEN_MESSAGE;
 
 
 /**
@@ -102,15 +112,30 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   }
 
   @Override
-  public void authenticate(String userId) throws RemoteApiException {
+  public void authenticate(String userId) throws AuthenticationException {
     AuthenticationContext context = contextForUser(userId);
 
     if (!context.isAuthenticated()) {
       LOG.info("Authenticate {}", userId);
-      Token sessionToken = sbeAuthApi.authenticate(userId);
-      Token keyManagerToken = keyManagerAuthApi.authenticate(userId);
 
-      context.setToken(
+      Token sessionToken = null;
+      Token keyManagerToken = null;
+
+      try {
+        sessionToken = sbeAuthApi.authenticate(userId);
+        keyManagerToken = keyManagerAuthApi.authenticate(userId);
+      } catch (RemoteApiException e) {
+        checkAndThrowException(e, userId);
+      } catch (ConnectivityException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new UnexpectedAuthException(
+            logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
+            logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_SOLUTION));
+      }
+
+
+    context.setToken(
           new AuthenticationToken(sessionToken.getToken(), keyManagerToken.getToken()));
     }
 
@@ -200,23 +225,14 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     if (validateResponseCode(Status.UNAUTHORIZED, remoteApiException.getCode())) {
       if (shouldInvalidateSession(userId)) {
         invalidate(userId);
-        try {
-          authenticate(userId);
-        } catch (RemoteApiException e) {
-          checkAndThrowException(e, userId);
-        } catch (ConnectivityException e) {
-          throw e;
-        } catch (Exception e) {
-          throw new UnexpectedAuthException(logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
-              logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_SOLUTION));
-        }
+        authenticate(userId);
       }
     } else {
       throw remoteApiException;
     }
   }
 
-  private void checkAndThrowException(RemoteApiException e, String userId) throws RemoteApiException {
+  private void checkAndThrowException(RemoteApiException e, String userId) throws AuthenticationException {
     int code = e.getCode();
 
     if (sessionUnauthorized(code)) {
