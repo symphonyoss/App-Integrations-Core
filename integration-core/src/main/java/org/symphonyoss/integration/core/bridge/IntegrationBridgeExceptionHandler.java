@@ -124,9 +124,9 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       IntegrationInstance instance, String integrationUser, String stream) {
     int code = remoteException.getCode();
     Status status = Status.fromStatusCode(code);
+    String message = logMessage.getMessage(UNABLE_POST_STREAM, stream, String.valueOf(code));
 
-    LOGGER.error(logMessage.getMessage(UNABLE_POST_STREAM, stream, String.valueOf(code)),
-        remoteException);
+    LOGGER.error(message,remoteException);
 
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
