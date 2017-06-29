@@ -16,6 +16,9 @@
 
 package org.symphonyoss.integration.auth.api.client;
 
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .KEY_MANAGER_URL_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,8 +26,6 @@ import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-
-import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.KEY_MANAGER_URL_SOLUTION;
 
 /**
  * Low-level HTTP client to query Authentication API used to authenticate on the Key Manager.
@@ -36,6 +37,8 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
   private static final String SERVICE_NAME = "Key Manager Auth";
 
   private static final String REQUIRED_KEY = "key_manager_auth.host";
+
+  private static final String KEY_MANAGER_AUTH = "key_manager_auth";
 
   @Autowired
   private IntegrationProperties properties;
@@ -52,7 +55,7 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
     String url = properties.getKeyManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY, logMessageSource.getMessage(KEY_MANAGER_URL_SOLUTION));
+      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY, logMessageSource.getMessage(KEY_MANAGER_URL_SOLUTION, KEY_MANAGER_AUTH));
     }
 
     return url;
