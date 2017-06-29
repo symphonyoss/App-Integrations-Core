@@ -28,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 import java.util.HashMap;
@@ -49,11 +50,14 @@ public class V2MessageApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private V2MessageApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new V2MessageApiClient(httpClient);
+    this.apiClient = new V2MessageApiClient(httpClient, logMessage);
   }
 
   @Test
