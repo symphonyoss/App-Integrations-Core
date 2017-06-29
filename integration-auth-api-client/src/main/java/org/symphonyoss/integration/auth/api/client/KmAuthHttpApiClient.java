@@ -38,8 +38,6 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
 
   private static final String REQUIRED_KEY = "key_manager_auth.host";
 
-  private static final String KEY_MANAGER_AUTH = "key_manager_auth";
-
   @Autowired
   private IntegrationProperties properties;
 
@@ -55,7 +53,7 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
     String url = properties.getKeyManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY, logMessageSource.getMessage(KEY_MANAGER_URL_SOLUTION, KEY_MANAGER_AUTH));
+      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY, logMessageSource.getMessage(KEY_MANAGER_URL_SOLUTION, REQUIRED_KEY));
     }
 
     return url;
