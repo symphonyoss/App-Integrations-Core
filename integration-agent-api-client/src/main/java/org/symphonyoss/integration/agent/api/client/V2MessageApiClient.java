@@ -19,6 +19,7 @@ package org.symphonyoss.integration.agent.api.client;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.api.client.json.JsonEntitySerializer;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 import java.util.Collections;
@@ -65,11 +66,13 @@ import java.util.Map;
  *
  * Created by rsanchez on 23/02/17.
  */
+
 public class V2MessageApiClient extends BaseMessageApiClient {
 
   private HttpApiClient apiClient;
 
-  public V2MessageApiClient(HttpApiClient apiClient) {
+  public V2MessageApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
+    super(logMessage);
     this.apiClient = apiClient;
     this.apiClient.setEntitySerializer(new JsonEntitySerializer());
   }

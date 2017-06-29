@@ -16,6 +16,9 @@
 
 package org.symphonyoss.integration.agent.api.client;
 
+import static org.symphonyoss.integration.agent.api.client.properties.AgentApiClientProperties.MISSING_CONFIG_FILE;
+import static org.symphonyoss.integration.agent.api.client.properties.AgentApiClientProperties.MISSING_CONFIG_FILE_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,6 +26,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -38,6 +42,9 @@ public class AgentApiClient extends SymphonyApiClient {
   private static final String REQUIRED_KEY = "agent.host";
 
   @Autowired
+  private LogMessageSource logMessage;
+
+  @Autowired
   private IntegrationProperties properties;
 
   public AgentApiClient() {
@@ -49,7 +56,10 @@ public class AgentApiClient extends SymphonyApiClient {
     String url = properties.getAgentUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY);
+      String message = logMessage.getMessage(MISSING_CONFIG_FILE, REQUIRED_KEY);
+      String solution = logMessage.getMessage(MISSING_CONFIG_FILE_SOLUTION, REQUIRED_KEY);
+
+      throw new MissingConfigurationException(SERVICE_NAME, message, solution);
     }
 
     return url;
