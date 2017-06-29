@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.agent.api.client;
 
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 /**
@@ -24,6 +25,10 @@ import org.symphonyoss.integration.model.message.Message;
  * Created by rsanchez on 06/04/17.
  */
 public class MockMessageApiClient extends BaseMessageApiClient {
+
+  public MockMessageApiClient(LogMessageSource logMessage) {
+    super(logMessage);
+  }
 
   @Override
   public Message postMessage(String sessionToken, String kmToken, String streamId, Message message)

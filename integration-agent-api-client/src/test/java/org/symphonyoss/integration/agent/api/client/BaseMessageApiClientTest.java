@@ -18,7 +18,12 @@ package org.symphonyoss.integration.agent.api.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.symphonyoss.integration.agent.api.client.BaseMessageApiClient.KM_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.agent.api.client.BaseMessageApiClient.SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.agent.api.client.BaseMessageApiClient.STREAM_ID_PATH;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_BODY;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_PARAMETER;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,12 +31,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
-import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.model.message.Message;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
  * Unit test for {@link BaseMessageApiClient}
@@ -49,11 +50,14 @@ public class BaseMessageApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private BaseMessageApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new MockMessageApiClient();
+    this.apiClient = new MockMessageApiClient(logMessage);
   }
 
   @Test
@@ -63,9 +67,7 @@ public class BaseMessageApiClientTest {
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      verify(logMessage).getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM);
     }
   }
 
@@ -76,9 +78,7 @@ public class BaseMessageApiClientTest {
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'kmToken' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      verify(logMessage).getMessage(MISSING_PARAMETER, KM_TOKEN_HEADER_PARAM);
     }
   }
 
@@ -89,9 +89,7 @@ public class BaseMessageApiClientTest {
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'streamId' when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      verify(logMessage).getMessage(MISSING_PARAMETER, STREAM_ID_PATH);
     }
   }
 
@@ -102,9 +100,7 @@ public class BaseMessageApiClientTest {
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body when calling postMessage";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      verify(logMessage).getMessage(MISSING_BODY);
     }
   }
 

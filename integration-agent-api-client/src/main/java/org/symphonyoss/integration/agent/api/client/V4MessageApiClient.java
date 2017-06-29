@@ -18,13 +18,15 @@ package org.symphonyoss.integration.agent.api.client;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
+import static org.symphonyoss.integration.agent.api.client.properties.V4MessageApiClientProperties.POST_FAILURE;
+import static org.symphonyoss.integration.agent.api.client.properties.V4MessageApiClientProperties.POST_FAILURE_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.api.client.form.MultiPartEntitySerializer;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 import java.io.IOException;
@@ -86,7 +88,8 @@ public class V4MessageApiClient extends BaseMessageApiClient {
 
   private HttpApiClient apiClient;
 
-  public V4MessageApiClient(HttpApiClient apiClient) {
+  public V4MessageApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
+    super(logMessage);
     this.apiClient = apiClient;
     this.apiClient.setEntitySerializer(new MultiPartEntitySerializer());
   }
@@ -121,9 +124,10 @@ public class V4MessageApiClient extends BaseMessageApiClient {
 
       return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart, Message.class);
     } catch (IOException e) {
-      String errorMessage =
-          String.format("Fail to post message to stream %s due to %s", streamId, e.getMessage());
-      throw new RemoteApiException(500, errorMessage, e);
+      String errorMessage = logMessage.getMessage(POST_FAILURE, streamId, e.getMessage());
+      String solution = logMessage.getMessage(POST_FAILURE_SOLUTION);
+
+      throw new RemoteApiException(500, errorMessage, e, solution);
     }
   }
 
