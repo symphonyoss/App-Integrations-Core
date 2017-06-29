@@ -66,6 +66,8 @@ public class IntegrationBridgeTest {
   private static final String OPTIONAL_PROPERTIES = "{ \"lastPostedDate\": 1, \"owner\": "
       + "\"owner\", \"streams\": [ \"stream1\", \"stream2\"] }";
 
+  private static final String COMPONENT = "core";
+
   @Spy
   private StreamService streamService = new StreamServiceImpl();
 
@@ -207,7 +209,7 @@ public class IntegrationBridgeTest {
 
   @Test(expected = ConnectivityException.class)
   public void testSendMessageConnectivityException() throws RemoteApiException, JsonProcessingException {
-    ConnectivityException exception = new ConnectivityException("mockService");
+    ConnectivityException exception = new ConnectivityException(COMPONENT, "mockService");
 
     doThrow(exception).when(streamService).postMessage(anyString(), anyString(), any(Message.class));
 

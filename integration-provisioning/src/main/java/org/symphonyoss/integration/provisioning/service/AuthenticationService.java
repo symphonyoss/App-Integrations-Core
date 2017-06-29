@@ -16,16 +16,20 @@
 
 package org.symphonyoss.integration.provisioning.service;
 
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.FAIL_AUTH_API;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.FAIL_AUTH_API_SOLUTION;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.INVALID_ADMIN_CERT;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.INVALID_ADMIN_CERT_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .FAIL_AUTH_API;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .FAIL_AUTH_API_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .INVALID_ADMIN_CERT;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .INVALID_ADMIN_CERT_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
@@ -64,8 +68,8 @@ public class AuthenticationService {
       setupSSLContext(userId, trustStore, trustStorePassword, trustStoreType, keystore,
           keyStorePassword, keyStoreType);
       authenticationProxy.authenticate(userId);
-    } catch (RemoteApiException e) {
-      String message = logMessage.getMessage(FAIL_AUTH_API, String.valueOf(e.getCode()));
+    } catch (AuthenticationException e) {
+      String message = logMessage.getMessage(FAIL_AUTH_API);
       String solution = logMessage.getMessage(FAIL_AUTH_API_SOLUTION);
 
       throw new IntegrationProvisioningAuthException(message, e, solution);

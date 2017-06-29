@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.client.ClientProperties;
@@ -46,9 +47,11 @@ import org.symphonyoss.integration.auth.api.model.Token;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
@@ -109,6 +112,9 @@ public class AuthenticationProxyImplTest {
   @Autowired
   private AuthenticationProxyImpl proxy;
 
+  @MockBean
+  private LogMessageSource logMessage;
+
   private Token sessionToken = new Token();
   private Token kmToken = new Token();
   private Token sessionToken2 = new Token();
@@ -145,21 +151,21 @@ public class AuthenticationProxyImplTest {
   @Test(expected = UnexpectedAuthException.class)
   public void testUnexpectedAuthException() throws RemoteApiException {
     doThrow(NullPointerException.class).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 
   @Test(expected = UnauthorizedUserException.class)
   public void testUnauthorizedUserException() throws RemoteApiException {
     RemoteApiException rae = new RemoteApiException(401, "testUnauthorizedUserException");
     doThrow(rae).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 
   @Test(expected = ForbiddenAuthException.class)
   public void testForbiddenAuthException() throws RemoteApiException {
     RemoteApiException rae = new RemoteApiException(403, "testForbiddenAuthException");
     doThrow(rae).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 
   @Test
@@ -183,7 +189,7 @@ public class AuthenticationProxyImplTest {
     try {
       proxy.authenticate(JIRAWEBHOOK);
       fail();
-    } catch (RemoteApiException e) {
+    } catch (AuthenticationException e) {
       assertTrue(proxy.getToken(JIRAWEBHOOK).equals(AuthenticationToken.VOID_AUTH_TOKEN));
       assertFalse(proxy.isAuthenticated(JIRAWEBHOOK));
     }
@@ -247,19 +253,19 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = RemoteApiException.class)
   public void testReAuthThrowRemoteApiException() throws RemoteApiException {
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 500, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "message"));
   }
 
   @Test(expected = UnexpectedAuthException.class)
   public void testReAuthFailed() throws RemoteApiException {
     doThrow(new RemoteApiException(500, new RuntimeException())).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 
   @Test
   public void testReAuth() throws RemoteApiException {
     doReturn(new Token()).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
     doReturn(new Token()).when(keyManagerAuthApi).authenticate(JIRAWEBHOOK);
-    proxy.reAuthOrThrow(JIRAWEBHOOK, 401, new RuntimeException());
+    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 }

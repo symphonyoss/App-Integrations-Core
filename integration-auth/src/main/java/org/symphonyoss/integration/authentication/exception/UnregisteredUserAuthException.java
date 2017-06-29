@@ -25,7 +25,7 @@ import org.symphonyoss.integration.exception.authentication.AuthenticationExcept
  */
 public class UnregisteredUserAuthException extends AuthenticationException {
 
-  public UnregisteredUserAuthException(String message) {
-    super(message);
+  public UnregisteredUserAuthException(String message, String... solutions) {
+    super(message, solutions);
   }
 }
