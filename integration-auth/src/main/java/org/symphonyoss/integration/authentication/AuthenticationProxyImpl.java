@@ -118,12 +118,12 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
     if (!context.isAuthenticated()) {
       LOG.info("Authenticate {}", userId);
 
-      Token sessionToken = null;
-      Token keyManagerToken = null;
-
       try {
-        sessionToken = sbeAuthApi.authenticate(userId);
-        keyManagerToken = keyManagerAuthApi.authenticate(userId);
+        Token sessionToken = sbeAuthApi.authenticate(userId);
+        Token keyManagerToken = keyManagerAuthApi.authenticate(userId);
+
+        context.setToken(
+            new AuthenticationToken(sessionToken.getToken(), keyManagerToken.getToken()));
       } catch (RemoteApiException e) {
         checkAndThrowException(e, userId);
       } catch (ConnectivityException e) {
@@ -133,10 +133,6 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
             logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_MESSAGE, userId), e,
             logMessage.getMessage(UNEXPECTED_SESSION_TOKEN_SOLUTION));
       }
-
-
-    context.setToken(
-          new AuthenticationToken(sessionToken.getToken(), keyManagerToken.getToken()));
     }
 
   }
