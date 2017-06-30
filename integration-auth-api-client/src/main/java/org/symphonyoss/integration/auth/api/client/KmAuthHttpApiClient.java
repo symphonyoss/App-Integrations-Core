@@ -17,7 +17,10 @@
 package org.symphonyoss.integration.auth.api.client;
 
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
-    .KEY_MANAGER_URL_SOLUTION;
+    .MISSING_CONFIG_INFO_SOLUTION;
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .MISSING_CONFIG_INFO;
+
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +56,9 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
     String url = properties.getKeyManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY, logMessageSource.getMessage(KEY_MANAGER_URL_SOLUTION, REQUIRED_KEY));
+      throw new MissingConfigurationException(SERVICE_NAME,
+          logMessageSource.getMessage(MISSING_CONFIG_INFO, REQUIRED_KEY),
+          logMessageSource.getMessage(MISSING_CONFIG_INFO_SOLUTION, REQUIRED_KEY));
     }
 
     return url;

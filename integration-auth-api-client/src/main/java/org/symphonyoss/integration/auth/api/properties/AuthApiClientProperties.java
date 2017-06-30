@@ -5,6 +5,8 @@ package org.symphonyoss.integration.auth.api.properties;
  */
 public class AuthApiClientProperties {
 
-  public static final String KEY_MANAGER_URL_SOLUTION = "auth.api.client.property.key.manager.url.solution";
+  public static final String MISSING_CONFIG_INFO = "auth.api.client.missing.config.info";
+
+  public static final String MISSING_CONFIG_INFO_SOLUTION = "auth.api.client.missing.config.info.solution";
 
 }
