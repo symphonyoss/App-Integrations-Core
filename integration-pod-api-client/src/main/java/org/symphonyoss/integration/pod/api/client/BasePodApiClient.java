@@ -30,6 +30,8 @@ public abstract class BasePodApiClient {
 
   public static final String LIMIT_QUERY_PARAM = "limit";
 
+  public static final Integer HTTP_BAD_REQUEST_ERROR = 400;
+
   /**
    * Check the required authentication token.
    * @param sessionToken Session authentication token.
