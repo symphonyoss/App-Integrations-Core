@@ -19,7 +19,11 @@ package org.symphonyoss.integration.core.bridge;
 import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
     .ERROR_GET_STREAM_INSTANCE;
 import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
+    .ERROR_GET_STREAM_INSTANCE_SOLUTION;
+import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
     .ERROR_GET_STREAM_JSON;
+import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
+    .ERROR_GET_STREAM_JSON_SOLUTION;
 import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator.AGENT_MESSAGEML_VERSION2;
 
 import com.github.zafarkhaja.semver.Version;
@@ -117,7 +121,7 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreams(optionalProperties);
     } catch (IOException e) {
-      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_JSON,optionalProperties), e);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_JSON,optionalProperties), e, ERROR_GET_STREAM_JSON_SOLUTION);
       return Collections.emptyList();
     }
   }
@@ -127,7 +131,7 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
     } catch (IOException e) {
-      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_INSTANCE ,instance.getInstanceId()), e);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_INSTANCE ,instance.getInstanceId()), e, ERROR_GET_STREAM_INSTANCE_SOLUTION);
       return StreamType.NONE;
     }
   }

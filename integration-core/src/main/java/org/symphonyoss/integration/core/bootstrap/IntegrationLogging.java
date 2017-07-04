@@ -100,7 +100,8 @@ public class IntegrationLogging {
   }
 
   /**
-   * Logs the health of one integration. This method is called after an integration finishes its bootstrap
+   * Logs the health of one integration. This method is called after an integration finishes its
+   * bootstrap
    * process.
    */
   private void logIntegrationHealthCheck(Integration integration) {
@@ -108,26 +109,31 @@ public class IntegrationLogging {
       String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
       String integrationName = integration.getSettings().getName();
       String integrationHealthLog =
-          logMessage.getMessage(INTEGRATION_HEALTH_STATUS, integrationName, integrationHealthString);
+          logMessage.getMessage(INTEGRATION_HEALTH_STATUS, integrationName,
+              integrationHealthString);
       LOGGER.info(integrationHealthLog);
-    } catch (RemoteApiException e)  {
-      LOGGER.error(logMessage.getMessage(FAIL_LOG_INTEGRATION_HEALTH , integration.getSettings().getName()));
+    } catch (RemoteApiException e) {
+      LOGGER.error(
+          logMessage.getMessage(FAIL_LOG_INTEGRATION_HEALTH, integration.getSettings().getName()), e);
     }
   }
 
   /**
-   * Logs the application health, however the logging should only happen on these occasions:  after the last
-   * integration finishes its bootstrap process, after new integrations are added or after an exception
+   * Logs the application health, however the logging should only happen on these occasions:  after
+   * the last
+   * integration finishes its bootstrap process, after new integrations are added or after an
+   * exception
    * happens when trying to bootstrap an integration.
    */
   private void logHealthCheck() {
     try {
       Health health = asyncCompositeHealthEndpoint.invoke();
       String applicationHealthString = jsonUtils.serialize(health);
-      String applicationHealthLog = logMessage.getMessage(APPLICATION_HEALTH_CORE, applicationHealthString);
+      String applicationHealthLog =
+          logMessage.getMessage(APPLICATION_HEALTH_CORE, applicationHealthString);
       LOGGER.info(applicationHealthLog);
     } catch (RemoteApiException e) {
-      LOGGER.error(logMessage.getMessage(FAIL_LOG_APPLICATION_HEALTH));
+      LOGGER.error(logMessage.getMessage(FAIL_LOG_APPLICATION_HEALTH), e);
     }
   }
 
@@ -153,7 +159,7 @@ public class IntegrationLogging {
           logIntegrationHealthCheck(integration);
         }
       } catch (InterruptedException e) {
-        LOGGER.error(logMessage.getMessage(PERFORM_HEALTH_LOGGING));
+        LOGGER.error(logMessage.getMessage(PERFORM_HEALTH_LOGGING), e);
       }
     }
 

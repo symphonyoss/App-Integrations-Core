@@ -16,10 +16,10 @@
 
 package org.symphonyoss.integration.core.properties;
 
-import org.symphonyoss.integration.core.service.UserServiceImpl;
+import org.symphonyoss.integration.core.NullIntegration;
 
 /**
- * Exception message keys used by the component {@link UserServiceImpl}
+ * Exception message keys used by the component {@link NullIntegration}
  * Created by alexandre-silva-daitan on 26/06/17.
  */
 public class NullIntegrationProperties {
@@ -28,6 +28,4 @@ public class NullIntegrationProperties {
       "core.user.key.store.password.not.found";
   public static final String KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION =
       KEY_STORE_PASSWORD_NOT_FOUND + ".solution";
-  public static final String KEY_STORE_PASSWORD_NOT_RETRIEVED =
-      "core.user.key.store.password.not.retrieved";
 }

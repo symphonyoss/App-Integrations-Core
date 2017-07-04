@@ -24,6 +24,8 @@ import static org.symphonyoss.integration.core.properties
 import static org.symphonyoss.integration.core.properties
     .IntegrationBridgeExceptionHandlerProperties.FAIL_UPDATE_STREAM;
 import static org.symphonyoss.integration.core.properties
+    .IntegrationBridgeExceptionHandlerProperties.FAIL_UPDATE_STREAM_SOLUTION;
+import static org.symphonyoss.integration.core.properties
     .IntegrationBridgeExceptionHandlerProperties.INVALID_MESSAGE;
 import static org.symphonyoss.integration.core.properties
     .IntegrationBridgeExceptionHandlerProperties.UNABLE_POST_STREAM;
@@ -69,13 +71,11 @@ import javax.ws.rs.core.Response.Status;
 @Component
 public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBridgeExceptionHandler.class);
 
   /**
    * We use this message when we want to notify an instance owner that one of his instances has an
-   * unreachable room
-   * for the Integration User.
+   * unreachable room for the Integration User.
    */
   private static final String DEFAULT_NOTIFICATION =
       "<messageML>%s has been removed from %s, I can no longer post messages in %s unless I am "
@@ -83,8 +83,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
           + "</messageML>";
   /**
    * Used when we want to notify an instance owner that one of his instances has an unreachable room
-   * for the
-   * Integration User but we can't determine its room name.
+   * for the Integration User but we can't determine its room name.
    */
   private static final String UNDETERMINED_ROOM_NOTIFICATION =
       "<messageML>%s has been removed from a room belonging to web hook instance %s, "
@@ -126,7 +125,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
     Status status = Status.fromStatusCode(code);
     String message = logMessage.getMessage(UNABLE_POST_STREAM, stream, String.valueOf(code));
 
-    LOGGER.error(message,remoteException);
+    LOGGER.error(message, remoteException);
 
     if (forbiddenError(code)) {
       updateStreams(instance, integrationUser, stream);
@@ -142,10 +141,8 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   /**
    * Update the integration instance removing the stream. Needs to notify the instance owner.
-   * @param instance to determine the unreachable room name and provide info for the remaining
-   * process.
-   * @param integrationUser to remove the stream from the instance and to notify the instance
-   * owner.
+   * @param instance to determine the unreachable room name and provide info for the remaining process.
+   * @param integrationUser to remove the stream from the instance and to notify the instance owner.
    * @param stream to be removed from the instance.
    */
   private void updateStreams(IntegrationInstance instance, String integrationUser, String stream) {
@@ -169,7 +166,8 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
       removeStreamFromInstance(instance, integrationUser, stream);
       notifyInstanceOwner(instance, integrationUser, roomName);
     } catch (IntegrationRuntimeException | IOException e) {
-      LOGGER.error(logMessage.getMessage(FAIL_UPDATE_STREAM) ,e);
+      String solution = logMessage.getMessage(FAIL_UPDATE_STREAM_SOLUTION);
+      LOGGER.error(logMessage.getMessage(FAIL_UPDATE_STREAM), e, solution);
     }
   }
 
@@ -196,8 +194,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
   }
 
   /**
-   * Notifies the instance owner about the integration bridge not being able to post the message to
-   * the configured room.
+   * Notifies the instance owner about the integration bridge not being able to post the message to the configured room.
    * @param instance to determine the owner of this instance.
    * @param integrationUser to determine which integration user is going to post the message.
    * @param roomName to tell the user which room we can't reach.

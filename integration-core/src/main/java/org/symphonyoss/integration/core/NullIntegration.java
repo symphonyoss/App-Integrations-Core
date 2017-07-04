@@ -20,8 +20,6 @@ import static org.symphonyoss.integration.core.properties.NullIntegrationPropert
     .KEY_STORE_PASSWORD_NOT_FOUND;
 import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
     .KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION;
-import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
-    .KEY_STORE_PASSWORD_NOT_RETRIEVED;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
@@ -60,7 +58,8 @@ public class NullIntegration extends BaseIntegration {
   private LogMessageSource logMessage;
 
   public NullIntegration(ApplicationsHealthIndicator healthIndicator, Application application,
-      IntegrationUtils utils, AuthenticationProxy authenticationProxy, LogMessageSource logMessage) {
+      IntegrationUtils utils, AuthenticationProxy authenticationProxy,
+      LogMessageSource logMessage) {
     this.healthIndicator = healthIndicator;
     this.application = application;
     this.utils = utils;
@@ -79,7 +78,7 @@ public class NullIntegration extends BaseIntegration {
     try {
       registerUser(integrationUser);
     } catch (BootstrapException e) {
-      LOG.error(KEY_STORE_PASSWORD_NOT_RETRIEVED, e);
+      LOG.error(e.getMessage());
       healthManager.certificateInstalled(NOK);
     }
 
@@ -107,16 +106,10 @@ public class NullIntegration extends BaseIntegration {
 
   @Override
   public void onConfigChange(IntegrationSettings settings) {
-    /* This has no implementation due to the nature of this class, it shouldn't do anything as it
-     represents an empty,
-     * "null" Integration. */
   }
 
   @Override
   public void onDestroy() {
-    /* This has no implementation due to the nature of this class, it shouldn't do anything as it
-     represents an empty,
-     * "null" Integration. */
   }
 
   @Override

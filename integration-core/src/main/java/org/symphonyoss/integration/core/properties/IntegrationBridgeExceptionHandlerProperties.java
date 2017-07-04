@@ -3,7 +3,7 @@ package org.symphonyoss.integration.core.properties;
 import org.symphonyoss.integration.core.bridge.IntegrationBridgeExceptionHandler;
 
 /**
- * Exception message keys used by the component {@link IntegrationBridgeExceptionHandler
+ * Exception message keys used by the component {@link IntegrationBridgeExceptionHandler}
  * Created by alexandre-silva-daitan on 27/06/17.
  */
 public class IntegrationBridgeExceptionHandlerProperties {
@@ -13,4 +13,5 @@ public class IntegrationBridgeExceptionHandlerProperties {
   public static final String FAIL_UPDATE_STREAM = "core.integration.bridge.exception.handler.fail.update.streams";
   public static final String FAIL_NOTIFY_OWNER = "core.integration.bridge.exception.handler.fail.notify.owner";
   public static final String UPDATE_INSTANCE_NOTIFY = "core.integration.bridge.exception.handler.update.instance.notify";
+  public static final String FAIL_UPDATE_STREAM_SOLUTION = "core.integration.bridge.exception.handler.fail.update.streams.solution";
 }

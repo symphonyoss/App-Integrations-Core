@@ -27,6 +27,7 @@ public class IntegrationBootstrapContextProperties {
   public static final String POLLING_AGENT_HEALTH_CHECK = "core.bootstrapcontext.polling.agent.health.check";
   public static final String FAIL_BOOTSTRAP_INTEGRATION = "core.bootstrapcontext.fail.bootstrap.integration";
   public static final String POLLING_STOPPED = "core.bootstrapcontext.polling.stopped";
+  public static final String POLLING_STOPPED_SOLUTION = "core.bootstrapcontext.polling.stopped.solution";
   public static final String INTEGRATION_SUCCESSFULLY_BOOTSTRAPPED = "core.bootstrapcontext.integration.successfully";
   public static final String FAIL_BOOTSTRAP_INTEGRATION_RETRYING = "core.bootstrapcontext.fail.bootstrap.integration.retrying";
   public static final String VERIFY_NEW_INTEGRATIONS = "core.bootstrapcontext.verify.new.integrations";

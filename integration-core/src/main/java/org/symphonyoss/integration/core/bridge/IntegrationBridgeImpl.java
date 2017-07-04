@@ -19,8 +19,6 @@ package org.symphonyoss.integration.core.bridge;
 import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
     .NO_CONFIGURED_STREAM;
 import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
-    .NO_STREAMS;
-import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
     .NO_STREAMS_SOLUTION;
 import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
     .REMOTE_API_EXCEPTION_REASON;

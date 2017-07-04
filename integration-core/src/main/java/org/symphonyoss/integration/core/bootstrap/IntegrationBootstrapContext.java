@@ -29,6 +29,8 @@ import static org.symphonyoss.integration.core.properties.IntegrationBootstrapCo
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .POLLING_STOPPED;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .POLLING_STOPPED_SOLUTION;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .SHUTTING_DOWN_INTEGRATION;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .VERIFY_NEW_INTEGRATIONS;
@@ -214,11 +216,10 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
    * their own
    * are considered "Unknown Applications".
    * They will show up on health checks for the Integration Bridge as non-ACTIVE applications as
-   * they aren't actually
-   * implemented.
+   * they aren't actually implemented.
    * This is more likely to happen if someone configures the provisioning YAML file with an
-   * incorrect application name
-   * or with an integration name that does not actually exist for the time being.
+   * incorrect application name or with an integration name that does not actually exist for the
+   * time being.
    */
   private void initUnknownApps() {
     Map<String, Application> applications = properties.getApplications();
@@ -237,7 +238,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         try {
           integration.onCreate(appId);
         } catch (IntegrationRuntimeException e) {
-          LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION, appId));
+          LOGGER.error(e.getMessage(), appId);
         }
       }
     }
@@ -284,7 +285,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         }
       }
     } catch (InterruptedException e) {
-      LOGGER.error(logMessage.getMessage(POLLING_STOPPED));
+      LOGGER.error(logMessage.getMessage(POLLING_STOPPED), e, POLLING_STOPPED_SOLUTION);
     }
   }
 
@@ -330,12 +331,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       logging.logIntegration(integration);
     } catch (ConnectivityException e) {
-      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING, integrationUser));
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING, integrationUser), e);
       integrationsToRegister.offer(info);
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
-      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION, integrationUser));
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION, integrationUser), e);
     } finally {
       logHealthCheck();
     }
@@ -346,11 +347,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     int retryAttempts = integrationInfo.registerRetryAttempt();
     if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING,
-          integrationInfo.getConfigurationType()));
+          integrationInfo.getConfigurationType()), e);
       integrationsToRegister.offer(integrationInfo);
     } else {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
-          integrationInfo.getConfigurationType()));
+          integrationInfo.getConfigurationType()), e);
     }
   }
 
