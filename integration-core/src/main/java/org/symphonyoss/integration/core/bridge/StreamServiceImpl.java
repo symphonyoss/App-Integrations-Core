@@ -103,7 +103,7 @@ public class StreamServiceImpl implements StreamService {
   public void init() {
     streamsApi = new StreamApiClient(podApiClient);
 
-    MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient);
+    MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient, logMessage);
 
     // In the begin, we must configure the Agent Message API v2 for both versions of MessageML.
     // After that, this API version might get overridden by the event handler method.
@@ -175,7 +175,7 @@ public class StreamServiceImpl implements StreamService {
       Version version = Version.valueOf(event.getNewVersion());
 
       if (version.greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
-        apiResolver.put(MessageMLVersion.V2, new V4MessageApiClient(agentV4ApiClient));
+        apiResolver.put(MessageMLVersion.V2, new V4MessageApiClient(agentV4ApiClient, logMessage));
       } else {
         MessageApiClient messageApiClient = apiResolver.get(MessageMLVersion.V1);
         apiResolver.put(MessageMLVersion.V2, messageApiClient);

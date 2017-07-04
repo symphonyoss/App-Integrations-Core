@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.symphonyoss.integration.agent.api.client.properties;
 
-package org.symphonyoss.integration.authentication.exception;
-
-import org.symphonyoss.integration.exception.authentication.AuthenticationException;
+import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 
 /**
- * Calling authorization API's without registering the user.
- *
- * Created by ecarrenho on 26/10/16.
+ * Exception message keys used by the component {@link AgentApiClient}
+ * Created by rsanchez on 29/06/17.
  */
-public class UnregisteredUserAuthException extends AuthenticationException {
+public class AgentApiClientProperties {
 
-  public UnregisteredUserAuthException(String message, String... solutions) {
-    super(message, solutions);
-  }
+  public static final String MISSING_CONFIG_FILE = "integration.agent.api.client.config.missing.info";
+
+  public static final String MISSING_CONFIG_FILE_SOLUTION = MISSING_CONFIG_FILE + ".solution";
+
 }

@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -39,6 +40,9 @@ public class AgentApiClientTest {
 
   @Mock
   private IntegrationProperties properties;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private AgentApiClient agentApiClient;

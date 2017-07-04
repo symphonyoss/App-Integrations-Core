@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.symphonyoss.integration.agent.api.client.properties;
 
-package org.symphonyoss.integration.authentication.exception;
+import org.symphonyoss.integration.agent.api.client.V4MessageApiClient;
 
-import org.symphonyoss.integration.exception.authentication.AuthenticationException;
-
-/**
- * Calling authorization API's without registering the user.
- *
- * Created by ecarrenho on 26/10/16.
+ /** Exception message keys used by the component {@link V4MessageApiClient}
+ * Created by rsanchez on 6/27/17.
  */
-public class UnregisteredUserAuthException extends AuthenticationException {
 
-  public UnregisteredUserAuthException(String message, String... solutions) {
-    super(message, solutions);
-  }
+public class V4MessageApiClientProperties {
+
+  public static String POST_FAILURE = "integration.message.failed.post";
+
+  public static String POST_FAILURE_SOLUTION = "integration.message.failed.post.solution";
 }

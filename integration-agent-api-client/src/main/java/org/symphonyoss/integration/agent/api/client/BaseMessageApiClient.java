@@ -16,7 +16,14 @@
 
 package org.symphonyoss.integration.agent.api.client;
 
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_BODY;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_BODY_SOLUTION;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_PARAMETER;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_PARAMETER_SOLUTION;
+import static org.symphonyoss.integration.agent.api.client.properties.BaseMessageApiClientProperties.MISSING_STREAMID_SOLUTION;
+
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 /**
@@ -28,6 +35,14 @@ public abstract class BaseMessageApiClient implements MessageApiClient {
   public static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
 
   public static final String KM_TOKEN_HEADER_PARAM = "keyManagerToken";
+
+  public static final String STREAM_ID_PATH = "streamId";
+
+  protected LogMessageSource logMessage;
+
+  public BaseMessageApiClient(LogMessageSource logMessage) {
+    this.logMessage = logMessage;
+  }
 
   /**
    * Validate the required parameters to post messages through the Agent API.
@@ -43,23 +58,32 @@ public abstract class BaseMessageApiClient implements MessageApiClient {
   protected void validateParams(String sessionToken, String kmToken, String streamId,
       Message message) throws RemoteApiException {
     if (sessionToken == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'sessionToken' when calling postMessage");
+      String exception = logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION);
+
+      throw new RemoteApiException(400, exception, solution);
     }
 
     if (kmToken == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'kmToken' when calling postMessage");
+      String exception = logMessage.getMessage(MISSING_PARAMETER, KM_TOKEN_HEADER_PARAM);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION);
+
+      throw new RemoteApiException(400, exception, solution);
     }
 
     if (streamId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'streamId' when calling postMessage");
+      String exception = logMessage.getMessage(MISSING_PARAMETER, STREAM_ID_PATH);
+      String solution = logMessage.getMessage(MISSING_STREAMID_SOLUTION);
+
+      throw new RemoteApiException(400, exception, solution);
     }
 
     // verify the required parameter 'message' is set
     if (message == null) {
-      throw new RemoteApiException(400, "Missing the required body when calling postMessage");
+      String exception = logMessage.getMessage(MISSING_BODY);
+      String solution = logMessage.getMessage(MISSING_BODY_SOLUTION);
+
+      throw new RemoteApiException(400, exception, solution);
     }
   }
 

@@ -39,6 +39,7 @@ import org.mockito.stubbing.Answer;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.json.JsonUtils;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.Message;
 
 import java.io.IOException;
@@ -93,11 +94,14 @@ public class V4MessageApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private MessageApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new V4MessageApiClient(httpClient);
+    this.apiClient = new V4MessageApiClient(httpClient, logMessage);
   }
 
   @Test
