@@ -26,9 +26,11 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -49,6 +51,9 @@ public class ApplicationsHealthIndicatorTest {
 
   @Autowired
   private ApplicationsHealthIndicator healthIndicator;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Before
   public void init() {
