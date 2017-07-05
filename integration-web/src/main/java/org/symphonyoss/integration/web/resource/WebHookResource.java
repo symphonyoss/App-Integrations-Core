@@ -19,6 +19,14 @@ package org.symphonyoss.integration.web.resource;
 import static org.symphonyoss.integration.web.properties.WebProperties.CONFIGURATION_FILE_EXCEPTION;
 import static org.symphonyoss.integration.web.properties.WebProperties
     .CONFIGURATION_FILE_EXCEPTION_SOLUTION;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .INTEGRATION_BRIDGE_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .INTEGRATION_BRIDGE_UNAVAILABLE_SOLUTION;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .WEBHOOK_CONFIGURATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +66,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response;
 
 /**
  * Base class to support HTTP handlers.
@@ -125,9 +134,9 @@ public abstract class WebHookResource {
     WebHookIntegration whiIntegration =
         (WebHookIntegration) this.integrationBridge.getIntegrationById(configurationId);
     if (whiIntegration == null) {
-//      String message = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION, configurationId);
-//      String solution = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION_SOLUTION, configurationId);
-      throw new IntegrationUnavailableException(configurationId);
+      String message = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE, configurationId);
+      String solution = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION);
+      throw new IntegrationUnavailableException(message, solution);
     }
 
     return whiIntegration;
@@ -183,8 +192,9 @@ public abstract class WebHookResource {
    */
   protected void checkIntegrationBridgeAvailability() {
     if (!this.circuitClosed) {
-      throw new IntegrationBridgeUnavailableException(
-          "Integration Bridge temporarily unavailable due to connectivity issues.");
+      String message = logMessage.getMessage(INTEGRATION_BRIDGE_UNAVAILABLE);
+      String solution = logMessage.getMessage(INTEGRATION_BRIDGE_UNAVAILABLE_SOLUTION);
+      throw new IntegrationBridgeUnavailableException(message, solution);
     }
   }
 
@@ -230,8 +240,7 @@ public abstract class WebHookResource {
 
   /**
    * Handle {@link RemoteApiException} exception.
-   * When an error occurs in the API call, whether this error is on account of the client or the
-   * API,
+   * When an error occurs in the API call, whether this error is on account of the client or the API,
    * a RemoteApiException with an HTTP code and a message description is returned.
    * Business Rule: When receive HTTP 403 - FORBIDDEN then return HTTP 404 - NOT FOUND
    * @param ex RemoteApiException object
@@ -297,8 +306,7 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(WebHookUnprocessableEntityException.class)
-  public ResponseEntity<String> handleWebHookUnprocessableEntityException(
-      WebHookUnprocessableEntityException e) {
+  public ResponseEntity<String> handleWebHookUnprocessableEntityException(WebHookUnprocessableEntityException e) {
     String message = e.getMessage();
     LOGGER.info(message);
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(message);

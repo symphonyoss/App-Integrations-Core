@@ -17,9 +17,6 @@
 package org.symphonyoss.integration.web.filter;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.symphonyoss.integration.web.properties.WebProperties.CANNOT_FIND_HOST_FOR_IP;
-import static org.symphonyoss.integration.web.properties.WebProperties
-    .CANNOT_FIND_HOST_FOR_IP_SOLUTION;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -78,14 +75,22 @@ public class WebHookOriginCheckFilter implements Filter {
 
   private static final String WELCOME_PATH = "welcome";
 
+  private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
+
+  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION =
+      "integration.web.cannot.find.host.solution";
+
   private static final String WEBHOOK_REQUEST_BLOCKED = "integration.web.request.blocked";
 
-  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION = "integration.web.request.blocked.solution";
+  private static final String WEBHOOK_REQUEST_BLOCKED_SOLUTION =
+      "integration.web.request.blocked.solution";
 
   /**
    * A regular expression to match commas and commas followed by spaces.
-   * This will allow to split the originating address list into an array of IP's. For instance, the originating IP
-   * addresses is typically something like "12.234.45.56, 13.345.56.67, 13.345.56.67". Splitting that string with
+   * This will allow to split the originating address list into an array of IP's. For instance, the
+   * originating IP
+   * addresses is typically something like "12.234.45.56, 13.345.56.67, 13.345.56.67". Splitting
+   * that string with
    * this regular expression will result in an array of the trimmed IP addresses.
    */
   private static final String COMMA_FOLLOWED_BY_SPACES = ",\\s*";
@@ -121,7 +126,6 @@ public class WebHookOriginCheckFilter implements Filter {
    * If the request sender is allowed to communicate with the Integration Bridge the filter
    * invoke the next entity in the chain using the filterChain object. Otherwise, the filter
    * returns an HTTP 403 (Forbidden).
-   *
    * @param servletRequest HTTP Servlet request
    * @param servletResponse HTTP Servlet response
    * @param filterChain Object provided by the servlet container to the developer giving a view
@@ -213,17 +217,21 @@ public class WebHookOriginCheckFilter implements Filter {
 
   /**
    * Verify if the origin is allowed to send message through the integration.
-   * @param remoteAddressInfo Request origin addresses (this may contain one or more IP's separated by comma)
+   * @param remoteAddressInfo Request origin addresses (this may contain one or more IP's separated
+   * by comma)
    * @param whiteList The IP whitelist to match the remoteAddress
    * @param integrationType The path for the incoming HTTP request
    * @return true if the origin is allowed or false otherwise
    */
-  private boolean verifyOrigin(String remoteAddressInfo, Set<String> whiteList, String integrationType) {
+  private boolean verifyOrigin(String remoteAddressInfo, Set<String> whiteList,
+      String integrationType) {
     String[] remoteAddresses = COMMA_PATTERN.split(remoteAddressInfo);
-    return verifyOriginIPs(remoteAddresses, whiteList) || verifyOriginHosts(remoteAddresses, whiteList, integrationType);
+    return verifyOriginIPs(remoteAddresses, whiteList) || verifyOriginHosts(remoteAddresses,
+        whiteList, integrationType);
   }
 
-  private boolean verifyOriginHosts(String[] remoteAddresses, Set<String> whiteList, String integrationType) {
+  private boolean verifyOriginHosts(String[] remoteAddresses, Set<String> whiteList,
+      String integrationType) {
     for (String ipAddress : remoteAddresses) {
       try {
         InetAddress address = InetAddress.getByName(ipAddress);
@@ -235,7 +243,8 @@ public class WebHookOriginCheckFilter implements Filter {
         }
       } catch (UnknownHostException e) {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
-            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress), e,
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
+            e,
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION, integrationType)
         ));
       }
@@ -253,7 +262,8 @@ public class WebHookOriginCheckFilter implements Filter {
   }
 
   /**
-   * Gets the originating address information from the request header x-forwarded-for, or from the request remote
+   * Gets the originating address information from the request header x-forwarded-for, or from the
+   * request remote
    * address, if x-forwarded-for is not present.
    * @param request Incoming Http request
    * @return Originating addresses information: a list of one or more IP's separated by commas.
@@ -274,7 +284,8 @@ public class WebHookOriginCheckFilter implements Filter {
    * @param remoteAddress Origin remote address
    * @throws IOException Report failure to write the http error response.
    */
-  private void writeResponse(HttpServletResponse response, String remoteAddress) throws IOException {
+  private void writeResponse(HttpServletResponse response, String remoteAddress)
+      throws IOException {
     response.setContentType(APPLICATION_JSON);
     response.setStatus(Response.Status.FORBIDDEN.getStatusCode());
 
@@ -286,5 +297,6 @@ public class WebHookOriginCheckFilter implements Filter {
   }
 
   @Override
-  public void destroy() {}
+  public void destroy() {
+  }
 }

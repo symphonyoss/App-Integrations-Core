@@ -29,4 +29,8 @@ public class ConfigurationProvisioningException extends IntegrationRuntimeExcept
     super(COMPONENT, message, cause, solutions);
   }
 
+  public ConfigurationProvisioningException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
+  }
+
 }

@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -43,6 +44,7 @@ import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
@@ -73,6 +75,9 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
   private static final String IB_UNAVAILABLE_EXCEPTION_MESSAGE =
       "Integration Bridge temporarily unavailable due to connectivity issues.";
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private WebHookDispatcherResource webHookDispatcherResource = new WebHookDispatcherResource();
