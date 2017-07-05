@@ -16,6 +16,10 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static org.symphonyoss.integration.web.properties.WebProperties.CONFIGURATION_FILE_EXCEPTION;
+import static org.symphonyoss.integration.web.properties.WebProperties
+    .CONFIGURATION_FILE_EXCEPTION_SOLUTION;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,7 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.exception.config.NotFoundException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
@@ -53,7 +58,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
 
 /**
  * Base class to support HTTP handlers.
@@ -72,6 +76,9 @@ public abstract class WebHookResource {
 
   @Autowired
   private IntegrationBridge integrationBridge;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Represents the current circuit state that Integration Bridge uses to determine whether it is
@@ -118,6 +125,8 @@ public abstract class WebHookResource {
     WebHookIntegration whiIntegration =
         (WebHookIntegration) this.integrationBridge.getIntegrationById(configurationId);
     if (whiIntegration == null) {
+//      String message = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION, configurationId);
+//      String solution = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION_SOLUTION, configurationId);
       throw new IntegrationUnavailableException(configurationId);
     }
 
@@ -221,7 +230,8 @@ public abstract class WebHookResource {
 
   /**
    * Handle {@link RemoteApiException} exception.
-   * When an error occurs in the API call, whether this error is on account of the client or the API,
+   * When an error occurs in the API call, whether this error is on account of the client or the
+   * API,
    * a RemoteApiException with an HTTP code and a message description is returned.
    * Business Rule: When receive HTTP 403 - FORBIDDEN then return HTTP 404 - NOT FOUND
    * @param ex RemoteApiException object
@@ -287,7 +297,8 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(WebHookUnprocessableEntityException.class)
-  public ResponseEntity<String> handleWebHookUnprocessableEntityException(WebHookUnprocessableEntityException e) {
+  public ResponseEntity<String> handleWebHookUnprocessableEntityException(
+      WebHookUnprocessableEntityException e) {
     String message = e.getMessage();
     LOGGER.info(message);
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(message);

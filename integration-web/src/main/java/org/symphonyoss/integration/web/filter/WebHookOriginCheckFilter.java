@@ -17,6 +17,9 @@
 package org.symphonyoss.integration.web.filter;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.symphonyoss.integration.web.properties.WebProperties.CANNOT_FIND_HOST_FOR_IP;
+import static org.symphonyoss.integration.web.properties.WebProperties
+    .CANNOT_FIND_HOST_FOR_IP_SOLUTION;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -74,10 +77,6 @@ public class WebHookOriginCheckFilter implements Filter {
   private static final String FORBIDDEN_MESSAGE = "Host not allowed";
 
   private static final String WELCOME_PATH = "welcome";
-
-  private static final String CANNOT_FIND_HOST_FOR_IP = "integration.web.cannot.find.host";
-
-  private static final String CANNOT_FIND_HOST_FOR_IP_SOLUTION = "integration.web.cannot.find.host.solution";
 
   private static final String WEBHOOK_REQUEST_BLOCKED = "integration.web.request.blocked";
 
@@ -236,8 +235,7 @@ public class WebHookOriginCheckFilter implements Filter {
         }
       } catch (UnknownHostException e) {
         LOGGER.warn(ExceptionMessageFormatter.format(WEBHOOK_FILTER,
-            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress),
-            e,
+            logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP, ipAddress), e,
             logMessage.getMessage(CANNOT_FIND_HOST_FOR_IP_SOLUTION, integrationType)
         ));
       }
