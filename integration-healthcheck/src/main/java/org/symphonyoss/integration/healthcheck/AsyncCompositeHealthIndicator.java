@@ -75,12 +75,12 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
    */
   private final HealthAggregator healthAggregator;
 
-  @Autowired
-  private LogMessageSource logMessageSource;
+  private final LogMessageSource logMessageSource;
 
   @Autowired
-  public AsyncCompositeHealthIndicator(HealthAggregator aggregator) {
+  public AsyncCompositeHealthIndicator(HealthAggregator aggregator, LogMessageSource logMessageSource) {
     this.healthAggregator = aggregator;
+    this.logMessageSource = logMessageSource;
     this.indicators = new HashMap<>();
   }
 

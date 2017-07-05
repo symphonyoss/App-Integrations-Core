@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -30,6 +31,8 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
+import org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 import java.util.LinkedHashMap;
 
@@ -50,13 +53,15 @@ public class AsyncCompositeHealthIndicatorTest {
   @Mock
   private HealthIndicator healthIndicatorMock2;
 
-  @Spy
   private HealthAggregator aggregator = new MockHealthAggregator();
 
   @Mock
   private HealthAggregator aggregatorMock;
 
-  private AsyncCompositeHealthIndicator healthIndicator = new AsyncCompositeHealthIndicator(aggregator);
+  @Mock
+  private LogMessageSource logMessageSource;
+
+  private AsyncCompositeHealthIndicator healthIndicator = new AsyncCompositeHealthIndicator(aggregator, logMessageSource);
 
   @Test
   public void testEmpty() {
@@ -67,8 +72,10 @@ public class AsyncCompositeHealthIndicatorTest {
 
   @Test
   public void testInterrupted() {
-    HealthIndicator hi = new AsyncCompositeHealthIndicator(aggregatorMock);
+    HealthIndicator hi = new AsyncCompositeHealthIndicator(aggregatorMock, logMessageSource);
     doThrow(InterruptedException.class).when(aggregatorMock).aggregate(any(LinkedHashMap.class));
+
+    doReturn("Test").when(logMessageSource).getMessage(HealthCheckProperties.INTERRUPTED_EXCEPTION);
 
     Health result = hi.health();
     assertEquals(Status.DOWN, result.getStatus());
@@ -76,21 +83,24 @@ public class AsyncCompositeHealthIndicatorTest {
 
   @Test
   public void testFailIndicator() {
+    AsyncCompositeHealthIndicator hi = new AsyncCompositeHealthIndicator(aggregator, logMessageSource);
+
     Health mock1 = Health.up().build();
     Health mock2 = Health.down().withDetail("error", "Fail to verify the health status").build();
 
     doReturn(mock1).when(healthIndicatorMock1).health();
     doThrow(new RuntimeException()).when(healthIndicatorMock2).health();
-
-    healthIndicator.addHealthIndicator(MOCK_INDICATOR_1, healthIndicatorMock1);
-    healthIndicator.addHealthIndicator(MOCK_INDICATOR_2, healthIndicatorMock2);
-
-    Health result = healthIndicator.health();
+    doReturn("Fail to verify the health status").when(logMessageSource).getMessage(anyString());
 
     Health expected = Health.down()
         .withDetail(MOCK_INDICATOR_1, mock1)
         .withDetail(MOCK_INDICATOR_2, mock2)
         .build();
+
+    hi.addHealthIndicator(MOCK_INDICATOR_1, healthIndicatorMock1);
+    hi.addHealthIndicator(MOCK_INDICATOR_2, healthIndicatorMock2);
+
+    Health result = hi.health();
 
     assertEquals(expected, result);
   }
