@@ -30,7 +30,7 @@ public class PodHealthIndicator extends ServiceHealthIndicator {
 
   private static final String SERVICE_NAME = "POD";
 
-  public static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
+  private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
 
   @Override
   protected String getServiceName() {

@@ -16,6 +16,11 @@
 
 package org.symphonyoss.integration.healthcheck;
 
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .EXECUTION_EXCEPTION;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .INTERRUPTED_EXCEPTION;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -70,6 +76,9 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private final HealthAggregator healthAggregator;
 
   @Autowired
+  private LogMessageSource logMessageSource;
+
+  @Autowired
   public AsyncCompositeHealthIndicator(HealthAggregator aggregator) {
     this.healthAggregator = aggregator;
     this.indicators = new HashMap<>();
@@ -91,7 +100,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
       Map<String, Health> healths = extractResult(result);
       return this.healthAggregator.aggregate(healths);
     } catch (InterruptedException e) {
-      String message = "Request thread was interrupted";
+      String message = logMessageSource.getMessage(INTERRUPTED_EXCEPTION);
       LOG.error(message, e);
       return Health.down().withDetail(ERROR_KEY, message).build();
     }
@@ -169,12 +178,11 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
     try {
       return value.get();
     } catch (InterruptedException e) {
-      return Health.down().withDetail(ERROR_KEY, "Thread was interrupted").build();
+      return Health.down().withDetail(ERROR_KEY, logMessageSource.getMessage(INTERRUPTED_EXCEPTION)).build();
     } catch (ExecutionException e) {
-      String message = "Fail to verify the health status";
+      String message = logMessageSource.getMessage(EXECUTION_EXCEPTION);
       LOG.error(message, e.getCause());
       return Health.down().withDetail(ERROR_KEY, message).build();
     }
   }
-
 }
