@@ -16,6 +16,17 @@
 
 package org.symphonyoss.integration.core.bridge;
 
+import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
+    .NO_CONFIGURED_STREAM;
+import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
+    .NO_STREAMS_SOLUTION;
+import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
+    .REMOTE_API_EXCEPTION_REASON;
+import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
+    .REMOTE_API_EXCEPTION_WITH_RESULT_REASON;
+import static org.symphonyoss.integration.core.properties.IntegrationBridgeImplProperties
+    .USER_POSTED_MESSAGE;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +36,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.bootstrap.IntegrationBootstrapContext;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.service.IntegrationBridge;
@@ -52,6 +64,9 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
 
   @Autowired
   private IntegrationBridgeExceptionHandler exceptionHandler;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   @Override
   public List<Message> sendMessage(IntegrationInstance instance, String integrationUser, Message message) throws RemoteApiException {
@@ -96,10 +111,11 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     List<Message> result = new ArrayList<>();
 
     if (streams.isEmpty()) {
-      LOGGER.info("No streams configured to instance {} and configuration {}",
-          instance.getInstanceId(), instance.getConfigurationId());
-      throw new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(),
-          Response.Status.NOT_FOUND.getReasonPhrase());
+      LOGGER.info(logMessage.getMessage(NO_CONFIGURED_STREAM, instance.getInstanceId(), instance.getConfigurationId()));
+      Integer code = Response.Status.NOT_FOUND.getStatusCode();
+      String reason = Response.Status.NOT_FOUND.getReasonPhrase();
+      String solution = logMessage.getMessage(NO_STREAMS_SOLUTION);
+      throw new RemoteApiException(code, reason, solution);
     }
 
     RemoteApiException remoteApiException = null;
@@ -124,10 +140,15 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
     if (remoteApiException != null) {
       if (remoteApiException.getCode() == Response.Status.FORBIDDEN.getStatusCode()) {
         if (result.size() > 0) {
-          throw new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
+          Integer code = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
+          String reason = Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase();
+          String solution = logMessage.getMessage(REMOTE_API_EXCEPTION_WITH_RESULT_REASON);
+          throw new RemoteApiException(code, reason,  solution);
         }
-
-        throw new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase());
+        Integer code = Response.Status.NOT_FOUND.getStatusCode();
+        String reason = Response.Status.NOT_FOUND.getReasonPhrase();
+        String solution = logMessage.getMessage(REMOTE_API_EXCEPTION_REASON);
+        throw new RemoteApiException(code, reason, solution);
       }
 
       throw remoteApiException;
@@ -147,7 +168,7 @@ public class IntegrationBridgeImpl implements IntegrationBridge {
   private Message postMessage(String integrationUser, String stream, Message message)
       throws RemoteApiException {
     Message messageResponse = streamService.postMessage(integrationUser, stream, message);
-    LOGGER.info("User {} posted message to stream {} ", integrationUser, stream);
+    LOGGER.info(logMessage.getMessage(USER_POSTED_MESSAGE,integrationUser, stream));
 
     return messageResponse;
   }

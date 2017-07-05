@@ -16,6 +16,24 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .FAIL_BOOTSTRAP_INTEGRATION;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .FAIL_BOOTSTRAP_INTEGRATION_RETRYING;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .INTEGRATION_SUCCESSFULLY_BOOTSTRAPPED;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .NO_INTEGRATION_FOR_BOOTSTRAP;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .POLLING_AGENT_HEALTH_CHECK;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .POLLING_STOPPED;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .POLLING_STOPPED_SOLUTION;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .SHUTTING_DOWN_INTEGRATION;
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
+    .VERIFY_NEW_INTEGRATIONS;
 import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +56,7 @@ import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -117,15 +136,17 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   @Autowired
   private IntegrationLogging logging;
 
+  @Autowired
+  private LogMessageSource logMessage;
+
   private JsonUtils jsonUtils = new JsonUtils();
 
   /**
-  *
-  * Atomic  Integer used to control when the application should log its health.
-  * The application health should only be logged after the last default integration finishes
-  * to try its bootstrap process. After new integrations are added and try to bootstrap the
-  * health should also be logged.
-  */
+   * Atomic  Integer used to control when the application should log its health.
+   * The application health should only be logged after the last default integration finishes
+   * to try its bootstrap process. After new integrations are added and try to bootstrap the
+   * health should also be logged.
+   */
   private AtomicInteger logHealthApplicationCounter = new AtomicInteger();
 
   @Override
@@ -146,7 +167,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     Map<String, Integration> integrations = this.context.getBeansOfType(Integration.class);
 
     if (integrations == null || integrations.isEmpty()) {
-      LOGGER.warn("No integrations found to bootstrap");
+      LOGGER.warn(logMessage.getMessage(NO_INTEGRATION_FOR_BOOTSTRAP));
     } else {
       // Integration components
       for (String configurationType : integrations.keySet()) {
@@ -158,7 +179,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
       String initialDelay = System.getProperty(BOOTSTRAP_INITIAL_DELAY_KEY, INITAL_DELAY);
-      scheduleHandleIntegrations(Long.valueOf(initialDelay), Long.valueOf(delay), TimeUnit.MILLISECONDS);
+      scheduleHandleIntegrations(Long.valueOf(initialDelay), Long.valueOf(delay),
+          TimeUnit.MILLISECONDS);
       // deals with unknown apps.
       initUnknownApps();
 
@@ -180,7 +202,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       @Override
       public void run() {
-        LOGGER.debug("Polling AGENT health check");
+        LOGGER.debug(logMessage.getMessage(POLLING_AGENT_HEALTH_CHECK));
 
         HealthCheckEventData event = new HealthCheckEventData(AGENT_SERVICE_NAME);
         publisher.publishEvent(event);
@@ -190,12 +212,14 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   }
 
   /**
-   * Applications that were found in the properties file but don't have a corresponding bean on their own
+   * Applications that were found in the properties file but don't have a corresponding bean on
+   * their own
    * are considered "Unknown Applications".
-   * They will show up on health checks for the Integration Bridge as non-ACTIVE applications as they aren't actually
-   * implemented.
-   * This is more likely to happen if someone configures the provisioning YAML file with an incorrect application name
-   * or with an integration name that does not actually exist for the time being.
+   * They will show up on health checks for the Integration Bridge as non-ACTIVE applications as
+   * they aren't actually implemented.
+   * This is more likely to happen if someone configures the provisioning YAML file with an
+   * incorrect application name or with an integration name that does not actually exist for the
+   * time being.
    */
   private void initUnknownApps() {
     Map<String, Application> applications = properties.getApplications();
@@ -209,12 +233,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
         NullIntegration integration =
             new NullIntegration(applicationsHealthIndicator, application, utils,
-                authenticationProxy);
+                authenticationProxy, logMessage);
 
         try {
           integration.onCreate(appId);
         } catch (IntegrationRuntimeException e) {
-          LOGGER.error(String.format("Fail to bootstrap the Integration %s", appId), e);
+          LOGGER.error(e.getMessage(), appId);
         }
       }
     }
@@ -238,11 +262,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   /**
    * Handle integrations that for some reason failed to bootstrap correctly.
    * It will try to bootstrap any integrations registered under our queue {@link BlockingQueue}.
-   * Common reasons for an integration to be on this "retry state" are connectivity problems or faulty configurations.
+   * Common reasons for an integration to be on this "retry state" are connectivity problems or
+   * faulty configurations.
    */
   private void handleIntegrations() {
     try {
-      LOGGER.debug("Verify new integrations");
+      LOGGER.debug(logMessage.getMessage(VERIFY_NEW_INTEGRATIONS));
 
       // Sets the new application health check counter
       this.logHealthApplicationCounter.set(integrationsToRegister.size());
@@ -253,13 +278,14 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         if (info != null) {
           Application application = properties.getApplication(info.getConfigurationType());
 
-          if ((application != null) && (ApplicationState.PROVISIONED.equals(application.getState()))) {
+          if ((application != null) && (ApplicationState.PROVISIONED.equals(
+              application.getState()))) {
             submitPoolTask(info);
           }
         }
       }
     } catch (InterruptedException e) {
-      LOGGER.error("Polling stopped", e);
+      LOGGER.error(logMessage.getMessage(POLLING_STOPPED), e, POLLING_STOPPED_SOLUTION);
     }
   }
 
@@ -273,8 +299,10 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   }
 
   /**
-   * Logs the application health, however the logging should only happen on these occasions: after the first
-   * integration finishes its bootstrap process, after new integrations are added or after an exception
+   * Logs the application health, however the logging should only happen on these occasions: after
+   * the first
+   * integration finishes its bootstrap process, after new integrations are added or after an
+   * exception
    * happens when trying to bootstrap an integration.
    */
   public void logHealthCheck() {
@@ -299,28 +327,31 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
       metricsController.addIntegrationTimer(integrationUser);
 
-      LOGGER.info("Integration {} bootstrapped successfully", integrationUser);
+      LOGGER.info(logMessage.getMessage(INTEGRATION_SUCCESSFULLY_BOOTSTRAPPED, integrationUser));
 
       logging.logIntegration(integration);
     } catch (ConnectivityException e) {
-      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationUser), e);
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING, integrationUser), e);
       integrationsToRegister.offer(info);
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
-      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationUser), e);
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION, integrationUser), e);
     } finally {
       logHealthCheck();
     }
   }
 
-  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo, RetryLifecycleException e) {
+  private void checkRetryAttempt(IntegrationBootstrapInfo integrationInfo,
+      RetryLifecycleException e) {
     int retryAttempts = integrationInfo.registerRetryAttempt();
     if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
-      LOGGER.error(String.format("Fail to bootstrap the integration %s, but retrying...", integrationInfo.getConfigurationType()), e);
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING,
+          integrationInfo.getConfigurationType()), e);
       integrationsToRegister.offer(integrationInfo);
     } else {
-      LOGGER.error(String.format("Fail to bootstrap the Integration %s", integrationInfo.getConfigurationType()), e);
+      LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
+          integrationInfo.getConfigurationType()), e);
     }
   }
 
@@ -334,7 +365,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   private void destroyIntegrations() {
     for (Integration integration : this.integrations.values()) {
-      LOGGER.info("Shutting down integration {}", integration.getClass().getSimpleName());
+      LOGGER.info(
+          logMessage.getMessage(SHUTTING_DOWN_INTEGRATION, integration.getClass().getSimpleName()));
       integration.onDestroy();
     }
 
