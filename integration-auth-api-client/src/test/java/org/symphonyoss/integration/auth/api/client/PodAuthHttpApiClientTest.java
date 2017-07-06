@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -40,6 +41,9 @@ public class PodAuthHttpApiClientTest {
 
   @InjectMocks
   private PodAuthHttpApiClient podAuthHttpApiClient = new PodAuthHttpApiClient();
+
+  @Mock
+  private LogMessageSource logMessageSource;
 
   @Test(expected = MissingConfigurationException.class)
   public void testInitFail() {

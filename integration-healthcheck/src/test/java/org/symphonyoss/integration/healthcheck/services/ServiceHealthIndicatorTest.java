@@ -44,6 +44,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import javax.ws.rs.ProcessingException;
@@ -77,6 +78,9 @@ public class ServiceHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Autowired
   @Qualifier("podHealthIndicator")

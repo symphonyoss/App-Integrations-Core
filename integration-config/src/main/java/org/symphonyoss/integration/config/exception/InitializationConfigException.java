@@ -25,11 +25,8 @@ import org.symphonyoss.integration.exception.config.IntegrationConfigException;
  */
 public class InitializationConfigException extends IntegrationConfigException {
 
-  public InitializationConfigException(String message) {
-    super(message);
+  public InitializationConfigException(String message, Throwable cause, String solution) {
+    super(message, cause, solution);
   }
 
-  public InitializationConfigException(String message, Throwable cause) {
-    super(message, cause);
-  }
 }

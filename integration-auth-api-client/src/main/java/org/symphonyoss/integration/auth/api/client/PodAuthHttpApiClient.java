@@ -16,11 +16,17 @@
 
 package org.symphonyoss.integration.auth.api.client;
 
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .MISSING_CONFIG_INFO_SOLUTION;
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .MISSING_CONFIG_INFO;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -37,6 +43,9 @@ public class PodAuthHttpApiClient extends SymphonyApiClient {
   @Autowired
   private IntegrationProperties properties;
 
+  @Autowired
+  private LogMessageSource logMessageSource;
+
   public PodAuthHttpApiClient() {
     super(SERVICE_NAME);
   }
@@ -46,7 +55,9 @@ public class PodAuthHttpApiClient extends SymphonyApiClient {
     String url = properties.getSessionManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY);
+      throw new MissingConfigurationException(SERVICE_NAME,
+          logMessageSource.getMessage(MISSING_CONFIG_INFO, REQUIRED_KEY),
+          logMessageSource.getMessage(MISSING_CONFIG_INFO_SOLUTION, REQUIRED_KEY));
     }
 
     return url;

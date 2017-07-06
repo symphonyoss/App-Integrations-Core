@@ -27,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -45,6 +46,9 @@ public class PodHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Autowired
   private PodHealthIndicator indicator;

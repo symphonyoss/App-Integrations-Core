@@ -17,6 +17,14 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .UNREGISTERED_USER;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .CACHE_IS_NOT_LOADED;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .PROCESSING_EXCEPTION;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
+    .IO_EXCEPTION;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
@@ -38,6 +46,7 @@ import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuth
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.json.JsonUtils;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -95,6 +104,9 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   @Autowired
   protected ApplicationEventPublisher publisher;
 
+  @Autowired
+  private LogMessageSource logMessageSource;
+
   /**
    * Cache for the service information.
    */
@@ -140,7 +152,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       IntegrationBridgeService service = serviceInfoCache.get(serviceName);
       return Health.status(service.getConnectivity()).withDetail(serviceName, service).build();
     } catch (UncheckedExecutionException | ExecutionException e) {
-      LOG.error(String.format("Unable to retrieve %s info", serviceName), e);
+      LOG.error(logMessageSource.getMessage(CACHE_IS_NOT_LOADED, serviceName), e);
       return Health.unknown().build();
     }
   }
@@ -225,7 +237,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
       return OK.equals(status) ? response.readEntity(String.class) : null;
     } catch (ProcessingException e) {
-      LOG.error("Trying to reach {} but getting exception: {}", getHealthCheckUrl(), e.getMessage(), e);
+      LOG.error(logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()), e);
       return null;
     }
   }
@@ -244,7 +256,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       try {
         return authenticationProxy.httpClientForUser(app.getComponent());
       } catch (UnregisteredUserAuthException e) {
-        LOG.warn("Integration {} wasn't bootstrapped", app.getName());
+        LOG.warn(logMessageSource.getMessage(UNREGISTERED_USER, app.getComponent()));
       }
     }
 
@@ -279,7 +291,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
         return version;
       }
     } catch (IOException e) {
-      LOG.error("Cannot retrieve the service version for the service {}", getServiceName());
+      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName()));
     }
 
     return null;

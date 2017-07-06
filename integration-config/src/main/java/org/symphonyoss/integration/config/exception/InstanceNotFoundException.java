@@ -25,8 +25,8 @@ import org.symphonyoss.integration.exception.config.IntegrationConfigException;
  */
 public class InstanceNotFoundException extends IntegrationConfigException {
 
-  public InstanceNotFoundException(String instanceId) {
-    super("Instance " + instanceId + " not found.");
+  public InstanceNotFoundException(String message, String... solutions) {
+    super(message, solutions);
   }
 
 }

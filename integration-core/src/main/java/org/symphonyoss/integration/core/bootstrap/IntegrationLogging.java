@@ -16,6 +16,17 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .APPLICATION_HEALTH_CORE;
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .FAIL_LOG_APPLICATION_HEALTH;
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .FAIL_LOG_INTEGRATION_HEALTH;
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .INTEGRATION_HEALTH_STATUS;
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .PERFORM_HEALTH_LOGGING;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +36,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,6 +54,9 @@ public class IntegrationLogging {
 
   @Autowired
   private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Ready to perform the health-check
@@ -85,7 +100,8 @@ public class IntegrationLogging {
   }
 
   /**
-   * Logs the health of one integration. This method is called after an integration finishes its bootstrap
+   * Logs the health of one integration. This method is called after an integration finishes its
+   * bootstrap
    * process.
    */
   private void logIntegrationHealthCheck(Integration integration) {
@@ -93,27 +109,31 @@ public class IntegrationLogging {
       String integrationHealthString = jsonUtils.serialize(integration.getHealthStatus());
       String integrationName = integration.getSettings().getName();
       String integrationHealthLog =
-          String.format("Integration: %s %s %s", integrationName, " health status: ",
+          logMessage.getMessage(INTEGRATION_HEALTH_STATUS, integrationName,
               integrationHealthString);
       LOGGER.info(integrationHealthLog);
-    } catch (RemoteApiException e)  {
-      LOGGER.error("Failed to log the " + integration.getSettings().getName()+ " Integration Health", e);
+    } catch (RemoteApiException e) {
+      LOGGER.error(
+          logMessage.getMessage(FAIL_LOG_INTEGRATION_HEALTH, integration.getSettings().getName()), e);
     }
   }
 
   /**
-   * Logs the application health, however the logging should only happen on these occasions:  after the last
-   * integration finishes its bootstrap process, after new integrations are added or after an exception
+   * Logs the application health, however the logging should only happen on these occasions:  after
+   * the last
+   * integration finishes its bootstrap process, after new integrations are added or after an
+   * exception
    * happens when trying to bootstrap an integration.
    */
   private void logHealthCheck() {
     try {
       Health health = asyncCompositeHealthEndpoint.invoke();
       String applicationHealthString = jsonUtils.serialize(health);
-      String applicationHealthLog = String.format("Application Health Status: %s", applicationHealthString);
+      String applicationHealthLog =
+          logMessage.getMessage(APPLICATION_HEALTH_CORE, applicationHealthString);
       LOGGER.info(applicationHealthLog);
     } catch (RemoteApiException e) {
-      LOGGER.error("Failed to log the Application Health", e);
+      LOGGER.error(logMessage.getMessage(FAIL_LOG_APPLICATION_HEALTH), e);
     }
   }
 
@@ -139,7 +159,7 @@ public class IntegrationLogging {
           logIntegrationHealthCheck(integration);
         }
       } catch (InterruptedException e) {
-        LOGGER.error("Fail to perform the health logging", e);
+        LOGGER.error(logMessage.getMessage(PERFORM_HEALTH_LOGGING), e);
       }
     }
 

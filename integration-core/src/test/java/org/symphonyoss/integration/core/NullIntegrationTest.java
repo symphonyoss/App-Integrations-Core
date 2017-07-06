@@ -28,10 +28,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockBeans;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -69,6 +73,9 @@ public class NullIntegrationTest extends MockKeystore {
   @Mock
   private ApplicationsHealthIndicator healthIndicator;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private Application application = new Application();
 
   @Before
@@ -82,7 +89,7 @@ public class NullIntegrationTest extends MockKeystore {
     doThrow(CertificateNotFoundException.class).when(utils).getCertsDirectory();
 
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     integration.onCreate(APP_TYPE);
 
@@ -102,7 +109,7 @@ public class NullIntegrationTest extends MockKeystore {
     doReturn(dir).when(utils).getCertsDirectory();
 
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     integration.onCreate(APP_TYPE);
 
@@ -125,7 +132,7 @@ public class NullIntegrationTest extends MockKeystore {
     application.setKeystore(keystore);
 
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     integration.onCreate(APP_TYPE);
 
@@ -151,7 +158,7 @@ public class NullIntegrationTest extends MockKeystore {
     doReturn(dir).when(utils).getCertsDirectory();
 
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     integration.onCreate(APP_TYPE);
 
@@ -176,7 +183,7 @@ public class NullIntegrationTest extends MockKeystore {
     doReturn(dir).when(utils).getCertsDirectory();
 
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     integration.onCreate(APP_TYPE);
 
@@ -192,7 +199,7 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testGetSettings() {
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     assertNull(integration.getSettings());
   }
@@ -200,7 +207,7 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testGetIntegrationWhiteList() {
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
 
     assertEquals(Collections.emptySet(), integration.getIntegrationWhiteList());
   }

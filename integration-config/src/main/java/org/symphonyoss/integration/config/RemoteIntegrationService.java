@@ -18,6 +18,18 @@ package org.symphonyoss.integration.config;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.FORBIDDEN_USER;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.FORBIDDEN_USER_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INVALID_INTEGRATION_INSTANCE;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INVALID_INTEGRATION_INSTANCE_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INVALID_INTEGRATION_SETTINGS;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INVALID_INTEGRATION_SETTINGS_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.UNHEALTH_API;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.UNHEALTH_API_SOLUTION;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,8 +37,8 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.config.exception.ConfigurationNotFoundException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
-import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
@@ -51,6 +63,9 @@ public class RemoteIntegrationService implements IntegrationService {
   private AuthenticationProxy authenticationProxy;
 
   @Autowired
+  private LogMessageSource logMessage;
+
+  @Autowired
   private PodHttpApiClient client;
 
   private ConfigurationApiClient configurationApiClient;
@@ -72,22 +87,32 @@ public class RemoteIntegrationService implements IntegrationService {
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
 
-      throw new RemoteConfigurationException(e);
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INTEGRATION_NOT_FOUND, integrationId);
+        String solution = logMessage.getMessage(INTEGRATION_NOT_FOUND_SOLUTION, integrationId);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
   private void checkExceptionCodeForbidden(RemoteApiException e) {
     if (e.getCode() == FORBIDDEN.getStatusCode()) {
-      throw new ForbiddenUserException(e);
+      String message = logMessage.getMessage(FORBIDDEN_USER);
+      String solution = logMessage.getMessage(FORBIDDEN_USER_SOLUTION);
+
+      throw new ForbiddenUserException(message, e, solution);
     }
   }
 
-  private void checkExceptionCodeBadRequest(RemoteApiException e) {
-    if (e.getCode() == BAD_REQUEST.getStatusCode()) {
-      throw new NotFoundException(e.getMessage());
-    }
-  }
+  private RemoteConfigurationException getUnknownException(RemoteApiException e) {
+    String message = logMessage.getMessage(UNHEALTH_API);
+    String solution = logMessage.getMessage(UNHEALTH_API_SOLUTION);
 
+    return new RemoteConfigurationException(message, e, solution);
+  }
 
   @Override
   public IntegrationSettings getIntegrationByType(String integrationType, String userId) {
@@ -98,10 +123,13 @@ public class RemoteIntegrationService implements IntegrationService {
       checkExceptionCodeForbidden(e);
 
       if (e.getCode() == BAD_REQUEST.getStatusCode()) {
-        throw new ConfigurationNotFoundException(integrationType);
+        String message = logMessage.getMessage(INTEGRATION_NOT_FOUND, integrationType);
+        String solution = logMessage.getMessage(INTEGRATION_NOT_FOUND_SOLUTION, integrationType);
+
+        throw new ConfigurationNotFoundException(message, solution);
       }
 
-      throw new RemoteConfigurationException(e);
+      throw getUnknownException(e);
     }
   }
 
@@ -122,8 +150,15 @@ public class RemoteIntegrationService implements IntegrationService {
           configurationId, instanceId);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
-      checkExceptionCodeBadRequest(e);
-      throw new RemoteConfigurationException(e);
+
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INTEGRATION_INSTANCE_NOT_FOUND, instanceId);
+        String solution = logMessage.getMessage(INTEGRATION_INSTANCE_NOT_FOUND_SOLUTION, instanceId);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
@@ -145,7 +180,15 @@ public class RemoteIntegrationService implements IntegrationService {
           create);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
-      throw new RemoteConfigurationException(e);
+
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INVALID_INTEGRATION_SETTINGS);
+        String solution = logMessage.getMessage(INVALID_INTEGRATION_SETTINGS_SOLUTION);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
@@ -158,7 +201,15 @@ public class RemoteIntegrationService implements IntegrationService {
           settings.getConfigurationId(), create);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
-      throw new RemoteConfigurationException(e);
+
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INVALID_INTEGRATION_SETTINGS);
+        String solution = logMessage.getMessage(INVALID_INTEGRATION_SETTINGS_SOLUTION);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
@@ -184,7 +235,7 @@ public class RemoteIntegrationService implements IntegrationService {
       if (e.getCode() == BAD_REQUEST.getStatusCode()) {
         return false;
       } else {
-        throw new RemoteConfigurationException(e);
+        throw getUnknownException(e);
       }
     }
   }
@@ -200,7 +251,15 @@ public class RemoteIntegrationService implements IntegrationService {
       return instanceApiClient.updateInstance(authenticationProxy.getSessionToken(userId), instanceUpdate);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
-      throw new RemoteConfigurationException(e);
+
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE);
+        String solution = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE_SOLUTION);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
@@ -216,7 +275,15 @@ public class RemoteIntegrationService implements IntegrationService {
       return instanceApiClient.createInstance(authenticationProxy.getSessionToken(userId), instanceCreate);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
-      throw new RemoteConfigurationException(e);
+
+      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE);
+        String solution = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE_SOLUTION);
+
+        throw new RemoteConfigurationException(message, e, solution);
+      }
+
+      throw getUnknownException(e);
     }
   }
 
@@ -227,10 +294,11 @@ public class RemoteIntegrationService implements IntegrationService {
       return true;
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
+
       if (e.getCode() == BAD_REQUEST.getStatusCode()) {
         return false;
       } else {
-        throw new RemoteConfigurationException(e);
+        throw getUnknownException(e);
       }
     }
   }
