@@ -29,6 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Health;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class AsyncCompositeHealthEndpointTest {
   private IntegrationBridgeHealthAggregator aggregator = new IntegrationBridgeHealthAggregator();
 
   private AsyncCompositeHealthIndicator asyncCompositeHealthIndicator =
-      new AsyncCompositeHealthIndicator(aggregator);
+      new AsyncCompositeHealthIndicator(aggregator, new LogMessageSource());
 
   @Mock
   private ApplicationsHealthIndicator applicationsHealthIndicator;

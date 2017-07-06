@@ -49,6 +49,7 @@ import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -121,6 +122,9 @@ public class IntegrationBootstrapContextTest {
 
   @Mock
   private IntegrationUtils integrationUtils;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   /**
    * Setting up the mocks needed for most tests.

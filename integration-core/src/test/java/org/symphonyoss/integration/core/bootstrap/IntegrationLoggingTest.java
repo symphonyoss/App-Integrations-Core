@@ -37,6 +37,7 @@ import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
@@ -76,6 +77,9 @@ public class IntegrationLoggingTest {
 
   @Spy
   private JsonUtils jsonUtils;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @Before
   public void setUp() throws Exception {

@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.config.exception;
+package org.symphonyoss.integration.core.properties;
 
-import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.core.service.UserServiceImpl;
 
 /**
- * Exception to report the failure to save the configuration instance in the datasource.
- *
- * Created by rsanchez on 04/05/16.
+ * Exception message keys used by the component {@link UserServiceImpl}
+ * Created by alexandre-silva-daitan on 26/06/17.
  */
-public class SaveInstanceException extends IntegrationConfigException {
+public class UserProperties {
 
-  public SaveInstanceException(String message, Throwable cause, String... solution) {
-    super(message, cause, solution);
-  }
-
+  public static final String FAIL_GET_USER_BY_USERID = "core.user.get.userid.fail";
+  public static final String FAIL_GET_USER_BY_USERNAME = "core.user.get.username.fail";
+  public static final String FAIL_GET_USER_BY_EMAIL = "core.user.get.useremail.fail";
 }

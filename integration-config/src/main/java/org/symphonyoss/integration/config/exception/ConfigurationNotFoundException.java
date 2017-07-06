@@ -26,8 +26,8 @@ import org.symphonyoss.integration.exception.config.IntegrationConfigException;
  */
 public class ConfigurationNotFoundException extends IntegrationConfigException {
 
-  public ConfigurationNotFoundException(String configurationId) {
-    super("Configuration " + configurationId + " not found.");
+  public ConfigurationNotFoundException(String message, String solution) {
+    super(message, solution);
   }
 
 }

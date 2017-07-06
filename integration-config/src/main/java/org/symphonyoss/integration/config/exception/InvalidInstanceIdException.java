@@ -26,8 +26,8 @@ import org.symphonyoss.integration.exception.config.IntegrationConfigException;
  */
 public class InvalidInstanceIdException extends IntegrationConfigException {
 
-  public InvalidInstanceIdException() {
-    super("Invalid configuration instance identifier.");
+  public InvalidInstanceIdException(String message, String... solutions) {
+    super(message, solutions);
   }
 
 }

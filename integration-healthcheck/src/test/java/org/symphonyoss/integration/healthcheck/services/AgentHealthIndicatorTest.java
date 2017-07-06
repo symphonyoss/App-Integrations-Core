@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -53,6 +55,9 @@ public class AgentHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Autowired
   private AgentHealthIndicator indicator;

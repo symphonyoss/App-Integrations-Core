@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -45,6 +47,9 @@ public class KmHealthIndicatorTest {
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Autowired
   private KmHealthIndicator indicator;

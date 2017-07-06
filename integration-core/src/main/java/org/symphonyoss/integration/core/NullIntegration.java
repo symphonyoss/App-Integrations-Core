@@ -16,6 +16,10 @@
 
 package org.symphonyoss.integration.core;
 
+import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
+    .KEY_STORE_PASSWORD_NOT_FOUND;
+import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
+    .KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
@@ -29,6 +33,7 @@ import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -50,13 +55,17 @@ public class NullIntegration extends BaseIntegration {
 
   private final Application application;
 
+  private LogMessageSource logMessage;
+
   public NullIntegration(ApplicationsHealthIndicator healthIndicator, Application application,
-      IntegrationUtils utils, AuthenticationProxy authenticationProxy) {
+      IntegrationUtils utils, AuthenticationProxy authenticationProxy,
+      LogMessageSource logMessage) {
     this.healthIndicator = healthIndicator;
     this.application = application;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
     this.healthManager = new IntegrationHealthManager();
+    this.logMessage = logMessage;
   }
 
   @Override
@@ -69,7 +78,7 @@ public class NullIntegration extends BaseIntegration {
     try {
       registerUser(integrationUser);
     } catch (BootstrapException e) {
-      LOG.error(e.getMessage(), e);
+      LOG.error(e.getMessage());
       healthManager.certificateInstalled(NOK);
     }
 
@@ -83,26 +92,24 @@ public class NullIntegration extends BaseIntegration {
     if ((application == null) || (application.getKeystore() == null) || (StringUtils.isEmpty(
         application.getKeystore().getPassword()))) {
       String appId = application != null ? application.getId() : integrationUser;
-      throw new LoadKeyStoreException(
-          "Fail to retrieve the keystore password. Application: " + appId);
+      String message = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND, appId);
+      String solution = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION);
+      throw new LoadKeyStoreException(message, solution);
     }
 
     KeyStore keyStore = loadKeyStore(certsDir, application);
 
     healthManager.certificateInstalled(OK);
-    authenticationProxy.registerUser(integrationUser, keyStore, application.getKeystore().getPassword());
+    authenticationProxy.registerUser(integrationUser, keyStore,
+        application.getKeystore().getPassword());
   }
 
   @Override
   public void onConfigChange(IntegrationSettings settings) {
-    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
-     * "null" Integration. */
   }
 
   @Override
   public void onDestroy() {
-    /* This has no implementation due to the nature of this class, it shouldn't do anything as it represents an empty,
-     * "null" Integration. */
   }
 
   @Override

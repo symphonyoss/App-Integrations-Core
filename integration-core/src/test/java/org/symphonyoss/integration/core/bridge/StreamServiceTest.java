@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
@@ -41,6 +42,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -93,6 +95,9 @@ public class StreamServiceTest {
 
   @Mock
   private V2MessageApiClient messageApiClient;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @Before
   public void init() {
