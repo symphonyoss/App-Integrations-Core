@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -45,8 +46,9 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
   @Autowired(required = false)
   private Map<String, Integration> integrations;
 
-  public ApplicationsHealthIndicator() {
-    super(new ApplicationsHealthAggregator());
+  @Autowired
+  public ApplicationsHealthIndicator(LogMessageSource logMessageSource) {
+    super(new ApplicationsHealthAggregator(), logMessageSource);
   }
 
   @PostConstruct
