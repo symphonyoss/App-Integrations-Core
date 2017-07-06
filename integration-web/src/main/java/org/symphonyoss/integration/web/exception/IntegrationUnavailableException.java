@@ -16,15 +16,22 @@
 
 package org.symphonyoss.integration.web.exception;
 
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+
 /**
  * Integration wasn't initialized properly.
  *
  * Created by rsanchez on 08/09/16.
  */
-public class IntegrationUnavailableException extends IntegrationException {
+public class IntegrationUnavailableException extends IntegrationRuntimeException {
+
+  private static final String COMPONENT = "Webhook Dispatcher";
 
   public IntegrationUnavailableException(String configurationType) {
-    super(String.format("Configuration %s unavailable!", configurationType));
+    super(COMPONENT, String.format("Configuration %s unavailable", configurationType));
   }
 
+  public IntegrationUnavailableException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
+  }
 }

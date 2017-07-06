@@ -11,6 +11,11 @@ target/
 .idea
 *.iml
 
+# Eclipse
+.classpath
+.settings
+.project
+
 # Applications
 integration-jira/
 integration-github/
