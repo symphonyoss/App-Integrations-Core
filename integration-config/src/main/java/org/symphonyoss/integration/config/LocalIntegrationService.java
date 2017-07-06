@@ -16,6 +16,28 @@
 
 package org.symphonyoss.integration.config;
 
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.CONFIGURATION_FILE_EXCEPTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.CONFIGURATION_FILE_EXCEPTION_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_ID;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_ID_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INSTANCE;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INSTANCE_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INTEGRATIONS_SETTINGS;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INTEGRATIONS_SETTINGS_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INTEGRATION_TYPE;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_INVALID_INTEGRATION_TYPE_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_TYPE_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.INTEGRATION_TYPE_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.FAILED_TO_SAVE_CONFIGURATION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.FAILED_TO_SAVE_LOCAL_FILE_SOLUTION;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.FAILED_TO_SAVE_INSTANCE;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.FILE_NOT_FOUND;
+import static org.symphonyoss.integration.config.properties.LocalIntegrationServiceProperties.FILE_NOT_FOUND_SOLUTION;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -33,6 +55,7 @@ import org.symphonyoss.integration.config.exception.InvalidInstanceIdException;
 import org.symphonyoss.integration.config.exception.SaveConfigurationException;
 import org.symphonyoss.integration.config.exception.SaveInstanceException;
 import org.symphonyoss.integration.config.model.IntegrationRepository;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.service.IntegrationService;
@@ -61,6 +84,9 @@ public class LocalIntegrationService implements IntegrationService {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalIntegrationService.class);
 
   private static final String DEFAULT_FILE_NAME = "configuration.json";
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Properties file name
@@ -100,9 +126,11 @@ public class LocalIntegrationService implements IntegrationService {
       this.repository = mapper.readValue(input, IntegrationRepository.class);
 
       LOGGER.info("File {} loaded successfully", fileName);
-    } catch (IOException | InitializationConfigException e) {
-      throw new InitializationConfigException("Config Service can't read the configuration file",
-          e);
+    } catch (IOException e) {
+      String message = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION, fileName);
+      String solution = logMessage.getMessage(CONFIGURATION_FILE_EXCEPTION_SOLUTION, fileName);
+
+      throw new InitializationConfigException(message, e, solution);
     } finally {
       closeStream(input);
     }
@@ -128,7 +156,10 @@ public class LocalIntegrationService implements IntegrationService {
         input = new FileInputStream(fileName);
         saveFile = true;
       } catch (FileNotFoundException e) {
-        throw new InitializationConfigException("File " + fileName + " does not exist");
+        String message = logMessage.getMessage(FILE_NOT_FOUND, fileName);
+        String solution = logMessage.getMessage(FILE_NOT_FOUND_SOLUTION);
+
+        throw new InitializationConfigException(message, e, solution);
       }
     }
 
@@ -138,12 +169,18 @@ public class LocalIntegrationService implements IntegrationService {
   @Override
   public IntegrationSettings getIntegrationById(String integrationId, String userId) {
     if (integrationId == null) {
-      throw new InvalidConfigurationIdException();
+      String message = logMessage.getMessage(INTEGRATION_INVALID_ID);
+      String solution = logMessage.getMessage(INTEGRATION_INVALID_ID_SOLUTION);
+
+      throw new InvalidConfigurationIdException(message,solution);
     }
 
     IntegrationSettings settings = repository.getIntegrationById(integrationId);
     if (settings == null) {
-      throw new ConfigurationNotFoundException(integrationId);
+      String message = logMessage.getMessage(INTEGRATION_NOT_FOUND, integrationId);
+      String solution = logMessage.getMessage(INTEGRATION_NOT_FOUND_SOLUTION, integrationId);
+
+      throw new ConfigurationNotFoundException(message, solution);
     }
 
     return settings;
@@ -152,7 +189,10 @@ public class LocalIntegrationService implements IntegrationService {
   @Override
   public IntegrationSettings getIntegrationByType(String integrationType, String userId) {
     if (integrationType == null) {
-      throw new InvalidConfigurationIdException();
+      String message = logMessage.getMessage(INTEGRATION_INVALID_INTEGRATION_TYPE);
+      String solution = logMessage.getMessage(INTEGRATION_INVALID_INTEGRATION_TYPE_SOLUTION);
+
+      throw new InvalidConfigurationIdException(message, solution);
     }
 
     List<IntegrationSettings> integrations = repository.getIntegrations();
@@ -162,13 +202,18 @@ public class LocalIntegrationService implements IntegrationService {
       }
     }
 
-    throw new ConfigurationNotFoundException(integrationType);
+    String message = logMessage.getMessage(INTEGRATION_TYPE_NOT_FOUND, integrationType);
+    String solution = logMessage.getMessage(INTEGRATION_TYPE_NOT_FOUND_SOLUTION, integrationType);
+    throw new ConfigurationNotFoundException(message, solution);
   }
 
   @Override
   public IntegrationSettings save(IntegrationSettings settings, String usedId) {
     if ((settings == null) || (settings.getConfigurationId() == null)) {
-      throw new InvalidConfigurationIdException();
+      String message = logMessage.getMessage(INTEGRATION_INVALID_INTEGRATIONS_SETTINGS);
+      String solution = logMessage.getMessage(INTEGRATION_INVALID_INTEGRATIONS_SETTINGS_SOLUTION);
+
+      throw new InvalidConfigurationIdException(message, solution);
     }
 
     try {
@@ -179,7 +224,10 @@ public class LocalIntegrationService implements IntegrationService {
 
       return settings;
     } catch (IOException e) {
-      throw new SaveConfigurationException(settings.getConfigurationId(), e);
+      String message = logMessage.getMessage(FAILED_TO_SAVE_CONFIGURATION, settings.getConfigurationId());
+      String solution = logMessage.getMessage(FAILED_TO_SAVE_LOCAL_FILE_SOLUTION, fileName);
+
+      throw new SaveConfigurationException(message, e, solution);
     }
   }
 
@@ -205,12 +253,19 @@ public class LocalIntegrationService implements IntegrationService {
   public IntegrationInstance getInstanceById(String configurationId, String instanceId,
       String userId) {
     if (instanceId == null) {
-      throw new InvalidInstanceIdException();
+      String message = logMessage.getMessage(INTEGRATION_INVALID_INSTANCE);
+      String solution = logMessage.getMessage(INTEGRATION_INVALID_INSTANCE_SOLUTION);
+
+      throw new InvalidInstanceIdException(message, solution);
     }
 
     IntegrationInstance instance = repository.getInstanceById(instanceId);
+
     if (instance == null) {
-      throw new InstanceNotFoundException(instanceId);
+      String message = logMessage.getMessage(INTEGRATION_INSTANCE_NOT_FOUND, instanceId);
+      String solution = logMessage.getMessage(INTEGRATION_INSTANCE_NOT_FOUND_SOLUTION, instanceId);
+
+      throw new InstanceNotFoundException(message, solution);
     }
 
     return instance;
@@ -219,7 +274,10 @@ public class LocalIntegrationService implements IntegrationService {
   @Override
   public IntegrationInstance save(IntegrationInstance instance, String userId) {
     if ((instance == null) || (instance.getInstanceId() == null)) {
-      throw new InvalidInstanceIdException();
+      String message = logMessage.getMessage(INTEGRATION_INVALID_INSTANCE);
+      String solution = logMessage.getMessage(INTEGRATION_INVALID_INSTANCE_SOLUTION);
+
+      throw new InvalidInstanceIdException(message, solution);
     }
 
     try {
@@ -230,7 +288,10 @@ public class LocalIntegrationService implements IntegrationService {
 
       return instance;
     } catch (IOException e) {
-      throw new SaveInstanceException(instance.getInstanceId(), e);
+      String message = logMessage.getMessage(FAILED_TO_SAVE_INSTANCE, instance.getInstanceId());
+      String solution = logMessage.getMessage(FAILED_TO_SAVE_LOCAL_FILE_SOLUTION, fileName);
+
+      throw new SaveInstanceException(message, e, solution);
     }
   }
 

@@ -25,8 +25,8 @@ import org.symphonyoss.integration.exception.config.IntegrationConfigException;
  */
 public class SaveInstanceException extends IntegrationConfigException {
 
-  public SaveInstanceException(String instanceId, Throwable cause) {
-    super("Fail to save configuration instance. Instance: " + instanceId, cause);
+  public SaveInstanceException(String message, Throwable cause, String... solution) {
+    super(message, cause, solution);
   }
 
 }
