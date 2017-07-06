@@ -1,7 +1,9 @@
 package org.symphonyoss.integration.web.properties;
 
-/**
- * Created by hamitay on 7/5/17.
+import org.symphonyoss.integration.web.resource.WebHookResource;
+
+/** Exception message keys used by the component {@link WebHookResource}
+ * Created by  on 07/06/17.
  */
 public class WebHookResourceProperties {
 

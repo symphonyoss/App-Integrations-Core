@@ -16,9 +16,6 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import static org.symphonyoss.integration.web.properties.WebProperties.CONFIGURATION_FILE_EXCEPTION;
-import static org.symphonyoss.integration.web.properties.WebProperties
-    .CONFIGURATION_FILE_EXCEPTION_SOLUTION;
 import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
     .INTEGRATION_BRIDGE_UNAVAILABLE;
 import static org.symphonyoss.integration.web.properties.WebHookResourceProperties

@@ -149,8 +149,6 @@ public class WebHookDispatcherResource extends WebHookResource {
       String message = logMessage.getMessage(CANT_PARSE_PAYLOAD, hash, configurationId);
       String solution = logMessage.getMessage(CANT_PARSE_PAYLOAD_SOLUTION);
       LOGGER.error(String.format("%s\n%s", message, solution), e);
-      LOGGER.error(String.format("Couldn't parse the incoming payload for the instance %s and "
-          + "configuration %s", hash, configurationId), e);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(String.format("Couldn't validate the incoming payload for the instance: %s", hash));
     }

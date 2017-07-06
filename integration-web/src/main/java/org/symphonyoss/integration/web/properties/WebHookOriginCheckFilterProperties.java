@@ -1,7 +1,9 @@
 package org.symphonyoss.integration.web.properties;
 
-/**
- * Created by  on 7/5/17.
+import org.symphonyoss.integration.web.filter.WebHookOriginCheckFilter;
+
+/** Exception message keys used by the component {@link WebHookOriginCheckFilter}
+ * Created by  on 07/05/17.
  */
 public class WebHookOriginCheckFilterProperties {
 
