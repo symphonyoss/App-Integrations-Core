@@ -34,9 +34,4 @@ public class IntegrationUnavailableException extends IntegrationRuntimeException
   public IntegrationUnavailableException(String message, String... solutions) {
     super(COMPONENT, message, solutions);
   }
-
-  public IntegrationUnavailableException(String message, String... solutions) {
-    super(message, solutions);
-  }
-
 }
