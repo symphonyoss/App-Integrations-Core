@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.config.exception;
+package org.symphonyoss.integration.core.properties;
 
-import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.core.NullIntegration;
 
 /**
- * Exception to report the failure to save the configuration instance in the datasource.
- *
- * Created by rsanchez on 04/05/16.
+ * Exception message keys used by the component {@link NullIntegration}
+ * Created by alexandre-silva-daitan on 26/06/17.
  */
-public class SaveInstanceException extends IntegrationConfigException {
+public class NullIntegrationProperties {
 
-  public SaveInstanceException(String message, Throwable cause, String... solution) {
-    super(message, cause, solution);
-  }
-
+  public static final String KEY_STORE_PASSWORD_NOT_FOUND =
+      "core.user.key.store.password.not.found";
+  public static final String KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION =
+      KEY_STORE_PASSWORD_NOT_FOUND + ".solution";
 }

@@ -16,6 +16,7 @@
 
 package org.symphonyoss.integration.config;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -35,6 +36,7 @@ import org.symphonyoss.integration.config.exception.ConfigurationNotFoundExcepti
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.RemoteConfigurationException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
@@ -62,7 +64,6 @@ public class RemoteIntegrationServiceTest {
   private static final String CREATOR_ID = "CreatorId";
   private static final long CREATED_DATE = 123456L;
   private static final String API_EXCEPTION_MESSAGE = "message";
-  private static final int STATUS_CODE_BAD_REQUEST = Response.Status.BAD_REQUEST.getStatusCode();
   private static final String TOKEN = "token";
 
   @Mock
@@ -74,6 +75,9 @@ public class RemoteIntegrationServiceTest {
   @Mock
   private ConfigurationInstanceApiClient instanceApiClient;
 
+  @Mock
+  private LogMessageSource logMesagge;
+
   @InjectMocks
   private RemoteIntegrationService remoteIntegrationService;
 
@@ -84,13 +88,24 @@ public class RemoteIntegrationServiceTest {
 
   @Test(expected = RemoteConfigurationException.class)
   public void testGetIntegrationByIdFailed() throws Exception {
-    doThrow(RemoteApiException.class).when(configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+    doThrow(RemoteApiException.class).when(configurationApiClient)
+        .getIntegrationById(TOKEN, CONFIGURATION_ID);
     remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID);
   }
 
   @Test(expected = ForbiddenUserException.class)
   public void testGetIntegrationByIdForbidden() throws Exception {
-    RemoteApiException apiException = new RemoteApiException(FORBIDDEN.getStatusCode(), "Forbidden user");
+    RemoteApiException apiException =
+        new RemoteApiException(FORBIDDEN.getStatusCode(), "Forbidden user");
+    doThrow(apiException).when(configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
+
+    remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID);
+  }
+
+  @Test(expected = RemoteConfigurationException.class)
+  public void testGetIntegrationByIdBadRequest() throws Exception {
+    RemoteApiException apiException =
+        new RemoteApiException(BAD_REQUEST.getStatusCode(), "Bad Request");
     doThrow(apiException).when(configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
     remoteIntegrationService.getIntegrationById(CONFIGURATION_ID, USER_ID);
@@ -113,7 +128,8 @@ public class RemoteIntegrationServiceTest {
 
   @Test(expected = ConfigurationNotFoundException.class)
   public void testGetIntegrationByTypeNotFound() throws Exception {
-    RemoteApiException exception = new RemoteApiException(STATUS_CODE_BAD_REQUEST, "Configuration not found");
+    RemoteApiException exception =
+        new RemoteApiException(BAD_REQUEST.getStatusCode(), "Configuration not found");
     doThrow(exception).when(configurationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
 
     remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID);
@@ -125,14 +141,15 @@ public class RemoteIntegrationServiceTest {
 
     doReturn(settings).when(configurationApiClient).getIntegrationByType(TOKEN, CONFIGURATION_TYPE);
 
-    assertEquals(settings, remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID));
+    assertEquals(settings,
+        remoteIntegrationService.getIntegrationByType(CONFIGURATION_TYPE, USER_ID));
   }
 
   @Test(expected = RemoteConfigurationException.class)
   public void testSaveIntegrationCreateFailed() throws Exception {
     IntegrationSettings settings = buildIntegrationSettings();
 
-    doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
         configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
     doThrow(RemoteApiException.class).when(configurationApiClient).createIntegration(eq(TOKEN),
@@ -145,7 +162,7 @@ public class RemoteIntegrationServiceTest {
   public void testSaveIntegrationCreate() throws Exception {
     IntegrationSettings settings = buildIntegrationSettings();
 
-    doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
         configurationApiClient).getIntegrationById(TOKEN, CONFIGURATION_ID);
 
     doReturn(settings).when(configurationApiClient)
@@ -164,6 +181,18 @@ public class RemoteIntegrationServiceTest {
     remoteIntegrationService.save(settings, USER_ID);
   }
 
+  @Test(expected = RemoteConfigurationException.class)
+  public void testSaveIntegrationUpdateBadRequest() throws Exception {
+    IntegrationSettings settings = buildIntegrationSettings();
+
+    // make the api update work
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
+        configurationApiClient)
+        .updateIntegration(eq(TOKEN), eq(CONFIGURATION_ID), any(IntegrationSubmissionCreate.class));
+
+    remoteIntegrationService.save(settings, USER_ID);
+  }
+
   @Test
   public void testSaveIntegrationUpdate() throws Exception {
     IntegrationSettings settings = buildIntegrationSettings();
@@ -177,6 +206,16 @@ public class RemoteIntegrationServiceTest {
   @Test(expected = RemoteConfigurationException.class)
   public void testGetInstanceByIdFailed() throws Exception {
     doThrow(RemoteApiException.class).when(instanceApiClient)
+        .getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
+
+    remoteIntegrationService.getInstanceById(CONFIGURATION_ID, INSTANCE_ID, USER_ID);
+  }
+
+  @Test(expected = RemoteConfigurationException.class)
+  public void testGetInstanceByIdBadRequest() throws Exception {
+    RemoteApiException remoteApiException =
+        new RemoteApiException(BAD_REQUEST.getStatusCode(), "Bad Request");
+    doThrow(remoteApiException).when(instanceApiClient)
         .getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
 
     remoteIntegrationService.getInstanceById(CONFIGURATION_ID, INSTANCE_ID, USER_ID);
@@ -199,10 +238,24 @@ public class RemoteIntegrationServiceTest {
   public void testSaveInstanceCreateFailed() throws Exception {
     IntegrationInstance instance = buildInstance();
 
-    doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
         instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
 
     doThrow(RemoteApiException.class).when(instanceApiClient)
+        .createInstance(eq(TOKEN), any(IntegrationInstanceSubmissionCreate.class));
+
+    remoteIntegrationService.save(instance, USER_ID);
+  }
+
+  @Test(expected = RemoteConfigurationException.class)
+  public void testSaveInstanceCreateBadRequest() throws Exception {
+    IntegrationInstance instance = buildInstance();
+
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
+        instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
+
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
+        instanceApiClient)
         .createInstance(eq(TOKEN), any(IntegrationInstanceSubmissionCreate.class));
 
     remoteIntegrationService.save(instance, USER_ID);
@@ -212,7 +265,7 @@ public class RemoteIntegrationServiceTest {
   public void testSaveInstanceCreate() throws Exception {
     IntegrationInstance instance = buildInstance();
 
-    doThrow(new RemoteApiException(STATUS_CODE_BAD_REQUEST, API_EXCEPTION_MESSAGE)).when(
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
         instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
 
     doReturn(instance).when(instanceApiClient)
@@ -226,6 +279,17 @@ public class RemoteIntegrationServiceTest {
     IntegrationInstance instance = buildInstance();
 
     doThrow(RemoteApiException.class).when(instanceApiClient)
+        .updateInstance(eq(TOKEN), any(IntegrationInstanceSubmissionUpdate.class));
+
+    remoteIntegrationService.save(instance, USER_ID);
+  }
+
+  @Test(expected = RemoteConfigurationException.class)
+  public void testSaveInstanceUpdateBadRequest() throws Exception {
+    IntegrationInstance instance = buildInstance();
+
+    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
+        instanceApiClient)
         .updateInstance(eq(TOKEN), any(IntegrationInstanceSubmissionUpdate.class));
 
     remoteIntegrationService.save(instance, USER_ID);

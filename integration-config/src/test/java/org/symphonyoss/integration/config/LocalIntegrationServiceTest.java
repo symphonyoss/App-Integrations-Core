@@ -51,6 +51,7 @@ import org.symphonyoss.integration.config.exception.SaveConfigurationException;
 import org.symphonyoss.integration.config.exception.SaveInstanceException;
 import org.symphonyoss.integration.config.model.IntegrationRepository;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
@@ -92,6 +93,9 @@ public class LocalIntegrationServiceTest {
 
   @Mock
   private Environment environment;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   @InjectMocks
   private LocalIntegrationService service;
