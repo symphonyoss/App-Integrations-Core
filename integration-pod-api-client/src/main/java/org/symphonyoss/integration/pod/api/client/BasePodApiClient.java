@@ -16,7 +16,14 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER_SOLUTION;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
  * Base API client for the POD API.
@@ -32,6 +39,10 @@ public abstract class BasePodApiClient {
 
   public static final Integer HTTP_BAD_REQUEST_ERROR = 400;
 
+  @Autowired
+  public LogMessageSource logMessage;
+
+
   /**
    * Check the required authentication token.
    * @param sessionToken Session authentication token.
@@ -39,7 +50,9 @@ public abstract class BasePodApiClient {
    */
   protected void checkAuthToken(String sessionToken) throws RemoteApiException {
     if (sessionToken == null) {
-      throw new RemoteApiException(400, "Missing the required parameter 'sessionToken'");
+      String reason = logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
   }
 

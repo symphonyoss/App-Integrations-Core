@@ -16,6 +16,15 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -37,6 +46,7 @@ import java.util.Map;
 public class IntegrationInstanceApiClient extends BaseIntegrationInstanceApiClient {
 
   private static final String API_PREFIX = "/v1";
+  public static final String CREATE_INSTANCE = "createInstance";
 
   public IntegrationInstanceApiClient(HttpApiClient apiClient) {
     super(apiClient);
@@ -53,11 +63,15 @@ public class IntegrationInstanceApiClient extends BaseIntegrationInstanceApiClie
     checkAuthToken(sessionToken);
 
     if (instance == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createInstance");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_INSTANCE);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_INSTANCE);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (StringUtils.isEmpty(instance.getConfigurationId())) {
-      throw new RemoteApiException(400, "Missing the required field 'configurationId'");
+      String reason = logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(instance.getConfigurationId())

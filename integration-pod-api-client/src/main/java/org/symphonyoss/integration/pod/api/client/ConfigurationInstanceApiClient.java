@@ -16,6 +16,25 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .CONFIGURATION_ID;
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .GET_INSTANCE_BY_ID;
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .INSTANCE_ID;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -33,6 +52,8 @@ import java.util.Map;
  */
 public class ConfigurationInstanceApiClient extends BasePodApiClient {
 
+  public static final String CREATE_INSTANCE = "createInstance";
+  public static final String UPDATE_INSTANCE = "updateInstance";
   private HttpApiClient apiClient;
 
   public ConfigurationInstanceApiClient(HttpApiClient apiClient) {
@@ -50,11 +71,15 @@ public class ConfigurationInstanceApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (instance == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createInstance");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_INSTANCE);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_INSTANCE);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (StringUtils.isEmpty(instance.getConfigurationId())) {
-      throw new RemoteApiException(400, "Missing the required field 'configurationId'");
+      String reason = logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(instance.getConfigurationId())
@@ -78,18 +103,24 @@ public class ConfigurationInstanceApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (instance == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateInstance");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, UPDATE_INSTANCE);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_INSTANCE);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String configurationId = instance.getConfigurationId();
     String instanceId = instance.getInstanceId();
 
     if (StringUtils.isEmpty(configurationId)) {
-      throw new RemoteApiException(400, "Missing the required field 'configurationId'");
+      String reason = logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (StringUtils.isEmpty(instanceId)) {
-      throw new RemoteApiException(400, "Missing the required field 'instanceId'");
+      String reason = logMessage.getMessage(ID_EMPTY, INSTANCE_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/configuration/" + apiClient.escapeString(configurationId)
@@ -114,13 +145,15 @@ public class ConfigurationInstanceApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (configurationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'configurationId' when calling getInstanceById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER, CONFIGURATION_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, CONFIGURATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'instanceId' when calling getInstanceById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER, INSTANCE_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/configuration/" + apiClient.escapeString(configurationId)

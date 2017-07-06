@@ -16,6 +16,11 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
@@ -31,6 +36,7 @@ import java.util.Map;
  */
 public class SecurityApiClient extends BasePodApiClient {
 
+  public static final String CREATE_COMPANY_CERT = "createCompanyCert";
   private HttpApiClient apiClient;
 
   public SecurityApiClient(HttpApiClient apiClient) {
@@ -42,8 +48,9 @@ public class SecurityApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (cert == null) {
-      throw new RemoteApiException(400,
-          "Missing the required body payload when calling createCompanyCert");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_COMPANY_CERT);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_COMPANY_CERT);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v2/companycert/create";

@@ -16,6 +16,11 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.stream.Stream;
@@ -31,6 +36,7 @@ import java.util.Map;
  */
 public class StreamApiClient extends BasePodApiClient {
 
+  public static final String CREATE_IM = "createIM";
   private HttpApiClient apiClient;
 
   public StreamApiClient(HttpApiClient apiClient) {
@@ -47,7 +53,9 @@ public class StreamApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (uidList == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createIM");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_IM);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_IM);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/im/create";

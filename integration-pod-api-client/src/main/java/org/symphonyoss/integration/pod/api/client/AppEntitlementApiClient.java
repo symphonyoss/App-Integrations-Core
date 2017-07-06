@@ -16,6 +16,11 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties.AppEntitlementApiClientProperties
+    .BODY_PAYLOAD_ELEMENT_NULL;
+import static org.symphonyoss.integration.pod.api.properties.AppEntitlementApiClientProperties
+    .BODY_PAYLOAD_ELEMENT_NULL_SOLUTION;
+
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.pod.api.model.AppEntitlement;
@@ -33,6 +38,7 @@ import java.util.Map;
  */
 public class AppEntitlementApiClient extends BasePodApiClient {
 
+  public static final String ENTILTEMENT = "entiltement";
   private HttpApiClient apiClient;
 
   public AppEntitlementApiClient(HttpApiClient apiClient) {
@@ -44,8 +50,9 @@ public class AppEntitlementApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (entitlement == null) {
-      throw new RemoteApiException(400,
-          "Missing the required body payload when calling updateAppEntitlementList");
+      String reason = logMessage.getMessage(BODY_PAYLOAD_ELEMENT_NULL, ENTILTEMENT);
+      String solution = logMessage.getMessage(BODY_PAYLOAD_ELEMENT_NULL_SOLUTION);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/app/entitlement/list";

@@ -7,6 +7,6 @@ import org.symphonyoss.integration.pod.api.client.AppEntitlementApiClient;
  * Created by alexandre-silva-daitan on 30/06/17.
  */
 public class AppEntitlementApiClientProperties {
-    public static final String ENTITLEMENT_NULL = "integration.pod.api.client.entitlement.null";
-  public static final String ENTITLEMENT_NULL_SOLUTION = "integration.pod.api.client.entitlement.null.solution";
+    public static final String BODY_PAYLOAD_ELEMENT_NULL = "integration.pod.api.client.body.payload.null";
+    public static final String BODY_PAYLOAD_ELEMENT_NULL_SOLUTION = "integration.pod.api.client.body.payload.solution";
 }
