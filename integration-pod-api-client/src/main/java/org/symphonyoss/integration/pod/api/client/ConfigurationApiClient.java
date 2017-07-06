@@ -27,8 +27,10 @@ import static org.symphonyoss.integration.pod.api.properties
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
 
@@ -50,8 +52,10 @@ public class ConfigurationApiClient extends BasePodApiClient {
   public static final String UPDATE_INTEGRATION = "updateIntegration";
   private HttpApiClient apiClient;
 
-  public ConfigurationApiClient(HttpApiClient apiClient) {
+  @Autowired
+  public ConfigurationApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**

@@ -18,16 +18,20 @@ package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
 
@@ -53,9 +57,14 @@ public class ConfigurationApiClientTest {
 
   private ConfigurationApiClient apiClient;
 
+  @Mock
+  private LogMessageSource logMessageSource;
+
   @Before
   public void init() {
-    this.apiClient = new ConfigurationApiClient(httpClient);
+    this.apiClient = new ConfigurationApiClient(httpClient,logMessageSource);
+
+    doReturn("").when(logMessageSource).getMessage(anyString());
   }
 
   @Test
