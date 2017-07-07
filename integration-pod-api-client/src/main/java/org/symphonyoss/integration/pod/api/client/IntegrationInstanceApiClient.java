@@ -28,6 +28,7 @@ import static org.symphonyoss.integration.pod.api.properties
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
@@ -48,8 +49,8 @@ public class IntegrationInstanceApiClient extends BaseIntegrationInstanceApiClie
   private static final String API_PREFIX = "/v1";
   public static final String CREATE_INSTANCE = "createInstance";
 
-  public IntegrationInstanceApiClient(HttpApiClient apiClient) {
-    super(apiClient);
+  public IntegrationInstanceApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
+    super(apiClient, logMessage);
   }
 
   /**

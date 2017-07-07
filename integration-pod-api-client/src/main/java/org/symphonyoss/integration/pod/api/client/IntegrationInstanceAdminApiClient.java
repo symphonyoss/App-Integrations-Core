@@ -17,6 +17,7 @@
 package org.symphonyoss.integration.pod.api.client;
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
+import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
  * Part of Integration API, holds all endpoints to maintain the integration instances as an admin
@@ -27,8 +28,8 @@ public class IntegrationInstanceAdminApiClient extends BaseIntegrationInstanceAp
 
   private static final String API_PREFIX = "/v1/admin";
 
-  public IntegrationInstanceAdminApiClient(HttpApiClient apiClient) {
-    super(apiClient);
+  public IntegrationInstanceAdminApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
+    super(apiClient, logMessage);
   }
 
   @Override

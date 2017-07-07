@@ -28,6 +28,7 @@ import static org.symphonyoss.integration.pod.api.properties
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
 import org.symphonyoss.integration.pod.api.model.UserCreate;
@@ -55,8 +56,9 @@ public class UserApiClient extends BasePodApiClient {
   public static final String UID = "uid";
   private HttpApiClient apiClient;
 
-  public UserApiClient(HttpApiClient apiClient) {
+  public UserApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**

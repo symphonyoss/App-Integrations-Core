@@ -89,7 +89,7 @@ public class CompanyCertificateService {
   @PostConstruct
   public void init() {
     Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    this.securityApi = new SecurityApiClient(podApiClient);
+    this.securityApi = new SecurityApiClient(podApiClient, logMessage);
   }
 
   /**

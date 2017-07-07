@@ -23,6 +23,7 @@ import static org.symphonyoss.integration.pod.api.properties
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.stream.Stream;
 
 import java.util.Collections;
@@ -39,8 +40,9 @@ public class StreamApiClient extends BasePodApiClient {
   public static final String CREATE_IM = "createIM";
   private HttpApiClient apiClient;
 
-  public StreamApiClient(HttpApiClient apiClient) {
+  public StreamApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**

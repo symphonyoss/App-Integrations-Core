@@ -28,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
@@ -53,11 +54,14 @@ public class IntegrationInstanceApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private IntegrationInstanceApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new IntegrationInstanceApiClient(httpClient);
+    this.apiClient = new IntegrationInstanceApiClient(httpClient, logMessage);
   }
 
   @Test

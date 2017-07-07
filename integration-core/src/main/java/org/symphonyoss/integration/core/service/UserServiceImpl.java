@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
   @PostConstruct
   public void init() {
-    this.userApiClient = new UserApiClient(podHttpApiClient);
+    this.userApiClient = new UserApiClient(podHttpApiClient, logMessage);
   }
 
   @Override

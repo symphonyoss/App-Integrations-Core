@@ -29,6 +29,7 @@ import static org.symphonyoss.integration.pod.api.properties
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.model.IntegrationSettingsList;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
@@ -52,8 +53,9 @@ public class IntegrationApiClient extends BasePodApiClient {
   public static final String DEACTIVATE_INTEGRATION = "deactivateIntegration";
   private HttpApiClient apiClient;
 
-  public IntegrationApiClient(HttpApiClient apiClient) {
+  public IntegrationApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**

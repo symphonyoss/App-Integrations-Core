@@ -23,6 +23,7 @@ import static org.symphonyoss.integration.pod.api.properties.AppEntitlementApiCl
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.AppEntitlement;
 import org.symphonyoss.integration.pod.api.model.AppEntitlementList;
 
@@ -41,8 +42,9 @@ public class AppEntitlementApiClient extends BasePodApiClient {
   public static final String ENTILTEMENT = "entiltement";
   private HttpApiClient apiClient;
 
-  public AppEntitlementApiClient(HttpApiClient apiClient) {
+  public AppEntitlementApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   public AppEntitlement updateAppEntitlement(String sessionToken, AppEntitlement entitlement)
@@ -51,7 +53,7 @@ public class AppEntitlementApiClient extends BasePodApiClient {
 
     if (entitlement == null) {
       String reason = logMessage.getMessage(BODY_PAYLOAD_ELEMENT_NULL, ENTILTEMENT);
-      String solution = logMessage.getMessage(BODY_PAYLOAD_ELEMENT_NULL_SOLUTION);
+      String solution = logMessage.getMessage(BODY_PAYLOAD_ELEMENT_NULL_SOLUTION, ENTILTEMENT);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

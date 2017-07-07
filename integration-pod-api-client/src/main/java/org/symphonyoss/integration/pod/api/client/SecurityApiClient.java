@@ -23,6 +23,7 @@ import static org.symphonyoss.integration.pod.api.properties
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
 import org.symphonyoss.integration.pod.api.model.CompanyCertDetail;
 
@@ -39,8 +40,9 @@ public class SecurityApiClient extends BasePodApiClient {
   public static final String CREATE_COMPANY_CERT = "createCompanyCert";
   private HttpApiClient apiClient;
 
-  public SecurityApiClient(HttpApiClient apiClient) {
+  public SecurityApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   public CompanyCertDetail createCompanyCert(String sessionToken, CompanyCert cert)

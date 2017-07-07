@@ -19,6 +19,19 @@ package org.symphonyoss.integration.pod.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
+
+
+import static org.symphonyoss.integration.pod.api.client.SecurityApiClient.CREATE_COMPANY_CERT;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER_SOLUTION;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.CompanyCert;
 import org.symphonyoss.integration.pod.api.model.CompanyCertAttributes;
 import org.symphonyoss.integration.pod.api.model.CompanyCertDetail;
@@ -57,36 +71,57 @@ public class SecurityApiClientTest {
   @Mock
   private HttpApiClient httpClient;
 
+  @Mock
+  private LogMessageSource logMessage;
+
   private SecurityApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new SecurityApiClient(httpClient);
+    this.apiClient = new SecurityApiClient(httpClient, logMessage);
   }
 
   @Test
   public void testCreateIMNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createCompanyCert(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testCreateCompanyCertNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", CREATE_COMPANY_CERT);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        CREATE_COMPANY_CERT);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, CREATE_COMPANY_CERT)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_COMPANY_CERT)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createCompanyCert(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling createCompanyCert";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
