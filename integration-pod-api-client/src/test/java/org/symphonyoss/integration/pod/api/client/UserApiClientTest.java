@@ -81,6 +81,9 @@ public class UserApiClientTest {
   private static final String MOCK_LAST_NAME = "User";
 
   private static final Long MOCK_USER_ID = 123L;
+  public static final String UID = "uid";
+  public static final String UPDATE_USER = "updateUser";
+  public static final String UPDATE_USER_AVATAR = "updateUserAvatar";
 
   @Mock
   private HttpApiClient httpClient;
@@ -416,27 +419,46 @@ public class UserApiClientTest {
 
   @Test
   public void testUpdateUserNullIdentifier() {
+
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", UID, UPDATE_USER);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        UID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUser(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'uid' when calling updateUser";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", UPDATE_USER);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        UPDATE_USER);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUser(MOCK_SESSION, MOCK_USER_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling updateUser";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -485,27 +507,47 @@ public class UserApiClientTest {
 
   @Test
   public void testUpdateUserAvatarNullIdentifier() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", UID,
+            UPDATE_USER_AVATAR);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        UID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER_AVATAR)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUserAvatar(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'uid' when calling updateUserAvatar";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserAvatarNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", UPDATE_USER_AVATAR);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        UPDATE_USER_AVATAR);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER_AVATAR)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER_AVATAR)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUserAvatar(MOCK_SESSION, MOCK_USER_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling updateUserAvatar";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
