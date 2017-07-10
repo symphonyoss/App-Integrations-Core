@@ -42,7 +42,6 @@ public abstract class BasePodApiClient {
   @Autowired
   public LogMessageSource logMessage;
 
-
   /**
    * Check the required authentication token.
    * @param sessionToken Session authentication token.
