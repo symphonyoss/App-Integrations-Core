@@ -125,9 +125,9 @@ public class UserApiClientTest {
         EMAIL);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER, EMAIL, GET_USER_BY_EMAIL)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, EMAIL, GET_USER_BY_EMAIL)).thenReturn(
         expectedMessage);
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION, EMAIL)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, EMAIL)).thenReturn(
         expectedSolution);
     try {
       apiClient.getUserByEmail(MOCK_SESSION, null);
@@ -197,9 +197,9 @@ public class UserApiClientTest {
         USERNAME);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER, USERNAME, GET_USER_BY_USERNAME)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, USERNAME, GET_USER_BY_USERNAME)).thenReturn(
         expectedMessage);
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION, USERNAME)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USERNAME)).thenReturn(
         expectedSolution);
 
     try {
@@ -261,9 +261,9 @@ public class UserApiClientTest {
         USER_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER, USER_ID, GET_USER_BY_ID)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, USER_ID, GET_USER_BY_ID)).thenReturn(
         expectedMessage);
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION, USER_ID)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USER_ID)).thenReturn(
         expectedSolution);
 
     try {

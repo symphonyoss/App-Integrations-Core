@@ -11,7 +11,7 @@ public class BaseIntegrationInstanceApiClientProperties {
   public static final String INSTANCE_EMPTY_SOLUTION = "integration.pod.base.integration.instance.api.client.instance.solution";
   public static final String ID_EMPTY = "integration.pod.base.integration.instance.api.client.id.empty";
   public static final String ID_SOLUTION = "integration.pod.base.integration.instance.api.client.id.solution";
-  public static final String MISSING_PARAMETER = "integration.pod.base.integration.instance.api.client.missing.parameter";
-  public static final String MISSING_PARAMETER_SOLUTION = "integration.pod.base.integration.instance.api.client.missing.parameter.solution";
+  public static final String MISSING_PARAMETER_WHEN_CALLING = "integration.pod.base.integration.instance.api.client.missing.parameter";
+  public static final String MISSING_PARAMETER_WHEN_CALLING_SOLUTION = "integration.pod.base.integration.instance.api.client.missing.parameter.solution";
 
 }

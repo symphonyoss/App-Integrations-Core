@@ -23,9 +23,9 @@ import static org.symphonyoss.integration.pod.api.properties
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.api.client.HttpApiClient;
@@ -69,7 +69,7 @@ public class ConfigurationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integration == null) {
-      String reason = logMessage.getMessage(INSTANCE_EMPTY, INTEGRATION);
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_INTEGRATION);
       String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_INTEGRATION);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
@@ -96,8 +96,8 @@ public class ConfigurationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, GET_INTEGRATION_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, GET_INTEGRATION_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -123,8 +123,8 @@ public class ConfigurationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationType == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_TYPE, GET_INTEGRATION_BY_TYPE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_TYPE);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_TYPE, GET_INTEGRATION_BY_TYPE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_TYPE);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -151,14 +151,14 @@ public class ConfigurationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, UPDATE_INTEGRATION);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, UPDATE_INTEGRATION);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (integration == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION, UPDATE_INTEGRATION);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION, UPDATE_INTEGRATION);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

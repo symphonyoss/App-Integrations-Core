@@ -21,9 +21,9 @@ import static org.symphonyoss.integration.pod.api.properties
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
@@ -71,8 +71,8 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (email == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, EMAIL, GET_USER_BY_EMAIL);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, EMAIL);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, EMAIL, GET_USER_BY_EMAIL);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, EMAIL);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -98,8 +98,8 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (username == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, USERNAME, GET_USER_BY_USERNAME);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, USERNAME);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, USERNAME, GET_USER_BY_USERNAME);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USERNAME);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -125,8 +125,8 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (userId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, USER_ID, GET_USER_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, USER_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, USER_ID, GET_USER_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USER_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -165,8 +165,8 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (uid == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, UID, UPDATE_USER);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, UID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -190,8 +190,8 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (uid == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, UID, UPDATE_USER_AVATAR);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, UID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER_AVATAR);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

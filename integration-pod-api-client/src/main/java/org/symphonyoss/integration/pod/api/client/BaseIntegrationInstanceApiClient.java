@@ -25,9 +25,9 @@ import static org.symphonyoss.integration.pod.api.properties
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
@@ -117,8 +117,8 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, LIST_INSTANCES);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, LIST_INSTANCES);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -146,14 +146,14 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, GET_INSTANCE_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INSTANCE_ID, GET_INSTANCE_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -179,14 +179,14 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, ACTIVATE_INSTANCE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INTEGRATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, ACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INSTANCE_ID, ACTIVATE_INSTANCE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, ACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
@@ -212,14 +212,14 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INTEGRATION_ID, DEACTIVATE_INSTANCE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, DEACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INSTANCE_ID, DEACTIVATE_INSTANCE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, DEACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

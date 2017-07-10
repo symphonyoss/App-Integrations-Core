@@ -251,10 +251,10 @@ public class IntegrationApiClientTest {
             INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, GET_INTEGRATION_BY_ID)).thenReturn(expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_ID)).thenReturn(
         expectedSolution);
 
@@ -319,10 +319,10 @@ public class IntegrationApiClientTest {
             INTEGRATION_TYPE);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_TYPE, GET_INTEGRATION_BY_TYPE)).thenReturn(expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_TYPE)).thenReturn(
         expectedSolution);
 
@@ -387,10 +387,10 @@ public class IntegrationApiClientTest {
             INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, UPDATE_INTEGRATION)).thenReturn(expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_ID)).thenReturn(
         expectedSolution);
 

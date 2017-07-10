@@ -31,9 +31,9 @@ import static org.symphonyoss.integration.pod.api.properties
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
 import static org.symphonyoss.integration.pod.api.properties
-    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION;
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
@@ -147,14 +147,14 @@ public class ConfigurationInstanceApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (configurationId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, CONFIGURATION_ID, GET_INSTANCE_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, CONFIGURATION_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, CONFIGURATION_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, CONFIGURATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      String reason = logMessage.getMessage(MISSING_PARAMETER, INSTANCE_ID, GET_INSTANCE_BY_ID);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_SOLUTION, INSTANCE_ID);
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

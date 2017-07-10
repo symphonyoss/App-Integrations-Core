@@ -63,7 +63,6 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
-import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 import org.symphonyoss.integration.pod.api.properties.BaseIntegrationInstanceApiClientProperties;
 
@@ -265,11 +264,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, LIST_INSTANCES)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_ID)).thenReturn(
         expectedSolution);
 
@@ -345,11 +344,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, GET_INSTANCE_BY_ID)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_ID)).thenReturn(
         expectedSolution);
 
@@ -372,11 +371,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INSTANCE_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INSTANCE_ID, GET_INSTANCE_BY_ID)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INSTANCE_ID)).thenReturn(
         expectedSolution);
 
@@ -445,11 +444,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, ACTIVATE_INSTANCE)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INTEGRATION_ID)).thenReturn(
         expectedSolution);
 
@@ -472,11 +471,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INSTANCE_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INSTANCE_ID, ACTIVATE_INSTANCE)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INSTANCE_ID)).thenReturn(
         expectedSolution);
 
@@ -545,11 +544,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INSTANCE_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INTEGRATION_ID, DEACTIVATE_INSTANCE)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INSTANCE_ID)).thenReturn(
         expectedSolution);
 
@@ -572,11 +571,11 @@ public class IntegrationInstanceAdminApiClientTest {
         String.format("Please check if the required field '%s' is not empty", INTEGRATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER,
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
         INSTANCE_ID, DEACTIVATE_INSTANCE)).thenReturn(
         expectedMessage);
     when(
-        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION,
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
             INSTANCE_ID)).thenReturn(
         expectedSolution);
 

@@ -353,8 +353,8 @@ public class ConfigurationInstanceApiClientTest {
             CONFIGURATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER, CONFIGURATION_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION, CONFIGURATION_ID)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, CONFIGURATION_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, CONFIGURATION_ID)).thenReturn(
         expectedSolution);
 
     try {
@@ -375,8 +375,8 @@ public class ConfigurationInstanceApiClientTest {
             CONFIGURATION_ID);
 
     //Set up logMessage
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER, INSTANCE_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
-    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_SOLUTION, INSTANCE_ID)).thenReturn(
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID)).thenReturn(
         expectedSolution);
 
     try {
