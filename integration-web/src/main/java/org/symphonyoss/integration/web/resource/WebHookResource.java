@@ -16,6 +16,15 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .INTEGRATION_BRIDGE_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .INTEGRATION_BRIDGE_UNAVAILABLE_SOLUTION;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .WEBHOOK_CONFIGURATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.WebHookResourceProperties
+    .WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +43,7 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.exception.config.NotFoundException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
@@ -72,6 +82,9 @@ public abstract class WebHookResource {
 
   @Autowired
   private IntegrationBridge integrationBridge;
+
+  @Autowired
+  private LogMessageSource logMessage;
 
   /**
    * Represents the current circuit state that Integration Bridge uses to determine whether it is
@@ -118,7 +131,9 @@ public abstract class WebHookResource {
     WebHookIntegration whiIntegration =
         (WebHookIntegration) this.integrationBridge.getIntegrationById(configurationId);
     if (whiIntegration == null) {
-      throw new IntegrationUnavailableException(configurationId);
+      String message = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE, configurationId);
+      String solution = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION);
+      throw new IntegrationUnavailableException(message, solution);
     }
 
     return whiIntegration;
@@ -174,8 +189,9 @@ public abstract class WebHookResource {
    */
   protected void checkIntegrationBridgeAvailability() {
     if (!this.circuitClosed) {
-      throw new IntegrationBridgeUnavailableException(
-          "Integration Bridge temporarily unavailable due to connectivity issues.");
+      String message = logMessage.getMessage(INTEGRATION_BRIDGE_UNAVAILABLE);
+      String solution = logMessage.getMessage(INTEGRATION_BRIDGE_UNAVAILABLE_SOLUTION);
+      throw new IntegrationBridgeUnavailableException(message, solution);
     }
   }
 

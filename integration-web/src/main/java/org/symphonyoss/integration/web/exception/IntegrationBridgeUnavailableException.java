@@ -30,4 +30,7 @@ public class IntegrationBridgeUnavailableException extends IntegrationRuntimeExc
     super(COMPONENT, message);
   }
 
+  public IntegrationBridgeUnavailableException(String message, String... solutions) {
+    super(COMPONENT, message, solutions);
+  }
 }

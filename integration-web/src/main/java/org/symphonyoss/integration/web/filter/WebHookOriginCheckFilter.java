@@ -17,6 +17,18 @@
 package org.symphonyoss.integration.web.filter;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .CANNOT_FIND_HOST_FOR_IP;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .CANNOT_FIND_HOST_FOR_IP_SOLUTION;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .CANNOT_RETRIEVE_WHITELIST;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .CANNOT_RETRIEVE_WHITELIST_SOLUTION;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .WEBHOOK_REQUEST_BLOCKED;
+import static org.symphonyoss.integration.web.properties.WebHookOriginCheckFilterProperties
+    .WEBHOOK_REQUEST_BLOCKED_SOLUTION;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;

@@ -28,5 +28,4 @@ public class IntegrationProvisioningAuthException extends IntegrationRuntimeExce
   public IntegrationProvisioningAuthException(String message, Throwable cause, String... solution) {
     super(COMPONENT, message, cause, solution);
   }
-
 }
