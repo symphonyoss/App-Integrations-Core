@@ -45,7 +45,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
@@ -53,7 +52,6 @@ import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.logging.DistributedTracingUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -128,9 +126,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private ApplicationsHealthIndicator applicationsHealthIndicator;
 
   @Autowired
-  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
-
-  @Autowired
   private ApplicationEventPublisher publisher;
 
   @Autowired
@@ -138,8 +133,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private LogMessageSource logMessage;
-
-  private JsonUtils jsonUtils = new JsonUtils();
 
   /**
    * Atomic  Integer used to control when the application should log its health.
