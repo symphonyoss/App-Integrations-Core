@@ -83,7 +83,7 @@ public class ApplicationService {
 
   @PostConstruct
   public void init() {
-    this.appEntitlementApi = new AppEntitlementApiClient(podApiClient);
+    this.appEntitlementApi = new AppEntitlementApiClient(podApiClient, logMessage);
   }
 
   /**
