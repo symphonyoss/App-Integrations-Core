@@ -75,8 +75,8 @@ public class RemoteIntegrationService implements IntegrationService {
   @Override
   @PostConstruct
   public void init() {
-    configurationApiClient = new ConfigurationApiClient(client);
-    instanceApiClient = new ConfigurationInstanceApiClient(client);
+    configurationApiClient = new ConfigurationApiClient(client,logMessage);
+    instanceApiClient = new ConfigurationInstanceApiClient(client,logMessage);
   }
 
   @Override
