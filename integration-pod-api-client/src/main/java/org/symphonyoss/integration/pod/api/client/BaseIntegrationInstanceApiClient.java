@@ -213,7 +213,7 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
 
     if (integrationId == null) {
       String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, DEACTIVATE_INSTANCE);
-      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 

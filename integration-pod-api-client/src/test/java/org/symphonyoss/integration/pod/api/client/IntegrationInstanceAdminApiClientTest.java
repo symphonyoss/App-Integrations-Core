@@ -549,7 +549,7 @@ public class IntegrationInstanceAdminApiClientTest {
         expectedMessage);
     when(
         logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
-            INSTANCE_ID)).thenReturn(
+            INTEGRATION_ID)).thenReturn(
         expectedSolution);
 
     try {
