@@ -16,8 +16,7 @@
 
 package org.symphonyoss.integration.agent.api.client;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static org.symphonyoss.integration.agent.api.client.properties.V4MessageApiClientProperties.POST_FAILURE;
 import static org.symphonyoss.integration.agent.api.client.properties.V4MessageApiClientProperties.POST_FAILURE_SOLUTION;
 
@@ -114,12 +113,12 @@ public class V4MessageApiClient extends BaseMessageApiClient {
     headerParams.put(KM_TOKEN_HEADER_PARAM, kmToken);
 
     try (FormDataMultiPart multiPart = new FormDataMultiPart()) {
-      multiPart.field(MESSAGE_BODY, message.getMessage(), APPLICATION_XML_TYPE);
+      multiPart.field(MESSAGE_BODY, message.getMessage(), TEXT_PLAIN_TYPE);
 
       String entityJSON = message.getData();
 
       if (StringUtils.isNotEmpty(entityJSON)) {
-        multiPart.field(DATA_BODY, entityJSON, APPLICATION_JSON_TYPE);
+        multiPart.field(DATA_BODY, entityJSON, TEXT_PLAIN_TYPE);
       }
 
       return apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), multiPart, Message.class);
