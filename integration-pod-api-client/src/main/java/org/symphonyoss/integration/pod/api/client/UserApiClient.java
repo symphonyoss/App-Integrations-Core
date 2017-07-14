@@ -16,9 +16,19 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
+
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
 import org.symphonyoss.integration.pod.api.model.UserCreate;
@@ -34,10 +44,21 @@ import java.util.Map;
  */
 public class UserApiClient extends BasePodApiClient {
 
+  private static final String EMAIL = "email";
+  private static final String GET_USER_BY_EMAIL = "getUserByEmail";
+  private static final String USERNAME = "username";
+  private static final String GET_USER_BY_USERNAME = "getUserByUsername";
+  private static final String USER_ID = "userId";
+  private static final String GET_USER_BY_ID = "getUserById";
+  private static final String CREATE_USER = "createUser";
+  private static final String UPDATE_USER = "updateUser";
+  private static final String UPDATE_USER_AVATAR = "updateUserAvatar";
+  private static final String UID = "uid";
   private HttpApiClient apiClient;
 
-  public UserApiClient(HttpApiClient apiClient) {
+  public UserApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**
@@ -50,7 +71,9 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (email == null) {
-      throw new RemoteApiException(400, "Missing the required parameter 'email' when calling getUserByEmail");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, EMAIL, GET_USER_BY_EMAIL);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, EMAIL);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v2/user";
@@ -75,8 +98,9 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (username == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'username' when calling getUserByUsername");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, USERNAME, GET_USER_BY_USERNAME);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USERNAME);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v2/user";
@@ -101,7 +125,9 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (userId == null) {
-      throw new RemoteApiException(400, "Missing the required parameter 'userId' when calling getUserById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, USER_ID, GET_USER_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USER_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v2/user";
@@ -120,7 +146,9 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (userInfo == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createUser");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_USER);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_USER);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/user/create";
@@ -137,11 +165,15 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (uid == null) {
-      throw new RemoteApiException(400, "Missing the required parameter 'uid' when calling updateUser");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (attributes == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateUser");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/user/" + uid + "/update";
@@ -158,11 +190,15 @@ public class UserApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (uid == null) {
-      throw new RemoteApiException(400, "Missing the required parameter 'uid' when calling updateUserAvatar");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER_AVATAR);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (avatarUpdate == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateUserAvatar");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER_AVATAR);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER_AVATAR);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/admin/user/" + uid + "/avatar/update";

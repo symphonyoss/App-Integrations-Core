@@ -116,7 +116,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   @PostConstruct
   public void init() {
-    usersApi = new UserApiClient(podApiClient);
+    usersApi = new UserApiClient(podApiClient, logMessage);
   }
 
   public void handleRemoteApiException(RemoteApiException remoteException,

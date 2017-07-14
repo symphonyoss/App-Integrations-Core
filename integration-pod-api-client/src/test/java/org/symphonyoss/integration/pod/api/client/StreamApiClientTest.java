@@ -19,6 +19,17 @@ package org.symphonyoss.integration.pod.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER_SOLUTION;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.stream.Stream;
 
 import java.util.ArrayList;
@@ -43,45 +55,71 @@ import java.util.Map;
 @RunWith(MockitoJUnitRunner.class)
 public class StreamApiClientTest {
 
-  private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
+  private static final String MOCK_SESSION =
+      "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
 
   private static final String MOCK_STREAM_ID = "Bm42DA4wtrPT2IeX5g6J4n///qrJ+Ev3dA==";
 
   private static final Long MOCK_USER_ID = 123456L;
+  private static final String CREATE_IM = "createIM";
 
   @Mock
   private HttpApiClient httpClient;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   private StreamApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new StreamApiClient(httpClient);
+    this.apiClient = new StreamApiClient(httpClient, logMessage);
   }
 
   @Test
   public void testCreateIMNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createIM(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution),
+          e.getMessage());
     }
   }
 
   @Test
   public void testCreateIntegrationNullList() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", CREATE_IM);
+    String expectedSolution =
+        String.format("Please check if the required body payload when calling %s exists",
+            CREATE_IM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, CREATE_IM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_IM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createIM(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling createIM";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution),
+          e.getMessage());
     }
   }
 

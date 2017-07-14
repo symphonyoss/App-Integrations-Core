@@ -22,6 +22,17 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER_SOLUTION;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +43,7 @@ import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.Avatar;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
@@ -39,6 +51,7 @@ import org.symphonyoss.integration.pod.api.model.UserCreate;
 import org.symphonyoss.integration.pod.api.model.UserDetail;
 import org.symphonyoss.integration.pod.api.model.UserPassword;
 import org.symphonyoss.integration.pod.api.model.UserSystemInfo;
+import org.symphonyoss.integration.pod.api.properties.BaseIntegrationInstanceApiClientProperties;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,40 +73,70 @@ public class UserApiClientTest {
   private static final String MOCK_LAST_NAME = "User";
 
   private static final Long MOCK_USER_ID = 123L;
+  public static final String UID = "uid";
+  public static final String UPDATE_USER = "updateUser";
+  public static final String UPDATE_USER_AVATAR = "updateUserAvatar";
+  private static final String EMAIL = "email";
+  private static final String GET_USER_BY_EMAIL = "getUserByEmail";
+  private static final String USERNAME = "username";
+  private static final String GET_USER_BY_USERNAME = "getUserByUsername";
+  private static final String USER_ID = "userId";
+  private static final String GET_USER_BY_ID = "getUserById";
+  private static final String CREATE_USER = "createUser";
 
   @Mock
   private HttpApiClient httpClient;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   private UserApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new UserApiClient(httpClient);
+    this.apiClient = new UserApiClient(httpClient, logMessage);
   }
 
   @Test
   public void testGetUserByEmailNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getUserByEmail(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetUserByEmailNullEmail() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", EMAIL, GET_USER_BY_EMAIL);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        EMAIL);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, EMAIL, GET_USER_BY_EMAIL)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, EMAIL)).thenReturn(
+        expectedSolution);
     try {
       apiClient.getUserByEmail(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'email' when calling getUserByEmail";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -128,27 +171,45 @@ public class UserApiClientTest {
 
   @Test
   public void testGetUserByUsernameNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getUserByUsername(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetUserByUsernameNullUsername() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", USERNAME, GET_USER_BY_USERNAME);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        USERNAME);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, USERNAME, GET_USER_BY_USERNAME)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USERNAME)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getUserByUsername(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'username' when calling getUserByUsername";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -174,27 +235,45 @@ public class UserApiClientTest {
 
   @Test
   public void testGetUserByIdNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getUserById(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetUserByIdNullId() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", USER_ID, GET_USER_BY_ID);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        USER_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, USER_ID, GET_USER_BY_ID)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, USER_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getUserById(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'userId' when calling getUserById";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -220,27 +299,45 @@ public class UserApiClientTest {
 
   @Test
   public void testCreateUserNullSession() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createUser(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testCreateUserNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", CREATE_USER);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        CREATE_USER);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, CREATE_USER)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_USER)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createUser(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling createUser";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -299,40 +396,68 @@ public class UserApiClientTest {
 
   @Test
   public void testUpdateUserNullSession() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUser(null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserNullIdentifier() {
+
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", UID, UPDATE_USER);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        UID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUser(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'uid' when calling updateUser";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", UPDATE_USER);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        UPDATE_USER);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUser(MOCK_SESSION, MOCK_USER_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling updateUser";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -359,40 +484,69 @@ public class UserApiClientTest {
 
   @Test
   public void testUpdateUserAvatarNullSession() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUserAvatar(null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserAvatarNullIdentifier() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", UID,
+            UPDATE_USER_AVATAR);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        UID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING, UID, UPDATE_USER_AVATAR)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION, UID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUserAvatar(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'uid' when calling updateUserAvatar";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateUserAvatarNullData() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", UPDATE_USER_AVATAR);
+    String expectedSolution = String.format("Please check if the required body payload when calling %s exists",
+        UPDATE_USER_AVATAR);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, UPDATE_USER_AVATAR)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_USER_AVATAR)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateUserAvatar(MOCK_SESSION, MOCK_USER_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required body payload when calling updateUserAvatar";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 

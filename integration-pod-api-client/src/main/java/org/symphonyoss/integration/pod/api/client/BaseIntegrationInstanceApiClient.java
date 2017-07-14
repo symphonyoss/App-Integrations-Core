@@ -16,12 +16,25 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
+
 import org.apache.commons.lang3.StringUtils;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
-import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 
 import java.util.Collections;
@@ -34,10 +47,20 @@ import java.util.Map;
  */
 public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient {
 
+  public static final String INSTANCE = "instance";
+  public static final String CONFIGURATION_ID = "configurationId";
+  public static final String INSTANCE_ID = "instanceId";
+  public static final String INTEGRATION_ID = "integrationId";
+  public static final String LIST_INSTANCES = "listInstances";
+  public static final String GET_INSTANCE_BY_ID = "getInstanceById";
+  public static final String ACTIVATE_INSTANCE = "activateInstance";
+  public static final String DEACTIVATE_INSTANCE = "deactivateInstance";
+  public static final String UPDATE_INSTANCE = "updateInstance";
   protected HttpApiClient apiClient;
 
-  public BaseIntegrationInstanceApiClient(HttpApiClient apiClient) {
+  public BaseIntegrationInstanceApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**
@@ -51,18 +74,24 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (instance == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateInstance");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, UPDATE_INSTANCE);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_INSTANCE);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String configurationId = instance.getConfigurationId();
     String instanceId = instance.getInstanceId();
 
     if (StringUtils.isEmpty(configurationId)) {
-      throw new RemoteApiException(400, "Missing the required field 'configurationId'");
+      String reason = logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (StringUtils.isEmpty(instanceId)) {
-      throw new RemoteApiException(400, "Missing the required field 'instanceId'");
+      String reason = logMessage.getMessage(ID_EMPTY, INSTANCE_ID);
+      String solution = logMessage.getMessage(ID_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = getApiPathPrefix() + "/configuration/" + apiClient.escapeString(configurationId)
@@ -88,8 +117,9 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling listInstances");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, LIST_INSTANCES);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = getApiPathPrefix() + "/configuration/" + apiClient.escapeString(integrationId) + "/instance";
@@ -116,13 +146,15 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling getInstanceById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'instanceId' when calling getInstanceById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, GET_INSTANCE_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = getApiPathPrefix() + "/configuration/" + apiClient.escapeString(integrationId)
@@ -147,13 +179,15 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling activateInstance");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, ACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'instanceId' when calling activateInstance");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, ACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = getApiPathPrefix() + "/configuration/" + apiClient.escapeString(integrationId)
@@ -178,13 +212,15 @@ public abstract class BaseIntegrationInstanceApiClient extends BasePodApiClient 
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling deactivateInstance");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, DEACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (instanceId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'instanceId' when calling deactivateInstance");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INSTANCE_ID, DEACTIVATE_INSTANCE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INSTANCE_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = getApiPathPrefix() + "/configuration/" + apiClient.escapeString(integrationId)

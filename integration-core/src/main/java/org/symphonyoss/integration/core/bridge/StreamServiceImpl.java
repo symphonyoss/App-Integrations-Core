@@ -101,7 +101,7 @@ public class StreamServiceImpl implements StreamService {
    */
   @PostConstruct
   public void init() {
-    streamsApi = new StreamApiClient(podApiClient);
+    streamsApi = new StreamApiClient(podApiClient, logMessage);
 
     MessageApiClient messageApiClient = new V2MessageApiClient(agentV2ApiClient, logMessage);
 

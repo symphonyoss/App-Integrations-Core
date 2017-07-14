@@ -16,8 +16,20 @@
 
 package org.symphonyoss.integration.pod.api.client;
 
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .INTEGRATION_ID;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
+
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.model.IntegrationSettingsList;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
@@ -32,10 +44,18 @@ import java.util.Map;
  */
 public class IntegrationApiClient extends BasePodApiClient {
 
+  private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
+  private static final String INTEGRATION_TYPE = "integrationType";
+  private static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
+  private static final String CREATE_INTEGRATION = "createIntegration";
+  private static final String UPDATE_INTEGRATION = "updateIntegration";
+  private static final String ACTIVATE_INTEGRATION = "activateIntegration";
+  private static final String DEACTIVATE_INTEGRATION = "deactivateIntegration";
   private HttpApiClient apiClient;
 
-  public IntegrationApiClient(HttpApiClient apiClient) {
+  public IntegrationApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
+    this.logMessage = logMessage;
   }
 
   /**
@@ -74,8 +94,9 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling getIntegrationById");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, GET_INTEGRATION_BY_ID);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(integrationId);
@@ -100,8 +121,9 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationType == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationType' when calling getIntegrationByType");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_TYPE, GET_INTEGRATION_BY_TYPE);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_TYPE);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/type/" + apiClient.escapeString(integrationType);
@@ -124,7 +146,9 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integration == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling createIntegration");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, CREATE_INTEGRATION);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_INTEGRATION);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration";
@@ -150,12 +174,15 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling updateIntegration");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, UPDATE_INTEGRATION);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     if (integration == null) {
-      throw new RemoteApiException(400, "Missing the required body payload when calling updateIntegration");
+      String reason = logMessage.getMessage(INSTANCE_EMPTY, UPDATE_INTEGRATION);
+      String solution = logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_INTEGRATION);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(integrationId);
@@ -178,8 +205,9 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling activateIntegration");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, ACTIVATE_INTEGRATION);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/activate";
@@ -202,8 +230,9 @@ public class IntegrationApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
 
     if (integrationId == null) {
-      throw new RemoteApiException(400,
-          "Missing the required parameter 'integrationId' when calling deactivateIntegration");
+      String reason = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, INTEGRATION_ID, DEACTIVATE_INTEGRATION);
+      String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, INTEGRATION_ID);
+      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
     String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/deactivate";

@@ -19,6 +19,27 @@ package org.symphonyoss.integration.pod.api.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .CONFIGURATION_ID;
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .GET_INSTANCE_BY_ID;
+import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
+    .INSTANCE_ID;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.ID_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
+import static org.symphonyoss.integration.pod.api.properties
+    .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY_SOLUTION;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER;
+import static org.symphonyoss.integration.pod.api.properties.BasePodApiClientProperties
+    .MISSING_PARAMETER_SOLUTION;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +49,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceList;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
+import org.symphonyoss.integration.pod.api.properties.BaseIntegrationInstanceApiClientProperties;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,45 +72,83 @@ public class IntegrationInstanceApiClientTest {
   private static final String MOCK_CONFIGURATION_ID = "57d6f328e4b0396198ce723d";
 
   private static final String MOCK_INSTANCE_ID = "57e2f006e4b0176038a81b18";
+  public static final String CREATE_INSTANCE = "createInstance";
+  public static final String INTEGRATION_ID = "integrationId";
+  public static final String ACTIVATE_INSTANCE = "activateInstance";
+  public static final String LIST_INSTANCES = "listInstances";
+  public static final String DEACTIVATE_INSTANCE = "deactivateInstance";
+  public static final String UPDATE_INSTANCE = "updateInstance";
 
   @Mock
   private HttpApiClient httpClient;
+
+  @Mock
+  private LogMessageSource logMessage;
 
   private IntegrationInstanceApiClient apiClient;
 
   @Before
   public void init() {
-    this.apiClient = new IntegrationInstanceApiClient(httpClient);
+    this.apiClient = new IntegrationInstanceApiClient(httpClient, logMessage);
   }
 
   @Test
   public void testCreateInstanceNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createInstance(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testCreateInstanceNullInstance() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling %s", CREATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required body payload when calling %s exists",
+            CREATE_INSTANCE);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, CREATE_INSTANCE)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, CREATE_INSTANCE)).thenReturn(
+        expectedSolution);
     try {
       apiClient.createInstance(MOCK_SESSION, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required body payload when calling createInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testCreateInstanceInvalidConfiguration() {
+    String expectedMessage =
+        String.format("Missing the required field '%s'", CONFIGURATION_ID);
+    String expectedSolution =
+        String.format("Please check if the required field {0} is not empty",
+            CONFIGURATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.createInstance(MOCK_SESSION, new IntegrationInstanceSubmissionCreate());
       fail();
@@ -95,7 +156,7 @@ public class IntegrationInstanceApiClientTest {
       assertEquals(400, e.getCode());
 
       String message = "Missing the required field 'configurationId'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -134,19 +195,39 @@ public class IntegrationInstanceApiClientTest {
 
   @Test
   public void testUpdateInstanceNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.updateInstance(null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateInstanceNull() {
+    String expectedMessage =
+        String.format("Missing the required body payload when calling '%s'", UPDATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required body payload when calling %s exists",
+            UPDATE_INSTANCE);
+
+    //Set up logMessage
+    when(logMessage.getMessage(INSTANCE_EMPTY, UPDATE_INSTANCE)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(INSTANCE_EMPTY_SOLUTION, UPDATE_INSTANCE)).thenReturn(
+        expectedSolution);
     try {
       apiClient.updateInstance(MOCK_SESSION, null);
       fail();
@@ -154,12 +235,22 @@ public class IntegrationInstanceApiClientTest {
       assertEquals(400, e.getCode());
 
       String message = "Missing the required body payload when calling updateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateInstanceNullConfigId() {
+    String expectedMessage =
+        String.format("Missing the required field '%s'", CONFIGURATION_ID);
+    String expectedSolution =
+        String.format("Please check if the required field {0} is not empty",
+            CONFIGURATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(ID_EMPTY, CONFIGURATION_ID)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(ID_SOLUTION, CONFIGURATION_ID)).thenReturn(
+        expectedSolution);
     try {
       IntegrationInstanceSubmissionUpdate update = new IntegrationInstanceSubmissionUpdate();
 
@@ -169,12 +260,22 @@ public class IntegrationInstanceApiClientTest {
       assertEquals(400, e.getCode());
 
       String message = "Missing the required field 'configurationId'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage,expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testUpdateInstanceNullInstanceId() {
+    String expectedMessage =
+        String.format("Missing the required field '%s'", INSTANCE_ID);
+    String expectedSolution =
+        String.format("Please check if the required field {0} is not empty",
+            INSTANCE_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(ID_EMPTY, INSTANCE_ID)).thenReturn(expectedMessage);
+    when(logMessage.getMessage(ID_SOLUTION, INSTANCE_ID)).thenReturn(
+        expectedSolution);
     try {
       IntegrationInstanceSubmissionUpdate update = new IntegrationInstanceSubmissionUpdate();
       update.setConfigurationId(MOCK_CONFIGURATION_ID);
@@ -185,7 +286,7 @@ public class IntegrationInstanceApiClientTest {
       assertEquals(400, e.getCode());
 
       String message = "Missing the required field 'instanceId'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -217,27 +318,50 @@ public class IntegrationInstanceApiClientTest {
 
   @Test
   public void testGetInstanceListNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.listInstances(null, null, 0, 0);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetInstanceListInvalidConfig() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INTEGRATION_ID,
+            LIST_INSTANCES);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INTEGRATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INTEGRATION_ID, LIST_INSTANCES)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INTEGRATION_ID)).thenReturn(
+        expectedSolution);
     try {
       apiClient.listInstances(MOCK_SESSION, null, 0, 0);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'integrationId' when calling listInstances";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -269,40 +393,77 @@ public class IntegrationInstanceApiClientTest {
 
   @Test
   public void testGetInstanceByIdNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getInstanceById(null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetInstanceByIdInvalidConfig() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INTEGRATION_ID,
+            GET_INSTANCE_BY_ID);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INTEGRATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INTEGRATION_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INTEGRATION_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.getInstanceById(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'integrationId' when calling getInstanceById";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testGetInstanceByIdInvalidInstance() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INSTANCE_ID,
+            GET_INSTANCE_BY_ID);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INSTANCE_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INSTANCE_ID, GET_INSTANCE_BY_ID)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INSTANCE_ID)).thenReturn(
+        expectedSolution);
     try {
       apiClient.getInstanceById(MOCK_SESSION, MOCK_INSTANCE_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'instanceId' when calling getInstanceById";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -330,40 +491,77 @@ public class IntegrationInstanceApiClientTest {
 
   @Test
   public void testActivateInstanceByIdNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.activateInstance(null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testActivateInstanceByIdInvalidConfig() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INTEGRATION_ID,
+            ACTIVATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INTEGRATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INTEGRATION_ID, ACTIVATE_INSTANCE)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INTEGRATION_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.activateInstance(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'integrationId' when calling activateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testActivateInstanceByIdInvalidInstance() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INSTANCE_ID,
+            ACTIVATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INSTANCE_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INSTANCE_ID, ACTIVATE_INSTANCE)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INSTANCE_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.activateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'instanceId' when calling activateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
@@ -391,40 +589,76 @@ public class IntegrationInstanceApiClientTest {
 
   @Test
   public void testDeactivateInstanceByIdNullSessionToken() {
+    String expectedMessage =
+        String.format("Missing the required parameter %s", SESSION_TOKEN_HEADER_PARAM);
+    String expectedSolution = String.format("Please check if the required field '%s' is not empty",
+        SESSION_TOKEN_HEADER_PARAM);
+
+    //Set up logMessage
+    when(logMessage.getMessage(MISSING_PARAMETER, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedMessage);
+    when(logMessage.getMessage(MISSING_PARAMETER_SOLUTION, SESSION_TOKEN_HEADER_PARAM)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.deactivateInstance(null, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'sessionToken'";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testDeactivateInstanceByIdInvalidConfig() {
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INTEGRATION_ID,
+            DEACTIVATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INTEGRATION_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INTEGRATION_ID, DEACTIVATE_INSTANCE)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INTEGRATION_ID)).thenReturn(
+        expectedSolution);
     try {
       apiClient.deactivateInstance(MOCK_SESSION, null, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
-
-      String message = "Missing the required parameter 'integrationId' when calling deactivateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
   @Test
   public void testDeactivateInstanceByIdInvalidInstance() {
+
+    String expectedMessage =
+        String.format("Missing the required parameter '%s' when calling %s", INSTANCE_ID,
+            DEACTIVATE_INSTANCE);
+    String expectedSolution =
+        String.format("Please check if the required field '%s' is not empty",
+            INSTANCE_ID);
+
+    //Set up logMessage
+    when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
+        INSTANCE_ID, DEACTIVATE_INSTANCE)).thenReturn(expectedMessage);
+    when(
+        logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION,
+            INSTANCE_ID)).thenReturn(
+        expectedSolution);
+
     try {
       apiClient.deactivateInstance(MOCK_SESSION, MOCK_CONFIGURATION_ID, null);
       fail();
     } catch (RemoteApiException e) {
       assertEquals(400, e.getCode());
 
-      String message = "Missing the required parameter 'instanceId' when calling deactivateInstance";
-      assertEquals(ExceptionMessageFormatter.format("Commons", message), e.getMessage());
+      assertEquals(ExceptionMessageFormatter.format("Commons", expectedMessage, expectedSolution), e.getMessage());
     }
   }
 
