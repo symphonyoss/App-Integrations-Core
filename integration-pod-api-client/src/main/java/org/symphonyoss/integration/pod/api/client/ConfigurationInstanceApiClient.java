@@ -53,8 +53,8 @@ import java.util.Map;
  */
 public class ConfigurationInstanceApiClient extends BasePodApiClient {
 
-  public static final String CREATE_INSTANCE = "createInstance";
-  public static final String UPDATE_INSTANCE = "updateInstance";
+  private static final String CREATE_INSTANCE = "createInstance";
+  private static final String UPDATE_INSTANCE = "updateInstance";
   private HttpApiClient apiClient;
 
   public ConfigurationInstanceApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

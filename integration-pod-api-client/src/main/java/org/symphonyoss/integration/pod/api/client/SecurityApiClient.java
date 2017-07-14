@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class SecurityApiClient extends BasePodApiClient {
 
-  public static final String CREATE_COMPANY_CERT = "createCompanyCert";
+  private static final String CREATE_COMPANY_CERT = "createCompanyCert";
   private HttpApiClient apiClient;
 
   public SecurityApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

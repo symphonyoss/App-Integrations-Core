@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class StreamApiClient extends BasePodApiClient {
 
-  public static final String CREATE_IM = "createIM";
+  private static final String CREATE_IM = "createIM";
   private HttpApiClient apiClient;
 
   public StreamApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

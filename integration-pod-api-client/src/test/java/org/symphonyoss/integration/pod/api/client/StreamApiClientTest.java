@@ -22,9 +22,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
     .SESSION_TOKEN_HEADER_PARAM;
-
-
-import static org.symphonyoss.integration.pod.api.client.StreamApiClient.CREATE_IM;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -64,6 +61,7 @@ public class StreamApiClientTest {
   private static final String MOCK_STREAM_ID = "Bm42DA4wtrPT2IeX5g6J4n///qrJ+Ev3dA==";
 
   private static final Long MOCK_USER_ID = 123456L;
+  private static final String CREATE_IM = "createIM";
 
   @Mock
   private HttpApiClient httpClient;

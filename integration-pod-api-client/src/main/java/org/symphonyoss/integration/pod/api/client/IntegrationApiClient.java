@@ -44,13 +44,13 @@ import java.util.Map;
  */
 public class IntegrationApiClient extends BasePodApiClient {
 
-  public static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
-  public static final String INTEGRATION_TYPE = "integrationType";
-  public static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
-  public static final String CREATE_INTEGRATION = "createIntegration";
-  public static final String UPDATE_INTEGRATION = "updateIntegration";
-  public static final String ACTIVATE_INTEGRATION = "activateIntegration";
-  public static final String DEACTIVATE_INTEGRATION = "deactivateIntegration";
+  private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
+  private static final String INTEGRATION_TYPE = "integrationType";
+  private static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
+  private static final String CREATE_INTEGRATION = "createIntegration";
+  private static final String UPDATE_INTEGRATION = "updateIntegration";
+  private static final String ACTIVATE_INTEGRATION = "activateIntegration";
+  private static final String DEACTIVATE_INTEGRATION = "deactivateIntegration";
   private HttpApiClient apiClient;
 
   public IntegrationApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

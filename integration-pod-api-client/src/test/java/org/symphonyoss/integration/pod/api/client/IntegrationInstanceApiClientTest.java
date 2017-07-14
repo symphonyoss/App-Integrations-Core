@@ -24,12 +24,10 @@ import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstance
     .CONFIGURATION_ID;
 import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
     .GET_INSTANCE_BY_ID;
-import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient.INSTANCE;
 import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
     .INSTANCE_ID;
 import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
     .SESSION_TOKEN_HEADER_PARAM;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient.INTEGRATION_TYPE;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -348,7 +346,7 @@ public class IntegrationInstanceApiClientTest {
             LIST_INSTANCES);
     String expectedSolution =
         String.format("Please check if the required field '%s' is not empty",
-            INTEGRATION_TYPE);
+            INTEGRATION_ID);
 
     //Set up logMessage
     when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,
@@ -423,7 +421,7 @@ public class IntegrationInstanceApiClientTest {
             GET_INSTANCE_BY_ID);
     String expectedSolution =
         String.format("Please check if the required field '%s' is not empty",
-            INTEGRATION_TYPE);
+            INTEGRATION_ID);
 
     //Set up logMessage
     when(logMessage.getMessage(BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING,

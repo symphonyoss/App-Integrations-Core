@@ -44,16 +44,16 @@ import java.util.Map;
  */
 public class UserApiClient extends BasePodApiClient {
 
-  public static final String EMAIL = "email";
-  public static final String GET_USER_BY_EMAIL = "getUserByEmail";
-  public static final String USERNAME = "username";
-  public static final String GET_USER_BY_USERNAME = "getUserByUsername";
-  public static final String USER_ID = "userId";
-  public static final String GET_USER_BY_ID = "getUserById";
-  public static final String CREATE_USER = "createUser";
-  public static final String UPDATE_USER = "updateUser";
-  public static final String UPDATE_USER_AVATAR = "updateUserAvatar";
-  public static final String UID = "uid";
+  private static final String EMAIL = "email";
+  private static final String GET_USER_BY_EMAIL = "getUserByEmail";
+  private static final String USERNAME = "username";
+  private static final String GET_USER_BY_USERNAME = "getUserByUsername";
+  private static final String USER_ID = "userId";
+  private static final String GET_USER_BY_ID = "getUserById";
+  private static final String CREATE_USER = "createUser";
+  private static final String UPDATE_USER = "updateUser";
+  private static final String UPDATE_USER_AVATAR = "updateUserAvatar";
+  private static final String UID = "uid";
   private HttpApiClient apiClient;
 
   public UserApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

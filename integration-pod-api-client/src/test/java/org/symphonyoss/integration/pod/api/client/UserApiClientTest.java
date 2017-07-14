@@ -23,16 +23,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
-
-
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.CREATE_USER;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.EMAIL;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.GET_USER_BY_EMAIL;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.GET_USER_BY_ID;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.GET_USER_BY_USERNAME;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.USERNAME;
-import static org.symphonyoss.integration.pod.api.client.UserApiClient.USER_ID;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -84,6 +76,13 @@ public class UserApiClientTest {
   public static final String UID = "uid";
   public static final String UPDATE_USER = "updateUser";
   public static final String UPDATE_USER_AVATAR = "updateUserAvatar";
+  private static final String EMAIL = "email";
+  private static final String GET_USER_BY_EMAIL = "getUserByEmail";
+  private static final String USERNAME = "username";
+  private static final String GET_USER_BY_USERNAME = "getUserByUsername";
+  private static final String USER_ID = "userId";
+  private static final String GET_USER_BY_ID = "getUserById";
+  private static final String CREATE_USER = "createUser";
 
   @Mock
   private HttpApiClient httpClient;

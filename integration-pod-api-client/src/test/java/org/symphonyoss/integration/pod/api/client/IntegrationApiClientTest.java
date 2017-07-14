@@ -17,7 +17,6 @@
 package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -26,12 +25,6 @@ import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstance
     .INTEGRATION_ID;
 import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
     .SESSION_TOKEN_HEADER_PARAM;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient.CREATE_INTEGRATION;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient.GET_INTEGRATION_BY_ID;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient
-    .GET_INTEGRATION_BY_TYPE;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient.INTEGRATION_TYPE;
-import static org.symphonyoss.integration.pod.api.client.IntegrationApiClient.UPDATE_INTEGRATION;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -72,6 +65,11 @@ public class IntegrationApiClientTest {
   private static final String MOCK_CONFIGURATION_ID = "57d6f328e4b0396198ce723d";
 
   private static final String MOCK_TYPE = "jiraWebHookIntegration";
+  private static final String CREATE_INTEGRATION = "createIntegration";
+  private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
+  private static final String INTEGRATION_TYPE = "integrationType";
+  private static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
+  private static final String UPDATE_INTEGRATION = "updateIntegration";
 
   @Mock
   private HttpApiClient httpClient;

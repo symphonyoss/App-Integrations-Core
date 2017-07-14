@@ -26,10 +26,6 @@ import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstance
     .GET_INSTANCE_BY_ID;
 import static org.symphonyoss.integration.pod.api.client.BaseIntegrationInstanceApiClient
     .INSTANCE_ID;
-import static org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient
-    .CREATE_INSTANCE;
-import static org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient
-    .UPDATE_INSTANCE;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.ID_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -76,6 +72,8 @@ public class ConfigurationInstanceApiClientTest {
   private static final String MOCK_INSTANCE_ID = "57e2f006e4b0176038a81b18";
 
   private static final String SESSION_TOKEN_HEADER_PARAM = "sessionToken";
+  private static final String CREATE_INSTANCE = "createInstance";
+  private static final String UPDATE_INSTANCE = "updateInstance";
 
   @Mock
   private HttpApiClient httpClient;

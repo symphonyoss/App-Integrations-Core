@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
+import javax.ws.rs.core.Response;
+
 /**
  * Base API client for the POD API.
  * Created by rsanchez on 22/02/17.
@@ -37,7 +39,7 @@ public abstract class BasePodApiClient {
 
   public static final String LIMIT_QUERY_PARAM = "limit";
 
-  public static final Integer HTTP_BAD_REQUEST_ERROR = 400;
+  public static final Integer HTTP_BAD_REQUEST_ERROR =  Response.Status.BAD_REQUEST.getStatusCode();
 
   @Autowired
   public LogMessageSource logMessage;

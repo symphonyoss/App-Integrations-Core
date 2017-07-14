@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class AppEntitlementApiClient extends BasePodApiClient {
 
-  public static final String ENTILTEMENT = "entiltement";
+  private static final String ENTILTEMENT = "entiltement";
   private HttpApiClient apiClient;
 
   public AppEntitlementApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {

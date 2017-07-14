@@ -44,12 +44,12 @@ import java.util.Map;
  */
 public class ConfigurationApiClient extends BasePodApiClient {
 
-  public static final String INTEGRATION = "integration";
-  public static final String CREATE_INTEGRATION = "createIntegration";
-  public static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
-  public static final String INTEGRATION_TYPE = "integrationType";
-  public static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
-  public static final String UPDATE_INTEGRATION = "updateIntegration";
+  private static final String INTEGRATION = "integration";
+  private static final String CREATE_INTEGRATION = "createIntegration";
+  private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
+  private static final String INTEGRATION_TYPE = "integrationType";
+  private static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
+  private static final String UPDATE_INTEGRATION = "updateIntegration";
   private HttpApiClient apiClient;
 
   @Autowired

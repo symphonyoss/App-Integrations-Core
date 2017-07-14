@@ -64,13 +64,13 @@ public class ConfigurationApiClientTest {
   private static final String MOCK_CONFIGURATION_ID = "57d6f328e4b0396198ce723d";
 
   private static final String MOCK_TYPE = "jiraWebHookIntegration";
-  public static final String INTEGRATION_ID = "integrationId";
-  public static final String UPDATE_INTEGRATION = "updateIntegration";
-  public static final String INTEGRATION_TYPE = "integrationType";
-  public static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
-  public static final String INTEGRATION = "integration";
-  public static final String CREATE_INTEGRATION = "createIntegration";
-  public static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
+  private static final String INTEGRATION_ID = "integrationId";
+  private static final String UPDATE_INTEGRATION = "updateIntegration";
+  private static final String INTEGRATION_TYPE = "integrationType";
+  private static final String GET_INTEGRATION_BY_TYPE = "getIntegrationByType";
+  private static final String INTEGRATION = "integration";
+  private static final String CREATE_INTEGRATION = "createIntegration";
+  private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
 
   @Mock
   private HttpApiClient httpClient;

@@ -20,10 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
-
-
-import static org.symphonyoss.integration.pod.api.client.SecurityApiClient.CREATE_COMPANY_CERT;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.INSTANCE_EMPTY;
 import static org.symphonyoss.integration.pod.api.properties
@@ -67,6 +65,7 @@ public class SecurityApiClientTest {
       + "-----END CERTIFICATE-----\\n";
 
   private static final String MOCK_APP_NAME = "TEST APP";
+  private static final String CREATE_COMPANY_CERT = "createCompanyCert";
 
   @Mock
   private HttpApiClient httpClient;
