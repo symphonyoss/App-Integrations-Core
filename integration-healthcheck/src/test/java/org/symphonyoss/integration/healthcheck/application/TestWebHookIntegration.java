@@ -20,6 +20,7 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.test.context.TestComponent;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.model.yaml.AppAuthenticationModel;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
@@ -62,6 +63,11 @@ public class TestWebHookIntegration implements Integration {
 
   @Override
   public Set<String> getIntegrationWhiteList() {
+    return null;
+  }
+
+  @Override
+  public AppAuthenticationModel getAuthenticationModel() {
     return null;
   }
 
