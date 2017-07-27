@@ -16,8 +16,6 @@
 
 package org.symphonyoss.integration.authentication.exception;
 
-import org.symphonyoss.integration.exception.authentication.AuthenticationException;
-
 /**
  * Calling authorization API's without registering the user.
  *

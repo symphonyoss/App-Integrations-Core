@@ -45,14 +45,14 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
 import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
+import org.symphonyoss.integration.authentication.exception.AuthenticationException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.AuthenticationException;
-import org.symphonyoss.integration.exception.authentication.ConnectivityException;
-import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
-import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.authentication.exception.ConnectivityException;
+import org.symphonyoss.integration.authentication.exception.ForbiddenAuthException;
+import org.symphonyoss.integration.authentication.exception.UnauthorizedUserException;
+import org.symphonyoss.integration.authentication.exception.UnexpectedAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -209,23 +209,21 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   }
 
   /**
-   * If the provided exception is of type unauthorized, then authenticate again, else rethrow the
-   * same exception
-   * @param userId
-   * @param remoteApiException
-   * @throws RemoteApiException the original exception
+   * If the provided exception is of type unauthorized, then authenticate again, else return false
+   * @param userId User identifier
+   * @param code error code
    */
-  @Override
-  public synchronized void reAuthOrThrow(String userId, RemoteApiException remoteApiException)
-      throws RemoteApiException {
-    if (validateResponseCode(Status.UNAUTHORIZED, remoteApiException.getCode())) {
+  private boolean reAuthenticate(String userId, int code) {
+    if (validateResponseCode(Status.UNAUTHORIZED, code)) {
       if (shouldInvalidateSession(userId)) {
         invalidate(userId);
         authenticate(userId);
       }
-    } else {
-      throw remoteApiException;
+
+      return true;
     }
+
+    return false;
   }
 
   private void checkAndThrowException(RemoteApiException e, String userId) throws AuthenticationException {
@@ -244,11 +242,15 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   }
 
   @Override
-  public synchronized AuthenticationToken reAuthSessionOrThrow(String sessionToken, RemoteApiException remoteApiException)
-      throws RemoteApiException {
+  public synchronized AuthenticationToken reAuthSession(String sessionToken, int code) {
     AuthenticationContext authContext = contextForSessionToken(sessionToken);
-    reAuthOrThrow(authContext.getUserId(), remoteApiException);
-    return authContext.getToken();
+    boolean authenticated = reAuthenticate(authContext.getUserId(), code);
+
+    if (authenticated) {
+      return authContext.getToken();
+    }
+
+    return null;
   }
 
   /**
@@ -267,8 +269,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * @param code response code
    * @return
    */
-  @Override
-  public boolean sessionNoLongerEntitled(int code) {
+  private boolean sessionNoLongerEntitled(int code) {
     return validateResponseCode(Status.FORBIDDEN, code);
   }
 
@@ -278,8 +279,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * @param code response code
    * @return
    */
-  @Override
-  public boolean sessionUnauthorized(int code) {
+  private boolean sessionUnauthorized(int code) {
     return validateResponseCode(Status.UNAUTHORIZED, code);
   }
 
