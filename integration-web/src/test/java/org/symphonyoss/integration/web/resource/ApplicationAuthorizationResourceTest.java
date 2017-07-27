@@ -1,0 +1,183 @@
+/**
+ * Copyright 2016-2017 Symphony Integrations - Symphony LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.symphonyoss.integration.web.resource;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.symphonyoss.integration.Integration;
+import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
+import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
+import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.web.model.ErrorResponse;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Unit tests for {@link ApplicationAuthorizationResource}
+ *
+ * Created by rsanchez on 26/07/17.
+ */
+@RunWith(MockitoJUnitRunner.class)
+public class ApplicationAuthorizationResourceTest {
+
+  private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
+
+  private static final String CONFIGURATION_ID = "57756bca4b54433738037005";
+
+  private static final String INTEGRATION_URL = "test.symphony.com";
+
+  private static final String INTEGRATION_TYPE = "mockType";
+
+  private static final String USER_ID = "userId";
+  private static final String URL = "url";
+
+  @Mock
+  private Integration integration;
+
+  @Mock
+  private IntegrationBridge integrationBridge;
+
+  @Mock
+  private JwtAuthentication jwtAuthentication;
+
+  @Mock
+  private LogMessageSource logMessage;
+
+  @Mock
+  private AuthenticationProxy authenticationProxy;
+
+  @Mock
+  private PodHttpApiClient client;
+
+  @InjectMocks
+  private ApplicationAuthorizationResource applicationAuthorizationResource;
+
+  @Before
+  public void init() {
+    IntegrationSettings settings = new IntegrationSettings();
+    settings.setType(INTEGRATION_TYPE);
+
+    doReturn(settings).when(integration).getSettings();
+  }
+
+  @Test
+  public void testGetAuthorizationModelIntegrationNotFound() {
+    ResponseEntity<AppAuthorizationModel> authProperties =
+        applicationAuthorizationResource.getAuthorizationProperties(CONFIGURATION_ID);
+
+    assertEquals(ResponseEntity.notFound().build(), authProperties);
+  }
+
+  @Test
+  public void testNoContent() {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+
+    ResponseEntity<AppAuthorizationModel> authProperties =
+        applicationAuthorizationResource.getAuthorizationProperties(CONFIGURATION_ID);
+
+    assertEquals(ResponseEntity.noContent().build(), authProperties);
+  }
+
+  @Test
+  public void testAuthorizationModel() {
+    AppAuthorizationModel model = mockAppAuthorizationModel();
+
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(model).when(integration).getAuthorizationModel();
+
+    ResponseEntity<AppAuthorizationModel> authProperties =
+        applicationAuthorizationResource.getAuthorizationProperties(CONFIGURATION_ID);
+
+    assertEquals(ResponseEntity.ok().body(model), authProperties);
+  }
+
+  private AppAuthorizationModel mockAppAuthorizationModel() {
+    AppAuthorizationModel appAuthorizationModel = new AppAuthorizationModel();
+    appAuthorizationModel.setApplicationName("Symphony Integration");
+    appAuthorizationModel.setApplicationURL("https://test.symphony.com:8080/integration");
+
+    return appAuthorizationModel;
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testGetAuthorizationUserSessionIntegrationNotFound() throws RemoteApiException {
+    applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
+  }
+
+  @Test
+  public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    UserAuthorizationData authorizationData = new UserAuthorizationData();
+
+    String path = "/v1/configuration" + CONFIGURATION_ID + "/auth/user";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
+
+    Map<String, String> queryParams = new HashMap<>();
+    queryParams.put(USER_ID, "0");
+    queryParams.put(URL, INTEGRATION_URL);
+
+    doReturn(CONFIGURATION_ID).when(client).escapeString(CONFIGURATION_ID);
+    doReturn(authorizationData).when(client).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+
+    UnauthorizedUserException exception = new UnauthorizedUserException("Access token expired");
+    doThrow(exception).when(integration).verifyUserAuthorizationData(authorizationData);
+
+    ErrorResponse response = new ErrorResponse();
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setMessage(exception.getMessage());
+
+    assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response),
+        applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
+            null));
+  }
+
+  @Test
+  public void testGetAuthorizationUser() throws RemoteApiException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    UserAuthorizationData authorizationData = new UserAuthorizationData(0L, INTEGRATION_URL);
+
+    assertEquals(ResponseEntity.ok().body(authorizationData),
+        applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
+            null));
+  }
+}
