@@ -42,7 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.ConnectivityException;
+import org.symphonyoss.integration.authentication.exception.ConnectivityException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;

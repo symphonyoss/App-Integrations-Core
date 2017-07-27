@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.exception.authentication.AuthenticationException;
+import org.symphonyoss.integration.authentication.exception.AuthenticationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.provisioning.exception.IntegrationProvisioningAuthException;
 
