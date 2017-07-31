@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
-import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
@@ -63,7 +62,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
 
 /**
  * Base class to support HTTP handlers.
@@ -233,36 +231,6 @@ public abstract class WebHookResource {
   public ResponseEntity<String> handleNotFound(Exception ex) {
     LOGGER.info(ex.getMessage());
     return ResponseEntity.notFound().build();
-  }
-
-  /**
-   * Handle {@link RemoteApiException} exception.
-   * When an error occurs in the API call, whether this error is on account of the client or the API,
-   * a RemoteApiException with an HTTP code and a message description is returned.
-   * Business Rule: When receive HTTP 403 - FORBIDDEN then return HTTP 404 - NOT FOUND
-   * @param ex RemoteApiException object
-   * @return HTTP Status code and message description about error
-   */
-  @ResponseBody
-  @ExceptionHandler({RemoteApiException.class})
-  public ResponseEntity<String> handleRemoteAPIException(RemoteApiException ex) {
-    String message = ex.getMessage();
-
-    LOGGER.error(message, ex);
-    return ResponseEntity.status(ex.getCode()).body(message);
-  }
-
-  /**
-   * Handle {@link IntegrationUnavailableException} exception.
-   * @param ex Exception object
-   * @return HTTP 503 (Service Unavailable)
-   */
-  @ResponseBody
-  @ExceptionHandler(IntegrationUnavailableException.class)
-  public ResponseEntity<String> handleUnavailableException(IntegrationUnavailableException ex) {
-    String message = ex.getMessage();
-    LOGGER.error(message);
-    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
   }
 
   /**

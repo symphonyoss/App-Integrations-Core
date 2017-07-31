@@ -248,16 +248,6 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   }
 
   /**
-   * Test an HTTP Internal Server caused by {@link IntegrationUnavailableException}
-   */
-  @Test
-  public void testInternalServerErrorUnavailableException() {
-    IntegrationUnavailableException ex = new IntegrationUnavailableException("test");
-    Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
-        webHookDispatcherResource.handleUnavailableException(ex).getStatusCode());
-  }
-
-  /**
    * Test an HTTP Internal Server caused by {@link RuntimeException}
    */
   @Test
@@ -370,36 +360,4 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
   }
 
-  /**
-   * Test an HTTP Internal Server Error caused by {@link RemoteApiException}
-   */
-  @Test
-  public void testInternalServerErrorWithRemoteApiException() {
-    RemoteApiException ex =
-        new RemoteApiException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "test");
-    Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
-  }
-
-  /**
-   * Test an HTTP Bad Request caused by {@link RemoteApiException}
-   */
-  @Test
-  public void testBadRequestWithRemoteApiException() {
-    RemoteApiException ex =
-        new RemoteApiException(Response.Status.BAD_REQUEST.getStatusCode(), "test");
-    Assert.assertEquals(HttpStatus.BAD_REQUEST,
-        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
-  }
-
-  /**
-   * Test an HTTP Not Found caused by {@link RemoteApiException}
-   */
-  @Test
-  public void testNotFoundWithRemoteApiExceptionThenReturnNotFound() {
-    RemoteApiException ex =
-        new RemoteApiException(Response.Status.NOT_FOUND.getStatusCode(), "test");
-    Assert.assertEquals(HttpStatus.NOT_FOUND,
-        webHookDispatcherResource.handleRemoteAPIException(ex).getStatusCode());
-  }
 }
