@@ -32,6 +32,8 @@ import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authorization.AuthorizationException;
+import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
@@ -66,7 +68,7 @@ public class ApplicationAuthorizationResourceTest {
   private static final String URL = "url";
 
   @Mock
-  private Integration integration;
+  private AuthorizedIntegration integration;
 
   @Mock
   private IntegrationBridge integrationBridge;
@@ -94,7 +96,7 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(settings).when(integration).getSettings();
   }
 
-  @Test
+  @Test(expected = IntegrationUnavailableException.class)
   public void testGetAuthorizationModelIntegrationNotFound() {
     ResponseEntity<AppAuthorizationModel> authProperties =
         applicationAuthorizationResource.getAuthorizationProperties(CONFIGURATION_ID);
@@ -138,8 +140,9 @@ public class ApplicationAuthorizationResourceTest {
     applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
   }
 
-  @Test
-  public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException {
+  @Test(expected = UnauthorizedUserException.class)
+  public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException,
+      AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
 
@@ -158,7 +161,7 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(authorizationData).when(client).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
 
     UnauthorizedUserException exception = new UnauthorizedUserException("Access token expired");
-    doThrow(exception).when(integration).verifyUserAuthorizationData(authorizationData);
+    doThrow(exception).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
 
     ErrorResponse response = new ErrorResponse();
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -170,11 +173,12 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test
-  public void testGetAuthorizationUser() throws RemoteApiException {
+  public void testGetAuthorizationUser() throws RemoteApiException, AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+    doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
 
-    UserAuthorizationData authorizationData = new UserAuthorizationData(0L, INTEGRATION_URL);
+    UserAuthorizationData authorizationData = new UserAuthorizationData(INTEGRATION_URL, 0L);
 
     assertEquals(ResponseEntity.ok().body(authorizationData),
         applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,

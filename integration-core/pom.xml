@@ -26,6 +26,12 @@
 
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
+            <artifactId>integration-authorization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
