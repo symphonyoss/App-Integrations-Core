@@ -1,10 +1,9 @@
 package org.symphonyoss.integration.core.authorization;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authorization.AuthorizationException;
-import org.symphonyoss.integration.authorization.AuthorizationService;
+import org.symphonyoss.integration.authorization.AuthorizationRepositoryService;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -15,10 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Implementation of a API based repository for authorization data.
  * Created by campidelli on 8/1/17.
  */
 @Component
-public class AuthorizationServiceImpl implements AuthorizationService {
+public class AuthorizationRepositoryServiceImpl implements AuthorizationRepositoryService {
 
   private final LogMessageSource logMessage;
 
@@ -26,7 +26,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private final IntegrationAuthApiClient apiClient;
 
-  public AuthorizationServiceImpl(PodHttpApiClient podHttpApiClient,
+  public AuthorizationRepositoryServiceImpl(PodHttpApiClient podHttpApiClient,
       AuthenticationProxy authenticationProxy, LogMessageSource logMessage) {
     this.logMessage = logMessage;
     this.authenticationProxy = authenticationProxy;

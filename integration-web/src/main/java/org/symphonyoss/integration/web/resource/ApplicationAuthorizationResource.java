@@ -150,8 +150,8 @@ public class ApplicationAuthorizationResource {
    * @return 200 when there is a callback configuration for the informed integration or
    * 404 otherwise.
    */
-  @RequestMapping(value = "/callback")
-  public ResponseEntity getAuthorizationProperties(@PathVariable String configurationId,
+  @RequestMapping(value = "/authorize")
+  public ResponseEntity authorize(@PathVariable String configurationId,
       HttpServletRequest request, @RequestBody String body) throws RemoteApiException {
 
     Integration integration = this.integrationBridge.getIntegrationById(configurationId);
