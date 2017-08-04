@@ -111,7 +111,6 @@ public class ApplicationAuthorizationResource {
       @RequestParam(name = "url") String integrationURL,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
       throws RemoteApiException {
-
     Integration integration = this.integrationBridge.getIntegrationById(configurationId);
     if (integration == null || !(integration instanceof AuthorizedIntegration)) {
       String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
@@ -151,9 +150,8 @@ public class ApplicationAuthorizationResource {
    * 404 otherwise.
    */
   @RequestMapping(value = "/authorize")
-  public ResponseEntity authorize(@PathVariable String configurationId,
-      HttpServletRequest request, @RequestBody String body) throws RemoteApiException {
-
+  public ResponseEntity authorize(@PathVariable String configurationId, HttpServletRequest request,
+      @RequestBody(required = false) String body) throws RemoteApiException {
     Integration integration = this.integrationBridge.getIntegrationById(configurationId);
     if (integration == null || !(integration instanceof AuthorizedIntegration)) {
       String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
@@ -170,6 +168,7 @@ public class ApplicationAuthorizationResource {
           HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
     return ResponseEntity.ok().build();
   }
 
