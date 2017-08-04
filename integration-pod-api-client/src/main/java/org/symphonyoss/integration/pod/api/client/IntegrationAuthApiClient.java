@@ -29,7 +29,9 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,17 +80,13 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
     checkParam(integrationId, INTEGRATION_ID);
     checkParam(userData, USER_DATA);
 
-    String path = "/v1/configuration" + apiClient.escapeString(integrationId) + "/auth/user";
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/auth/user";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put(USER_ID, String.valueOf(userData.getUserId()));
-    queryParams.put(URL, userData.getUrl());
-
     try {
-      apiClient.doPost(path, headerParams, queryParams, userData, UserAuthorizationData.class);
+      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), userData, UserAuthorizationData.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
@@ -126,7 +124,7 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
     checkParam(userId, USER_ID);
     checkParam(url, URL);
 
-    String path = "/v1/configuration" + apiClient.escapeString(integrationId) + "/auth/user";
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/auth/user";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
@@ -150,10 +148,6 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
         throw new ForbiddenAuthException(message, solution);
       }
 
-      if (e.getCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-        return null;
-      }
-
       throw e;
     }
   }
@@ -174,13 +168,13 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
     checkAuthToken(sessionToken);
     checkParam(integrationId, INTEGRATION_ID);
 
-    String path = "/v1/configuration" + apiClient.escapeString(integrationId) + "/auth/user/search";
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/auth/user/search";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
     try {
-      return apiClient.doGet(path, headerParams, filter, List.class);
+      return apiClient.doGet(path, headerParams, filter, UserAuthorizationDataList.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
@@ -192,10 +186,6 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
         String message = logMessage.getMessage(FORBIDDEN_MESSAGE);
         String solution = logMessage.getMessage(FORBIDDEN_MESSAGE_SOLUTION);
         throw new ForbiddenAuthException(message, solution);
-      }
-
-      if (e.getCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-        return null;
       }
 
       throw e;
