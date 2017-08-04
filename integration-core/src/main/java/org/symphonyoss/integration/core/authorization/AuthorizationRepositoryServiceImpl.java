@@ -8,7 +8,7 @@ import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
-import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
 
 import java.util.List;
 import java.util.Map;
@@ -26,17 +26,18 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
 
   private final IntegrationAuthApiClient apiClient;
 
-  public AuthorizationRepositoryServiceImpl(PodHttpApiClient podHttpApiClient,
+  public AuthorizationRepositoryServiceImpl(IntegrationHttpApiClient integrationHttpApiClient,
       AuthenticationProxy authenticationProxy, LogMessageSource logMessage) {
     this.logMessage = logMessage;
     this.authenticationProxy = authenticationProxy;
-    this.apiClient = new IntegrationAuthApiClient(podHttpApiClient, logMessage);
+    this.apiClient = new IntegrationAuthApiClient(integrationHttpApiClient, logMessage);
   }
 
   @Override
-  public void save(String configurationId, UserAuthorizationData data) throws
-      AuthorizationException {
-    String sessionToken = authenticationProxy.getSessionToken(configurationId);
+  public void save(String integrationUser, String configurationId, UserAuthorizationData data)
+      throws AuthorizationException {
+    String sessionToken = authenticationProxy.getSessionToken(integrationUser);
+
     try {
       apiClient.saveUserAuthData(sessionToken, configurationId, data);
     } catch (RemoteApiException e) {
@@ -45,9 +46,10 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
   }
 
   @Override
-  public UserAuthorizationData find(String configurationId, String url, Long userId)
-      throws AuthorizationException {
-    String sessionToken = authenticationProxy.getSessionToken(configurationId);
+  public UserAuthorizationData find(String integrationUser, String configurationId, String url,
+      Long userId) throws AuthorizationException {
+    String sessionToken = authenticationProxy.getSessionToken(integrationUser);
+
     try {
       return apiClient.getUserAuthData(sessionToken, configurationId, userId, url);
     } catch (RemoteApiException e) {
@@ -56,9 +58,10 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
   }
 
   @Override
-  public List<UserAuthorizationData> search(String configurationId, Map<String, String> filter)
-      throws AuthorizationException {
-    String sessionToken = authenticationProxy.getSessionToken(configurationId);
+  public List<UserAuthorizationData> search(String integrationUser, String configurationId,
+      Map<String, String> filter) throws AuthorizationException {
+    String sessionToken = authenticationProxy.getSessionToken(integrationUser);
+
     try {
       return apiClient.searchUserAuthData(sessionToken, configurationId, filter);
     } catch (RemoteApiException e) {
