@@ -27,8 +27,8 @@ script:
 - "if [[ \"$TRAVIS_PULL_REQUEST\" = \"false\" && $TRAVIS_BRANCH =~ dev ]]; then mvn clean deploy -Pversioneye -DtransitiveDependencies=true --settings settings.xml -Dbuild.provisioning=false; fi"
 - "if [[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]]; then mvn clean install -Pcobertura; fi"
 
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+#after_success:
+#- bash <(curl -s https://codecov.io/bash)
 
 jdk:
   - oraclejdk8
