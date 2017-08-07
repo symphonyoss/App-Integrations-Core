@@ -54,9 +54,12 @@ import org.symphonyoss.integration.webhook.exception.WebHookParseException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -78,6 +81,9 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
   @Mock
   private LogMessageSource logMessage;
+
+  @Mock
+  private HttpServletRequest httpRequest;
 
   @InjectMocks
   private WebHookDispatcherResource webHookDispatcherResource = new WebHookDispatcherResource();
@@ -360,4 +366,23 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     Assert.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
   }
 
+  @Test
+  public void testHandleMultiPartFormDataRequestUnsupportedMediaType() throws Exception {
+    mockConfiguration(true);
+    mockStatus(IntegrationStatus.ACTIVE);
+    mockRequest();
+
+    Enumeration parameters = new StringTokenizer("param1\tparam2");
+    doReturn(parameters).when(httpRequest).getParameterNames();
+    doReturn("value").when(httpRequest).getParameter(anyString());
+
+    Enumeration headers = new StringTokenizer("param1\tparam2");
+    doReturn(headers).when(httpRequest).getHeaderNames();
+    doReturn("value").when(httpRequest).getHeader(anyString());
+
+    ResponseEntity response = webHookDispatcherResource.handleMultiPartFormDataRequest(
+        TEST_HASH, CONFIGURATION_ID, TEST_USER, null, null, httpRequest);
+
+    assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
+  }
 }

@@ -20,23 +20,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authorization.AuthorizationException;
+import org.symphonyoss.integration.authorization.AuthorizationPayload;
+import org.symphonyoss.integration.authorization.AuthorizedIntegration;
+import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
-import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
-import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.web.model.ErrorResponse;
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * REST endpoint to handle requests for manage application authentication data.
@@ -47,29 +53,25 @@ import org.symphonyoss.integration.web.model.ErrorResponse;
 @RequestMapping("/v1/application/{configurationId}/authorization")
 public class ApplicationAuthorizationResource {
 
-  public static String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
+  private static final String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
 
-  public static String INTEGRATION_UNAVAILABLE_SOLUTION = INTEGRATION_UNAVAILABLE + ".solution";
+  private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
+      INTEGRATION_UNAVAILABLE + ".solution";
+  private static final String INTEGRATION_NOT_AUTH = "integration.web.integration.not.authorized";
+  private static final String INTEGRATION_NOT_AUTH_SOLUTION =
+      INTEGRATION_NOT_AUTH + ".solution";
 
   private final IntegrationBridge integrationBridge;
 
   private final LogMessageSource logMessage;
 
-  private final AuthenticationProxy authenticationProxy;
-
-  private final IntegrationAuthApiClient apiClient;
-
   private final JwtAuthentication jwtAuthentication;
 
-  public ApplicationAuthorizationResource(IntegrationBridge integrationBridge, LogMessageSource logMessage,
-      PodHttpApiClient client, AuthenticationProxy authenticationProxy,
-      JwtAuthentication jwtAuthentication) {
+  public ApplicationAuthorizationResource(IntegrationBridge integrationBridge,
+      LogMessageSource logMessage, JwtAuthentication jwtAuthentication) {
     this.integrationBridge = integrationBridge;
     this.logMessage = logMessage;
-    this.authenticationProxy = authenticationProxy;
     this.jwtAuthentication = jwtAuthentication;
-
-    this.apiClient = new IntegrationAuthApiClient(client, logMessage);
   }
 
   /**
@@ -79,14 +81,11 @@ public class ApplicationAuthorizationResource {
    * @return Authentication properties
    */
   @GetMapping
-  public ResponseEntity<AppAuthorizationModel> getAuthorizationProperties(@PathVariable String configurationId) {
-    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
+  public ResponseEntity<AppAuthorizationModel> getAuthorizationProperties(
+      @PathVariable String configurationId) {
 
-    if (integration == null) {
-      return ResponseEntity.notFound().build();
-    }
-
-    AppAuthorizationModel authenticationModel = integration.getAuthorizationModel();
+    AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
+    AppAuthorizationModel authenticationModel = authIntegration.getAuthorizationModel();
 
     if (authenticationModel == null) {
       return ResponseEntity.noContent().build();
@@ -100,44 +99,105 @@ public class ApplicationAuthorizationResource {
    *
    * @param configurationId Application identifier
    * @param integrationURL Integration URL
-   * @return User authentication data if the user is authenticated or HTTP 401 (Unauthorized) otherwise.
+   * @return User authentication data if the user is authenticated or HTTP 401 (Unauthorized)
+   * otherwise.
    */
   @GetMapping("/userSession")
   public ResponseEntity getUserAuthorizationData(@PathVariable String configurationId,
       @RequestParam(name = "url") String integrationURL,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
       throws RemoteApiException {
+
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(authorizationHeader);
-
-    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
-
-    if (integration == null) {
-      String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
-      String solution = logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
-    }
-
-    String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
-
-    UserAuthorizationData authorizationData =
-        apiClient.getUserAuthData(sessionToken, configurationId, userId, integrationURL);
-
-    if (authorizationData == null) {
-      authorizationData = new UserAuthorizationData(userId, integrationURL);
-    }
+    UserAuthorizationData data = new UserAuthorizationData(integrationURL, userId);
 
     try {
-      integration.verifyUserAuthorizationData(authorizationData);
-
-      return ResponseEntity.ok().body(authorizationData);
-    } catch (UnauthorizedUserException e) {
-      ErrorResponse response = new ErrorResponse();
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.setMessage(e.getMessage());
-      response.setProperties(authorizationData.getData());
-
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+      AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
+      if (!authIntegration.isUserAuthorized(integrationURL, userId)) {
+        String authorizationUrl = authIntegration.getAuthorizationUrl(integrationURL, userId);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("authorizationUrl", authorizationUrl);
+        ErrorResponse response = new ErrorResponse();
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setProperties(properties);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+      }
+    } catch (AuthorizationException e) {
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
+    return ResponseEntity.ok().body(data);
   }
 
+  /**
+   * Callback for authorization by third-party applications.
+   * @param configurationId Application identifier
+   * @param request Parameters and headers from the HTTP request.
+   * @param body Request body (when it's called using HTTP POST method).
+   * @return 200 when there is a callback configuration for the informed integration or
+   * 404 otherwise.
+   */
+  @RequestMapping(value = "/authorize")
+  public ResponseEntity authorize(@PathVariable String configurationId, HttpServletRequest request,
+      @RequestBody(required = false) String body) throws RemoteApiException {
+
+    AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
+    AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
+
+    try {
+      authIntegration.authorize(authPayload);
+    } catch (AuthorizationException e) {
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Get an AuthorizedIntegration based on a configuraton ID.
+   * @param configurationId Configuration ID used to retrieve the AuthorizedIntegration.
+   * @return AuthorizedIntegration found or an IntegrationUnavailableException if it was not
+   * found or is invalid.
+   */
+  private AuthorizedIntegration getAuthorizedIntegration(@PathVariable String configurationId) {
+    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
+    if (integration == null) {
+      throw new IntegrationUnavailableException(
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
+    }
+
+    if (!(integration instanceof AuthorizedIntegration)) {
+      throw new IntegrationUnavailableException(
+          logMessage.getMessage(INTEGRATION_NOT_AUTH, configurationId),
+          logMessage.getMessage(INTEGRATION_NOT_AUTH_SOLUTION));
+    }
+    return (AuthorizedIntegration) integration;
+  }
+
+  /**
+   * Construct the payload that will be sent to {@link AuthorizedIntegration}
+   */
+  private AuthorizationPayload getAuthorizationPayload(HttpServletRequest request, String body) {
+    Map<String, String> parameters = new HashMap<>();
+    Map<String, String> headers = new HashMap<>();
+
+    Enumeration<String> paramEnum = request.getParameterNames();
+    while (paramEnum.hasMoreElements()) {
+      String paramName = paramEnum.nextElement();
+      parameters.put(paramName, request.getParameter(paramName));
+    }
+
+    Enumeration<String> headerEnum = request.getHeaderNames();
+    while (headerEnum.hasMoreElements()) {
+      String headerName = headerEnum.nextElement();
+      headers.put(headerName, request.getHeader(headerName));
+    }
+
+    return new AuthorizationPayload(parameters, headers, body);
+  }
 }

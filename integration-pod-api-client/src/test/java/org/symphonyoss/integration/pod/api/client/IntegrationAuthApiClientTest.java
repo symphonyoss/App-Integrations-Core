@@ -2,9 +2,14 @@ package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +22,11 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +38,7 @@ import java.util.Map;
 public class IntegrationAuthApiClientTest {
 
   private static final String USER_ID = "userId";
+
   private static final String URL = "url";
 
   private static final String MOCK_SESSION = "37ee62570a52804c1fb388a49f30df59fa1513b0368871a031c6de1036db";
@@ -77,7 +86,7 @@ public class IntegrationAuthApiClientTest {
   @Test(expected = UnauthorizedUserException.class)
   public void testGetUserAuthDataUnauthorized() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(401, "unauthorized");
-    mockRemoteException(apiException);
+    mockRemoteExceptionToFind(apiException);
 
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
   }
@@ -85,7 +94,7 @@ public class IntegrationAuthApiClientTest {
   @Test(expected = ForbiddenAuthException.class)
   public void testGetUserAuthDataForbidden() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(403, "forbidden");
-    mockRemoteException(apiException);
+    mockRemoteExceptionToFind(apiException);
 
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
   }
@@ -93,46 +102,94 @@ public class IntegrationAuthApiClientTest {
   @Test(expected = RemoteApiException.class)
   public void testGetUserAuthDataRemoteException() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(500, "internal server error");
-    mockRemoteException(apiException);
+    mockRemoteExceptionToFind(apiException);
 
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
   }
 
   @Test
-  public void testGetUserAuthDataNotFound() throws RemoteApiException {
+  public void testGetUserAuthDataNotFound() {
     RemoteApiException apiException = new RemoteApiException(404, "not found");
-    mockRemoteException(apiException);
-
-    assertNull(apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL));
+    try {
+      mockRemoteExceptionToFind(apiException);
+      apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
+    } catch (RemoteApiException e) {
+      assertEquals(apiException, e);
+    }
   }
 
   @Test
   public void testGetUserAuthData() throws RemoteApiException {
     String path = "/v1/configuration" + MOCK_INTEGRATION_ID + "/auth/user";
 
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
-
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put(USER_ID, String.valueOf(MOCK_USER_ID));
-    queryParams.put(URL, MOCK_URL);
-
     UserAuthorizationData data = new UserAuthorizationData();
-    doReturn(data).when(httpClient).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+    doReturn(data).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationData.class));
 
     assertEquals(data, apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL));
   }
 
-  private void mockRemoteException(RemoteApiException apiException) throws RemoteApiException {
-    String path = "/v1/configuration" + MOCK_INTEGRATION_ID + "/auth/user";
+  @Test(expected = UnauthorizedUserException.class)
+  public void testSaveUserAuthDataUnauthorized() throws RemoteApiException {
+    RemoteApiException apiException = new RemoteApiException(401, "unauthorized");
+    mockRemoteExceptionToSave(apiException);
 
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
+    UserAuthorizationData data = new UserAuthorizationData();
+    apiClient.saveUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, data);
+  }
 
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put(USER_ID, String.valueOf(MOCK_USER_ID));
-    queryParams.put(URL, MOCK_URL);
+  @Test(expected = ForbiddenAuthException.class)
+  public void testSaveUserAuthDataForbidden() throws RemoteApiException {
+    RemoteApiException apiException = new RemoteApiException(403, "forbidden");
+    mockRemoteExceptionToSave(apiException);
 
-    doThrow(apiException).when(httpClient).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+    UserAuthorizationData data = new UserAuthorizationData();
+    apiClient.saveUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, data);
+  }
+
+  @Test(expected = UnauthorizedUserException.class)
+  public void testSearchUserAuthDataUnauthorized() throws RemoteApiException {
+    RemoteApiException apiException = new RemoteApiException(401, "unauthorized");
+    mockRemoteExceptionToSearch(apiException);
+
+    apiClient.searchUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, null);
+  }
+
+  @Test(expected = ForbiddenAuthException.class)
+  public void testSearchUserAuthDataForbidden() throws RemoteApiException {
+    RemoteApiException apiException = new RemoteApiException(403, "forbidden");
+    mockRemoteExceptionToSearch(apiException);
+
+    apiClient.searchUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, null);
+  }
+
+  @Test
+  public void testSearchUserAuthData() throws RemoteApiException {
+    Map<String, String> filter = new HashMap<>();
+    UserAuthorizationDataList expected = new UserAuthorizationDataList();
+    expected.add(new UserAuthorizationData());
+    doReturn(expected).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationDataList.class));
+
+    List result = apiClient.searchUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, filter);
+    assertEquals(expected, result);
+  }
+
+  private void mockRemoteExceptionToFind(RemoteApiException apiException)
+      throws RemoteApiException {
+    doThrow(apiException).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationData.class));
+  }
+
+  private void mockRemoteExceptionToSearch(RemoteApiException apiException)
+      throws RemoteApiException {
+    doThrow(apiException).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationDataList.class));
+  }
+
+  private void mockRemoteExceptionToSave(RemoteApiException apiException)
+      throws RemoteApiException {
+    doThrow(apiException).when(httpClient).doPost(
+        anyString(), anyMap(), anyMap(), anyObject(), eq(UserAuthorizationData.class));
   }
 }

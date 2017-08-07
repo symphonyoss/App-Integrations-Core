@@ -17,9 +17,14 @@
 package org.symphonyoss.integration.web.resource;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +34,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authorization.AuthorizationException;
+import org.symphonyoss.integration.authorization.AuthorizationPayload;
+import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
@@ -43,8 +49,12 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.web.model.ErrorResponse;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Unit tests for {@link ApplicationAuthorizationResource}
@@ -63,10 +73,13 @@ public class ApplicationAuthorizationResourceTest {
   private static final String INTEGRATION_TYPE = "mockType";
 
   private static final String USER_ID = "userId";
+
   private static final String URL = "url";
 
+  private static final String AUTHORIZATION_URL = "authUrl";
+
   @Mock
-  private Integration integration;
+  private AuthorizedIntegration integration;
 
   @Mock
   private IntegrationBridge integrationBridge;
@@ -83,6 +96,9 @@ public class ApplicationAuthorizationResourceTest {
   @Mock
   private PodHttpApiClient client;
 
+  @Mock
+  private HttpServletRequest httpRequest;
+
   @InjectMocks
   private ApplicationAuthorizationResource applicationAuthorizationResource;
 
@@ -94,7 +110,7 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(settings).when(integration).getSettings();
   }
 
-  @Test
+  @Test(expected = IntegrationUnavailableException.class)
   public void testGetAuthorizationModelIntegrationNotFound() {
     ResponseEntity<AppAuthorizationModel> authProperties =
         applicationAuthorizationResource.getAuthorizationProperties(CONFIGURATION_ID);
@@ -139,7 +155,8 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test
-  public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException {
+  public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException,
+      AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
 
@@ -157,27 +174,95 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(CONFIGURATION_ID).when(client).escapeString(CONFIGURATION_ID);
     doReturn(authorizationData).when(client).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
 
-    UnauthorizedUserException exception = new UnauthorizedUserException("Access token expired");
-    doThrow(exception).when(integration).verifyUserAuthorizationData(authorizationData);
+    doReturn(false).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
+    doReturn(AUTHORIZATION_URL).when(integration).getAuthorizationUrl(INTEGRATION_URL, 0L);
 
-    ErrorResponse response = new ErrorResponse();
-    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-    response.setMessage(exception.getMessage());
+    ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
+        CONFIGURATION_ID, INTEGRATION_URL, null);
 
-    assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response),
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertTrue(response.getBody() instanceof ErrorResponse);
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+
+    Map<String, String> properties = (Map<String, String>) errorResponse.getProperties();
+    String authorizationUrl = properties.get("authorizationUrl");
+
+    assertEquals(AUTHORIZATION_URL, authorizationUrl);
+  }
+
+  @Test
+  public void testGetAuthorizationUser() throws RemoteApiException, AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+    doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
+
+    UserAuthorizationData authorizationData = new UserAuthorizationData(INTEGRATION_URL, 0L);
+
+    assertEquals(ResponseEntity.ok().body(authorizationData),
         applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
             null));
   }
 
   @Test
-  public void testGetAuthorizationUser() throws RemoteApiException {
+  public void testGetAuthorizationUserInternalError() throws RemoteApiException,
+      AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
 
-    UserAuthorizationData authorizationData = new UserAuthorizationData(0L, INTEGRATION_URL);
+    doThrow(AuthorizationException.class).when(integration).isUserAuthorized(
+        anyString(), anyLong());
 
-    assertEquals(ResponseEntity.ok().body(authorizationData),
-        applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
-            null));
+    ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
+        CONFIGURATION_ID, INTEGRATION_URL, null);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  @Test
+  public void testAuthorize() throws RemoteApiException, AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    Enumeration parameters = new StringTokenizer("param1\tparam2");
+    doReturn(parameters).when(httpRequest).getParameterNames();
+    doReturn("value").when(httpRequest).getParameter(anyString());
+
+    Enumeration headers = new StringTokenizer("param1\tparam2");
+    doReturn(headers).when(httpRequest).getHeaderNames();
+    doReturn("value").when(httpRequest).getHeader(anyString());
+
+    applicationAuthorizationResource.authorize(CONFIGURATION_ID, httpRequest, null);
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testAuthorizeInvalidIntegration() throws RemoteApiException, AuthorizationException {
+    doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+
+    ResponseEntity response = applicationAuthorizationResource.authorize(
+        CONFIGURATION_ID, httpRequest, null);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  @Test
+  public void testAuthorizeInternalError() throws RemoteApiException, AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    doThrow(AuthorizationException.class).when(integration).authorize(
+        any(AuthorizationPayload.class));
+
+    Enumeration parameters = new StringTokenizer("param1\tparam2");
+    doReturn(parameters).when(httpRequest).getParameterNames();
+    doReturn("value").when(httpRequest).getParameter(anyString());
+
+    Enumeration headers = new StringTokenizer("param1\tparam2");
+    doReturn(headers).when(httpRequest).getHeaderNames();
+    doReturn("value").when(httpRequest).getHeader(anyString());
+
+    ResponseEntity response = applicationAuthorizationResource.authorize(
+        CONFIGURATION_ID, httpRequest, null);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
 }
