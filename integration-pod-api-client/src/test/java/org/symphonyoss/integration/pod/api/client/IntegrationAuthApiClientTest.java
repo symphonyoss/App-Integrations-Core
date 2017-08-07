@@ -8,12 +8,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.pod.api.client.BasePodApiClient.SESSION_TOKEN_HEADER_PARAM;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.api.client.HttpApiClient;
@@ -22,6 +22,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,26 +110,23 @@ public class IntegrationAuthApiClientTest {
   }
 
   @Test
-  public void testGetUserAuthDataNotFound() throws RemoteApiException {
+  public void testGetUserAuthDataNotFound() {
     RemoteApiException apiException = new RemoteApiException(404, "not found");
-    mockRemoteException(TestTypeEnum.FIND, apiException);
-
-    assertNull(apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL));
+    try {
+      mockRemoteException(TestTypeEnum.FIND, apiException);
+      apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
+    } catch (RemoteApiException e) {
+      assertEquals(apiException, e);
+    }
   }
 
   @Test
   public void testGetUserAuthData() throws RemoteApiException {
     String path = "/v1/configuration" + MOCK_INTEGRATION_ID + "/auth/user";
 
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
-
-    Map<String, String> queryParams = new HashMap<>();
-    queryParams.put(USER_ID, String.valueOf(MOCK_USER_ID));
-    queryParams.put(URL, MOCK_URL);
-
     UserAuthorizationData data = new UserAuthorizationData();
-    doReturn(data).when(httpClient).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+    doReturn(data).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationData.class));
 
     assertEquals(data, apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL));
   }
@@ -175,15 +173,11 @@ public class IntegrationAuthApiClientTest {
 
   @Test
   public void testSearchUserAuthData() throws RemoteApiException {
-    String path = "/v1/configuration" + MOCK_INTEGRATION_ID + "/auth/user/search";
-
-    Map<String, String> headerParams = new HashMap<>();
-    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
-
     Map<String, String> filter = new HashMap<>();
-    List<UserAuthorizationData> expected = new ArrayList<>();
+    UserAuthorizationDataList expected = new UserAuthorizationDataList();
     expected.add(new UserAuthorizationData());
-    doReturn(expected).when(httpClient).doGet(path, headerParams, filter, List.class);
+    doReturn(expected).when(httpClient).doGet(
+        anyString(), anyMap(), anyMap(), eq(UserAuthorizationDataList.class));
 
     List result = apiClient.searchUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, filter);
     assertEquals(expected, result);
@@ -197,7 +191,7 @@ public class IntegrationAuthApiClientTest {
           anyString(), anyMap(), anyMap(), eq(UserAuthorizationData.class));
     } else if (testType == TestTypeEnum.SEARCH) {
       doThrow(apiException).when(httpClient).doGet(
-          anyString(), anyMap(), anyMap(), eq(List.class));
+          anyString(), anyMap(), anyMap(), eq(UserAuthorizationDataList.class));
     } else if (testType == TestTypeEnum.SAVE) {
       doThrow(apiException).when(httpClient).doPost(
           anyString(), anyMap(), anyMap(), anyObject(), eq(UserAuthorizationData.class));
