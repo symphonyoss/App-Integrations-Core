@@ -88,17 +88,11 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
     doReturn(SESSION_TOKEN).when(authenticationProxy).getSessionToken(INTEGRATION_USER);
   }
 
-  @Test
-  public void testSave() throws AuthorizationException {
-    authRepoService.save(INTEGRATION_USER, CONFIGURATION_ID, null);
-  }
-
   @Test(expected = AuthorizationException.class)
   public void testInvalidSave() throws RemoteApiException, AuthorizationException {
     doThrow(RemoteApiException.class).when(apiClient).saveUserAuthData(
-        anyString(), anyString(), any(UserAuthorizationData.class));
+        SESSION_TOKEN, CONFIGURATION_ID, null);
     authRepoService.save(INTEGRATION_USER, CONFIGURATION_ID, null);
-    fail(FAIL_MSG);
   }
 
   @Test
@@ -114,9 +108,8 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
   @Test(expected = AuthorizationException.class)
   public void testInvalidFind() throws RemoteApiException, AuthorizationException {
     doThrow(RemoteApiException.class).when(apiClient).getUserAuthData(
-        anyString(), anyString(), anyLong(), anyString());
+        SESSION_TOKEN, CONFIGURATION_ID, USER_ID, URL);
     authRepoService.find(INTEGRATION_USER, CONFIGURATION_ID, URL, USER_ID);
-    fail(FAIL_MSG);
   }
 
   @Test
@@ -136,7 +129,7 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
   @Test(expected = AuthorizationException.class)
   public void testInvalidSearch() throws RemoteApiException, AuthorizationException {
     doThrow(RemoteApiException.class).when(apiClient).searchUserAuthData(
-        anyString(), anyString(), anyMap());
+        SESSION_TOKEN, CONFIGURATION_ID, null);
     authRepoService.search(INTEGRATION_USER, CONFIGURATION_ID, null);
     fail(FAIL_MSG);
   }

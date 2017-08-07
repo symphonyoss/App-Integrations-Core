@@ -20,6 +20,9 @@ import java.util.Map;
 @Component
 public class AuthorizationRepositoryServiceImpl implements AuthorizationRepositoryService {
 
+  private static final String API_MSG = "core.integration.authorization.repo.api.exception";
+  private static final String API_MSG_SOLUTION = API_MSG + ".solution";
+
   private final LogMessageSource logMessage;
 
   private final AuthenticationProxy authenticationProxy;
@@ -41,7 +44,8 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
     try {
       apiClient.saveUserAuthData(sessionToken, configurationId, data);
     } catch (RemoteApiException e) {
-      throw new AuthorizationException("Error calling external API.", e);
+      throw new AuthorizationException(logMessage.getMessage(API_MSG), e,
+          logMessage.getMessage(API_MSG_SOLUTION));
     }
   }
 
@@ -53,7 +57,8 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
     try {
       return apiClient.getUserAuthData(sessionToken, configurationId, userId, url);
     } catch (RemoteApiException e) {
-      throw new AuthorizationException("Error calling external API.", e);
+      throw new AuthorizationException(logMessage.getMessage(API_MSG), e,
+          logMessage.getMessage(API_MSG_SOLUTION));
     }
   }
 
@@ -65,7 +70,8 @@ public class AuthorizationRepositoryServiceImpl implements AuthorizationReposito
     try {
       return apiClient.searchUserAuthData(sessionToken, configurationId, filter);
     } catch (RemoteApiException e) {
-      throw new AuthorizationException("Error calling external API.", e);
+      throw new AuthorizationException(logMessage.getMessage(API_MSG), e,
+          logMessage.getMessage(API_MSG_SOLUTION));
     }
   }
 }

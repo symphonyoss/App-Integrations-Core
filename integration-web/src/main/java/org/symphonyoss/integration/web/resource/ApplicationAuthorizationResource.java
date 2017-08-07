@@ -57,6 +57,9 @@ public class ApplicationAuthorizationResource {
 
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
       INTEGRATION_UNAVAILABLE + ".solution";
+  private static final String INTEGRATION_NOT_AUTH = "integration.web.integration.not.authorized";
+  private static final String INTEGRATION_NOT_AUTH_SOLUTION =
+      INTEGRATION_NOT_AUTH + ".solution";
 
   private final IntegrationBridge integrationBridge;
 
@@ -80,15 +83,8 @@ public class ApplicationAuthorizationResource {
   @GetMapping
   public ResponseEntity<AppAuthorizationModel> getAuthorizationProperties(
       @PathVariable String configurationId) {
-    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
 
-    if (integration == null || !(integration instanceof AuthorizedIntegration)) {
-      String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
-      String solution = logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
-    }
-
-    AuthorizedIntegration authIntegration = (AuthorizedIntegration) integration;
+    AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AppAuthorizationModel authenticationModel = authIntegration.getAuthorizationModel();
 
     if (authenticationModel == null) {
@@ -111,18 +107,12 @@ public class ApplicationAuthorizationResource {
       @RequestParam(name = "url") String integrationURL,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
       throws RemoteApiException {
-    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
-    if (integration == null || !(integration instanceof AuthorizedIntegration)) {
-      String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
-      String solution = logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
-    }
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(authorizationHeader);
     UserAuthorizationData data = new UserAuthorizationData(integrationURL, userId);
-    AuthorizedIntegration authIntegration = (AuthorizedIntegration) integration;
 
     try {
+      AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
       if (!authIntegration.isUserAuthorized(integrationURL, userId)) {
         String authorizationUrl = authIntegration.getAuthorizationUrl(integrationURL, userId);
         Map<String, String> properties = new HashMap<>();
@@ -152,15 +142,10 @@ public class ApplicationAuthorizationResource {
   @RequestMapping(value = "/authorize")
   public ResponseEntity authorize(@PathVariable String configurationId, HttpServletRequest request,
       @RequestBody(required = false) String body) throws RemoteApiException {
-    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
-    if (integration == null || !(integration instanceof AuthorizedIntegration)) {
-      String message = logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId);
-      String solution = logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
-    }
 
-    AuthorizedIntegration authIntegration = (AuthorizedIntegration) integration;
+    AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
+
     try {
       authIntegration.authorize(authPayload);
     } catch (AuthorizationException e) {
@@ -170,6 +155,28 @@ public class ApplicationAuthorizationResource {
     }
 
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Get an AuthorizedIntegration based on a configuraton ID.
+   * @param configurationId Configuration ID used to retrieve the AuthorizedIntegration.
+   * @return AuthorizedIntegration found or an IntegrationUnavailableException if it was not
+   * found or is invalid.
+   */
+  private AuthorizedIntegration getAuthorizedIntegration(@PathVariable String configurationId) {
+    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
+    if (integration == null) {
+      throw new IntegrationUnavailableException(
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
+    }
+
+    if (!(integration instanceof AuthorizedIntegration)) {
+      throw new IntegrationUnavailableException(
+          logMessage.getMessage(INTEGRATION_NOT_AUTH, configurationId),
+          logMessage.getMessage(INTEGRATION_NOT_AUTH_SOLUTION));
+    }
+    return (AuthorizedIntegration) integration;
   }
 
   /**
