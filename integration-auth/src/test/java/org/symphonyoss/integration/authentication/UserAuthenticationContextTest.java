@@ -39,11 +39,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Configuration;
 
 /**
- * Unit test for {@link AuthenticationContext}
+ * Unit test for {@link UserAuthenticationContext}
  * Created by Evandro Carrenho on 21/04/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AuthenticationContextTest {
+public class UserAuthenticationContextTest {
   private static final String SESSION_TOKEN1 = "S-TOKEN-1";
 
   private static final String KM_TOKEN1 = "KM-TOKEN-1";
@@ -64,19 +64,19 @@ public class AuthenticationContextTest {
 
   private static final String USER_ID = "jiraWebHookIntegration";
 
-  private AuthenticationContext authContext;
+  private UserAuthenticationContext authContext;
 
   @Mock
   private KeyStore keyStore;
 
   @Before
   public void initAuthenticationContext() {
-    authContext = new AuthenticationContext(USER_ID, null, null, null);
+    authContext = new UserAuthenticationContext(USER_ID, null, null, null);
   }
 
   @Test (expected = IllegalStateException.class)
   public void testInvalidKeystore() throws RemoteApiException {
-    authContext = new AuthenticationContext(USER_ID, keyStore, "12345", null);
+    authContext = new UserAuthenticationContext(USER_ID, keyStore, "12345", null);
   }
 
   @Test
@@ -161,7 +161,8 @@ public class AuthenticationContextTest {
     apiClientConfig.setMaxConnections(ApiClientConfig.MAX_TOTAL_CONNECTIONS);
     apiClientConfig.setMaxConnectionsPerRoute(ApiClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
 
-    AuthenticationContext authContext = new AuthenticationContext(USER_ID, null, null, apiClientConfig);
+    UserAuthenticationContext authContext =
+        new UserAuthenticationContext(USER_ID, null, null, apiClientConfig);
 
     Client client = authContext.httpClientForContext();
     Configuration clientConfiguration = client.getConfiguration();

@@ -88,7 +88,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    */
   private AuthenticationApiClient keyManagerAuthApi;
 
-  private Map<String, AuthenticationContext> authContexts = new ConcurrentHashMap<>();
+  private Map<String, UserAuthenticationContext> authContexts = new ConcurrentHashMap<>();
 
   @Autowired
   private IntegrationProperties properties;
@@ -113,7 +113,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
 
   @Override
   public void authenticate(String userId) throws AuthenticationException {
-    AuthenticationContext context = contextForUser(userId);
+    UserAuthenticationContext context = contextForUser(userId);
 
     if (!context.isAuthenticated()) {
       LOG.info("Authenticate {}", userId);
@@ -141,8 +141,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * Makes sure the user passed to auth proxy has been registered before, to avoid hard to find
    * bugs.
    */
-  private AuthenticationContext contextForUser(String userId) {
-    AuthenticationContext context = this.authContexts.get(userId);
+  private UserAuthenticationContext contextForUser(String userId) {
+    UserAuthenticationContext context = this.authContexts.get(userId);
 
     if (context == null) {
       throw new UnregisteredUserAuthException(logMessage.getMessage(UNREGISTERED_USER_MESSAGE, userId),
@@ -156,14 +156,14 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * Makes sure the session token passed to auth proxy has been registered before, to avoid hard to
    * find bugs.
    */
-  private AuthenticationContext contextForSessionToken(String sessionToken) {
-    for (AuthenticationContext context : this.authContexts.values()) {
+  private UserAuthenticationContext contextForSessionToken(String sessionToken) {
+    for (UserAuthenticationContext context : this.authContexts.values()) {
       if (context.getToken().getSessionToken().equals(sessionToken)) {
         return context;
       }
     }
 
-    for (AuthenticationContext context : this.authContexts.values()) {
+    for (UserAuthenticationContext context : this.authContexts.values()) {
       if (context.getPreviousToken().getSessionToken().equals(sessionToken)) {
         return context;
       }
@@ -246,7 +246,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   @Override
   public synchronized AuthenticationToken reAuthSessionOrThrow(String sessionToken, RemoteApiException remoteApiException)
       throws RemoteApiException {
-    AuthenticationContext authContext = contextForSessionToken(sessionToken);
+    UserAuthenticationContext authContext = contextForSessionToken(sessionToken);
     reAuthOrThrow(authContext.getUserId(), remoteApiException);
     return authContext.getToken();
   }
@@ -293,7 +293,8 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    */
   @Override
   public void registerUser(String userId, KeyStore keyStore, String keyStorePass) {
-    authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass, properties.getApiClientConfig()));
+    authContexts.put(userId, new UserAuthenticationContext(userId, keyStore, keyStorePass,
+        properties.getApiClientConfig()));
   }
 
   /**

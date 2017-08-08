@@ -37,37 +37,38 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 /**
- * Created by ecarrenho on 8/23/16.
+ * Abstract class to support context management for an integration.
  *
- * Stores authentication context for an integration (Symphony user, keystore and token).
+ * Created by ecarrenho on 8/23/16.
  */
-public class AuthenticationContext {
-
-  private final String userId;
+public abstract class AuthenticationContext {
 
   private final Client client;
 
-  private boolean isTokenValid = false;
-
-  private AuthenticationToken token = AuthenticationToken.VOID_AUTH_TOKEN;
-
   /**
-   * The current token and the previous one are kept on the authentication context map, as for a
-   * short time window, some threads may have the previous valid token in hands, while another thread has
-   * just renewed it.
+   * Initializes HTTP client with the SSL Context according to the keystore received.
+   *
+   * @param keyStore Keystore object
+   * @param keyStorePassword Keystore password
+   * @param apiClientConfig API client settings
    */
-  private AuthenticationToken previousToken = AuthenticationToken.VOID_AUTH_TOKEN;
-
-  public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
+  public AuthenticationContext(KeyStore keyStore, String keyStorePassword, ApiClientConfig apiClientConfig) {
     if (apiClientConfig == null) {
       apiClientConfig = new ApiClientConfig();
     }
 
-    this.userId = userId;
-    this.client = buildClient(keyStore, keyStorePass, apiClientConfig);
+    this.client = buildClient(keyStore, keyStorePassword, apiClientConfig);
   }
 
-  private Client buildClient(KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
+  /**
+   * Builds HTTP client with the SSL Context according to the keystore received.
+   *
+   * @param keyStore Keystore object
+   * @param keyStorePassword Keystore password
+   * @param apiClientConfig API client settings
+   * @return HTTP client
+   */
+  private Client buildClient(KeyStore keyStore, String keyStorePassword, ApiClientConfig apiClientConfig) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
@@ -78,12 +79,12 @@ public class AuthenticationContext {
     // Socket factory setup with custom SSL context settings
     SSLConnectionSocketFactory sslSocketFactory;
 
-    if (keyStore == null || keyStorePass == null) {
+    if (keyStore == null || keyStorePassword == null) {
       sslSocketFactory = SSLConnectionSocketFactory.getSystemSocketFactory();
     } else {
       SslConfigurator sslConfigurator = SslConfigurator.newInstance()
           .keyStore(keyStore)
-          .keyStorePassword(keyStorePass);
+          .keyStorePassword(keyStorePassword);
 
       sslSocketFactory = new SSLConnectionSocketFactory(sslConfigurator.createSSLContext());
     }
@@ -110,39 +111,10 @@ public class AuthenticationContext {
     return clientBuilder.build();
   }
 
-  public String getUserId() {
-    return userId;
-  }
-
-  public synchronized AuthenticationToken getToken() {
-    return token;
-  }
-
-  public synchronized AuthenticationToken getPreviousToken() {
-    return previousToken;
-  }
-
-  public synchronized void setToken(AuthenticationToken newToken) {
-    if (newToken == null || newToken.equals(AuthenticationToken.VOID_AUTH_TOKEN)) {
-      // Current and previous tokens are just overridden with new non-void tokens.
-      // The authentication context is retrieved by the session token on POD and Agent API clients,
-      // and therefore the token should not not be thrown away when invalidated.
-      isTokenValid = false;
-    } else {
-      previousToken = token;
-      token = newToken;
-      isTokenValid = true;
-    }
-  }
-
-  public synchronized void invalidateAuthentication() {
-    isTokenValid = false;
-  }
-
-  public synchronized boolean isAuthenticated() {
-    return isTokenValid;
-  }
-
+  /**
+   * Get HTTP client
+   * @return HTTP client
+   */
   public Client httpClientForContext() {
     return client;
   }
