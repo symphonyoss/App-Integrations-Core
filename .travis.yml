@@ -46,3 +46,6 @@ addons:
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+
+cache:
+  - $HOME/.m2
