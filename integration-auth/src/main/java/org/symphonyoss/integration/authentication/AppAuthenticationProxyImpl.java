@@ -16,11 +16,17 @@
 
 package org.symphonyoss.integration.authentication;
 
-import static org.symphonyoss.integration.authentication.properties.AppAuthenticationProxyProperties.UNREGISTERED_APP_MESSAGE;
-import static org.symphonyoss.integration.authentication.properties.AppAuthenticationProxyProperties.UNREGISTERED_APP_SOLUTION;
+import static org.symphonyoss.integration.authentication.properties
+    .AppAuthenticationProxyProperties.UNREGISTERED_APP_MESSAGE;
+import static org.symphonyoss.integration.authentication.properties
+    .AppAuthenticationProxyProperties.UNREGISTERED_APP_SOLUTION;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.auth.api.client.AuthenticationAppApiClient;
+import org.symphonyoss.integration.auth.api.client.PodAuthAppHttpApiClient;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -29,6 +35,7 @@ import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 
 /**
@@ -41,13 +48,23 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
 
   private final Map<String, AppAuthenticationContext> appContexts = new HashMap<>();
 
-  private final IntegrationProperties properties;
+  @Autowired
+  private IntegrationProperties properties;
 
-  private final LogMessageSource logMessage;
+  @Autowired
+  private LogMessageSource logMessage;
 
-  public AppAuthenticationProxyImpl(IntegrationProperties properties, LogMessageSource logMessage) {
-    this.properties = properties;
-    this.logMessage = logMessage;
+  @Autowired
+  private PodAuthAppHttpApiClient podAuthAppHttpApiClient;
+
+  private AuthenticationAppApiClient apiClient;
+
+  /**
+   * Initialize HTTP client.
+   */
+  @PostConstruct
+  public void init() {
+    this.apiClient = new AuthenticationAppApiClient(podAuthAppHttpApiClient, logMessage);
   }
 
   @Override
@@ -82,5 +99,10 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
 
     return context;
   }
-  
+
+  @Override
+  public AppToken authenticate(String appId, String appToken) {
+    return apiClient.authenticate(appId, appToken);
+  }
+
 }

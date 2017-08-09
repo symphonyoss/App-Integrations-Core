@@ -35,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.auth.api.client.PodAuthAppHttpApiClient;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -64,6 +65,9 @@ public class AppAuthenticationProxyImplTest {
 
   @MockBean
   private LogMessageSource logMessage;
+
+  @MockBean
+  private PodAuthAppHttpApiClient podAuthAppHttpApiClient;
 
   @Autowired
   private AppAuthenticationProxyImpl proxy;
