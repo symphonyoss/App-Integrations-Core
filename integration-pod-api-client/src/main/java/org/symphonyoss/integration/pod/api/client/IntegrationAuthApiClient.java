@@ -24,6 +24,7 @@ import static org.symphonyoss.integration.pod.api.properties
     .BaseIntegrationInstanceApiClientProperties.MISSING_PARAMETER_WHEN_CALLING_SOLUTION;
 
 import org.symphonyoss.integration.api.client.HttpApiClient;
+import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
@@ -55,6 +56,8 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
   private static final String USER_DATA = "userData";
   private static final String USER_ID = "userId";
   private static final String URL = "url";
+  private static final String TOKEN_APPLICATION = "tokenApplication";
+  private static final String TOKEN_SYMPHONY = "tokenSymphony";
 
   private HttpApiClient apiClient;
 
@@ -206,4 +209,88 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
     }
   }
 
+  /**
+   * Save application authentication data.
+   *
+   * @param sessionToken Session authentication token.
+   * @param integrationId Integration identifier
+   * @param appToken Pair of tokens - application one and Symphony one.
+   * @throws UnauthorizedUserException User credentials not provided
+   * @throws ForbiddenAuthException User not authorized to retrieve user authentication
+   * @throws RemoteApiException Unexpected error calling API
+   */
+  public void saveAppAuthenticationToken(String sessionToken, String integrationId,
+      AppToken appToken) throws RemoteApiException {
+    checkAuthToken(sessionToken);
+
+    checkParam(integrationId, INTEGRATION_ID);
+    checkParam(appToken.getAppToken(), TOKEN_APPLICATION);
+    checkParam(appToken.getSymphonyToken(), TOKEN_SYMPHONY);
+
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/authentication/";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
+
+    try {
+      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), appToken, AppToken.class);
+    } catch (RemoteApiException e) {
+      if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+        String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
+        String solution = logMessage.getMessage(UNAUTHORIZED_MESSAGE_SOLUTION);
+        throw new UnauthorizedUserException(message, solution);
+      }
+
+      if (e.getCode() == Response.Status.FORBIDDEN.getStatusCode()) {
+        String message = logMessage.getMessage(FORBIDDEN_MESSAGE);
+        String solution = logMessage.getMessage(FORBIDDEN_MESSAGE_SOLUTION);
+        throw new ForbiddenAuthException(message, solution);
+      }
+
+      throw e;
+    }
+  }
+
+  /**
+   * Find application authentication data.
+   *
+   * @param sessionToken Session authentication token.
+   * @param integrationId Integration identifier
+   * @param applicationToken Application token.
+   * @throws UnauthorizedUserException User credentials not provided
+   * @throws ForbiddenAuthException User not authorized to retrieve user authentication
+   * @throws RemoteApiException Unexpected error calling API
+   */
+  public AppToken getAppAuthenticationToken(String sessionToken, String integrationId,
+      String applicationToken) throws RemoteApiException {
+    checkAuthToken(sessionToken);
+
+    checkParam(integrationId, INTEGRATION_ID);
+    checkParam(applicationToken, TOKEN_APPLICATION);
+
+    String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/application/"
+        + applicationToken;
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
+
+    try {
+      return apiClient.doGet(path, headerParams, Collections.<String, String>emptyMap(),
+          AppToken.class);
+    } catch (RemoteApiException e) {
+      if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+        String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
+        String solution = logMessage.getMessage(UNAUTHORIZED_MESSAGE_SOLUTION);
+        throw new UnauthorizedUserException(message, solution);
+      }
+
+      if (e.getCode() == Response.Status.FORBIDDEN.getStatusCode()) {
+        String message = logMessage.getMessage(FORBIDDEN_MESSAGE);
+        String solution = logMessage.getMessage(FORBIDDEN_MESSAGE_SOLUTION);
+        throw new ForbiddenAuthException(message, solution);
+      }
+
+      throw e;
+    }
+  }
 }
