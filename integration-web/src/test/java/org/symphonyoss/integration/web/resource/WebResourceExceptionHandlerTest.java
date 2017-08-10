@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 
 /**
  * Unit tests for {@link WebResourceExceptionHandler}

@@ -46,8 +46,8 @@ import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
-import org.symphonyoss.integration.web.model.ErrorResponse;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.model.ErrorResponse;
 
 import java.util.Enumeration;
 import java.util.HashMap;

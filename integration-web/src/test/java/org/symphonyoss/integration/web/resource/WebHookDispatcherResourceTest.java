@@ -46,8 +46,8 @@ import org.symphonyoss.integration.exception.authentication.ConnectivityExceptio
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.exception.IntegrationBridgeUnavailableException;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
@@ -61,7 +61,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Unit tests for {@link WebHookDispatcherResource}.
