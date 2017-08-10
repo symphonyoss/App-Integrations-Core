@@ -43,6 +43,8 @@ import javax.ws.rs.core.Response;
  */
 public class AuthenticationAppApiClient {
 
+  private static final String PATH = "/v1/authenticate/extensionApp";
+
   private final LogMessageSource logMessage;
 
   private final HttpApiClient apiClient;
@@ -53,8 +55,6 @@ public class AuthenticationAppApiClient {
   }
 
   public AppToken authenticate(String appId, String appToken) {
-    String path = "/v1/authenticate/extensionApp";
-
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("appId", appId);
 
@@ -64,7 +64,7 @@ public class AuthenticationAppApiClient {
       AppToken token = new AppToken();
       token.setAppToken(appToken);
 
-      return apiClient.doPost(path, headerParams, queryParams, token, AppToken.class);
+      return apiClient.doPost(PATH, headerParams, queryParams, token, AppToken.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
