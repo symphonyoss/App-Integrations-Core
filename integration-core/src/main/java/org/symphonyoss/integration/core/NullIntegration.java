@@ -16,20 +16,14 @@
 
 package org.symphonyoss.integration.core;
 
-import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
-    .KEY_STORE_PASSWORD_NOT_FOUND;
-import static org.symphonyoss.integration.core.properties.NullIntegrationProperties
-    .KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.NOK;
 import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.ValueEnum.OK;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
-import org.symphonyoss.integration.exception.bootstrap.LoadKeyStoreException;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthManager;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
@@ -79,7 +73,7 @@ public class NullIntegration extends BaseIntegration {
       registerUser(integrationUser);
     } catch (BootstrapException e) {
       LOG.error(e.getMessage());
-      healthManager.certificateInstalled(NOK);
+      healthManager.userCertificateInstalled(NOK);
     }
 
     healthIndicator.addHealthIndicator(applicationId, new IntegrationHealthIndicatorAdapter(this));
@@ -89,17 +83,10 @@ public class NullIntegration extends BaseIntegration {
   public void registerUser(String integrationUser) {
     String certsDir = utils.getCertsDirectory();
 
-    if ((application == null) || (application.getKeystore() == null) || (StringUtils.isEmpty(
-        application.getKeystore().getPassword()))) {
-      String appId = application != null ? application.getId() : integrationUser;
-      String message = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND, appId);
-      String solution = logMessage.getMessage(KEY_STORE_PASSWORD_NOT_FOUND_SOLUTION);
-      throw new LoadKeyStoreException(message, solution);
-    }
+    KeyStore keyStore = loadUserKeyStore(certsDir, application, integrationUser);
 
-    KeyStore keyStore = loadKeyStore(certsDir, application);
+    healthManager.userCertificateInstalled(OK);
 
-    healthManager.certificateInstalled(OK);
     authenticationProxy.registerUser(integrationUser, keyStore,
         application.getKeystore().getPassword());
   }

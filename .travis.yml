@@ -25,7 +25,7 @@ language: java
 install: true
 script:
 - "if [[ \"$TRAVIS_PULL_REQUEST\" = \"false\" && $TRAVIS_BRANCH =~ dev ]]; then mvn clean deploy -Pversioneye -DtransitiveDependencies=true --settings settings.xml -Dbuild.provisioning=false; fi"
-- "if [[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]]; then mvn clean install -Pcobertura; fi"
+- "if [[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]]; then mvn clean package -Pcobertura; fi"
 
 jdk:
   - oraclejdk8
@@ -43,6 +43,9 @@ addons:
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DsymphonySkipUnitTests=true install"
     branch_pattern: "dev"
+
+dist:
+  precise
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
