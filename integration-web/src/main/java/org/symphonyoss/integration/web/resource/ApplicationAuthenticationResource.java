@@ -98,10 +98,11 @@ public class ApplicationAuthenticationResource {
       @RequestParam String applicationToken, @RequestParam String symphonyToken)
       throws RemoteApiException {
 
-    String token = jwtAuthentication.getSymphonyToken(configurationId, applicationToken);
+    boolean isValid = jwtAuthentication.isValidTokenPair(configurationId, applicationToken,
+        symphonyToken);
 
-    if (token != null) {
-      AppToken appToken = new AppToken(configurationId, applicationToken, token);
+    if (isValid) {
+      AppToken appToken = new AppToken(configurationId, applicationToken, symphonyToken);
       return ResponseEntity.ok().body(appToken);
     }
 

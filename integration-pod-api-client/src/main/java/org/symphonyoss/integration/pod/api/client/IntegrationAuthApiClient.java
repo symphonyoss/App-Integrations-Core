@@ -233,7 +233,8 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
     try {
-      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), appToken, AppToken.class);
+      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), appToken,
+          AppToken.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
