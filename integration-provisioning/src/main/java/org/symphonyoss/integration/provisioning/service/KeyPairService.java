@@ -50,60 +50,30 @@ import java.util.Locale;
 import java.util.Scanner;
 
 /**
- * Service class to generate key pair (private key and corresponding public key).
+ * Abstract service class to provide commons methods for generating private keys and certificates.
+ *
  * Created by rsanchez on 20/10/16.
  */
-@Service
 public class KeyPairService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KeyPairService.class);
 
-  private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
+  public static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
 
-  private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
-      + " %s 2048";
-
-  private static final String OPENSSL_GEN_CERT_CMD = "openssl x509 -req -sha256 -days 2922 -in %s"
-      + " -CA %s -passin pass:%s -out %s -CAkey %s -set_serial 0x%s";
-
-  private static final String OPENSSL_PKCS12_CMD = "openssl pkcs12 -export -out %s -aes256 -in %s"
-      + " -inkey %s -passin pass:%s -passout pass:%s";
-
-  @Autowired
-  private IntegrationProperties properties;
-
-  @Autowired
-  private IntegrationUtils utils;
-
-  @Autowired
   private ApplicationArguments arguments;
 
-  @Autowired
   private LogMessageSource logMessage;
 
-  @Autowired
-  public KeyPairService(ApplicationArguments args) {
+  public KeyPairService(ApplicationArguments args, LogMessageSource logMessage) {
     this.arguments = args;
-  }
-
-  /**
-   * Export user certificate
-   * @param settings Integration settings associated with the application.
-   * @param application Application object
-   */
-  public void exportCertificate(IntegrationSettings settings, Application application) {
-    if (shouldGenerateCertificate()) {
-      String keyFileName = generateKeyPair(application);
-      String reqFileName = generateCSR(settings.getUsername(), application, keyFileName);
-      generateCertificate(application, keyFileName, reqFileName);
-    }
+    this.logMessage = logMessage;
   }
 
   /**
    * Validates if the application should generate the user certificate.
    * @return true if the application should generate the user certificate or false otherwise.
    */
-  private boolean shouldGenerateCertificate() {
+  protected boolean shouldGenerateCertificate() {
     List<String> optionValues = arguments.getOptionValues(GENERATE_CERTIFICATE);
 
     if ((optionValues == null) || (optionValues.isEmpty())) {
@@ -114,92 +84,10 @@ public class KeyPairService {
   }
 
   /**
-   * Generate private and public key.
-   * @param application Application object
-   * @return Key filename
-   */
-  private String generateKeyPair(Application application) {
-    LOGGER.info("Generating private and public key: {}", application.getComponent());
-
-    String password = getTempPassword(application);
-    String appKeyFilename = String.format("%s/%s-key.pem", System.getProperty("java.io.tmpdir"),
-        application.getId());
-
-    String genKeyPairCommand = String.format(OPENSSL_GEN_KEY_CMD, password, appKeyFilename);
-
-    executeProcess(genKeyPairCommand);
-
-    return appKeyFilename;
-  }
-
-  /**
-   * Generate the Certificate Signing Request (CSR).
-   * @param application Application object
-   * @param appKeyFilename Key filename
-   * @return Request filename
-   */
-  private String generateCSR(String username, Application application, String appKeyFilename) {
-    LOGGER.info("Generating certificate signing request: {}", application.getComponent());
-
-    String password = String.format("pass:%s", getTempPassword(application));
-    String subject =
-        String.format("/CN=%s/O=%s/C=%s", username, DEFAULT_ORGANIZATION, Locale.US.getCountry());
-
-    String appReqFilename = String.format("%s/%s-req.pem", System.getProperty("java.io.tmpdir"),
-        application.getId());
-
-    String[] genCSRCommand = new String[] {"openssl", "req", "-new", "-key", appKeyFilename,
-        "-passin", password, "-subj", subject, "-out", appReqFilename};
-
-    executeProcess(genCSRCommand);
-
-    return appReqFilename;
-  }
-
-  /**
-   * Generate user certificate
-   * @param application Application object
-   * @param appKeyFilename Key filename
-   * @param appReqFilename Request filename
-   */
-  private void generateCertificate(Application application, String appKeyFilename, String
-      appReqFilename) {
-    LOGGER.info("Generating certificate: {}", application.getComponent());
-
-    Certificate certificateInfo = properties.getSigningCert();
-
-    String keyPassword = getTempPassword(application);
-    String password = certificateInfo.getCaKeyPassword();
-    String passOutput = application.getKeystore().getPassword();
-    String sn = Long.toHexString(System.currentTimeMillis());
-
-    String appCertFilename = utils.getCertsDirectory() + application.getId() + ".pem";
-    String appPKCS12Filename = utils.getCertsDirectory() + application.getId() + ".p12";
-    String caCertFilename = certificateInfo.getCaCertFile();
-    String caCertKeyFilename = certificateInfo.getCaKeyFile();
-    String caCertChain = certificateInfo.getCaCertChainFile();
-
-    String genCerticateCommand =
-        String.format(OPENSSL_GEN_CERT_CMD, appReqFilename, caCertFilename, password,
-            appCertFilename, caCertKeyFilename, sn);
-
-    executeProcess(genCerticateCommand);
-
-    String genPKCS12Command = String.format(OPENSSL_PKCS12_CMD, appPKCS12Filename,
-        appCertFilename, appKeyFilename, keyPassword, passOutput);
-
-    if (!StringUtils.isEmpty(caCertChain)) {
-      genPKCS12Command = genPKCS12Command.concat(" -certfile ").concat(caCertChain);
-    }
-
-    executeProcess(genPKCS12Command);
-  }
-
-  /**
    * Executes a system process.
    * @param command Command to be executed
    */
-  private void executeProcess(String... command) {
+  protected void executeProcess(String... command) {
     try {
       Process process = Runtime.getRuntime().exec(command);
       process.waitFor();
@@ -214,7 +102,7 @@ public class KeyPairService {
    * Executes a system process.
    * @param command Command to be executed
    */
-  private void executeProcess(String command) {
+  protected void executeProcess(String command) {
     try {
       Process process = Runtime.getRuntime().exec(command);
       process.waitFor();
@@ -249,11 +137,11 @@ public class KeyPairService {
    * @param application Application object
    * @return Temporary password
    */
-  private String getTempPassword(Application application) {
+  protected String getTempPassword(Application application) {
     return application.getId();
   }
 
-  private void throwKeyPairException(String errorMessage) {
+  protected void throwKeyPairException(String errorMessage) {
     String yamlSolution = logMessage.getMessage(FAIL_YAML_SOLUTION);
     String permissionSolution = logMessage.getMessage(FAIL_PERMISSION_SOLUTION);
 
