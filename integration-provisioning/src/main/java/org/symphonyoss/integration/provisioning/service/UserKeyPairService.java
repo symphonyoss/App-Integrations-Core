@@ -40,8 +40,6 @@ public class UserKeyPairService extends KeyPairService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserKeyPairService.class);
 
-  private static final String DEFAULT_ORGANIZATION = "Symphony Communications LLC";
-
   private static final String OPENSSL_GEN_KEY_CMD = "openssl genrsa -aes256 -passout pass:%s -out"
       + " %s 2048";
 

@@ -22,31 +22,15 @@ import static org.symphonyoss.integration.provisioning.properties.KeyPairPropert
 import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.FAIL_YAML_SOLUTION;
 import static org.symphonyoss.integration.provisioning.properties.KeyPairProperties.GENERATE_CERTIFICATE;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.model.yaml.Certificate;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.KeyPairException;
-import org.symphonyoss.integration.utils.IntegrationUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.attribute.GroupPrincipal;
-import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.UserPrincipal;
-import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -54,7 +38,7 @@ import java.util.Scanner;
  *
  * Created by rsanchez on 20/10/16.
  */
-public class KeyPairService {
+public abstract class KeyPairService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KeyPairService.class);
 
