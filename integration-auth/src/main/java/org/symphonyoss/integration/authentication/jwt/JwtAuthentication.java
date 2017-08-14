@@ -8,9 +8,13 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
+import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
 import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
@@ -32,8 +36,10 @@ public class JwtAuthentication {
   private static final String JWT_TOKEN_EMPTY = "integration.auth.jwt.empty";
   private static final String JWT_TOKEN_EMPTY_SOLUTION = JWT_TOKEN_EMPTY + ".solution";
 
-  private static final String API_MSG = "integration.auth.jwt.api.exception";
-  private static final String API_MSG_SOLUTION = API_MSG + ".solution";
+
+  private static final String INTEGRATION_UNAVAILABLE = "integration.auth.integration.unavailable";
+  private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
+      INTEGRATION_UNAVAILABLE + ".solution";
 
   @Autowired
   private LogMessageSource logMessage;
@@ -64,9 +70,25 @@ public class JwtAuthentication {
   }
 
   /**
+   * Retrieve an integration by a configuration ID.
+   * @param configurationId Configuration ID.
+   * @return Integration found or a runtime exception when it is missing.
+   */
+  private Integration getIntegrationAndCheckAvailability(String configurationId) {
+    Integration integration = integrationBridge.getIntegrationById(configurationId);
+    if (integration == null) {
+      throw new UnexpectedBootstrapException(
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
+    }
+    return integration;
+  }
+
+  /**
    * Return user identifier from HTTP Authorization header.
    * @param authorizationHeader HTTP Authorization header
-   * @return User identifier or null if the authorization header is not present or it's not a valid JWT token
+   * @return User identifier or null if the authorization header is not present or it's not a valid
+   * JWT token
    */
   public Long getUserIdFromAuthorizationHeader(String authorizationHeader) {
     String token = getJwtToken(authorizationHeader);
@@ -75,7 +97,6 @@ public class JwtAuthentication {
 
   /**
    * Retrieves JWT token from HTTP Authorization header.
-   *
    * @param authorizationHeader HTTP Authorization header
    * @return JWT token or null if the authorization header is not present or it's not a valid JWT
    * token
@@ -113,17 +134,13 @@ public class JwtAuthentication {
    * @return The generated Application Token (Ta).
    */
   public String authenticate(String configurationId) {
+    Integration integration = getIntegrationAndCheckAvailability(configurationId);
+
     String appToken = tokenUtils.generateToken();
     AppToken bothTokens = appAuthenticationService.authenticate(configurationId, appToken);
 
-    Integration integration = integrationBridge.getIntegrationById(configurationId);
     String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
-    try {
-      apiClient.saveAppAuthenticationToken(sessionToken, configurationId, bothTokens);
-    } catch (RemoteApiException e) {
-      throw new UnexpectedAuthException(logMessage.getMessage(API_MSG), e,
-          logMessage.getMessage(API_MSG_SOLUTION));
-    }
+    apiClient.saveAppAuthenticationToken(sessionToken, configurationId, bothTokens);
 
     return appToken;
   }
@@ -136,18 +153,14 @@ public class JwtAuthentication {
    */
   public boolean isValidTokenPair(String configurationId, String applicationToken,
       String symphonyToken) {
-    Integration integration = integrationBridge.getIntegrationById(configurationId);
+    Integration integration = getIntegrationAndCheckAvailability(configurationId);
     String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
-    try {
-      AppToken bothTokens = apiClient.getAppAuthenticationToken(sessionToken, configurationId,
-          applicationToken);
-      return symphonyToken.equals(bothTokens.getSymphonyToken());
-    } catch (RemoteApiException e) {
-      if (e.getCode() == HttpStatus.SC_NOT_FOUND) {
-        return false;
-      }
-      throw new UnexpectedAuthException(logMessage.getMessage(API_MSG), e,
-          logMessage.getMessage(API_MSG_SOLUTION));
+
+    AppToken bothTokens = apiClient.getAppAuthenticationToken(sessionToken, configurationId,
+        applicationToken);
+    if (bothTokens == null) {
+      return false;
     }
+    return symphonyToken.equals(bothTokens.getSymphonyToken());
   }
 }

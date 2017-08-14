@@ -10,21 +10,18 @@ import static org.symphonyoss.integration.authentication.jwt.JwtAuthentication
     .AUTHORIZATION_HEADER_PREFIX;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.aop.support.RegexpMethodPointcutAdvisor;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
@@ -140,7 +137,7 @@ public class JwtAuthenticationTest {
     assertEquals(MOCK_APP_TOKEN, result);
   }
 
-  @Test(expected = UnexpectedAuthException.class)
+  @Test(expected = RemoteApiException.class)
   public void testAuthenticateException() throws RemoteApiException {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
     doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
@@ -171,25 +168,11 @@ public class JwtAuthenticationTest {
     doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
         MOCK_APP_TOKEN);
 
-    RemoteApiException rae = new RemoteApiException(HttpStatus.SC_NOT_FOUND, "Not found");
-    doThrow(rae).when(apiClient).getAppAuthenticationToken(
+    doReturn(null).when(apiClient).getAppAuthenticationToken(
         MOCK_SESSION_TOKEN, MOCK_CONFIG_ID, MOCK_APP_TOKEN);
 
     boolean result = jwtAuthentication.isValidTokenPair(
         MOCK_CONFIG_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
     assertFalse(result);
-  }
-
-  @Test(expected = UnexpectedAuthException.class)
-  public void testIsValidTokenPairException() throws RemoteApiException {
-    doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
-    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
-        MOCK_APP_TOKEN);
-
-    RemoteApiException rae = new RemoteApiException(HttpStatus.SC_BAD_GATEWAY, "Bad gateway");
-    doThrow(rae).when(apiClient).getAppAuthenticationToken(
-        MOCK_SESSION_TOKEN, MOCK_CONFIG_ID, MOCK_APP_TOKEN);
-
-    jwtAuthentication.isValidTokenPair(MOCK_CONFIG_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
   }
 }

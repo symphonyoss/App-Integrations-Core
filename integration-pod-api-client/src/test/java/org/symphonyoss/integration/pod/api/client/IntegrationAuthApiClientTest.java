@@ -19,6 +19,7 @@ import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
@@ -109,7 +110,7 @@ public class IntegrationAuthApiClientTest {
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test(expected = UnexpectedAuthException.class)
   public void testGetUserAuthDataRemoteException() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(500, "internal server error");
     mockRemoteExceptionToFind(apiException);
@@ -123,8 +124,8 @@ public class IntegrationAuthApiClientTest {
     try {
       mockRemoteExceptionToFind(apiException);
       apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, MOCK_URL);
-    } catch (RemoteApiException e) {
-      assertEquals(apiException, e);
+    } catch (Exception e) {
+      assertEquals(apiException, e.getCause());
     }
   }
 
