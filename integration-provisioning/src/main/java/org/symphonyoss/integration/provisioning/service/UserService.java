@@ -103,6 +103,7 @@ public class UserService {
 
     String name = app.getName();
     String avatar = app.getAvatar();
+    String emailAddress = certificateService.getEmailAddressFromApplicationCertificate(app);
 
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
@@ -112,7 +113,7 @@ public class UserService {
       String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
       throw new UserSearchException(message);
     } else {
-      updateUser(sessionToken, user, name, avatar);
+      updateUser(sessionToken, user, name, avatar, emailAddress);
       settings.setUsername(user.getUsername());
     }
   }
@@ -158,11 +159,11 @@ public class UserService {
    * @param name User display name
    * @param avatar User avatar (Base64 encoded)
    */
-  private void updateUser(String sessionToken, User user, String name, String avatar) {
+  private void updateUser(String sessionToken, User user, String name, String avatar, String emailAddress) {
     Long userId = user.getId();
 
     try {
-      UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
+      UserAttributes userAttributes = createUserAttributes(user.getUsername(), name, emailAddress);
       userApiClient.updateUser(sessionToken, userId, userAttributes);
     } catch (RemoteApiException e) {
       String message = logMessage.getMessage(FAIL_UPDATE_ATTRIBUTES);
@@ -199,14 +200,17 @@ public class UserService {
    * @param name User display name
    * @return User attributes
    */
-  private UserAttributes createUserAttributes(String username, String name) {
-    String emailAddress = getEmail(username);
-
+  private UserAttributes createUserAttributes(String username, String name, String emailAddress) {
     UserAttributes userAttributes = new UserAttributes();
     userAttributes.setUserName(username);
     userAttributes.setDisplayName(name);
-    userAttributes.setEmailAddress(emailAddress);
     userAttributes.setAccountType(UserAttributes.AccountTypeEnum.SYSTEM);
+
+    if (StringUtils.isNotEmpty(emailAddress)) {
+      userAttributes.setEmailAddress(emailAddress);
+    } else {
+      userAttributes.setEmailAddress(getEmail(username));
+    }
 
     return userAttributes;
   }

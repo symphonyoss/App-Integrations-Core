@@ -168,6 +168,26 @@ public class CompanyCertificateService {
   }
 
   /**
+   * Get a email address from the application certificate
+   * @param application Application object
+   * @return EmailAddress from the application certificate or empty string if the certificate doesn't exist
+   */
+  public String getEmailAddressFromApplicationCertificate(Application application) {
+    X509Certificate certificate = readPKCS12Certificate(application);
+
+    if (certificate != null) {
+      Pattern p = Pattern.compile("(^|,)EMAILADDRESS=([^,]*)(,|$)");
+      Matcher m = p.matcher(certificate.getIssuerDN().getName());
+
+      m.find();
+
+      return m.group(2);
+    }
+
+    return StringUtils.EMPTY;
+  }
+
+  /**
    * Read PKCS12 application certificate
    * @param application Application object
    * @return Certificate object if the application certificate file exists or null otherwise
