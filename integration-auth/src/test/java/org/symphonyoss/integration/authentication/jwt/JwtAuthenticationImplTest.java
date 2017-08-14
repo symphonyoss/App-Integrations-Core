@@ -2,7 +2,7 @@ package org.symphonyoss.integration.authentication.jwt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.symphonyoss.integration.authentication.jwt.JwtAuthentication.AUTHORIZATION_HEADER_PREFIX;
+import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl.AUTHORIZATION_HEADER_PREFIX;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -14,12 +14,12 @@ import org.symphonyoss.integration.exception.authentication.UnauthorizedUserExce
 import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
- * Unit tests for {@link JwtAuthentication}
+ * Unit tests for {@link JwtAuthenticationImpl}
  *
  * Created by rsanchez on 31/07/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JwtAuthenticationTest {
+public class JwtAuthenticationImplTest {
 
   private static final String MOCK_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
       + (".eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9"
@@ -29,7 +29,7 @@ public class JwtAuthenticationTest {
   private LogMessageSource logMessageSource;
 
   @InjectMocks
-  private JwtAuthentication jwtAuthentication;
+  private JwtAuthenticationImpl jwtAuthentication;
 
   @Test
   public void testGetJwtTokenEmpty() {

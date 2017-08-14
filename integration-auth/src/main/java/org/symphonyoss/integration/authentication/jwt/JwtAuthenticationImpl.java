@@ -3,6 +3,7 @@ package org.symphonyoss.integration.authentication.jwt;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
@@ -12,7 +13,7 @@ import org.symphonyoss.integration.logging.LogMessageSource;
  * Created by rsanchez on 28/07/17.
  */
 @Component
-public class JwtAuthentication {
+public class JwtAuthenticationImpl implements JwtAuthentication {
 
   public static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
 
@@ -23,23 +24,13 @@ public class JwtAuthentication {
   @Autowired
   private LogMessageSource logMessageSource;
 
-  /**
-   * Return user identifier from HTTP Authorization header.
-   * @param authorizationHeader HTTP Authorization header
-   * @return User identifier or null if the authorization header is not present or it's not a valid JWT token
-   */
+  @Override
   public Long getUserIdFromAuthorizationHeader(String authorizationHeader) {
     String token = getJwtToken(authorizationHeader);
     return getUserId(token);
   }
 
-  /**
-   * Retrieves JWT token from HTTP Authorization header.
-   *
-   * @param authorizationHeader HTTP Authorization header
-   * @return JWT token or null if the authorization header is not present or it's not a valid JWT
-   * token
-   */
+  @Override
   public String getJwtToken(String authorizationHeader) {
     if (StringUtils.isEmpty(authorizationHeader) || (!authorizationHeader.startsWith(
         AUTHORIZATION_HEADER_PREFIX))) {
