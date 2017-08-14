@@ -93,39 +93,77 @@ public class CompanyCertificateService {
   }
 
   /**
-   * Import user certificate
-   * @param application
+   * Import certificates related to the application.
+   * @param application Application settings
    */
   public void importCertificate(Application application) {
-    String pem = getPem(application);
+    importUserCertificate(application);
+    importAppCertificate(application);
+  }
+
+  /**
+   * Import user certificate
+   * @param application Application settings
+   */
+  public void importUserCertificate(Application application) {
+    String fileName = utils.getCertsDirectory() + application.getId() + ".pem";
+
+    String pem = getPem(fileName);
 
     if (StringUtils.isBlank(pem)) {
-      LOGGER.info("Skipping certificate importing for: {}", application.getComponent());
+      LOGGER.info("Skipping user certificate importing for: {}. File: {}", application.getComponent(), fileName);
     } else {
-      LOGGER.info("Importing company certificate for: {}", application.getComponent());
-      CompanyCert companyCert = buildCompanyCertificate(application, pem);
+      LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
 
-      String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+      CompanyCert companyCert = buildCompanyCertificate(application.getId(), pem, CompanyCertStatus.TypeEnum.KNOWN);
+      importCertificate(companyCert);
+    }
+  }
 
-      try {
-        securityApi.createCompanyCert(sessionToken, companyCert);
-      } catch (RemoteApiException e) {
-        String message = logMessage.getMessage(FAIL_IMPORT_CERT);
-        String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
-        throw new CompanyCertificateException(message, e, solution);
-      }
+  /**
+   * Import application certificate
+   * @param application Application settings
+   */
+  public void importAppCertificate(Application application) {
+    String certName = application.getId() + "_app";
+    String fileName = utils.getCertsDirectory() + certName + ".pem";
+
+    String pem = getPem(fileName);
+
+    if (StringUtils.isBlank(pem)) {
+      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
+    } else {
+      LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
+
+      CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
+      importCertificate(companyCert);
+    }
+  }
+
+  /**
+   * Import certificate using Security API
+   * @param companyCert Company certificate
+   */
+  private void importCertificate(CompanyCert companyCert) {
+    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
+
+    try {
+      securityApi.createCompanyCert(sessionToken, companyCert);
+    } catch (RemoteApiException e) {
+      String message = logMessage.getMessage(FAIL_IMPORT_CERT);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new CompanyCertificateException(message, e, solution);
     }
   }
 
   /**
    * Get an X509 certificate in PEM format.
-   * @param application Application object
+   * @param fileName Certificate filename
    * @return X509 certificate content or empty string if the certificate doesn't exist.
    */
-  public String getPem(Application application) {
-    String fileName = utils.getCertsDirectory() + application.getId() + ".pem";
-
+  public String getPem(String fileName) {
     File pemFile = new File(fileName);
+
     if (!pemFile.isFile()) {
       return StringUtils.EMPTY;
     } else {
@@ -251,20 +289,23 @@ public class CompanyCertificateService {
 
   /**
    * Builds a company certificate object.
-   * @param application Application object
+   *
+   * @param certName Certificate name
    * @param pem An X509 certificate in PEM format
+   * @param type Certificate type
    * @return Company certificate object
    */
-  private CompanyCert buildCompanyCertificate(Application application, String pem) {
+  private CompanyCert buildCompanyCertificate(String certName, String pem,
+      CompanyCertStatus.TypeEnum type) {
     CompanyCertAttributes attributes = new CompanyCertAttributes();
-    attributes.setName(application.getId());
+    attributes.setName(certName);
 
     CompanyCertType certType = new CompanyCertType();
     certType.setType(CompanyCertType.TypeEnum.USER);
     attributes.setType(certType);
 
     CompanyCertStatus status = new CompanyCertStatus();
-    status.setType(CompanyCertStatus.TypeEnum.KNOWN);
+    status.setType(type);
     attributes.setStatus(status);
 
     CompanyCert companyCert = new CompanyCert();

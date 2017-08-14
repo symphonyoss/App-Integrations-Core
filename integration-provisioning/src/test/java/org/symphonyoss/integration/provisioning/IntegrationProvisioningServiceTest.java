@@ -40,10 +40,12 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
+import org.symphonyoss.integration.provisioning.service.AppKeyPairService;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
 import org.symphonyoss.integration.provisioning.service.KeyPairService;
+import org.symphonyoss.integration.provisioning.service.UserKeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
 import java.util.Collections;
@@ -73,7 +75,10 @@ public class IntegrationProvisioningServiceTest {
   private CompanyCertificateService companyCertificateService;
 
   @MockBean
-  private KeyPairService keyPairService;
+  private UserKeyPairService userKeyPairService;
+
+  @MockBean
+  private AppKeyPairService appKeyPairService;
 
   @SpyBean
   private IntegrationProperties properties;

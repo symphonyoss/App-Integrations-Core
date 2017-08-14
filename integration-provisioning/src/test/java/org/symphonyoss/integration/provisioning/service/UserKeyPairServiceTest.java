@@ -67,13 +67,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Unit test for {@link KeyPairService}
+ * Unit test for {@link UserKeyPairService}
  * Created by rsanchez on 14/06/17.
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
 @PrepareForTest({KeyPairService.class})
-public class KeyPairServiceTest {
+public class UserKeyPairServiceTest {
 
   private static final String MOCK_APP_TYPE = "appTest";
 
@@ -111,11 +111,12 @@ public class KeyPairServiceTest {
   @Mock
   private LogMessageSource logMessage;
 
-  @InjectMocks
-  private KeyPairService keyPairService = new KeyPairService(arguments);
+  private UserKeyPairService keyPairService;
 
   @Before
   public void init() throws IOException {
+    keyPairService = new UserKeyPairService(arguments, logMessage, properties, utils);
+
     PowerMockito.mockStatic(Runtime.class);
     PowerMockito.mockStatic(FileSystems.class);
     PowerMockito.mockStatic(Files.class);

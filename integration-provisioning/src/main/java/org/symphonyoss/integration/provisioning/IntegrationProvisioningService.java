@@ -40,10 +40,12 @@ import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationBridge;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
+import org.symphonyoss.integration.provisioning.service.AppKeyPairService;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
 import org.symphonyoss.integration.provisioning.service.KeyPairService;
+import org.symphonyoss.integration.provisioning.service.UserKeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
 import java.io.IOException;
@@ -82,7 +84,10 @@ public class IntegrationProvisioningService {
   private CompanyCertificateService companyCertificateService;
 
   @Autowired
-  private KeyPairService keyPairService;
+  private UserKeyPairService userKeyPairService;
+
+  @Autowired
+  private AppKeyPairService appKeyPairService;
 
   @Autowired
   private IntegrationProperties properties;
@@ -178,7 +183,9 @@ public class IntegrationProvisioningService {
 
     userService.setupBotUser(settings, application);
 
-    keyPairService.exportCertificate(settings, application);
+    userKeyPairService.exportCertificate(settings, application);
+    appKeyPairService.exportCertificate(application);
+
     companyCertificateService.importCertificate(application);
 
     LOGGER.info("Application {} provisioned\n", application.getId());

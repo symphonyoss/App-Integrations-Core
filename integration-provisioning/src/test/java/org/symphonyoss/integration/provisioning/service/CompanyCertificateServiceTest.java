@@ -77,7 +77,7 @@ public class CompanyCertificateServiceTest {
 
   private static final String INVALID_ID = "invalid";
 
-  private static final String EXPECTED_PEM = "-----BEGIN CERTIFICATE-----\n"
+  private static final String EXPECTED_USER_PEM = "-----BEGIN CERTIFICATE-----\n"
       + "MIIFxzCCA6+gAwIBAgIJAOgCgLBJnSY5MA0GCSqGSIb3DQEBCwUAMHoxCzAJBgNV\n"
       + "BAYTAlVTMQswCQYDVQQIDAJDQTESMBAGA1UEBwwJUGFsbyBBbHRvMREwDwYDVQQK\n"
       + "DAhTeW1waG9ueTERMA8GA1UEAwwIdGVzdGJvb3QxJDAiBgkqhkiG9w0BCQEWFXRl\n"
@@ -111,6 +111,24 @@ public class CompanyCertificateServiceTest {
       + "CEuc8SaA/5dOJDEAPy5b1KdRR1lJnEHfgisGhc2S5h0KQYdGDkRNtMLNmg==\n"
       + "-----END CERTIFICATE-----\n";
 
+  private static final String EXPECTED_APP_PEM = "-----BEGIN CERTIFICATE-----\n"
+      + "MIICuDCCAiGgAwIBAgIJAP5lUDaSE775MA0GCSqGSIb3DQEBCwUAMHUxHzAdBgNV\n"
+      + "BAMMFmppcmFXZWJIb29rSW50ZWdyYXRpb24xJDAiBgNVBAoMG1N5bXBob255IENv\n"
+      + "bW11bmljYXRpb25zIExMQzEfMB0GA1UECwwWTk9UIEZPUiBQUk9EVUNUSU9OIFVT\n"
+      + "RTELMAkGA1UEBhMCVVMwHhcNMTcwODA4MTc0ODM5WhcNMjcwODA2MTc0ODM5WjB1\n"
+      + "MR8wHQYDVQQDDBZqaXJhV2ViSG9va0ludGVncmF0aW9uMSQwIgYDVQQKDBtTeW1w\n"
+      + "aG9ueSBDb21tdW5pY2F0aW9ucyBMTEMxHzAdBgNVBAsMFk5PVCBGT1IgUFJPRFVD\n"
+      + "VElPTiBVU0UxCzAJBgNVBAYTAlVTMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n"
+      + "gQCYNEPc4ZmiDjIP70Lnov5F/GMYarAEkEed6rRJ/hM7xI/QzwknndzM3rV+ykiU\n"
+      + "OSqZA4RaAwEZzcPWL6ZBydzb6MknL82VGlNEPFdOTSoIjd4moTNgCFkMY+MPjSQL\n"
+      + "Ko+rXTujGHH5smge3qr5hbtTOXEF/XU1w6Fm0xroykLrEQIDAQABo1AwTjAdBgNV\n"
+      + "HQ4EFgQUaiVZ4dnwKPiJLB23PG3lrIk6bQkwHwYDVR0jBBgwFoAUaiVZ4dnwKPiJ\n"
+      + "LB23PG3lrIk6bQkwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQAZMdc7\n"
+      + "s13aBRX9zcBsBrP+FMDSJHGULX0W2UNnRqEdnK6r2tS5v96YaAUmdtEYY55fPpCA\n"
+      + "JT/uk43VyeBcyVFNGUW6nysGFbOevsBUpXINgGFc4z76Iib2juWZS1P5kdhw3YhZ\n"
+      + "aJfiCzgWhDz1fRbMjGFu9ebL91DStwoC+xRryw==\n"
+      + "-----END CERTIFICATE-----\n";
+
   private static final String APP_ID = "jira";
 
   private static final String APP_TYPE = "jiraWebHookIntegration";
@@ -140,6 +158,8 @@ public class CompanyCertificateServiceTest {
   @InjectMocks
   private CompanyCertificateService service;
 
+  private String certDir;
+
   @Before
   public void init() {
     Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -149,7 +169,7 @@ public class CompanyCertificateServiceTest {
     this.application.setComponent(MOCK_APP_TYPE);
 
     URL certResource = getClass().getClassLoader().getResource(CERT_NAME);
-    String certDir = certResource.getFile().replace(CERT_NAME, "");
+    this.certDir = certResource.getFile().replace(CERT_NAME, "");
 
     doReturn(certDir).when(utils).getCertsDirectory();
 
@@ -201,33 +221,33 @@ public class CompanyCertificateServiceTest {
 
   @Test
   public void testFileNotFound() {
-    this.application.setId(UNKNOWN_ID);
-    String pem = service.getPem(application);
+    String fileName = certDir + UNKNOWN_ID + ".pem";
+    String pem = service.getPem(fileName);
     assertTrue(StringUtils.isBlank(pem));
   }
 
   @Test(expected = CompanyCertificateException.class)
   public void testInvalidCertificate() {
-    this.application.setId(INVALID_ID);
-    service.getPem(application);
+    String fileName = certDir + INVALID_ID + ".pem";
+    service.getPem(fileName);
   }
 
   @Test(expected = CompanyCertificateException.class)
-  public void testImportCertificateRemoteApiException() throws RemoteApiException {
+  public void testUserImportCertificateRemoteApiException() throws RemoteApiException {
     doThrow(RemoteApiException.class).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID),
         any(CompanyCert.class));
 
-    service.importCertificate(application);
+    service.importUserCertificate(application);
   }
 
   @Test
-  public void testImportCertificate() throws RemoteApiException {
+  public void testUserImportCertificate() throws RemoteApiException {
     doAnswer(new Answer<CompanyCertDetail>() {
       @Override
       public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
         CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
 
-        checkImportedCertificate(cert);
+        checkUserImportedCertificate(cert);
 
         CompanyCertDetail result = new CompanyCertDetail();
         result.setCompanyCertAttributes(cert.getAttributes());
@@ -236,16 +256,52 @@ public class CompanyCertificateServiceTest {
       }
     }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
 
-    service.importCertificate(application);
+    service.importUserCertificate(application);
   }
 
-  private void checkImportedCertificate(CompanyCert cert) {
+  private void checkUserImportedCertificate(CompanyCert cert) {
     CompanyCertAttributes attributes = cert.getAttributes();
 
-    assertEquals(EXPECTED_PEM, cert.getPem());
+    assertEquals(EXPECTED_USER_PEM, cert.getPem());
     assertEquals(application.getId(), attributes.getName());
     assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
     assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
+  }
+
+  @Test(expected = CompanyCertificateException.class)
+  public void testAppImportCertificateRemoteApiException() throws RemoteApiException {
+    doThrow(RemoteApiException.class).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID),
+        any(CompanyCert.class));
+
+    service.importAppCertificate(application);
+  }
+
+  @Test
+  public void testAppImportCertificate() throws RemoteApiException {
+    doAnswer(new Answer<CompanyCertDetail>() {
+      @Override
+      public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
+        CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
+
+        checkAppImportedCertificate(cert);
+
+        CompanyCertDetail result = new CompanyCertDetail();
+        result.setCompanyCertAttributes(cert.getAttributes());
+
+        return result;
+      }
+    }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
+
+    service.importAppCertificate(application);
+  }
+
+  private void checkAppImportedCertificate(CompanyCert cert) {
+    CompanyCertAttributes attributes = cert.getAttributes();
+
+    assertEquals(EXPECTED_APP_PEM, cert.getPem());
+    assertEquals(application.getId() + "_app", attributes.getName());
+    assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
+    assertEquals(CompanyCertStatus.TypeEnum.TRUSTED, attributes.getStatus().getType());
   }
 
   private Application getApplication(Keystore keystore) {
