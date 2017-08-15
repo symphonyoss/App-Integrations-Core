@@ -20,6 +20,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
@@ -79,17 +80,17 @@ public class IntegrationAuthApiClientTest {
     apiClient.getUserAuthData(null, null, null, null);
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetUserAuthDataNullIntegrationId() throws RemoteApiException {
     apiClient.getUserAuthData(MOCK_SESSION, null, null, null);
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetUserAuthDataNullUserId() throws RemoteApiException {
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, null, null);
   }
 
-  @Test(expected = RemoteApiException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetUserAuthDataNullUrl() throws RemoteApiException {
     apiClient.getUserAuthData(MOCK_SESSION, MOCK_INTEGRATION_ID, MOCK_USER_ID, null);
   }

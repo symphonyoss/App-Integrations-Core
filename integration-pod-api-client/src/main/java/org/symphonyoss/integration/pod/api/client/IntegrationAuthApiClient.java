@@ -30,6 +30,7 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.config.NotFoundException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
@@ -205,14 +206,14 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
    * Check HTTP parameter. Throws an {@link RemoteApiException} if the parameter is null.
    * @param param Parameter object
    * @param paramName Parameter name
-   * @throws RemoteApiException
+   * @throws NotFoundException
    */
-  private void checkParam(Object param, String paramName) throws RemoteApiException {
+  private void checkParam(Object param, String paramName) {
     if (param == null) {
       String reason =
           logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, paramName, GET_USER_AUTH_DATA);
       String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, paramName);
-      throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
+      throw new NotFoundException(reason, solution);
     }
   }
 
