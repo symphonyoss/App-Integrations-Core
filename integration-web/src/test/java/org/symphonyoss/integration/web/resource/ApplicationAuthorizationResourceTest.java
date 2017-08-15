@@ -40,6 +40,7 @@ import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1HttpRequestException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -150,13 +151,14 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testGetAuthorizationUserSessionIntegrationNotFound() throws RemoteApiException {
+  public void testGetAuthorizationUserSessionIntegrationNotFound()
+      throws RemoteApiException, OAuth1HttpRequestException {
     applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
   }
 
   @Test
   public void testGetAuthorizationUserSessionUnauthorized() throws RemoteApiException,
-      AuthorizationException {
+      AuthorizationException, OAuth1HttpRequestException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
 
@@ -191,7 +193,8 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test
-  public void testGetAuthorizationUser() throws RemoteApiException, AuthorizationException {
+  public void testGetAuthorizationUser()
+      throws RemoteApiException, AuthorizationException, OAuth1HttpRequestException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
     doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
@@ -205,7 +208,7 @@ public class ApplicationAuthorizationResourceTest {
 
   @Test
   public void testGetAuthorizationUserInternalError() throws RemoteApiException,
-      AuthorizationException {
+      AuthorizationException, OAuth1HttpRequestException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
 

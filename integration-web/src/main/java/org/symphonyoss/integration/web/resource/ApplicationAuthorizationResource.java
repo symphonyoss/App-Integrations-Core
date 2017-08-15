@@ -31,6 +31,7 @@ import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1HttpRequestException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
@@ -106,7 +107,7 @@ public class ApplicationAuthorizationResource {
   public ResponseEntity getUserAuthorizationData(@PathVariable String configurationId,
       @RequestParam(name = "url") String integrationURL,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-      throws RemoteApiException {
+      throws RemoteApiException, OAuth1HttpRequestException {
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(authorizationHeader);
     UserAuthorizationData data = new UserAuthorizationData(integrationURL, userId);
