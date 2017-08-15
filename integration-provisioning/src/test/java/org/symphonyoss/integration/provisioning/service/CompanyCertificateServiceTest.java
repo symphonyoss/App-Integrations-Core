@@ -139,7 +139,11 @@ public class CompanyCertificateServiceTest {
 
   private static final String MOCK_KEYSTORE_FILE = "mock.p12";
 
+  private static final String MOCK_WITH_EMAIL_ADDRESS_KEYSTORE_FILE = "mock-with-email_address.p12";
+
   private static final String MOCK_USER = "testuser";
+
+  private static final String MOCK_EMAIL = "symphony@symphony.com";
 
   @Mock
   private AuthenticationProxy authenticationProxy;
@@ -217,6 +221,42 @@ public class CompanyCertificateServiceTest {
 
     String name = service.getCommonNameFromApplicationCertificate(application);
     assertEquals(MOCK_USER, name);
+  }
+
+  @Test
+  public void testGetEmptyEmailAddressFromApplicationCertificate() {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+
+    Application application = getApplication(keystore);
+
+    String name = service.getEmailAddressFromApplicationCertificate(application);
+    assertTrue(StringUtils.isEmpty(name));
+  }
+
+  @Test(expected = CompanyCertificateException.class)
+  public void testFailGetEmailAddressFromApplicationCertificate()
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(INVALID_KEYSTORE_PASSWORD);
+    keystore.setFile(MOCK_WITH_EMAIL_ADDRESS_KEYSTORE_FILE);
+
+    Application application = getApplication(keystore);
+
+    service.getEmailAddressFromApplicationCertificate(application);
+  }
+
+  @Test
+  public void testGetEmailAddressFromApplicationCertificateEmptyAliases()
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    keystore.setFile(MOCK_WITH_EMAIL_ADDRESS_KEYSTORE_FILE);
+
+    Application application = getApplication(keystore);
+
+    String email = service.getEmailAddressFromApplicationCertificate(application);
+    assertEquals(MOCK_EMAIL, email);
   }
 
   @Test

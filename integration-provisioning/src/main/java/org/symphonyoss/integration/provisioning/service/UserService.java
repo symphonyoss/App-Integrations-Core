@@ -101,18 +101,18 @@ public class UserService {
       throw new UserSearchException(message);
     }
 
+    User user = getUser(settings.getOwner());
+
     String name = app.getName();
     String avatar = app.getAvatar();
-
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
-
-    User user = getUser(settings.getOwner());
 
     if (user == null) {
       String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
       throw new UserSearchException(message);
     } else {
-      updateUser(sessionToken, user, name, avatar);
+      String emailAddress = getEmail(app, user.getUsername());
+      updateUser(sessionToken, user, name, avatar, emailAddress);
       settings.setUsername(user.getUsername());
     }
   }
@@ -158,11 +158,11 @@ public class UserService {
    * @param name User display name
    * @param avatar User avatar (Base64 encoded)
    */
-  private void updateUser(String sessionToken, User user, String name, String avatar) {
+  private void updateUser(String sessionToken, User user, String name, String avatar, String emailAddress) {
     Long userId = user.getId();
 
     try {
-      UserAttributes userAttributes = createUserAttributes(user.getUsername(), name);
+      UserAttributes userAttributes = createUserAttributes(user.getUsername(), name, emailAddress);
       userApiClient.updateUser(sessionToken, userId, userAttributes);
     } catch (RemoteApiException e) {
       String message = logMessage.getMessage(FAIL_UPDATE_ATTRIBUTES);
@@ -199,14 +199,12 @@ public class UserService {
    * @param name User display name
    * @return User attributes
    */
-  private UserAttributes createUserAttributes(String username, String name) {
-    String emailAddress = getEmail(username);
-
+  private UserAttributes createUserAttributes(String username, String name, String emailAddress) {
     UserAttributes userAttributes = new UserAttributes();
     userAttributes.setUserName(username);
     userAttributes.setDisplayName(name);
-    userAttributes.setEmailAddress(emailAddress);
     userAttributes.setAccountType(UserAttributes.AccountTypeEnum.SYSTEM);
+    userAttributes.setEmailAddress(emailAddress);
 
     return userAttributes;
   }
@@ -217,7 +215,13 @@ public class UserService {
    * @param username Username
    * @return username if it's a valid email address or 'username@symphony.com' otherwise.
    */
-  private String getEmail(String username) {
+  private String getEmail(Application application, String username) {
+    String emailAddress = certificateService.getEmailAddressFromApplicationCertificate(application);
+
+    if (StringUtils.isNotEmpty(emailAddress)) {
+      return emailAddress;
+    }
+
     Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(username);
     if (matcher.matches()) {
       return username;
