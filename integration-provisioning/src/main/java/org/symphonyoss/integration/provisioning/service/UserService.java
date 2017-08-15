@@ -101,18 +101,17 @@ public class UserService {
       throw new UserSearchException(message);
     }
 
+    User user = getUser(settings.getOwner());
+
     String name = app.getName();
     String avatar = app.getAvatar();
-    String emailAddress = certificateService.getEmailAddressFromApplicationCertificate(app);
-
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
-
-    User user = getUser(settings.getOwner());
 
     if (user == null) {
       String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
       throw new UserSearchException(message);
     } else {
+      String emailAddress = getEmail(app, user.getUsername());
       updateUser(sessionToken, user, name, avatar, emailAddress);
       settings.setUsername(user.getUsername());
     }
@@ -205,12 +204,7 @@ public class UserService {
     userAttributes.setUserName(username);
     userAttributes.setDisplayName(name);
     userAttributes.setAccountType(UserAttributes.AccountTypeEnum.SYSTEM);
-
-    if (StringUtils.isNotEmpty(emailAddress)) {
-      userAttributes.setEmailAddress(emailAddress);
-    } else {
-      userAttributes.setEmailAddress(getEmail(username));
-    }
+    userAttributes.setEmailAddress(emailAddress);
 
     return userAttributes;
   }
@@ -221,7 +215,13 @@ public class UserService {
    * @param username Username
    * @return username if it's a valid email address or 'username@symphony.com' otherwise.
    */
-  private String getEmail(String username) {
+  private String getEmail(Application application, String username) {
+    String emailAddress = certificateService.getEmailAddressFromApplicationCertificate(application);
+
+    if (StringUtils.isNotEmpty(emailAddress)) {
+      return emailAddress;
+    }
+
     Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(username);
     if (matcher.matches()) {
       return username;

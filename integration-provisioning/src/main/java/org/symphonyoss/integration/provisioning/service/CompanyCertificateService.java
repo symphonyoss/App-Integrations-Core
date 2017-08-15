@@ -168,9 +168,9 @@ public class CompanyCertificateService {
   }
 
   /**
-   * Get a email address from the application certificate
+   * Get an email address from the application certificate
    * @param application Application object
-   * @return EmailAddress from the application certificate or empty string if the certificate doesn't exist
+   * @return Email address from the application certificate or empty string if the certificate doesn't exist
    */
   public String getEmailAddressFromApplicationCertificate(Application application) {
     X509Certificate certificate = readPKCS12Certificate(application);
