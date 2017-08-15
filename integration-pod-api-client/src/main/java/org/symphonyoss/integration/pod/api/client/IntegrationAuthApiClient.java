@@ -28,6 +28,7 @@ import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.exception.config.NotFoundException;
@@ -213,7 +214,7 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
       String reason =
           logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING, paramName, GET_USER_AUTH_DATA);
       String solution = logMessage.getMessage(MISSING_PARAMETER_WHEN_CALLING_SOLUTION, paramName);
-      throw new NotFoundException(reason, solution);
+      throw new MissingRequiredParameterException(reason, solution);
     }
   }
 
