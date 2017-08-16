@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.exception;
+package org.symphonyoss.integration.web.exception;
 
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 

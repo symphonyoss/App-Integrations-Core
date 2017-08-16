@@ -46,7 +46,7 @@ import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
-import org.symphonyoss.integration.exception.IntegrationBridgeUnavailableException;
+import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
