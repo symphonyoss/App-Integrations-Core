@@ -54,9 +54,9 @@ import javax.servlet.http.HttpServletRequest;
 public class ApplicationAuthorizationResource {
 
   private static final String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
-
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
       INTEGRATION_UNAVAILABLE + ".solution";
+
   private static final String INTEGRATION_NOT_AUTH = "integration.web.integration.not.authorized";
   private static final String INTEGRATION_NOT_AUTH_SOLUTION =
       INTEGRATION_NOT_AUTH + ".solution";
