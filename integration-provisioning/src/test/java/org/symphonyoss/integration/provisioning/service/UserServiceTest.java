@@ -19,13 +19,12 @@ package org.symphonyoss.integration.provisioning.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .DEFAULT_USER_ID;
 
@@ -36,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -50,6 +48,7 @@ import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
@@ -75,6 +74,7 @@ public class UserServiceTest {
       "zJaibaj9CI1hsjQEhkOuTzMwPK0Maht8No0zb5pHkz4af++s59u3vSnpIui7oHtAo1WL4Lf0TkHvgp7OjN9Or3==";
 
   private static final String MOCK_INVALID_USERNAME = "invaliduser";
+  public static final String MOCK_EMAIL_CERTIFICATE = "testuser@symphony.com";
 
   @Mock
   private AuthenticationProxy authenticationProxy;
@@ -229,6 +229,45 @@ public class UserServiceTest {
   public void testSuccessfulSetup() {
     Application application = mockApplication();
     userService.setupBotUser(settings, application);
+    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
+  }
+
+  @Test
+  public void testSuccessfulSetupWithEmailAddress() throws RemoteApiException {
+    Application application = mockApplication();
+    doReturn(MOCK_EMAIL).when(certificateService).getEmailAddressFromApplicationCertificate(application);
+
+    doAnswer(new Answer<UserDetail>() {
+      @Override
+      public UserDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
+        UserAttributes userAttributes = (UserAttributes) invocationOnMock.getArguments()[2];
+        Assert.assertEquals(MOCK_EMAIL, userAttributes.getEmailAddress());
+
+        return new UserDetail();
+      }
+    }).when(userApiClient).updateUser(eq(MOCK_SESSION_ID), eq(MOCK_USER_ID), any(UserAttributes.class));
+
+    userService.setupBotUser(settings, application);
+
+    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
+  }
+
+  @Test
+  public void testSuccessfulSetupWithoutEmailAddress() throws RemoteApiException {
+    Application application = mockApplication();
+
+    doAnswer(new Answer<UserDetail>() {
+      @Override
+      public UserDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
+        UserAttributes userAttributes = (UserAttributes) invocationOnMock.getArguments()[2];
+        Assert.assertEquals(MOCK_EMAIL_CERTIFICATE, userAttributes.getEmailAddress());
+
+        return new UserDetail();
+      }
+    }).when(userApiClient).updateUser(anyString(), anyLong(), any(UserAttributes.class));;
+
+    userService.setupBotUser(settings, application);
+
     Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
   }
 }

@@ -24,13 +24,8 @@ import static org.mockito.Mockito.doThrow;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.CertificateNotFoundException;
@@ -39,7 +34,6 @@ import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.healthcheck.IntegrationFlags;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 import org.symphonyoss.integration.model.yaml.Application;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.model.yaml.Keystore;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
@@ -98,8 +92,9 @@ public class NullIntegrationTest extends MockKeystore {
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+    assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
   }
 
   @Test
@@ -118,8 +113,9 @@ public class NullIntegrationTest extends MockKeystore {
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+    assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
   }
 
   @Test
@@ -141,8 +137,9 @@ public class NullIntegrationTest extends MockKeystore {
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+    assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
   }
 
   @Test
@@ -167,8 +164,9 @@ public class NullIntegrationTest extends MockKeystore {
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+    assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
   }
 
   @Test
@@ -192,8 +190,9 @@ public class NullIntegrationTest extends MockKeystore {
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.OK, flags.getCertificateInstalled());
+    assertEquals(IntegrationFlags.ValueEnum.OK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
+    assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
   }
 
   @Test
