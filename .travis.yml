@@ -24,7 +24,7 @@ language: java
 
 install: true
 script:
-- "if [[ \"$TRAVIS_PULL_REQUEST\" = \"false\" && $TRAVIS_BRANCH =~ dev ]]; then mvn clean deploy -Pversioneye -DtransitiveDependencies=true --settings settings.xml -Dbuild.provisioning=false; fi"
+- "if [[ \"$TRAVIS_PULL_REQUEST\" = \"false\" && $TRAVIS_BRANCH =~ dev ]]; then mvn clean deploy -Pversioneye -Pcobertura -DtransitiveDependencies=true --settings settings.xml -Dbuild.provisioning=false; fi"
 - "if [[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]]; then mvn clean install -Pcobertura; fi"
 
 jdk:
