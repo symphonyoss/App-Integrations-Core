@@ -18,6 +18,7 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -257,6 +258,19 @@ public class CompanyCertificateServiceTest {
 
     String email = service.getEmailAddressFromApplicationCertificate(application);
     assertEquals(MOCK_EMAIL, email);
+  }
+
+  @Test
+  public void testGetEmailAddressFromApplicationCertificateWhitoutEmailAddress()
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    Keystore keystore = new Keystore();
+    keystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    keystore.setFile(MOCK_KEYSTORE_FILE);
+
+    Application application = getApplication(keystore);
+
+    String email = service.getEmailAddressFromApplicationCertificate(application);
+    assertEquals(StringUtils.EMPTY, email);
   }
 
   @Test

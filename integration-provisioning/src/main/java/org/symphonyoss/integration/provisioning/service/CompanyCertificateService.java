@@ -214,8 +214,15 @@ public class CompanyCertificateService {
     X509Certificate certificate = readPKCS12Certificate(application);
 
     if (certificate != null) {
+
+      String issuerDNName = certificate.getIssuerDN().getName();
+      if (!issuerDNName.contains("EMAILADDRESS")) {
+        return StringUtils.EMPTY;
+      }
+
       Pattern p = Pattern.compile("(^|,)EMAILADDRESS=([^,]*)(,|$)");
-      Matcher m = p.matcher(certificate.getIssuerDN().getName());
+      Matcher m = p.matcher(issuerDNName);
+
 
       m.find();
 
