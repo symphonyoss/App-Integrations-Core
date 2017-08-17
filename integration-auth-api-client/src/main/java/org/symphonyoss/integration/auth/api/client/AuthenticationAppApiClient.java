@@ -18,6 +18,12 @@ package org.symphonyoss.integration.auth.api.client;
 
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.BAD_REQUEST_MESSAGE;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.BAD_REQUEST_MESSAGE_SOLUTION;
+
+
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .POD_UNEXPECTED_MESSAGE;
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .POD_UNEXPECTED_MESSAGE_SOLUTION;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNAUTHORIZED_MESSAGE;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNAUTHORIZED_MESSAGE_SOLUTION;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNEXPECTED_MESSAGE;
@@ -28,6 +34,7 @@ import org.symphonyoss.integration.auth.api.exception.InvalidAppTokenException;
 import org.symphonyoss.integration.auth.api.exception.UnauthorizedAppException;
 import org.symphonyoss.integration.auth.api.exception.UnexpectedAppAuthenticationException;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
@@ -43,7 +50,8 @@ import javax.ws.rs.core.Response;
  */
 public class AuthenticationAppApiClient {
 
-  private static final String PATH = "/v1/authenticate/extensionApp";
+  private static final String AUTHENTICATE_PATH = "/v1/authenticate/extensionApp";
+  private static final String CERTIFICATE_PATH = "/v1/app/pod/certificate";
 
   private final LogMessageSource logMessage;
 
@@ -64,7 +72,7 @@ public class AuthenticationAppApiClient {
       AppToken token = new AppToken();
       token.setAppToken(appToken);
 
-      return apiClient.doPost(PATH, headerParams, queryParams, token, AppToken.class);
+      return apiClient.doPost(AUTHENTICATE_PATH, headerParams, queryParams, token, AppToken.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
@@ -87,4 +95,17 @@ public class AuthenticationAppApiClient {
     }
   }
 
+  public PodCertificate getPodPublicCertificate() {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("appId", "jira");
+
+    Map<String, String> queryParams = new HashMap<>();
+    try {
+      return apiClient.doGet(CERTIFICATE_PATH, headerParams, queryParams, PodCertificate.class);
+    } catch (RemoteApiException e) {
+      String message = logMessage.getMessage(POD_UNEXPECTED_MESSAGE);
+      String solution = logMessage.getMessage(POD_UNEXPECTED_MESSAGE_SOLUTION);
+      throw new UnexpectedAppAuthenticationException(message, e, solution);
+    }
+  }
 }

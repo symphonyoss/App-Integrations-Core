@@ -27,6 +27,7 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationAppApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthAppHttpApiClient;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -105,4 +106,8 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
     return apiClient.authenticate(appId, appToken);
   }
 
+  @Override
+  public PodCertificate getPodPublicCertificate() {
+    return apiClient.getPodPublicCertificate();
+  }
 }
