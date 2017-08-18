@@ -22,25 +22,25 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link LocalAuthorizationRepoServiceCondition}
- * Created by hamitay on 18/08/17.
+ * Unit tests for {@link RemoteAuthorizationRepoServiceCondition}
+ * Created by rsanchez on 18/08/17.
  */
-public class LocalAuthorizationRepoServiceConditionTest {
+public class RemoteAuthorizationRepoServiceConditionTest {
 
   private static final String PROPERTY_KEY = "local_authorization";
 
   @Test
   public void testLocalAuthorizationRepoService() {
-    LocalAuthorizationRepoServiceCondition condition = new LocalAuthorizationRepoServiceCondition();
+    RemoteAuthorizationRepoServiceCondition condition = new RemoteAuthorizationRepoServiceCondition();
 
     System.getProperties().remove(PROPERTY_KEY);
-    assertFalse(condition.matches(null, null));
+    assertTrue(condition.matches(null, null));
 
     System.setProperty(PROPERTY_KEY, "false");
-    assertFalse(condition.matches(null, null));
+    assertTrue(condition.matches(null, null));
 
     System.setProperty(PROPERTY_KEY, "true");
-    assertTrue(condition.matches(null, null));
+    assertFalse(condition.matches(null, null));
   }
 
 }
