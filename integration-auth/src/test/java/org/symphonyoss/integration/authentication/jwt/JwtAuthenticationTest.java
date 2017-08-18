@@ -9,24 +9,39 @@ import static org.mockito.Mockito.doThrow;
 import static org.symphonyoss.integration.authentication.jwt.JwtAuthentication
     .AUTHORIZATION_HEADER_PREFIX;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.RsaProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
-import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.authentication.api.model.JwtPayload;
+import org.symphonyoss.integration.authentication.api.model.PodCertificate;
+import org.symphonyoss.integration.exception.authentication.ExpirationException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
+import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
+import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
 import org.symphonyoss.integration.service.IntegrationBridge;
+import org.symphonyoss.integration.utils.RsaKeyUtils;
 import org.symphonyoss.integration.utils.TokenUtils;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Calendar;
 
 /**
  * Unit tests for {@link JwtAuthentication}
@@ -36,16 +51,9 @@ import org.symphonyoss.integration.utils.TokenUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class JwtAuthenticationTest {
 
-  private static final String MOCK_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-      + (".eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9"
-      + ".TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ");
-
   private static final String MOCK_SESSION_TOKEN = "mockSessionToken";
-
   private static final String MOCK_APP_TOKEN = "mockAppToken";
-
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";
-
   private static final String MOCK_CONFIG_ID = "mockConfigId";
 
   @Mock
@@ -72,10 +80,27 @@ public class JwtAuthenticationTest {
   @Mock
   private IntegrationSettings integrationSettings;
 
+  @Mock
+  private IntegrationProperties properties;
+
+  @Mock
+  private IntegrationHttpApiClient integrationHttpApiClient;
+
+  @Spy
+  private RsaKeyUtils rsaKeyUtils = new RsaKeyUtils();
+
   @InjectMocks
   private JwtAuthentication jwtAuthentication;
 
   private AppToken mockAppToken;
+
+  private PodCertificate mockValidCertificate = new PodCertificate();
+
+  private PublicKey mockPublicKey;
+
+  private String mockJwt;
+
+  private JwtPayload mockJwtPayload;
 
   @Before
   public void init() {
@@ -83,7 +108,35 @@ public class JwtAuthenticationTest {
     doReturn(integration).when(integrationBridge).getIntegrationById(MOCK_CONFIG_ID);
     doReturn(integrationSettings).when(integration).getSettings();
     doReturn(MOCK_CONFIG_ID).when(integrationSettings).getType();
+    doReturn(MOCK_CONFIG_ID).when(properties).getApplicationId(MOCK_CONFIG_ID);
     doReturn(MOCK_SESSION_TOKEN).when(authenticationProxy).getSessionToken(MOCK_CONFIG_ID);
+    prepareJwtScenario(false);
+  }
+
+  private void prepareJwtScenario(boolean expiredJwt) {
+    try {
+      Calendar calendar = Calendar.getInstance();
+      calendar.set(Calendar.MILLISECOND, 0);
+      if (!expiredJwt) {
+        calendar.add(Calendar.HOUR, 1);
+      }
+
+      mockJwtPayload = new JwtPayload("www.symphony.com", "Symphony Communication Services LLC.",
+          "12345", calendar.getTime(), null);
+
+      KeyPair keypair = RsaProvider.generateKeyPair(1024);
+      PrivateKey privateKey = keypair.getPrivate();
+      mockPublicKey = keypair.getPublic();
+      mockJwt = Jwts.builder().
+          setSubject(mockJwtPayload.getUserId()).
+          setExpiration(mockJwtPayload.getExpirationDate()).
+          setAudience(mockJwtPayload.getApplicationId()).
+          setIssuer(mockJwtPayload.getCompanyName()).
+          signWith(SignatureAlgorithm.RS512, privateKey).compact();
+
+    } catch (Exception e) {
+      throw new RuntimeException("Preparation error.", e);
+    }
   }
 
   @Test
@@ -100,10 +153,10 @@ public class JwtAuthenticationTest {
 
   @Test
   public void testGetJwtToken() {
-    String authorizationHeader = AUTHORIZATION_HEADER_PREFIX.concat(MOCK_JWT_TOKEN);
+    String authorizationHeader = AUTHORIZATION_HEADER_PREFIX.concat(mockJwt);
     String result = jwtAuthentication.getJwtToken(authorizationHeader);
 
-    assertEquals(MOCK_JWT_TOKEN, result);
+    assertEquals(mockJwt, result);
   }
 
   @Test(expected = UnauthorizedUserException.class)
@@ -114,14 +167,14 @@ public class JwtAuthenticationTest {
   @Test
   public void testGetUserId() {
     // FIXME APP-1206 Need to be fixed
-    Long userId = jwtAuthentication.getUserId(MOCK_JWT_TOKEN);
+    Long userId = jwtAuthentication.getUserId(mockJwt);
     assertEquals(new Long(0), userId);
   }
 
   @Test
   public void testGetUserIdFromAuthorizationHeader() {
     // FIXME APP-1206 Need to be fixed
-    String authorizationHeader = AUTHORIZATION_HEADER_PREFIX.concat(MOCK_JWT_TOKEN);
+    String authorizationHeader = AUTHORIZATION_HEADER_PREFIX.concat(mockJwt);
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(authorizationHeader);
     assertEquals(new Long(0), userId);
@@ -137,20 +190,20 @@ public class JwtAuthenticationTest {
     assertEquals(MOCK_APP_TOKEN, result);
   }
 
-  @Test(expected = RemoteApiException.class)
-  public void testAuthenticateException() throws RemoteApiException {
+  @Test(expected = UnexpectedAuthException.class)
+  public void testAuthenticateException() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
     doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
         MOCK_APP_TOKEN);
 
-    doThrow(RemoteApiException.class).when(apiClient).saveAppAuthenticationToken(
+    doThrow(UnexpectedAuthException.class).when(apiClient).saveAppAuthenticationToken(
         MOCK_SESSION_TOKEN, MOCK_CONFIG_ID, mockAppToken);
 
     jwtAuthentication.authenticate(MOCK_CONFIG_ID);
   }
 
   @Test
-  public void testIsValidTokenPair() throws RemoteApiException {
+  public void testIsValidTokenPair() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
     doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
         MOCK_APP_TOKEN);
@@ -163,7 +216,7 @@ public class JwtAuthenticationTest {
   }
 
   @Test
-  public void testIsInvalidTokenPair() throws RemoteApiException {
+  public void testIsInvalidTokenPair() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
     doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
         MOCK_APP_TOKEN);
@@ -174,5 +227,25 @@ public class JwtAuthenticationTest {
     boolean result = jwtAuthentication.isValidTokenPair(
         MOCK_CONFIG_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
     assertFalse(result);
+  }
+
+  @Test
+  public void testParseJwtPayload() {
+    doReturn(mockValidCertificate).when(appAuthenticationService).getPodPublicCertificate();
+    doReturn(mockPublicKey).when(rsaKeyUtils).getPublicKeyFromCertificate(null);
+
+    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(mockJwt);
+    assertEquals(mockJwtPayload, jwtPayload);
+  }
+
+
+  @Test(expected = ExpirationException.class)
+  public void testParseJwtPayloadExpired() {
+    prepareJwtScenario(true);
+    doReturn(mockValidCertificate).when(appAuthenticationService).getPodPublicCertificate();
+    doReturn(mockPublicKey).when(rsaKeyUtils).getPublicKeyFromCertificate(null);
+
+    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(mockJwt);
+    assertEquals(mockJwtPayload, jwtPayload);
   }
 }

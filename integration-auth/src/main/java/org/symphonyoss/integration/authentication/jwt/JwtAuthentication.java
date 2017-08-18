@@ -1,9 +1,16 @@
 package org.symphonyoss.integration.authentication.jwt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +22,7 @@ import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
 import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.ExpirationException;
 import org.symphonyoss.integration.exception.authentication.MalformedParameterException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
@@ -46,6 +54,12 @@ public class JwtAuthentication {
 
   private static final String JWT_DESERIALIZE = "integration.auth.jwt.deserialize";
   private static final String JWT_DESERIALIZE_SOLUTION = JWT_DESERIALIZE + ".solution";
+
+  private static final String JWT_EXPIRED = "integration.auth.jwt.expired";
+  private static final String JWT_EXPIRED_SOLUTION = JWT_EXPIRED + ".solution";
+
+  private static final String JWT_INVALID_ALGORITHM = "integration.auth.jwt.invalid.algorithm";
+  private static final String JWT_INVALID_ALGORITHM_SOLUTION = JWT_INVALID_ALGORITHM + ".solution";
 
   private static final String JWT_TOKEN_EMPTY = "integration.auth.jwt.empty";
   private static final String JWT_TOKEN_EMPTY_SOLUTION = JWT_TOKEN_EMPTY + ".solution";
@@ -196,22 +210,30 @@ public class JwtAuthentication {
    */
   public JwtPayload parseJwtPayload(String jwt) {
     PublicKey rsaVerifier = getPodPublicSignatureVerifier();
+    Jws<Claims> jws = null;
+    try {
+      jws = Jwts.parser().setSigningKey(rsaVerifier).parseClaimsJws(jwt);
+    } catch (ExpiredJwtException e) {
+      Date expiration = e.getClaims().getExpiration();
+      if (expiration.before(new Date())) {
+        throw new ExpirationException(logMessage.getMessage(JWT_EXPIRED, expiration.toString()), e,
+            logMessage.getMessage(JWT_EXPIRED_SOLUTION));
+      }
+    }
 
-    String jwtString = "eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJqaXJhV2ViSG9va0ludGVncmF0aW9uIiwiaXNzIjoic3ltcGhvbnkiLCJzZXNzaW9uSWQiOiIzYzI2ZmIzMDU2ODcxMmY2MjRjYzFiYjM2NjBlZjJlZjhjY2NmYjJjNWY0NTYyYmViMTM4N2Y5ODY4YWY5MWJlYjliYjIxNWFhZGQxODk2OGI3YmRhMjExMDhlMjU0MjFiNjg4YTk3Yzc0MzYxNWRiNWM1YzQ3NjExZjNkNmYzYiIsInVzZXJJZCI6IjEwNjUxNTE4ODk0MTI5IiwiZXhwIjoxNTAzMDA3NTIyfQ.F88D9moPGqMMVMODpz8c-Lj3mRC4dQOK9ktncjK0Kuq8008cClTOaimRcgv3JiTf7kOBDFY0_TCi8wCSU27YQNBCz4fbyTuomHUR0V0Uamm0AVb5g2PZDBCrHWhZwHJn4t4Nc5MM7NTLowBYBJ4Ucb8t99yI_P27EL-bbqixaolJJBBg4R15wNtKZ7g1d-V68NGIey6SNZXJDjjVG3GIVRZhMwXXfUi5QUuKvHn5wtxmmlDqR5dyfpPMgg5XCN-cF4nIbl3yd40j5c0Y8OSgv32Paq6D_b26eQyBq0qmkq5AE81g2KpfBaDvnD26AI83UCjlcuaDHarPAidRC5UPEA";
-    Jws jws = Jwts.parser().setSigningKey(rsaVerifier).parseClaimsJws(jwtString);
-
-    Claims body = (Claims) jws.getBody();
-    Date expiration = body.getExpiration();
-
-    JwsHeader header = (JwsHeader) jws.getHeader();
-    String algorithm = header.getAlgorithm();
-
-    String stringJwt = body.getSubject();
-    JsonUtils jsonUtils = new JsonUtils();
+    String actualAlgorithm = jws.getHeader().getAlgorithm();
+    String expectedAlgorithm = SignatureAlgorithm.RS512.name();
+    if (!actualAlgorithm.equals(expectedAlgorithm)) {
+      throw new MalformedParameterException(
+          logMessage.getMessage(JWT_INVALID_ALGORITHM, actualAlgorithm),
+          logMessage.getMessage(JWT_EXPIRED_SOLUTION, expectedAlgorithm));
+    }
 
     try {
-      return jsonUtils.deserialize(stringJwt, JwtPayload.class);
-    } catch (RemoteApiException e) {
+      String json = new ObjectMapper().writeValueAsString(jws.getBody());
+      JsonUtils jsonUtils = new JsonUtils();
+      return jsonUtils.deserialize(json, JwtPayload.class);
+    } catch (JsonProcessingException | RemoteApiException e) {
       throw new MalformedParameterException(logMessage.getMessage(JWT_DESERIALIZE), e,
           logMessage.getMessage(JWT_DESERIALIZE_SOLUTION));
     }

@@ -30,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.authentication.api.model.JwtPayload;
 import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -47,6 +48,8 @@ public class ApplicationAuthenticationResourceTest {
   private static final String MOCK_SESSION = "37ee6257afb388a49f30df59fa1513b0368871a031c6de1036db";
 
   private static final String CONFIGURATION_ID = "57756bca4b54433738037005";
+
+  private static final String USER_ID = "12345";
 
   private static final String MOCK_APP_TOKEN = "mockAppToken";
 
@@ -100,9 +103,10 @@ public class ApplicationAuthenticationResourceTest {
   }
 
 
-  @Test(expected = RemoteApiException.class)
+  @Test
   public void testAuthenticateMalformedUrl() throws RemoteApiException {
     try {
+      doReturn(POD_URL + "/123").when(properties).getPodUrl();
       appAuthenticationResource.authenticate(CONFIGURATION_ID, "?");
     } catch (RemoteApiException e) {
       assertEquals(HttpStatus.BAD_REQUEST.value(), e.getCode());
@@ -111,7 +115,7 @@ public class ApplicationAuthenticationResourceTest {
   }
 
   @Test
-  public void testValidate() throws RemoteApiException {
+  public void testValidateTokens() throws RemoteApiException {
     doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
 
@@ -126,7 +130,7 @@ public class ApplicationAuthenticationResourceTest {
   }
 
   @Test
-  public void testValidateInvalid() throws RemoteApiException {
+  public void testValidateTokensInvalid() throws RemoteApiException {
     doReturn(false).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
 
@@ -136,6 +140,25 @@ public class ApplicationAuthenticationResourceTest {
     assertTrue(result.getBody() instanceof ErrorResponse);
 
     ErrorResponse errorResponse = (ErrorResponse) result.getBody();
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
+  }
+
+  @Test
+  public void testValidateJwt() throws RemoteApiException {
+    JwtPayload mockJwtPayload = new JwtPayload();
+    mockJwtPayload.setUserId(USER_ID);
+    doReturn(mockJwtPayload).when(jwtAuthentication).parseJwtPayload(MOCK_APP_TOKEN);
+
+    ResponseEntity response = appAuthenticationResource.validate(MOCK_APP_TOKEN);
+    assertEquals(mockJwtPayload.getUserId(), response.getBody());
+  }
+
+  @Test
+  public void testValidateJwtInvalid() throws RemoteApiException {
+    doReturn(null).when(jwtAuthentication).parseJwtPayload(MOCK_APP_TOKEN);
+
+    ResponseEntity response = appAuthenticationResource.validate(MOCK_APP_TOKEN);
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
   }
 }
