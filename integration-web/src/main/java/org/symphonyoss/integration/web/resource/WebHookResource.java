@@ -74,6 +74,8 @@ public abstract class WebHookResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WebHookResource.class);
 
+  private static final String COMPONENT = "Webhook Dispatcher";
+
   @Autowired
   @Qualifier("remoteIntegrationService")
   private IntegrationService integrationService;
@@ -131,7 +133,7 @@ public abstract class WebHookResource {
     if (whiIntegration == null) {
       String message = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE, configurationId);
       String solution = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
+      throw new IntegrationUnavailableException(COMPONENT, message, solution);
     }
 
     return whiIntegration;

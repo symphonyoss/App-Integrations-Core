@@ -53,6 +53,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/v1/application/{configurationId}/authorization")
 public class ApplicationAuthorizationResource {
 
+  private static final String COMPONENT = "Authorization API";
+
   private static final String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
       INTEGRATION_UNAVAILABLE + ".solution";
@@ -166,13 +168,13 @@ public class ApplicationAuthorizationResource {
   private AuthorizedIntegration getAuthorizedIntegration(@PathVariable String configurationId) {
     Integration integration = this.integrationBridge.getIntegrationById(configurationId);
     if (integration == null) {
-      throw new IntegrationUnavailableException(
+      throw new IntegrationUnavailableException(COMPONENT,
           logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
           logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
     }
 
     if (!(integration instanceof AuthorizedIntegration)) {
-      throw new IntegrationUnavailableException(
+      throw new IntegrationUnavailableException(COMPONENT,
           logMessage.getMessage(INTEGRATION_NOT_AUTH, configurationId),
           logMessage.getMessage(INTEGRATION_NOT_AUTH_SOLUTION));
     }
