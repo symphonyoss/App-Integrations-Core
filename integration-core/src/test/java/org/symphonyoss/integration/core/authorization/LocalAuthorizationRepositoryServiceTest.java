@@ -1,6 +1,9 @@
 package org.symphonyoss.integration.core.authorization;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -20,52 +23,79 @@ public class LocalAuthorizationRepositoryServiceTest {
 
   private static final String CONFIGURATION_ID = "configurationId";
 
-  private static final String INTEGRATION_URL = "integrationURL";
+  private static final String INTEGRATION_URL1 = "https://test1.symphony.com";
+
+  private static final String INTEGRATION_URL2 = "https://test2.symphony.com";
 
   private static final Long USER_ID = new Long(123456);
 
-  private HashMap<String, String> data1 = new HashMap<>();
+  private static final String MOCK_ACCESS_TOKEN = "as4e435tdfst4302ds8dfs9883249328dsf9";
 
-  private HashMap<String, String> data2 = new HashMap<>();
+  private static final String MOCK_VERIFIER = "a32er9";
 
-  private UserAuthorizationData authorizationData1;
+  private MockOAuth1Data data = new MockOAuth1Data(MOCK_ACCESS_TOKEN, MOCK_VERIFIER);
 
-  private UserAuthorizationData authorizationData2;
+  private UserAuthorizationData authorizationData;
 
   @InjectMocks
   private LocalAuthorizationRepositoryService service;
   
   @Before
   public void init() {
-    service = new LocalAuthorizationRepositoryService();
-    data1.put("data1Key","data1Value");
-    data2.put("data1Key","data2Value");
-    authorizationData1 = new UserAuthorizationData(INTEGRATION_URL, USER_ID, data1);
-    authorizationData2 = new UserAuthorizationData(INTEGRATION_URL, USER_ID, data2);
+    this.service = new LocalAuthorizationRepositoryService();
 
+    authorizationData = new UserAuthorizationData(INTEGRATION_URL1, USER_ID, data);
   }
 
   @Test
   public void testSaveAndFind() throws AuthorizationException {
-    service.save(INTEGRATION_USER, CONFIGURATION_ID, authorizationData1);
     UserAuthorizationData result =
-        service.find(INTEGRATION_USER, CONFIGURATION_ID, INTEGRATION_URL, USER_ID);
+        service.find(INTEGRATION_USER, CONFIGURATION_ID, INTEGRATION_URL1, USER_ID);
 
-    Assert.assertEquals(authorizationData1, result);
+    assertNull(result);
+
+    service.save(INTEGRATION_USER, CONFIGURATION_ID, authorizationData);
+
+    result = service.find(INTEGRATION_USER, CONFIGURATION_ID, INTEGRATION_URL1, USER_ID);
+
+    assertEquals(authorizationData, result);
+
+    result = service.find(INTEGRATION_USER, CONFIGURATION_ID, INTEGRATION_URL2, USER_ID);
+
+    assertNull(result);
   }
-
-  //TO DO
 
   @Test
   public void testSaveAndSearch() throws AuthorizationException {
-    service.save(INTEGRATION_USER, CONFIGURATION_ID, authorizationData1);
-    service.save(INTEGRATION_USER, CONFIGURATION_ID, authorizationData2);
+    service.save(INTEGRATION_USER, CONFIGURATION_ID, authorizationData);
 
     HashMap<String, String> filter = new HashMap<>();
-    filter.put(INTEGRATION_URL, CONFIGURATION_ID);
-    List<UserAuthorizationData> result = service.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
-    int a = 0;
+    filter.put("url", INTEGRATION_URL1);
 
+    List<UserAuthorizationData> result = service.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
+
+    assertTrue(result.isEmpty());
+
+    filter.clear();
+    filter.put("accessToken", MOCK_ACCESS_TOKEN);
+
+    result = service.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
+
+    assertEquals(1, result.size());
+    assertEquals(authorizationData, result.get(0));
+
+    filter.put("verifier", MOCK_VERIFIER);
+
+    result = service.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
+
+    assertEquals(1, result.size());
+    assertEquals(authorizationData, result.get(0));
+
+    filter.put("verifier", "test");
+
+    result = service.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
+
+    assertTrue(result.isEmpty());
   }
 
 }
