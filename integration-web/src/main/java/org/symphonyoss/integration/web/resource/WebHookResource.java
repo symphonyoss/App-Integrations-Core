@@ -47,7 +47,7 @@ import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
@@ -73,6 +73,8 @@ import javax.servlet.http.HttpServletRequest;
 public abstract class WebHookResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WebHookResource.class);
+
+  private static final String COMPONENT = "Webhook Dispatcher";
 
   @Autowired
   @Qualifier("remoteIntegrationService")
@@ -131,7 +133,7 @@ public abstract class WebHookResource {
     if (whiIntegration == null) {
       String message = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE, configurationId);
       String solution = logMessage.getMessage(WEBHOOK_CONFIGURATION_UNAVAILABLE_SOLUTION);
-      throw new IntegrationUnavailableException(message, solution);
+      throw new IntegrationUnavailableException(COMPONENT, message, solution);
     }
 
     return whiIntegration;

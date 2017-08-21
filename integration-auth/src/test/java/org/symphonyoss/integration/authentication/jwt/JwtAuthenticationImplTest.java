@@ -6,8 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.authentication.jwt.JwtAuthentication
-    .AUTHORIZATION_HEADER_PREFIX;
+import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl.AUTHORIZATION_HEADER_PREFIX;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -29,12 +28,12 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.utils.TokenUtils;
 
 /**
- * Unit tests for {@link JwtAuthentication}
+ * Unit tests for {@link JwtAuthenticationImpl}
  *
  * Created by rsanchez on 31/07/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JwtAuthenticationTest {
+public class JwtAuthenticationImplTest {
 
   private static final String MOCK_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
       + (".eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9"
@@ -73,7 +72,7 @@ public class JwtAuthenticationTest {
   private IntegrationSettings integrationSettings;
 
   @InjectMocks
-  private JwtAuthentication jwtAuthentication;
+  private JwtAuthenticationImpl jwtAuthentication;
 
   private AppToken mockAppToken;
 

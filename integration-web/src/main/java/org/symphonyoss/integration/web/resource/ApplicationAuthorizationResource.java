@@ -26,17 +26,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.Integration;
-import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
 import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
-import org.symphonyoss.integration.web.model.ErrorResponse;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -52,6 +52,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/v1/application/{configurationId}/authorization")
 public class ApplicationAuthorizationResource {
+
+  private static final String COMPONENT = "Authorization API";
 
   private static final String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
@@ -166,13 +168,13 @@ public class ApplicationAuthorizationResource {
   private AuthorizedIntegration getAuthorizedIntegration(@PathVariable String configurationId) {
     Integration integration = this.integrationBridge.getIntegrationById(configurationId);
     if (integration == null) {
-      throw new IntegrationUnavailableException(
+      throw new IntegrationUnavailableException(COMPONENT,
           logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
           logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
     }
 
     if (!(integration instanceof AuthorizedIntegration)) {
-      throw new IntegrationUnavailableException(
+      throw new IntegrationUnavailableException(COMPONENT,
           logMessage.getMessage(INTEGRATION_NOT_AUTH, configurationId),
           logMessage.getMessage(INTEGRATION_NOT_AUTH_SOLUTION));
     }

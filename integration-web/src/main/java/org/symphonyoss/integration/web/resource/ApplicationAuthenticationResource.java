@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
-import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.web.model.ErrorResponse;
+import org.symphonyoss.integration.model.ErrorResponse;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
-import org.symphonyoss.integration.web.model.ErrorResponse;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.model.ErrorResponse;
 
 /**
  * Global exception handler for web resources.

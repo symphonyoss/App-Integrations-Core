@@ -17,20 +17,16 @@
 package org.symphonyoss.integration.core.authorization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.symphonyoss.integration.pod.api.client.BasePodApiClient
+    .SESSION_TOKEN_HEADER_PARAM;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.symphonyoss.integration.MockKeystore;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
@@ -39,10 +35,11 @@ import org.symphonyoss.integration.authorization.AuthorizationRepositoryService;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
 import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
+import org.symphonyoss.integration.pod.api.model.UserAuthorizationDataList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,15 +49,17 @@ import java.util.Map;
  * Created by campidelli on 2-aug-17.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(AuthorizationRepositoryServiceImpl.class)
 public class AuthorizationRepositoryServiceTest extends MockKeystore {
 
-  private static final String INTEGRATION_USER = "us3r";
-  private static final String CONFIGURATION_ID = "configurationId@123";
-  private static final String SESSION_TOKEN = "s3ss10nT0k3n";
-  private static final String URL = "https://symphony.com";
-  private static final Long USER_ID = 0L;
-  private static final String FAIL_MSG = "Should have thrown an AuthorizationException.";
+  private static final String INTEGRATION_USER = "testUser";
+
+  private static final String CONFIGURATION_ID = "5810d1cee4b0f884b709cc9b";
+
+  private static final String SESSION_TOKEN = "89b69ad4b9c1eb37d8a6354896736aae6f44bb5b48a3ca03";
+
+  private static final String URL = "https://test.symphony.com";
+
+  private static final Long USER_ID = 10L;
 
   @Mock
   private IntegrationHttpApiClient integrationHttpApiClient;
@@ -71,16 +70,13 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
   @Mock
   private AuthenticationProxy authenticationProxy;
 
-  @Mock
-  private IntegrationAuthApiClient apiClient;
-
   private UserAuthorizationData userAuthData = new UserAuthorizationData(URL, USER_ID);
 
   private AuthorizationRepositoryService authRepoService;
 
   @Before
   public void init() throws Exception {
-    PowerMockito.whenNew(IntegrationAuthApiClient.class).withAnyArguments().thenReturn(apiClient);
+    doReturn(CONFIGURATION_ID).when(integrationHttpApiClient).escapeString(CONFIGURATION_ID);
 
     authRepoService = new AuthorizationRepositoryServiceImpl(
         integrationHttpApiClient, authenticationProxy, logMessage);
@@ -89,26 +85,47 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
   }
 
   @Test(expected = AuthorizationException.class)
-  public void testInvalidSave() throws RemoteApiException, AuthorizationException {
-    doThrow(RemoteApiException.class).when(apiClient).saveUserAuthData(
-        SESSION_TOKEN, CONFIGURATION_ID, null);
-    authRepoService.save(INTEGRATION_USER, CONFIGURATION_ID, null);
+  public void testInvalidSave() throws AuthorizationException {
+    doReturn(null).when(authenticationProxy).getSessionToken(INTEGRATION_USER);
+    authRepoService.save(INTEGRATION_USER, CONFIGURATION_ID, userAuthData);
+  }
+
+  @Test
+  public void testSave() throws AuthorizationException, RemoteApiException {
+    String path = "/v1/configuration/" + CONFIGURATION_ID + "/auth/user";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, SESSION_TOKEN);
+
+    authRepoService.save(INTEGRATION_USER, CONFIGURATION_ID, userAuthData);
+
+    verify(integrationHttpApiClient, times(1)).doPost(path, headerParams,
+        Collections.<String, String>emptyMap(), userAuthData, UserAuthorizationData.class);
   }
 
   @Test
   public void testFind() throws RemoteApiException, AuthorizationException {
-    doReturn(userAuthData).when(apiClient).getUserAuthData(
-        SESSION_TOKEN, CONFIGURATION_ID, USER_ID, URL);
+    String path = "/v1/configuration/" + CONFIGURATION_ID + "/auth/user";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, SESSION_TOKEN);
+
+    Map<String, String> queryParams = new HashMap<>();
+    queryParams.put("userId", String.valueOf(USER_ID));
+    queryParams.put("url", URL);
+
+    doReturn(userAuthData).when(integrationHttpApiClient)
+        .doGet(path, headerParams, queryParams, UserAuthorizationData.class);
 
     UserAuthorizationData userAuthDataFound = authRepoService.find(
         INTEGRATION_USER, CONFIGURATION_ID, URL, USER_ID);
+
     assertEquals(userAuthData, userAuthDataFound);
   }
 
   @Test(expected = AuthorizationException.class)
   public void testInvalidFind() throws RemoteApiException, AuthorizationException {
-    doThrow(RemoteApiException.class).when(apiClient).getUserAuthData(
-        SESSION_TOKEN, CONFIGURATION_ID, USER_ID, URL);
+    doReturn(null).when(authenticationProxy).getSessionToken(INTEGRATION_USER);
     authRepoService.find(INTEGRATION_USER, CONFIGURATION_ID, URL, USER_ID);
   }
 
@@ -117,20 +134,27 @@ public class AuthorizationRepositoryServiceTest extends MockKeystore {
     List<UserAuthorizationData> expected = new ArrayList<>();
     expected.add(userAuthData);
 
-    Map<String, String> filter = new HashMap <String, String>();
+    Map<String, String> filter = new HashMap<>();
 
-    doReturn(expected).when(apiClient).searchUserAuthData(SESSION_TOKEN, CONFIGURATION_ID, filter);
+    String path = "/v1/configuration/" + CONFIGURATION_ID + "/auth/user/search";
 
-    List<UserAuthorizationData> result = authRepoService.search(
-        INTEGRATION_USER, CONFIGURATION_ID, filter);
-    assertEquals(expected, result);
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, SESSION_TOKEN);
+
+    doReturn(expected).when(integrationHttpApiClient).doGet(path, headerParams, filter,
+        UserAuthorizationDataList.class);
+
+    List<UserAuthorizationData> result =
+        authRepoService.search(INTEGRATION_USER, CONFIGURATION_ID, filter);
+
+    assertEquals(1, result.size());
+    assertEquals(userAuthData, result.get(0));
   }
 
   @Test(expected = AuthorizationException.class)
   public void testInvalidSearch() throws RemoteApiException, AuthorizationException {
-    doThrow(RemoteApiException.class).when(apiClient).searchUserAuthData(
-        SESSION_TOKEN, CONFIGURATION_ID, null);
+    doReturn(null).when(authenticationProxy).getSessionToken(INTEGRATION_USER);
     authRepoService.search(INTEGRATION_USER, CONFIGURATION_ID, null);
-    fail(FAIL_MSG);
   }
+
 }
