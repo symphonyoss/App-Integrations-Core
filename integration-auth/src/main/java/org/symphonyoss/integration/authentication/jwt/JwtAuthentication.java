@@ -1,7 +1,11 @@
 package org.symphonyoss.integration.authentication.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -34,11 +38,14 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.utils.RsaKeyUtils;
 import org.symphonyoss.integration.utils.TokenUtils;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.ws.rs.ProcessingException;
 
 /**
  * Service class responsible for handling JWT authentication stuff.
@@ -94,16 +101,36 @@ public class JwtAuthentication {
 
   private IntegrationAuthApiClient apiClient;
 
-  private PublicKey podPublicSignatureVerifier;
-
-  private Date podPublicSignatureVerifierExpirationDate;
+  private LoadingCache<String, PublicKey> podPublicSignatureVerifierCache;
 
   /**
    * Initialize HTTP client.
    */
   @PostConstruct
   public void init() {
-    this.apiClient = new IntegrationAuthApiClient(integrationHttpApiClient, logMessage);
+    apiClient = new IntegrationAuthApiClient(integrationHttpApiClient, logMessage);
+    initializeCache(properties.getPublicPodCertificateCacheDuration());
+  }
+
+  /**
+   * Initializes the local cache for public pod certificates.
+   * @param cacheDuration The cache duration before expiring.
+   */
+  private void initializeCache(int cacheDuration) {
+    podPublicSignatureVerifierCache = CacheBuilder.newBuilder().expireAfterWrite(
+        cacheDuration, TimeUnit.MINUTES).build(new CacheLoader<String, PublicKey>() {
+      /**
+       * Called when the cache is empty or has expired.
+       * @param appId Application ID used as key to cache the pod public certificate.
+       * @return PublicKey created through the public pod PEM certificate.
+       */
+      @Override
+      public PublicKey load(String appId) {
+        PodCertificate podPublicCert = appAuthenticationService.getPodPublicCertificate(appId);
+        PublicKey pk = rsaKeyUtils.getPublicKeyFromCertificate(podPublicCert.getCertificate());
+        return pk;
+      }
+    });
   }
 
   /**
@@ -123,30 +150,30 @@ public class JwtAuthentication {
 
   /**
    * Return user identifier from HTTP Authorization header.
-   * @param authorizationHeader HTTP Authorization header
+   * @param configurationId Configuration ID.
+   * @param authorizationHeader HTTP Authorization header.
    * @return User identifier or null if the authorization header is not present or it's not a valid
    * JWT token
    */
-  public Long getUserIdFromAuthorizationHeader(String authorizationHeader) {
-    String token = getJwtToken(authorizationHeader);
+  public Long getUserIdFromAuthorizationHeader(String configurationId, String authorizationHeader) {
+    JwtPayload token = getJwtToken(configurationId, authorizationHeader);
     return getUserId(token);
   }
 
   /**
    * Retrieves JWT token from HTTP Authorization header.
+   * @param configurationId Configuration ID.
    * @param authorizationHeader HTTP Authorization header
    * @return JWT token or null if the authorization header is not present or it's not a valid JWT
    * token
    */
-  public String getJwtToken(String authorizationHeader) {
+  public JwtPayload getJwtToken(String configurationId, String authorizationHeader) {
     if (StringUtils.isEmpty(authorizationHeader) || (!authorizationHeader.startsWith(
         AUTHORIZATION_HEADER_PREFIX))) {
       return null;
     }
-
-    // TODO APP-1206 Validate JWT token
-
-    return authorizationHeader.replaceFirst(AUTHORIZATION_HEADER_PREFIX, StringUtils.EMPTY);
+    String jwt = authorizationHeader.replaceFirst(AUTHORIZATION_HEADER_PREFIX, StringUtils.EMPTY);
+    return parseJwtPayload(configurationId, jwt);
   }
 
   /**
@@ -154,15 +181,14 @@ public class JwtAuthentication {
    * @param token JWT token
    * @return User identifier
    */
-  public Long getUserId(String token) {
-    if (StringUtils.isEmpty(token)) {
+  public Long getUserId(JwtPayload token) {
+    if (token == null) {
       String message = logMessage.getMessage(JWT_TOKEN_EMPTY);
       String solution = logMessage.getMessage(JWT_TOKEN_EMPTY_SOLUTION);
       throw new UnauthorizedUserException(message, solution);
     }
 
-    // TODO APP-1206 Need to be implemented
-    return new Long(0);
+    return new Long(token.getUserId());
   }
 
   /**
@@ -213,16 +239,14 @@ public class JwtAuthentication {
     Integration integration = getIntegrationAndCheckAvailability(configurationId);
     String appId = properties.getApplicationId(integration.getSettings().getType());
 
-    PublicKey rsaVerifier = getPodPublicSignatureVerifier(appId);
+    PublicKey rsaVerifier = podPublicSignatureVerifierCache.getUnchecked(appId);
     Jws<Claims> jws = null;
     try {
       jws = Jwts.parser().setSigningKey(rsaVerifier).parseClaimsJws(jwt);
     } catch (ExpiredJwtException e) {
       Date expiration = e.getClaims().getExpiration();
-      if (expiration.before(new Date())) {
-        throw new ExpirationException(logMessage.getMessage(JWT_EXPIRED, expiration.toString()), e,
-            logMessage.getMessage(JWT_EXPIRED_SOLUTION));
-      }
+      throw new ExpirationException(logMessage.getMessage(JWT_EXPIRED, expiration.toString()), e,
+          logMessage.getMessage(JWT_EXPIRED_SOLUTION));
     }
 
     String actualAlgorithm = jws.getHeader().getAlgorithm();
@@ -241,23 +265,5 @@ public class JwtAuthentication {
       throw new MalformedParameterException(logMessage.getMessage(JWT_DESERIALIZE), e,
           logMessage.getMessage(JWT_DESERIALIZE_SOLUTION));
     }
-  }
-
-  /**
-   * Gets the cached public pod certificate or a new one if the previous has expired.
-   * @param appId The application identifier.
-   * @return Pod public certificate.
-   */
-  private PublicKey getPodPublicSignatureVerifier(String appId) {
-    Calendar now = Calendar.getInstance();
-    if (podPublicSignatureVerifier == null || now.after(podPublicSignatureVerifierExpirationDate)) {
-      PodCertificate podPublicCertificate = appAuthenticationService.getPodPublicCertificate(appId);
-      podPublicSignatureVerifier =
-          rsaKeyUtils.getPublicKeyFromCertificate(podPublicCertificate.getCertificate());
-
-      now.add(Calendar.MINUTE, CACHE_EXPIRATION_IN_MINUTES);
-      podPublicSignatureVerifierExpirationDate = now.getTime();
-    }
-    return podPublicSignatureVerifier;
   }
 }
