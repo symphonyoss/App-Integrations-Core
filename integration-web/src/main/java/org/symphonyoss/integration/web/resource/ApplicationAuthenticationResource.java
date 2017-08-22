@@ -23,13 +23,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
-import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.web.model.ErrorResponse;
 
 /**
  * REST endpoint to handle requests for manage application authentication data.
@@ -40,6 +40,7 @@ import org.symphonyoss.integration.web.model.ErrorResponse;
 @RequestMapping("/v1/application/{configurationId}/jwt")
 public class ApplicationAuthenticationResource {
 
+  private static final String MALFORMED_URL = "integration.web.jwt.pod.url.malformed";
   private static final String UNAUTHORIZED_URL = "integration.web.jwt.pod.url.unauthorized";
   private static final String UNAUTHORIZED_PAIR = "integration.web.jwt.pod.token.pair.invalid";
   private static final String UNAUTHORIZED_JWT = "integration.web.jwt.pod.token.jwt.invalid";

@@ -1,7 +1,6 @@
 package org.symphonyoss.integration.authentication.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -9,12 +8,8 @@ import com.google.common.cache.LoadingCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +17,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
 import org.symphonyoss.integration.authentication.api.model.PodCertificate;
@@ -38,14 +34,11 @@ import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.utils.RsaKeyUtils;
 import org.symphonyoss.integration.utils.TokenUtils;
 
-import java.io.IOException;
 import java.security.PublicKey;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.ProcessingException;
 
 /**
  * Service class responsible for handling JWT authentication stuff.
@@ -53,7 +46,7 @@ import javax.ws.rs.ProcessingException;
  * Created by rsanchez on 28/07/17.
  */
 @Component
-public class JwtAuthentication {
+public class JwtAuthenticationImpl implements JwtAuthentication {
 
   public static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
 
@@ -70,6 +63,7 @@ public class JwtAuthentication {
 
   private static final String JWT_TOKEN_EMPTY = "integration.auth.jwt.empty";
   private static final String JWT_TOKEN_EMPTY_SOLUTION = JWT_TOKEN_EMPTY + ".solution";
+
 
   private static final String INTEGRATION_UNAVAILABLE = "integration.auth.integration.unavailable";
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =

@@ -14,24 +14,36 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.web.exception;
-
-import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+package org.symphonyoss.integration.core.authorization;
 
 /**
- * Integration wasn't initialized properly.
- *
- * Created by rsanchez on 08/09/16.
+ * Mock information about a OAuth Session.
+ * Created by rsanchez on 18/08/17.
  */
-public class IntegrationUnavailableException extends IntegrationRuntimeException {
+public class MockOAuth1Data {
 
-  private static final String COMPONENT = "Webhook Dispatcher";
+  private String accessToken;
 
-  public IntegrationUnavailableException(String configurationType) {
-    super(COMPONENT, String.format("Configuration %s unavailable", configurationType));
+  private String verifier;
+
+  public MockOAuth1Data(String accessToken, String verifier) {
+    this.accessToken = accessToken;
+    this.verifier = verifier;
   }
 
-  public IntegrationUnavailableException(String message, String... solutions) {
-    super(COMPONENT, message, solutions);
+  public String getAccessToken() {
+    return accessToken;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  public String getVerifier() {
+    return verifier;
+  }
+
+  public void setVerifier(String verifier) {
+    this.verifier = verifier;
   }
 }

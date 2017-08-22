@@ -7,8 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.authentication.jwt.JwtAuthentication
-    .AUTHORIZATION_HEADER_PREFIX;
+import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl.AUTHORIZATION_HEADER_PREFIX;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -45,12 +44,12 @@ import java.security.PublicKey;
 import java.util.Calendar;
 
 /**
- * Unit tests for {@link JwtAuthentication}
+ * Unit tests for {@link JwtAuthenticationImpl}
  *
  * Created by rsanchez on 31/07/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JwtAuthenticationTest {
+public class JwtAuthenticationImplTest {
 
   private static final String MOCK_SESSION_TOKEN = "mockSessionToken";
   private static final String MOCK_APP_TOKEN = "mockAppToken";
@@ -94,7 +93,7 @@ public class JwtAuthenticationTest {
   private RsaKeyUtils rsaKeyUtils = new RsaKeyUtils();
 
   @InjectMocks
-  private JwtAuthentication jwtAuthentication;
+  private JwtAuthenticationImpl jwtAuthentication;
 
   private AppToken mockAppToken;
 

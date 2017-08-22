@@ -35,7 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.authentication.jwt.JwtAuthentication;
+import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
@@ -46,8 +46,8 @@ import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.web.exception.IntegrationUnavailableException;
-import org.symphonyoss.integration.web.model.ErrorResponse;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.model.ErrorResponse;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -150,7 +150,8 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testGetAuthorizationUserSessionIntegrationNotFound() throws RemoteApiException {
+  public void testGetAuthorizationUserSessionIntegrationNotFound()
+      throws RemoteApiException {
     applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
   }
 
@@ -191,7 +192,8 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test
-  public void testGetAuthorizationUser() throws RemoteApiException, AuthorizationException {
+  public void testGetAuthorizationUser()
+      throws RemoteApiException, AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
     doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
