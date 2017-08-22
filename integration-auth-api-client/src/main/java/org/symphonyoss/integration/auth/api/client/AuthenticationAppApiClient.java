@@ -62,6 +62,13 @@ public class AuthenticationAppApiClient {
     this.logMessage = logMessage;
   }
 
+  /**
+   * Authenticates application on the POD.
+   *
+   * @param appId Application identifier
+   * @param appToken Application token
+   * @return Token pair that contains application token and symphony token
+   */
   public AppToken authenticate(String appId, String appToken) {
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("appId", appId);
@@ -95,14 +102,33 @@ public class AuthenticationAppApiClient {
     }
   }
 
-  public PodCertificate getPodPublicCertificate() {
+  /**
+   * Retrieve and return the POD public certificate in PEM format.
+   * @param appId Application identifier
+   * @return The found certificate.
+   */
+  public PodCertificate getPodPublicCertificate(String appId) {
     Map<String, String> headerParams = new HashMap<>();
-    headerParams.put("appId", "jira");
+    headerParams.put("appId", appId);
 
     Map<String, String> queryParams = new HashMap<>();
     try {
       return apiClient.doGet(CERTIFICATE_PATH, headerParams, queryParams, PodCertificate.class);
     } catch (RemoteApiException e) {
+      if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+        String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
+        String solution = logMessage.getMessage(UNAUTHORIZED_MESSAGE_SOLUTION, appId);
+
+        throw new UnauthorizedAppException(message, e, solution);
+      }
+
+      if (e.getCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(BAD_REQUEST_MESSAGE);
+        String solution = logMessage.getMessage(BAD_REQUEST_MESSAGE_SOLUTION, appId);
+
+        throw new InvalidAppTokenException(message, e, solution);
+      }
+
       String message = logMessage.getMessage(POD_UNEXPECTED_MESSAGE);
       String solution = logMessage.getMessage(POD_UNEXPECTED_MESSAGE_SOLUTION);
       throw new UnexpectedAppAuthenticationException(message, e, solution);

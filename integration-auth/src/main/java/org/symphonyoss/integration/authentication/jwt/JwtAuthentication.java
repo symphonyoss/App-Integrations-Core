@@ -205,11 +205,15 @@ public class JwtAuthentication {
 
   /**
    * Validate if the sent JWT is valid by checking its signer and decodification and then return it.
+   * @param configurationId Application identifier.
    * @param jwt Json Web Token containing the user/app authentication data.
    * @return JwtPayload parsed;
    */
-  public JwtPayload parseJwtPayload(String jwt) {
-    PublicKey rsaVerifier = getPodPublicSignatureVerifier();
+  public JwtPayload parseJwtPayload(String configurationId, String jwt) {
+    Integration integration = getIntegrationAndCheckAvailability(configurationId);
+    String appId = properties.getApplicationId(integration.getSettings().getType());
+
+    PublicKey rsaVerifier = getPodPublicSignatureVerifier(appId);
     Jws<Claims> jws = null;
     try {
       jws = Jwts.parser().setSigningKey(rsaVerifier).parseClaimsJws(jwt);
@@ -241,13 +245,15 @@ public class JwtAuthentication {
 
   /**
    * Gets the cached public pod certificate or a new one if the previous has expired.
+   * @param appId The application identifier.
    * @return Pod public certificate.
    */
-  private PublicKey getPodPublicSignatureVerifier() {
+  private PublicKey getPodPublicSignatureVerifier(String appId) {
     Calendar now = Calendar.getInstance();
     if (podPublicSignatureVerifier == null || now.after(podPublicSignatureVerifierExpirationDate)) {
-      PodCertificate podPublicCertificate = appAuthenticationService.getPodPublicCertificate();
-      podPublicSignatureVerifier = rsaKeyUtils.getPublicKeyFromCertificate(podPublicCertificate.getCertificate());
+      PodCertificate podPublicCertificate = appAuthenticationService.getPodPublicCertificate(appId);
+      podPublicSignatureVerifier =
+          rsaKeyUtils.getPublicKeyFromCertificate(podPublicCertificate.getCertificate());
 
       now.add(Calendar.MINUTE, CACHE_EXPIRATION_IN_MINUTES);
       podPublicSignatureVerifierExpirationDate = now.getTime();

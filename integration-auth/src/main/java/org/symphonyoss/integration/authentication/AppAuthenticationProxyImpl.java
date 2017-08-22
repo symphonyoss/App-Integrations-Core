@@ -107,7 +107,7 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
   }
 
   @Override
-  public PodCertificate getPodPublicCertificate() {
-    return apiClient.getPodPublicCertificate();
+  public PodCertificate getPodPublicCertificate(String appId) {
+    return apiClient.getPodPublicCertificate(appId);
   }
 }

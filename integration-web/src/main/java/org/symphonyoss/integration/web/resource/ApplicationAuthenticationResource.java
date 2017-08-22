@@ -80,14 +80,15 @@ public class ApplicationAuthenticationResource {
 
   /**
    * Validate the provided JWT.
+   * @param configurationId Application identifier.
    * @param jwt Json Web Token containing the user/app authentication data.
    * @return 200 OK if it's a valid pair or a 401 otherwise.
    */
   @RequestMapping(value = "/validate")
-  public ResponseEntity validate(@RequestParam String jwt)
+  public ResponseEntity validate(@PathVariable String configurationId, @RequestParam String jwt)
       throws RemoteApiException {
     try {
-      JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(jwt);
+      JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(configurationId, jwt);
       return ResponseEntity.ok().body(jwtPayload.getUserId());
     } catch (Exception e) {
       ErrorResponse response = new ErrorResponse(

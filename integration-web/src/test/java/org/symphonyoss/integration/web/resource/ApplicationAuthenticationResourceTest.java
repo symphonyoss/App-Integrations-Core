@@ -147,17 +147,18 @@ public class ApplicationAuthenticationResourceTest {
   public void testValidateJwt() throws RemoteApiException {
     JwtPayload mockJwtPayload = new JwtPayload();
     mockJwtPayload.setUserId(USER_ID);
-    doReturn(mockJwtPayload).when(jwtAuthentication).parseJwtPayload(MOCK_APP_TOKEN);
+    doReturn(mockJwtPayload).when(jwtAuthentication)
+        .parseJwtPayload(CONFIGURATION_ID, MOCK_APP_TOKEN);
 
-    ResponseEntity response = appAuthenticationResource.validate(MOCK_APP_TOKEN);
+    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN);
     assertEquals(mockJwtPayload.getUserId(), response.getBody());
   }
 
   @Test
   public void testValidateJwtInvalid() throws RemoteApiException {
-    doReturn(null).when(jwtAuthentication).parseJwtPayload(MOCK_APP_TOKEN);
+    doReturn(null).when(jwtAuthentication).parseJwtPayload(CONFIGURATION_ID, MOCK_APP_TOKEN);
 
-    ResponseEntity response = appAuthenticationResource.validate(MOCK_APP_TOKEN);
+    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN);
     ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
   }

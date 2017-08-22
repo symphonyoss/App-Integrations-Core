@@ -55,6 +55,7 @@ public class JwtAuthenticationTest {
   private static final String MOCK_APP_TOKEN = "mockAppToken";
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";
   private static final String MOCK_CONFIG_ID = "mockConfigId";
+  private static final String MOCK_APP_ID = "mockAppId";
 
   @Mock
   private LogMessageSource logMessage;
@@ -108,7 +109,7 @@ public class JwtAuthenticationTest {
     doReturn(integration).when(integrationBridge).getIntegrationById(MOCK_CONFIG_ID);
     doReturn(integrationSettings).when(integration).getSettings();
     doReturn(MOCK_CONFIG_ID).when(integrationSettings).getType();
-    doReturn(MOCK_CONFIG_ID).when(properties).getApplicationId(MOCK_CONFIG_ID);
+    doReturn(MOCK_APP_ID).when(properties).getApplicationId(MOCK_CONFIG_ID);
     doReturn(MOCK_SESSION_TOKEN).when(authenticationProxy).getSessionToken(MOCK_CONFIG_ID);
     prepareJwtScenario(false);
   }
@@ -120,9 +121,10 @@ public class JwtAuthenticationTest {
       if (!expiredJwt) {
         calendar.add(Calendar.HOUR, 1);
       }
+      Long expirationInSeconds = calendar.getTimeInMillis() / 1000;
 
       mockJwtPayload = new JwtPayload("www.symphony.com", "Symphony Communication Services LLC.",
-          "12345", calendar.getTime(), null);
+          "12345", expirationInSeconds, null);
 
       KeyPair keypair = RsaProvider.generateKeyPair(1024);
       PrivateKey privateKey = keypair.getPrivate();
@@ -183,7 +185,7 @@ public class JwtAuthenticationTest {
   @Test
   public void testAuthenticate() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
-    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
+    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_APP_ID,
         MOCK_APP_TOKEN);
 
     String result = jwtAuthentication.authenticate(MOCK_CONFIG_ID);
@@ -193,7 +195,7 @@ public class JwtAuthenticationTest {
   @Test(expected = UnexpectedAuthException.class)
   public void testAuthenticateException() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
-    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
+    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_APP_ID,
         MOCK_APP_TOKEN);
 
     doThrow(UnexpectedAuthException.class).when(apiClient).saveAppAuthenticationToken(
@@ -205,7 +207,7 @@ public class JwtAuthenticationTest {
   @Test
   public void testIsValidTokenPair() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
-    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
+    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_APP_ID,
         MOCK_APP_TOKEN);
     doReturn(mockAppToken).when(apiClient).getAppAuthenticationToken(
         MOCK_SESSION_TOKEN, MOCK_CONFIG_ID, MOCK_APP_TOKEN);
@@ -218,7 +220,7 @@ public class JwtAuthenticationTest {
   @Test
   public void testIsInvalidTokenPair() {
     doReturn(MOCK_APP_TOKEN).when(tokenUtils).generateToken();
-    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_CONFIG_ID,
+    doReturn(mockAppToken).when(appAuthenticationService).authenticate(MOCK_APP_ID,
         MOCK_APP_TOKEN);
 
     doReturn(null).when(apiClient).getAppAuthenticationToken(
@@ -231,10 +233,11 @@ public class JwtAuthenticationTest {
 
   @Test
   public void testParseJwtPayload() {
-    doReturn(mockValidCertificate).when(appAuthenticationService).getPodPublicCertificate();
+    doReturn(mockValidCertificate).when(appAuthenticationService)
+        .getPodPublicCertificate(MOCK_APP_ID);
     doReturn(mockPublicKey).when(rsaKeyUtils).getPublicKeyFromCertificate(null);
 
-    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(mockJwt);
+    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(MOCK_CONFIG_ID, mockJwt);
     assertEquals(mockJwtPayload, jwtPayload);
   }
 
@@ -242,10 +245,11 @@ public class JwtAuthenticationTest {
   @Test(expected = ExpirationException.class)
   public void testParseJwtPayloadExpired() {
     prepareJwtScenario(true);
-    doReturn(mockValidCertificate).when(appAuthenticationService).getPodPublicCertificate();
+    doReturn(mockValidCertificate).when(appAuthenticationService)
+        .getPodPublicCertificate(MOCK_APP_ID);
     doReturn(mockPublicKey).when(rsaKeyUtils).getPublicKeyFromCertificate(null);
 
-    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(mockJwt);
+    JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(MOCK_CONFIG_ID, mockJwt);
     assertEquals(mockJwtPayload, jwtPayload);
   }
 }
