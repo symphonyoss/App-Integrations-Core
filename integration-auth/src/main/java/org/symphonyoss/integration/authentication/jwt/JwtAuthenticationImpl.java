@@ -50,8 +50,6 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
 
   public static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
 
-  private static final int CACHE_EXPIRATION_IN_MINUTES = 60;
-
   private static final String JWT_DESERIALIZE = "integration.auth.jwt.deserialize";
   private static final String JWT_DESERIALIZE_SOLUTION = JWT_DESERIALIZE + ".solution";
 
@@ -248,7 +246,7 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
     if (!actualAlgorithm.equals(expectedAlgorithm)) {
       throw new MalformedParameterException(
           logMessage.getMessage(JWT_INVALID_ALGORITHM, actualAlgorithm),
-          logMessage.getMessage(JWT_EXPIRED_SOLUTION, expectedAlgorithm));
+          logMessage.getMessage(JWT_INVALID_ALGORITHM_SOLUTION, expectedAlgorithm));
     }
 
     try {

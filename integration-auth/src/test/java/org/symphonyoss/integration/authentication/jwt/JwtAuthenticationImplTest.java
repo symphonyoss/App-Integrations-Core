@@ -7,8 +7,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl.AUTHORIZATION_HEADER_PREFIX;
+import static org.mockito.Mockito.mock;
+import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl
+    .AUTHORIZATION_HEADER_PREFIX;
 
+import com.google.common.cache.LoadingCache;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.RsaProvider;
@@ -20,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
@@ -29,6 +33,7 @@ import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.authentication.ExpirationException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
+import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -117,7 +122,8 @@ public class JwtAuthenticationImplTest {
     doReturn(mockValidCertificate).when(appAuthenticationService)
         .getPodPublicCertificate(MOCK_APP_ID);
     doReturn(PUBLIC_CERT_CACHE_DURATION).when(properties).getPublicPodCertificateCacheDuration();
-    jwtAuthentication.init();
+    ReflectionTestUtils.invokeMethod(jwtAuthentication, "initializeCache",
+        PUBLIC_CERT_CACHE_DURATION);
   }
 
   private void prepareJwtScenario(boolean expiredJwt) {
@@ -181,12 +187,11 @@ public class JwtAuthenticationImplTest {
 
   @Test
   public void testGetUserIdFromAuthorizationHeader() {
-    /* FIXME ASAP
+    doReturn(mockPublicKey).when(rsaKeyUtils).getPublicKeyFromCertificate(null);
     String authorizationHeader = AUTHORIZATION_HEADER_PREFIX.concat(mockJwt);
-
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(MOCK_CONFIG_ID,
-        authorizationHeader);*/
-    assertEquals(USER_ID, USER_ID);
+        authorizationHeader);
+    assertEquals(USER_ID, userId);
   }
 
   @Test
@@ -209,8 +214,7 @@ public class JwtAuthenticationImplTest {
 
     boolean result = jwtAuthentication.isValidTokenPair(
         MOCK_CONFIG_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
-    // FIXME asap
-    assertFalse(result);
+    assertTrue(result);
   }
 
   @Test
@@ -241,5 +245,25 @@ public class JwtAuthenticationImplTest {
 
     JwtPayload jwtPayload = jwtAuthentication.parseJwtPayload(MOCK_CONFIG_ID, mockJwt);
     assertEquals(mockJwtPayload, jwtPayload);
+  }
+
+  @Test(expected = UnexpectedBootstrapException.class)
+  public void testGetIntegrationAndCheckAvailabilityNull() {
+    doReturn(null).when(integrationBridge).getIntegrationById(MOCK_CONFIG_ID);
+    jwtAuthentication.isValidTokenPair(MOCK_CONFIG_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
+  }
+
+  @Test
+  public void testInit() {
+    jwtAuthentication.init();
+
+    Object apiClientObj = ReflectionTestUtils.getField(jwtAuthentication, "apiClient");
+    assertTrue(apiClientObj instanceof IntegrationAuthApiClient);
+
+    Object cacheObj = ReflectionTestUtils.getField(jwtAuthentication,
+        "podPublicSignatureVerifierCache");
+    assertTrue(cacheObj instanceof LoadingCache);
+    LoadingCache cache = (LoadingCache) cacheObj;
+    assertEquals(0, cache.size());
   }
 }
