@@ -32,6 +32,7 @@ import org.symphonyoss.integration.auth.api.exception.InvalidAppTokenException;
 import org.symphonyoss.integration.auth.api.exception.UnauthorizedAppException;
 import org.symphonyoss.integration.auth.api.exception.UnexpectedAppAuthenticationException;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
@@ -47,9 +48,13 @@ import java.util.UUID;
 @RunWith(MockitoJUnitRunner.class)
 public class AuthenticationAppApiClientTest {
 
-  private static final String PATH = "/v1/authenticate/extensionApp";
+  private static final String AUTHENTICATE_PATH = "/v1/authenticate/extensionApp";
+
+  private static final String CERTIFICATE_PATH = "/v1/app/pod/certificate";
 
   private static final String APP_ID = "appIdentifier";
+
+  private static final String MOCK_CERTIFICATE = "mockCertificate";
 
   @Mock
   private HttpApiClient apiClient;
@@ -61,13 +66,16 @@ public class AuthenticationAppApiClientTest {
 
   private AuthenticationAppApiClient authenticationAppApiClient;
 
+  private PodCertificate podCertificate;
+
   @Before
   public void init() {
     this.authenticationAppApiClient = new AuthenticationAppApiClient(apiClient, logMessage);
     this.appToken = UUID.randomUUID().toString();
+    this.podCertificate = new PodCertificate(MOCK_CERTIFICATE);
   }
 
-  private void mockRemoteException(int status, String message) throws RemoteApiException {
+  private void mockRemoteExceptionDoPost(int status, String message) throws RemoteApiException {
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("appId", APP_ID);
 
@@ -76,27 +84,39 @@ public class AuthenticationAppApiClientTest {
     RemoteApiException apiException = new RemoteApiException(status, message);
 
     doThrow(apiException).when(apiClient)
-        .doPost(eq(PATH), eq(headerParams), eq(queryParams), any(AppToken.class),
+        .doPost(eq(AUTHENTICATE_PATH), eq(headerParams), eq(queryParams), any(AppToken.class),
             eq(AppToken.class));
+  }
+
+  private void mockRemoteExceptionDoGet(int status, String message) throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("appId", APP_ID);
+
+    Map<String, String> queryParams = new HashMap<>();
+
+    RemoteApiException apiException = new RemoteApiException(status, message);
+
+    doThrow(apiException).when(apiClient).doGet(eq(CERTIFICATE_PATH), eq(headerParams),
+        eq(queryParams), eq(PodCertificate.class));
   }
 
   @Test(expected = UnauthorizedAppException.class)
   public void testAuthenticateUnauthorized() throws RemoteApiException {
-    mockRemoteException(401, "unauthorized");
+    mockRemoteExceptionDoPost(401, "unauthorized");
 
     authenticationAppApiClient.authenticate(APP_ID, UUID.randomUUID().toString());
   }
 
   @Test(expected = InvalidAppTokenException.class)
   public void testAuthenticateBadRequest() throws RemoteApiException {
-    mockRemoteException(400, "badrequest");
+    mockRemoteExceptionDoPost(400, "badrequest");
 
     authenticationAppApiClient.authenticate(APP_ID, UUID.randomUUID().toString());
   }
 
   @Test(expected = UnexpectedAppAuthenticationException.class)
   public void testAuthenticateUnexpected() throws RemoteApiException {
-    mockRemoteException(500, "internal");
+    mockRemoteExceptionDoPost(500, "internal");
 
     authenticationAppApiClient.authenticate(APP_ID, UUID.randomUUID().toString());
   }
@@ -116,7 +136,7 @@ public class AuthenticationAppApiClientTest {
     expected.setSymphonyToken(UUID.randomUUID().toString());
 
     doReturn(expected).when(apiClient)
-        .doPost(eq(PATH), eq(headerParams), eq(queryParams), any(AppToken.class),
+        .doPost(eq(AUTHENTICATE_PATH), eq(headerParams), eq(queryParams), any(AppToken.class),
             eq(AppToken.class));
 
     AppToken result = authenticationAppApiClient.authenticate(APP_ID, appToken);
@@ -124,5 +144,40 @@ public class AuthenticationAppApiClientTest {
     assertEquals(expected.getAppId(), result.getAppId());
     assertEquals(appToken, result.getAppToken());
     assertEquals(expected.getSymphonyToken(), result.getSymphonyToken());
+  }
+
+  @Test
+  public void testGetPodPublicCertificate() throws RemoteApiException {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("appId", APP_ID);
+
+    Map<String, String> queryParams = new HashMap<>();
+
+    doReturn(podCertificate).when(apiClient).doGet(eq(CERTIFICATE_PATH), eq(headerParams),
+        eq(queryParams), eq(PodCertificate.class));
+
+    PodCertificate result = authenticationAppApiClient.getPodPublicCertificate(APP_ID);
+    assertEquals(podCertificate, result);
+  }
+
+  @Test(expected = UnauthorizedAppException.class)
+  public void testGetPodPublicCertificateUnauthorized() throws RemoteApiException {
+    mockRemoteExceptionDoGet(401, "unauthorized");
+
+    authenticationAppApiClient.getPodPublicCertificate(APP_ID);
+  }
+
+  @Test(expected = InvalidAppTokenException.class)
+  public void testGetPodPublicCertificateBadRequest() throws RemoteApiException {
+    mockRemoteExceptionDoGet(400, "badrequest");
+
+    authenticationAppApiClient.getPodPublicCertificate(APP_ID);
+  }
+
+  @Test(expected = UnexpectedAppAuthenticationException.class)
+  public void testGetPodPublicCertificateUnexpected() throws RemoteApiException {
+    mockRemoteExceptionDoGet(500, "internal");
+
+    authenticationAppApiClient.getPodPublicCertificate(APP_ID);
   }
 }

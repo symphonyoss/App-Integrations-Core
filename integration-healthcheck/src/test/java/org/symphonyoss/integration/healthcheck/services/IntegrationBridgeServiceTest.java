@@ -19,6 +19,7 @@ package org.symphonyoss.integration.healthcheck.services;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Unit test for {@link IntegrationBridgeService}
@@ -33,6 +34,8 @@ public class IntegrationBridgeServiceTest {
   private static final String NEW_VERSION = "1.45.0";
 
   private static final String INVALID_VERSION = "x.y.z";
+
+  private static final String NOT_AVAILABLE = "N/A";
 
   @Test
   public void testNullVersion() {
@@ -89,4 +92,46 @@ public class IntegrationBridgeServiceTest {
     assertEquals(IntegrationBridgeService.Compability.NOK, service.getCompatibility());
   }
 
+  @Test
+  public void testGetCurrentVersion() {
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    service.setCurrentVersion(NEW_VERSION);
+    assertEquals(NEW_VERSION, service.getCurrentVersion());
+  }
+
+  @Test
+  public void testGetCurrentVersionNA() {
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    service.setCurrentVersion(StringUtils.EMPTY);
+    assertEquals(NOT_AVAILABLE, service.getCurrentVersion());
+  }
+
+  @Test
+  public void testGetMinVersion() {
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    assertEquals(NEW_VERSION, service.getMinVersion());
+  }
+
+  @Test
+  public void testToString() {
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    service.setCurrentVersion(NEW_VERSION);
+    String expected = "IntegrationBridgeService{" +
+        "connectivity=" + service.getConnectivity() +
+        ", currentVersion='" + service.getCurrentVersion() + '\'' +
+        ", minVersion='" + service.getMinVersion() + '\'' + '}';
+    assertEquals(expected, service.toString());
+  }
+
+  @Test
+  public void testHashCode() {
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    service.setCurrentVersion(NEW_VERSION);
+
+    int expected = service.getConnectivity().hashCode();
+    expected = 31 * expected + service.getCurrentVersion().hashCode();
+    expected = 31 * expected + service.getMinVersion().hashCode();
+
+    assertEquals(expected, service.hashCode());
+  }
 }
