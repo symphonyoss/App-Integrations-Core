@@ -37,4 +37,7 @@ public class AuthApiClientProperties {
 
   public static final String UNEXPECTED_MESSAGE_SOLUTION = UNEXPECTED_MESSAGE + ".solution";
 
+  public static final String POD_UNEXPECTED_MESSAGE = "auth.api.client.pod.unexpected";
+
+  public static final String POD_UNEXPECTED_MESSAGE_SOLUTION = POD_UNEXPECTED_MESSAGE + ".solution";
 }

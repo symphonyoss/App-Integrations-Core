@@ -110,7 +110,8 @@ public class ApplicationAuthorizationResource {
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
       throws RemoteApiException {
 
-    Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(authorizationHeader);
+    Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(configurationId,
+        authorizationHeader);
     UserAuthorizationData data = new UserAuthorizationData(integrationURL, userId);
 
     try {

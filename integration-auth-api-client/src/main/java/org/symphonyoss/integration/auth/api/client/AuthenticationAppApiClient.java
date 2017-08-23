@@ -18,6 +18,12 @@ package org.symphonyoss.integration.auth.api.client;
 
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.BAD_REQUEST_MESSAGE;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.BAD_REQUEST_MESSAGE_SOLUTION;
+
+
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .POD_UNEXPECTED_MESSAGE;
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .POD_UNEXPECTED_MESSAGE_SOLUTION;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNAUTHORIZED_MESSAGE;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNAUTHORIZED_MESSAGE_SOLUTION;
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties.UNEXPECTED_MESSAGE;
@@ -28,6 +34,7 @@ import org.symphonyoss.integration.auth.api.exception.InvalidAppTokenException;
 import org.symphonyoss.integration.auth.api.exception.UnauthorizedAppException;
 import org.symphonyoss.integration.auth.api.exception.UnexpectedAppAuthenticationException;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
+import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
@@ -43,7 +50,8 @@ import javax.ws.rs.core.Response;
  */
 public class AuthenticationAppApiClient {
 
-  private static final String PATH = "/v1/authenticate/extensionApp";
+  private static final String AUTHENTICATE_PATH = "/v1/authenticate/extensionApp";
+  private static final String CERTIFICATE_PATH = "/v1/app/pod/certificate";
 
   private final LogMessageSource logMessage;
 
@@ -54,6 +62,13 @@ public class AuthenticationAppApiClient {
     this.logMessage = logMessage;
   }
 
+  /**
+   * Authenticates application on the POD.
+   *
+   * @param appId Application identifier
+   * @param appToken Application token
+   * @return Token pair that contains application token and symphony token
+   */
   public AppToken authenticate(String appId, String appToken) {
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put("appId", appId);
@@ -64,7 +79,7 @@ public class AuthenticationAppApiClient {
       AppToken token = new AppToken();
       token.setAppToken(appToken);
 
-      return apiClient.doPost(PATH, headerParams, queryParams, token, AppToken.class);
+      return apiClient.doPost(AUTHENTICATE_PATH, headerParams, queryParams, token, AppToken.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
         String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
@@ -87,4 +102,36 @@ public class AuthenticationAppApiClient {
     }
   }
 
+  /**
+   * Retrieve and return the POD public certificate in PEM format.
+   * @param appId Application identifier
+   * @return The found certificate.
+   */
+  public PodCertificate getPodPublicCertificate(String appId) {
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put("appId", appId);
+
+    Map<String, String> queryParams = new HashMap<>();
+    try {
+      return apiClient.doGet(CERTIFICATE_PATH, headerParams, queryParams, PodCertificate.class);
+    } catch (RemoteApiException e) {
+      if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
+        String message = logMessage.getMessage(UNAUTHORIZED_MESSAGE);
+        String solution = logMessage.getMessage(UNAUTHORIZED_MESSAGE_SOLUTION, appId);
+
+        throw new UnauthorizedAppException(message, e, solution);
+      }
+
+      if (e.getCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
+        String message = logMessage.getMessage(BAD_REQUEST_MESSAGE);
+        String solution = logMessage.getMessage(BAD_REQUEST_MESSAGE_SOLUTION, appId);
+
+        throw new InvalidAppTokenException(message, e, solution);
+      }
+
+      String message = logMessage.getMessage(POD_UNEXPECTED_MESSAGE);
+      String solution = logMessage.getMessage(POD_UNEXPECTED_MESSAGE_SOLUTION);
+      throw new UnexpectedAppAuthenticationException(message, e, solution);
+    }
+  }
 }
