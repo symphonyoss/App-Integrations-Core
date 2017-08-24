@@ -55,3 +55,8 @@ key_manager:
 management:
   security:
     enabled: false
+
+#
+# Time (in minutes) to persist in a local cache the pod certificate to check JWT signature
+#
+public_pod_certificate_cache_duration: 60
