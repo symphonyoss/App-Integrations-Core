@@ -16,6 +16,9 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE_SOLUTION;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +26,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.service.IntegrationBridge;
 
 /**
  * REST endpoint to handle requests for manage application authentication data.
@@ -40,7 +46,8 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RequestMapping("/v1/application/{configurationId}/jwt")
 public class ApplicationAuthenticationResource {
 
-  private static final String MALFORMED_URL = "integration.web.jwt.pod.url.malformed";
+  private static final String COMPONENT = "Authentication API";
+
   private static final String UNAUTHORIZED_URL = "integration.web.jwt.pod.url.unauthorized";
   private static final String UNAUTHORIZED_PAIR = "integration.web.jwt.pod.token.pair.invalid";
   private static final String UNAUTHORIZED_JWT = "integration.web.jwt.pod.token.jwt.invalid";
@@ -53,6 +60,9 @@ public class ApplicationAuthenticationResource {
 
   @Autowired
   private JwtAuthentication jwtAuthentication;
+
+  @Autowired
+  private IntegrationBridge integrationBridge;
 
   /**
    * Start the JWT authentication between the App and the SBE.
@@ -73,8 +83,10 @@ public class ApplicationAuthenticationResource {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    String component = getIntegrationComponent(configurationId);
+
     String token = jwtAuthentication.authenticate(configurationId);
-    AppToken appToken = new AppToken(configurationId, token, null);
+    AppToken appToken = new AppToken(component, token, null);
 
     return ResponseEntity.ok().body(appToken);
   }
@@ -115,7 +127,9 @@ public class ApplicationAuthenticationResource {
         symphonyToken);
 
     if (isValid) {
-      AppToken appToken = new AppToken(configurationId, applicationToken, symphonyToken);
+      String component = getIntegrationComponent(configurationId);
+
+      AppToken appToken = new AppToken(component, applicationToken, symphonyToken);
       return ResponseEntity.ok().body(appToken);
     }
 
@@ -124,4 +138,23 @@ public class ApplicationAuthenticationResource {
         logMessage.getMessage(UNAUTHORIZED_PAIR, applicationToken, symphonyToken));
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
   }
+
+  /**
+   * Retrieves the integration component name
+   *
+   * @param configurationId Integration identifier
+   * @return Integration component name
+   */
+  private String getIntegrationComponent(String configurationId) {
+    Integration integration = this.integrationBridge.getIntegrationById(configurationId);
+
+    if ((integration == null) || (integration.getSettings() == null)) {
+      throw new IntegrationUnavailableException(COMPONENT,
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE, configurationId),
+          logMessage.getMessage(INTEGRATION_UNAVAILABLE_SOLUTION));
+    }
+
+    return integration.getSettings().getType();
+  }
+
 }
