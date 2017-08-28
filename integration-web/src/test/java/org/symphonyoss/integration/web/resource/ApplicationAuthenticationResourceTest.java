@@ -35,7 +35,7 @@ import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
-import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -61,6 +61,19 @@ public class ApplicationAuthenticationResourceTest {
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";
 
   private static final String POD_URL = "http://www.symphony.com";
+
+  private static final String REQUEST_AUTHENTICATE = "{ \"podId\": \"http://www.symphony.com\"}";
+
+  private static final String REQUEST_VALIDATE = "{ \"jwt\": \"mockAppToken\"}";
+
+  private static final String REQUEST_VALIDATE_TOKENS =
+      "{ \"applicationToken\": \"mockAppToken\", \"symphonyToken\": \"mockSymphonyToken\"}";
+
+  private static final String REQUEST_EMPTY_APP_TOKEN =
+      "{ \"applicationToken\": \"\", \"symphonyToken\": \"mockSymphonyToken\"}";
+
+  private static final String REQUEST_EMPTY_SYMPHONY_TOKEN =
+      "{ \"applicationToken\": \"mockAppToken\", \"symphonyToken\": \"\"}";
 
   private static final IntegrationSettings SETTINGS = new IntegrationSettings();
 
@@ -98,27 +111,27 @@ public class ApplicationAuthenticationResourceTest {
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testAuthenticateNullIntegration() throws RemoteApiException {
+  public void testAuthenticateNullIntegration() {
     doReturn(POD_URL).when(properties).getPodUrl();
     doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
 
-    appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testAuthenticateNullIntegrationSettings() throws RemoteApiException {
+  public void testAuthenticateNullIntegrationSettings() {
     doReturn(POD_URL).when(properties).getPodUrl();
     doReturn(null).when(integration).getSettings();
 
-    appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
   }
 
   @Test
-  public void testAuthenticate() throws RemoteApiException {
+  public void testAuthenticate() {
     doReturn(POD_URL).when(properties).getPodUrl();
     doReturn(MOCK_APP_TOKEN).when(jwtAuthentication).authenticate(CONFIGURATION_ID);
 
-    ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
+    ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
     assertNotNull(result);
     assertTrue(result.getBody() instanceof AppToken);
 
@@ -127,11 +140,11 @@ public class ApplicationAuthenticationResourceTest {
   }
 
   @Test
-  public void testAuthenticateNotMatchedUrl() throws RemoteApiException {
+  public void testAuthenticateNotMatchedUrl() {
     doReturn(POD_URL + "/123").when(properties).getPodUrl();
     doReturn(MOCK_APP_TOKEN).when(jwtAuthentication).authenticate(CONFIGURATION_ID);
 
-    ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
+    ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
     assertNotNull(result);
     assertTrue(result.getBody() instanceof ErrorResponse);
 
@@ -140,42 +153,42 @@ public class ApplicationAuthenticationResourceTest {
   }
 
 
-  @Test
-  public void testAuthenticateMalformedUrl() throws RemoteApiException {
-    try {
-      doReturn(POD_URL + "/123").when(properties).getPodUrl();
-      appAuthenticationResource.authenticate(CONFIGURATION_ID, "?");
-    } catch (RemoteApiException e) {
-      assertEquals(HttpStatus.BAD_REQUEST.value(), e.getCode());
-      throw e;
-    }
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testAuthenticateInvalidParameter() {
+    doReturn(POD_URL).when(properties).getPodUrl();
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, "?");
+  }
+
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testAuthenticateEmptyPodUrl() {
+    doReturn(POD_URL).when(properties).getPodUrl();
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, "{\"podUrl\": \"\"}");
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testValidateTokensNullIntegration() throws RemoteApiException {
+  public void testValidateTokensNullIntegration() {
     doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
     doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
 
-    appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
+    appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_VALIDATE_TOKENS);
   }
 
   @Test(expected = IntegrationUnavailableException.class)
-  public void testValidateTokensNullIntegrationSettings() throws RemoteApiException {
+  public void testValidateTokensNullIntegrationSettings() {
     doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
     doReturn(null).when(integration).getSettings();
 
-    appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
+    appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_VALIDATE_TOKENS);;
   }
 
   @Test
-  public void testValidateTokens() throws RemoteApiException {
+  public void testValidateTokens() {
     doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
 
-    ResponseEntity result = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN,
-        MOCK_SYMPHONY_TOKEN);
+    ResponseEntity result = appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_VALIDATE_TOKENS);
     assertNotNull(result);
     assertTrue(result.getBody() instanceof AppToken);
 
@@ -185,36 +198,59 @@ public class ApplicationAuthenticationResourceTest {
   }
 
   @Test
-  public void testValidateTokensInvalid() throws RemoteApiException {
+  public void testValidateTokensInvalid() {
     doReturn(false).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
         MOCK_SYMPHONY_TOKEN);
 
-    ResponseEntity result = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN,
-        MOCK_SYMPHONY_TOKEN);
-    assertNotNull(result);
-    assertTrue(result.getBody() instanceof ErrorResponse);
+    ResponseEntity response =
+        appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_VALIDATE_TOKENS);
 
-    ErrorResponse errorResponse = (ErrorResponse) result.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
   }
 
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testValidateTokensInvalidJson() {
+    appAuthenticationResource.validateTokens(CONFIGURATION_ID, "?");
+  }
+
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testValidateTokensInvalidSymphonyToken() {
+    appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_EMPTY_SYMPHONY_TOKEN);
+  }
+
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testValidateTokensInvalidAppToken() {
+    appAuthenticationResource.validateTokens(CONFIGURATION_ID, REQUEST_EMPTY_APP_TOKEN);
+  }
+
   @Test
-  public void testValidateJwt() throws RemoteApiException {
+  public void testValidateJwt() {
     JwtPayload mockJwtPayload = new JwtPayload();
     mockJwtPayload.setUserId(USER_ID);
     doReturn(mockJwtPayload).when(jwtAuthentication)
         .parseJwtPayload(CONFIGURATION_ID, MOCK_APP_TOKEN);
 
-    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN);
+    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_VALIDATE);
     assertEquals(mockJwtPayload.getUserId(), response.getBody());
   }
 
   @Test
-  public void testValidateJwtInvalid() throws RemoteApiException {
+  public void testValidateJwtInvalid() {
     doReturn(null).when(jwtAuthentication).parseJwtPayload(CONFIGURATION_ID, MOCK_APP_TOKEN);
 
-    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN);
+    ResponseEntity response = appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_VALIDATE);
     ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
+  }
+
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testValidateJwtInvalidJson() {
+    appAuthenticationResource.validate(CONFIGURATION_ID, "?");
+  }
+
+  @Test(expected = MissingRequiredParameterException.class)
+  public void testValidateJwtEmtptyToken() {
+    appAuthenticationResource.validate(CONFIGURATION_ID, "\"jwt\": \"\"");
   }
 }
