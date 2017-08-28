@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,13 +30,17 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.service.IntegrationBridge;
 
 /**
  * Unit tests for {@link ApplicationAuthenticationResource}
@@ -45,9 +50,9 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationAuthenticationResourceTest {
 
-  private static final String MOCK_SESSION = "37ee6257afb388a49f30df59fa1513b0368871a031c6de1036db";
-
   private static final String CONFIGURATION_ID = "57756bca4b54433738037005";
+
+  private static final String INTEGRATION_COMPONENT = "integration";
 
   private static final String USER_ID = "12345";
 
@@ -56,6 +61,8 @@ public class ApplicationAuthenticationResourceTest {
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";
 
   private static final String POD_URL = "http://www.symphony.com";
+
+  private static final IntegrationSettings SETTINGS = new IntegrationSettings();
 
   @Mock
   private LogMessageSource logMessage;
@@ -66,14 +73,44 @@ public class ApplicationAuthenticationResourceTest {
   @Mock
   private JwtAuthentication jwtAuthentication;
 
+  @Mock
+  private IntegrationBridge integrationBridge;
+
+  @Mock
+  private Integration integration;
+
   @InjectMocks
   private ApplicationAuthenticationResource appAuthenticationResource;
 
   private AppToken mockAppToken;
 
+  @BeforeClass
+  public static void startup() {
+    SETTINGS.setType(INTEGRATION_COMPONENT);
+  }
+
   @Before
   public void init() {
-    mockAppToken = new AppToken(CONFIGURATION_ID, MOCK_APP_TOKEN, null);
+    mockAppToken = new AppToken(INTEGRATION_COMPONENT, MOCK_APP_TOKEN, null);
+
+    doReturn(SETTINGS).when(integration).getSettings();
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testAuthenticateNullIntegration() throws RemoteApiException {
+    doReturn(POD_URL).when(properties).getPodUrl();
+    doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testAuthenticateNullIntegrationSettings() throws RemoteApiException {
+    doReturn(POD_URL).when(properties).getPodUrl();
+    doReturn(null).when(integration).getSettings();
+
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, POD_URL);
   }
 
   @Test
@@ -112,6 +149,24 @@ public class ApplicationAuthenticationResourceTest {
       assertEquals(HttpStatus.BAD_REQUEST.value(), e.getCode());
       throw e;
     }
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testValidateTokensNullIntegration() throws RemoteApiException {
+    doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
+        MOCK_SYMPHONY_TOKEN);
+    doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+
+    appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
+  }
+
+  @Test(expected = IntegrationUnavailableException.class)
+  public void testValidateTokensNullIntegrationSettings() throws RemoteApiException {
+    doReturn(true).when(jwtAuthentication).isValidTokenPair(CONFIGURATION_ID, MOCK_APP_TOKEN,
+        MOCK_SYMPHONY_TOKEN);
+    doReturn(null).when(integration).getSettings();
+
+    appAuthenticationResource.validate(CONFIGURATION_ID, MOCK_APP_TOKEN, MOCK_SYMPHONY_TOKEN);
   }
 
   @Test
