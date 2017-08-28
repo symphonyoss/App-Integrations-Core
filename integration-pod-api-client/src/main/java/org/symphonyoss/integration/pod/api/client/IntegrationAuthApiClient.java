@@ -277,7 +277,7 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
       checkParam(integrationId, INTEGRATION_ID);
       checkParam(applicationToken, TOKEN_APPLICATION);
 
-      String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/application/"
+      String path = "/v1/configuration/" + apiClient.escapeString(integrationId) + "/authentication/"
           + applicationToken;
 
       Map<String, String> headerParams = new HashMap<>();

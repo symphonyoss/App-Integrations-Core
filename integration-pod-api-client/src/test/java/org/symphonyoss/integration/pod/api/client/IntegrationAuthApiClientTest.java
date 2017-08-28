@@ -56,7 +56,7 @@ public class IntegrationAuthApiClientTest {
       "/authentication/";
 
   private static final String PATH_GET_APP_TOKEN = "/v1/configuration/" + MOCK_INTEGRATION_ID +
-      "/application/" + MOCK_APP_TOKEN;
+      "/authentication/" + MOCK_APP_TOKEN;
 
   @Mock
   private LogMessageSource logMessageSource;
