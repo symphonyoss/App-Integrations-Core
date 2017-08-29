@@ -100,24 +100,24 @@ public class ApplicationAuthorizationResource {
    * Get user authentication data according to the application identifier and integration URL.
    *
    * @param configurationId Application identifier
-   * @param integrationURL Integration URL
+   * @param integrationUrl Integration URL
    * @return User authentication data if the user is authenticated or HTTP 401 (Unauthorized)
    * otherwise.
    */
   @GetMapping("/userSession")
   public ResponseEntity getUserAuthorizationData(@PathVariable String configurationId,
-      @RequestParam(name = "url") String integrationURL,
+      @RequestParam(name = "integrationUrl") String integrationUrl,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
       throws RemoteApiException {
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(configurationId,
         authorizationHeader);
-    UserAuthorizationData data = new UserAuthorizationData(integrationURL, userId);
+    UserAuthorizationData data = new UserAuthorizationData(integrationUrl, userId);
 
     try {
       AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
-      if (!authIntegration.isUserAuthorized(integrationURL, userId)) {
-        String authorizationUrl = authIntegration.getAuthorizationUrl(integrationURL, userId);
+      if (!authIntegration.isUserAuthorized(integrationUrl, userId)) {
+        String authorizationUrl = authIntegration.getAuthorizationUrl(integrationUrl, userId);
         Map<String, String> properties = new HashMap<>();
         properties.put("authorizationUrl", authorizationUrl);
         ErrorResponse response = new ErrorResponse();
@@ -157,6 +157,7 @@ public class ApplicationAuthorizationResource {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
+    // Must return to a HTML page that closes the popup window
     return ResponseEntity.ok().build();
   }
 

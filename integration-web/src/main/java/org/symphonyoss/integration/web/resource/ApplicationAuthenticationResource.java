@@ -40,7 +40,6 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RequestMapping("/v1/application/{configurationId}/jwt")
 public class ApplicationAuthenticationResource {
 
-  private static final String MALFORMED_URL = "integration.web.jwt.pod.url.malformed";
   private static final String UNAUTHORIZED_URL = "integration.web.jwt.pod.url.unauthorized";
   private static final String UNAUTHORIZED_PAIR = "integration.web.jwt.pod.token.pair.invalid";
   private static final String UNAUTHORIZED_JWT = "integration.web.jwt.pod.token.jwt.invalid";
