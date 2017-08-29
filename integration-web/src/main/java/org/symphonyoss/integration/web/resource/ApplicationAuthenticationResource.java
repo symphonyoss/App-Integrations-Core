@@ -75,9 +75,6 @@ public class ApplicationAuthenticationResource {
   private LogMessageSource logMessage;
 
   @Autowired
-  private IntegrationProperties properties;
-
-  @Autowired
   private JwtAuthentication jwtAuthentication;
 
   @Autowired
@@ -96,12 +93,10 @@ public class ApplicationAuthenticationResource {
 
     validateRequiredParameter(podId, POD_ID, AUTHENTICATE);
 
-    // The requested POD URL must match with the current one that is being used
-    String currentPodUrl = properties.getPodUrl();
-    if (!currentPodUrl.equals(podId)) {
-      ErrorResponse response = new ErrorResponse(
-          HttpStatus.UNAUTHORIZED.value(),
-          logMessage.getMessage(UNAUTHORIZED_URL, podId, currentPodUrl));
+    // The requested POD ID must match with the current one that is being used
+    if (!jwtAuthentication.checkPodInfo(configurationId, podId)) {
+      ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(),
+          logMessage.getMessage(UNAUTHORIZED_URL, podId));
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 

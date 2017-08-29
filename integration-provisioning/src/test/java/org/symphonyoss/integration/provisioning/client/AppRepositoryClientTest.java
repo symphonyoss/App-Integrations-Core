@@ -38,9 +38,10 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreBuilder;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
-import org.symphonyoss.integration.provisioning.client.model.Envelope;
+import org.symphonyoss.integration.pod.api.model.Envelope;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 
 import java.net.MalformedURLException;
