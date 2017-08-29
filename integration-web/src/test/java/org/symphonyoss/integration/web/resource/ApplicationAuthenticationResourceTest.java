@@ -64,7 +64,11 @@ public class ApplicationAuthenticationResourceTest {
 
   private static final String REQUEST_AUTHENTICATE = "{ \"podId\": \"http://www.symphony.com\"}";
 
+  private static final String REQUEST_EMPTY_POD_ID = "{ \"podId\": \"\"}";
+
   private static final String REQUEST_VALIDATE = "{ \"jwt\": \"mockAppToken\"}";
+
+  private static final String REQUEST_EMPTY_JWT = "{ \"jwt\": \"\"}";
 
   private static final String REQUEST_VALIDATE_TOKENS =
       "{ \"applicationToken\": \"mockAppToken\", \"symphonyToken\": \"mockSymphonyToken\"}";
@@ -162,7 +166,7 @@ public class ApplicationAuthenticationResourceTest {
   @Test(expected = MissingRequiredParameterException.class)
   public void testAuthenticateEmptyPodUrl() {
     doReturn(POD_URL).when(properties).getPodUrl();
-    appAuthenticationResource.authenticate(CONFIGURATION_ID, "{\"podUrl\": \"\"}");
+    appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_EMPTY_POD_ID);
   }
 
   @Test(expected = IntegrationUnavailableException.class)
@@ -251,6 +255,6 @@ public class ApplicationAuthenticationResourceTest {
 
   @Test(expected = MissingRequiredParameterException.class)
   public void testValidateJwtEmtptyToken() {
-    appAuthenticationResource.validate(CONFIGURATION_ID, "\"jwt\": \"\"");
+    appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_EMPTY_JWT);
   }
 }
