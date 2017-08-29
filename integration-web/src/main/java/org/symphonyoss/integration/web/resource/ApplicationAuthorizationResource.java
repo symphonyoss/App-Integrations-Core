@@ -16,6 +16,9 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE_SOLUTION;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,10 +57,6 @@ import javax.servlet.http.HttpServletRequest;
 public class ApplicationAuthorizationResource {
 
   private static final String COMPONENT = "Authorization API";
-
-  private static final String INTEGRATION_UNAVAILABLE = "integration.web.integration.unavailable";
-  private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
-      INTEGRATION_UNAVAILABLE + ".solution";
 
   private static final String INTEGRATION_NOT_AUTH = "integration.web.integration.not.authorized";
   private static final String INTEGRATION_NOT_AUTH_SOLUTION =
