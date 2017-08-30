@@ -39,7 +39,6 @@ import org.symphonyoss.integration.exception.authentication.MissingRequiredParam
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.service.IntegrationBridge;
 
 /**
@@ -60,9 +59,9 @@ public class ApplicationAuthenticationResourceTest {
 
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";
 
-  private static final String POD_URL = "http://www.symphony.com";
+  private static final String POD_ID = "123";
 
-  private static final String REQUEST_AUTHENTICATE = "{ \"podId\": \"http://www.symphony.com\"}";
+  private static final String REQUEST_AUTHENTICATE = "{ \"podId\": \"123\"}";
 
   private static final String REQUEST_EMPTY_POD_ID = "{ \"podId\": \"\"}";
 
@@ -83,9 +82,6 @@ public class ApplicationAuthenticationResourceTest {
 
   @Mock
   private LogMessageSource logMessage;
-
-  @Mock
-  private IntegrationProperties properties;
 
   @Mock
   private JwtAuthentication jwtAuthentication;
@@ -116,7 +112,7 @@ public class ApplicationAuthenticationResourceTest {
 
   @Test(expected = IntegrationUnavailableException.class)
   public void testAuthenticateNullIntegration() {
-    doReturn(POD_URL).when(properties).getPodUrl();
+    doReturn(true).when(jwtAuthentication).checkPodInfo(CONFIGURATION_ID, POD_ID);
     doReturn(null).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
 
     appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
@@ -124,7 +120,7 @@ public class ApplicationAuthenticationResourceTest {
 
   @Test(expected = IntegrationUnavailableException.class)
   public void testAuthenticateNullIntegrationSettings() {
-    doReturn(POD_URL).when(properties).getPodUrl();
+    doReturn(true).when(jwtAuthentication).checkPodInfo(CONFIGURATION_ID, POD_ID);
     doReturn(null).when(integration).getSettings();
 
     appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
@@ -132,7 +128,7 @@ public class ApplicationAuthenticationResourceTest {
 
   @Test
   public void testAuthenticate() {
-    doReturn(POD_URL).when(properties).getPodUrl();
+    doReturn(true).when(jwtAuthentication).checkPodInfo(CONFIGURATION_ID, POD_ID);
     doReturn(MOCK_APP_TOKEN).when(jwtAuthentication).authenticate(CONFIGURATION_ID);
 
     ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
@@ -145,8 +141,7 @@ public class ApplicationAuthenticationResourceTest {
 
   @Test
   public void testAuthenticateNotMatchedUrl() {
-    doReturn(POD_URL + "/123").when(properties).getPodUrl();
-    doReturn(MOCK_APP_TOKEN).when(jwtAuthentication).authenticate(CONFIGURATION_ID);
+    doReturn(false).when(jwtAuthentication).checkPodInfo(CONFIGURATION_ID, POD_ID);
 
     ResponseEntity result = appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_AUTHENTICATE);
     assertNotNull(result);
@@ -156,16 +151,13 @@ public class ApplicationAuthenticationResourceTest {
     assertEquals(HttpStatus.UNAUTHORIZED.value(), errorResponse.getStatus());
   }
 
-
   @Test(expected = MissingRequiredParameterException.class)
   public void testAuthenticateInvalidParameter() {
-    doReturn(POD_URL).when(properties).getPodUrl();
     appAuthenticationResource.authenticate(CONFIGURATION_ID, "?");
   }
 
   @Test(expected = MissingRequiredParameterException.class)
   public void testAuthenticateEmptyPodUrl() {
-    doReturn(POD_URL).when(properties).getPodUrl();
     appAuthenticationResource.authenticate(CONFIGURATION_ID, REQUEST_EMPTY_POD_ID);
   }
 

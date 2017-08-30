@@ -8,6 +8,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl
     .AUTHORIZATION_HEADER_PREFIX;
 
@@ -39,6 +41,8 @@ import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
 import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.PodInfoClient;
+import org.symphonyoss.integration.pod.api.model.PodInfo;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.utils.RsaKeyUtils;
 import org.symphonyoss.integration.utils.TokenUtils;
@@ -47,6 +51,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Unit tests for {@link JwtAuthenticationImpl}
@@ -63,6 +69,11 @@ public class JwtAuthenticationImplTest {
   private static final String MOCK_APP_ID = "mockAppId";
   private static final Long USER_ID = 12345L;
   private static final Integer PUBLIC_CERT_CACHE_DURATION = 60;
+  private static final String MOCK_POD_ID = "111";
+  private static final String MOCK_INVALID_POD_ID = "0";
+
+  private static final String POD_ID = "podId";
+  private static final String EXTERNAL_POD_ID = "externalPodId";
 
   @Mock
   private LogMessageSource logMessage;
@@ -96,6 +107,9 @@ public class JwtAuthenticationImplTest {
 
   @Spy
   private RsaKeyUtils rsaKeyUtils = new RsaKeyUtils();
+
+  @Mock
+  private PodInfoClient podInfoClient;
 
   @InjectMocks
   private JwtAuthenticationImpl jwtAuthentication;
@@ -266,4 +280,28 @@ public class JwtAuthenticationImplTest {
     LoadingCache cache = (LoadingCache) cacheObj;
     assertEquals(0, cache.size());
   }
+
+  @Test
+  public void testPodInfoNullPodId() {
+    assertFalse(jwtAuthentication.checkPodInfo(MOCK_CONFIG_ID, null));
+  }
+
+  @Test
+  public void testPodInfo() {
+    ReflectionTestUtils.setField(jwtAuthentication, "podInfo", null);
+
+    Map<String, Object> data = new HashMap<>();
+    data.put(POD_ID, MOCK_POD_ID);
+    data.put(EXTERNAL_POD_ID, MOCK_POD_ID);
+
+    PodInfo podInfo = new PodInfo(data);
+
+    doReturn(podInfo).when(podInfoClient).getPodInfo(MOCK_SESSION_TOKEN);
+
+    assertTrue(jwtAuthentication.checkPodInfo(MOCK_CONFIG_ID, MOCK_POD_ID));
+    assertFalse(jwtAuthentication.checkPodInfo(MOCK_CONFIG_ID, MOCK_INVALID_POD_ID));
+
+    verify(podInfoClient, times(1)).getPodInfo(MOCK_SESSION_TOKEN);
+  }
+
 }
