@@ -51,7 +51,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class JwtAuthenticationImpl implements JwtAuthentication {
 
-  public static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
+  private static final String AUTHORIZATION_HEADER_PREFIX = "BEARER ";
 
   private static final String JWT_DESERIALIZE = "integration.auth.jwt.deserialize";
   private static final String JWT_DESERIALIZE_SOLUTION = JWT_DESERIALIZE + ".solution";
@@ -171,12 +171,12 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
    * token
    */
   public JwtPayload getJwtToken(String configurationId, String authorizationHeader) {
-    if (StringUtils.isEmpty(authorizationHeader) || (!authorizationHeader.startsWith(
-        AUTHORIZATION_HEADER_PREFIX))) {
-      return null;
+    if (StringUtils.isNotEmpty(authorizationHeader)
+        && authorizationHeader.toUpperCase().startsWith(AUTHORIZATION_HEADER_PREFIX)) {
+      String jwt = authorizationHeader.substring(AUTHORIZATION_HEADER_PREFIX.length());
+      return parseJwtPayload(configurationId, jwt);
     }
-    String jwt = authorizationHeader.replaceFirst(AUTHORIZATION_HEADER_PREFIX, StringUtils.EMPTY);
-    return parseJwtPayload(configurationId, jwt);
+    return null;
   }
 
   /**

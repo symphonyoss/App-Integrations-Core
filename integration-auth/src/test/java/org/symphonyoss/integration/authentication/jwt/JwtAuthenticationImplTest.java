@@ -4,14 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.symphonyoss.integration.authentication.jwt.JwtAuthenticationImpl
-    .AUTHORIZATION_HEADER_PREFIX;
 
 import com.google.common.cache.LoadingCache;
 import io.jsonwebtoken.Jwts;
@@ -34,7 +29,6 @@ import org.symphonyoss.integration.authentication.api.model.JwtPayload;
 import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.exception.authentication.ExpirationException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.authentication.UnexpectedAuthException;
 import org.symphonyoss.integration.exception.bootstrap.UnexpectedBootstrapException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -62,6 +56,7 @@ import java.util.Map;
 @RunWith(MockitoJUnitRunner.class)
 public class JwtAuthenticationImplTest {
 
+  private static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
   private static final String MOCK_SESSION_TOKEN = "mockSessionToken";
   private static final String MOCK_APP_TOKEN = "mockAppToken";
   private static final String MOCK_SYMPHONY_TOKEN = "mockSymphonyToken";

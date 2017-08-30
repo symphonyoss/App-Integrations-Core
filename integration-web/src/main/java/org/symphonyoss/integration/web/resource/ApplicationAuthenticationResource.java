@@ -16,8 +16,10 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE;
-import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE_SOLUTION;
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys
+    .INTEGRATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys
+    .INTEGRATION_UNAVAILABLE_SOLUTION;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +40,6 @@ import org.symphonyoss.integration.exception.authentication.MissingRequiredParam
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.service.IntegrationBridge;
 
 import java.io.IOException;
