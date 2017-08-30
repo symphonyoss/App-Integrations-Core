@@ -171,14 +171,10 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
    * token
    */
   public JwtPayload getJwtToken(String configurationId, String authorizationHeader) {
-    if (!StringUtils.isEmpty(authorizationHeader)) {
-      // Ignoring case
-      String upperCaseHeader = authorizationHeader.toUpperCase();
-      if (upperCaseHeader.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
-        String jwt = authorizationHeader.substring(AUTHORIZATION_HEADER_PREFIX.length(),
-            authorizationHeader.length());
-        return parseJwtPayload(configurationId, jwt);
-      }
+    if (StringUtils.isNotEmpty(authorizationHeader)
+        && authorizationHeader.toUpperCase().startsWith(AUTHORIZATION_HEADER_PREFIX)) {
+      String jwt = authorizationHeader.substring(AUTHORIZATION_HEADER_PREFIX.length());
+      return parseJwtPayload(configurationId, jwt);
     }
     return null;
   }
