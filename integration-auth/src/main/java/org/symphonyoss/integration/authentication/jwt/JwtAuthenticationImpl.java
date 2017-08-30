@@ -30,6 +30,9 @@ import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.pod.api.client.IntegrationAuthApiClient;
 import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.PodInfoClient;
+import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
+import org.symphonyoss.integration.pod.api.model.PodInfo;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.utils.RsaKeyUtils;
 import org.symphonyoss.integration.utils.TokenUtils;
@@ -91,16 +94,24 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
   @Autowired
   private RsaKeyUtils rsaKeyUtils;
 
+  @Autowired
+  private SymphonyHttpApiClient symphonyHttpApiClient;
+
   private IntegrationAuthApiClient apiClient;
 
+  private PodInfoClient podInfoClient;
+
   private LoadingCache<String, PublicKey> podPublicSignatureVerifierCache;
+
+  private PodInfo podInfo;
 
   /**
    * Initialize HTTP client.
    */
   @PostConstruct
   public void init() {
-    apiClient = new IntegrationAuthApiClient(integrationHttpApiClient, logMessage);
+    this.apiClient = new IntegrationAuthApiClient(integrationHttpApiClient, logMessage);
+    this.podInfoClient = new PodInfoClient(symphonyHttpApiClient, logMessage);
     initializeCache(properties.getPublicPodCertificateCacheDuration());
   }
 
@@ -262,4 +273,25 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
           logMessage.getMessage(JWT_DESERIALIZE_SOLUTION));
     }
   }
+
+  @Override
+  public boolean checkPodInfo(String configurationId, String podId) {
+    if (StringUtils.isEmpty(podId)) {
+      return Boolean.FALSE;
+    }
+
+    if (podInfo == null) {
+      podInfo = getPodInfo(configurationId);
+    }
+
+    return podInfo.verifyPodId(podId);
+  }
+
+  private PodInfo getPodInfo(String configurationId) {
+    Integration integration = getIntegrationAndCheckAvailability(configurationId);
+    String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
+
+    return podInfoClient.getPodInfo(sessionToken);
+  }
+
 }

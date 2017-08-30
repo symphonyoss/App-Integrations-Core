@@ -1,12 +1,9 @@
-package org.symphonyoss.integration.provisioning.client.model;
-
-import org.symphonyoss.integration.provisioning.client.AppRepositoryClient;
+package org.symphonyoss.integration.pod.api.model;
 
 /**
  * Wrap the data into an envelope.
  *
- * This class is used to the {@link AppRepositoryClient} because all requests performed to the
- * appstore requires the body payload to be wrapped into a 'data' object.
+ * This class is used to wrap the body payload into a 'data' object.
  *
  * Here's an example:
  *

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.provisioning.client;
+package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
