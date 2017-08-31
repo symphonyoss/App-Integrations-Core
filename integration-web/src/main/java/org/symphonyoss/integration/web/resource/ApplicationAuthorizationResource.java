@@ -148,8 +148,10 @@ public class ApplicationAuthorizationResource {
     AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
 
+    String url = null;
     try {
       authIntegration.authorize(authPayload);
+      url = authIntegration.getAuthorizationRedirectUrl();
     } catch (AuthorizationException e) {
       ErrorResponse response = new ErrorResponse(
           HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
@@ -157,6 +159,9 @@ public class ApplicationAuthorizationResource {
     }
 
     // Must return to a HTML page that closes the popup window
+    if (url != null) {
+      return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("Redirect", url).build();
+    }
     return ResponseEntity.ok().build();
   }
 
