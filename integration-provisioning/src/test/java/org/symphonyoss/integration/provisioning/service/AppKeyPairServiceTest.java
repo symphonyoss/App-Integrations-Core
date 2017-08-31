@@ -76,6 +76,10 @@ public class AppKeyPairServiceTest {
 
   private static final String MOCK_KEY_PASSWORD = "changeit";
 
+  private static final String MOCK_ROOT_CERT_FILE = "root-cert.pem";
+
+  private static final String MOCK_ROOT_KEY_FILE = "root-key.pem";
+
   @Mock
   private ApplicationArguments arguments;
 
@@ -97,11 +101,14 @@ public class AppKeyPairServiceTest {
   @Mock
   private LogMessageSource logMessage;
 
+  @Mock
+  private IntegrationProperties properties;
+
   private AppKeyPairService keyPairService;
 
   @Before
   public void init() throws IOException {
-    keyPairService = new AppKeyPairService(arguments, logMessage, utils);
+    keyPairService = new AppKeyPairService(arguments, logMessage, utils, properties);
 
     PowerMockito.mockStatic(Runtime.class);
     PowerMockito.mockStatic(FileSystems.class);
@@ -125,6 +132,13 @@ public class AppKeyPairServiceTest {
     doReturn(new ByteArrayInputStream(new byte[] {})).when(process).getErrorStream();
 
     doReturn(StringUtils.EMPTY).when(utils).getCertsDirectory();
+
+    Certificate certificateInfo = new Certificate();
+    certificateInfo.setCaCertFile(MOCK_ROOT_CERT_FILE);
+    certificateInfo.setCaKeyFile(MOCK_ROOT_KEY_FILE);
+    certificateInfo.setCaKeyPassword(MOCK_KEY_PASSWORD);
+
+    doReturn(certificateInfo).when(properties).getSigningCert();
   }
 
   @Test
@@ -165,7 +179,7 @@ public class AppKeyPairServiceTest {
   }
 
   @Test(expected = KeyPairException.class)
-  public void testFailGenerateCertificate() throws IOException, InterruptedException {
+  public void testFailGenerateCSR() throws IOException, InterruptedException {
     Application application = getApplication();
 
     doReturn(0).when(process).exitValue();
@@ -175,7 +189,7 @@ public class AppKeyPairServiceTest {
   }
 
   @Test(expected = KeyPairException.class)
-  public void testFailGeneratePKCS12() throws IOException, InterruptedException {
+  public void testFailGenerateCertificate() throws IOException, InterruptedException {
     Application application = getApplication();
 
     doReturn(0).doReturn(0).doReturn(0).doReturn(-1).when(process).exitValue();
@@ -184,10 +198,19 @@ public class AppKeyPairServiceTest {
   }
 
   @Test(expected = KeyPairException.class)
-  public void testFailGeneratePublicKey() throws IOException, InterruptedException {
+  public void testFailGeneratePKCS12() throws IOException, InterruptedException {
     Application application = getApplication();
 
     doReturn(0).doReturn(0).doReturn(0).doReturn(0).doReturn(-1).when(process).exitValue();
+
+    keyPairService.exportCertificate(application);
+  }
+
+  @Test(expected = KeyPairException.class)
+  public void testFailGeneratePublicKey() throws IOException, InterruptedException {
+    Application application = getApplication();
+
+    doReturn(0).doReturn(0).doReturn(0).doReturn(0).doReturn(0).doReturn(-1).when(process).exitValue();
 
     keyPairService.exportCertificate(application);
   }
