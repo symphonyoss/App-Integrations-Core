@@ -22,6 +22,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.Certificate;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
@@ -43,15 +44,21 @@ public class AppKeyPairService extends KeyPairService {
 
   private static final String OPENSSL_PUB_KEY_CMD = "openssl rsa -pubout -in %s -out %s";
 
+  private static final String OPENSSL_GEN_CERT_CMD = "openssl x509 -req -sha256 -days 3650 -in %s"
+      + " -CA %s -passin pass:%s -out %s -CAkey %s -set_serial 0x%s";
+
   private static final String OPENSSL_PKCS12_CMD = "openssl pkcs12 -export -out %s -in %s"
       + " -inkey %s -passout pass:%s";
 
   private final IntegrationUtils utils;
 
+  private final IntegrationProperties properties;
+
   public AppKeyPairService(ApplicationArguments args, LogMessageSource logMessage,
-      IntegrationUtils utils) {
+      IntegrationUtils utils, IntegrationProperties properties) {
     super(args, logMessage);
     this.utils = utils;
+    this.properties = properties;
   }
 
   /**
@@ -62,7 +69,8 @@ public class AppKeyPairService extends KeyPairService {
   public void exportCertificate(Application application) {
     if (shouldGenerateCertificate() && (application.getAppKeystore() != null)) {
       String keyFileName = generatePrivateKey(application);
-      generateCertificate(application, keyFileName);
+      String reqFileName = generateCSR(application, keyFileName);
+      generateCertificate(application, keyFileName, reqFileName);
       generatePublicKey(application, keyFileName);
     }
   }
@@ -91,25 +99,54 @@ public class AppKeyPairService extends KeyPairService {
   }
 
   /**
-   * Generate the application certificate.
-   *
+   * Generate the Certificate Signing Request (CSR).
    * @param application Application object
    * @param appKeyFilename Key filename
-   * @return App certificate filename
+   * @return Request filename
    */
-  private void generateCertificate(Application application, String appKeyFilename) {
-    LOGGER.info("Generating application certificate: {}", application.getComponent());
+  private String generateCSR(Application application, String appKeyFilename) {
+    LOGGER.info("Generating certificate signing request: {}", application.getComponent());
 
     String subject =
         String.format("/CN=%s/O=%s/C=%s", application.getComponent(), DEFAULT_ORGANIZATION,
             Locale.US.getCountry());
 
+    String appReqFilename = String.format("%s/%s_app_req.pem", System.getProperty("java.io.tmpdir"),
+        application.getId());
+
+    String[] genCSRCommand = new String[] { "openssl", "req", "-new", "-key", appKeyFilename,
+        "-subj", subject, "-out", appReqFilename };
+
+    executeProcess(genCSRCommand);
+
+    return appReqFilename;
+  }
+
+  /**
+   * Generate the application certificate.
+   *
+   * @param application Application object
+   * @param appKeyFilename Key filename
+   * @param appReqFilename Request filename
+   * @return App certificate filename
+   */
+  private void generateCertificate(Application application, String appKeyFilename, String appReqFilename) {
+    LOGGER.info("Generating application certificate: {}", application.getComponent());
+
+    Certificate certificateInfo = properties.getSigningCert();
+
+    String caCertFilename = certificateInfo.getCaCertFile();
+    String caCertKeyFilename = certificateInfo.getCaKeyFile();
+    String password = certificateInfo.getCaKeyPassword();
+    String sn = Long.toHexString(System.currentTimeMillis());
+
     String appCertFilename = utils.getCertsDirectory() + application.getId() + "_app.pem";
 
-    String[] genCertCommand = new String[] {"openssl", "req", "-newkey", "rsa:1024", "-x509",
-        "-key", appKeyFilename, "-subj", subject, "-out", appCertFilename, "-days", "3650"};
+    String genCerticateCommand =
+        String.format(OPENSSL_GEN_CERT_CMD, appReqFilename, caCertFilename, password,
+            appCertFilename, caCertKeyFilename, sn);
 
-    executeProcess(genCertCommand);
+    executeProcess(genCerticateCommand);
 
     String passOutput = application.getAppKeystore().getPassword();
     String appPKCS12Filename = utils.getCertsDirectory() + application.getId() + "_app.p12";
