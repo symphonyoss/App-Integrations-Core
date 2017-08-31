@@ -19,6 +19,8 @@ package org.symphonyoss.integration.web.resource;
 import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE;
 import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE_SOLUTION;
 
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -148,7 +150,8 @@ public class ApplicationAuthorizationResource {
     AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
 
-    String url = null;
+    String url;
+
     try {
       authIntegration.authorize(authPayload);
       url = authIntegration.getAuthorizationRedirectUrl();
@@ -159,9 +162,10 @@ public class ApplicationAuthorizationResource {
     }
 
     // Must return to a HTML page that closes the popup window
-    if (url != null) {
+    if (StringUtils.isNotEmpty(url)) {
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("Location", url).build();
     }
+
     return ResponseEntity.ok().build();
   }
 
