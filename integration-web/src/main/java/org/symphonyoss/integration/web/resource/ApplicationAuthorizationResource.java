@@ -160,7 +160,7 @@ public class ApplicationAuthorizationResource {
 
     // Must return to a HTML page that closes the popup window
     if (url != null) {
-      return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("Redirect", url).build();
+      return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("Location", url).build();
     }
     return ResponseEntity.ok().build();
   }
