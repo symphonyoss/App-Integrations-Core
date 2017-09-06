@@ -40,6 +40,7 @@ import org.symphonyoss.integration.exception.authentication.MissingRequiredParam
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
+import org.symphonyoss.integration.service.CryptoService;
 import org.symphonyoss.integration.service.IntegrationBridge;
 
 import java.io.IOException;
@@ -80,6 +81,9 @@ public class ApplicationAuthenticationResource {
 
   @Autowired
   private IntegrationBridge integrationBridge;
+
+  @Autowired
+  private CryptoService cryptoService;
 
   /**
    * Start the JWT authentication between the App and the SBE.
@@ -145,6 +149,9 @@ public class ApplicationAuthenticationResource {
 
     String applicationToken = node.path(APPLICATION_TOKEN).asText();
     String symphonyToken = node.path(SYMPHONY_TOKEN).asText();
+
+    String bruno = cryptoService.encrypt(configurationId, "Bruno", true);
+    String campidelli = cryptoService.decrypt(configurationId, bruno, true);
 
     validateRequiredParameter(applicationToken, APPLICATION_TOKEN, VALIDATE_TOKENS);
     validateRequiredParameter(symphonyToken, SYMPHONY_TOKEN, VALIDATE_TOKENS);
