@@ -40,7 +40,6 @@ import org.symphonyoss.integration.exception.authentication.MissingRequiredParam
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
-import org.symphonyoss.integration.service.CryptoService;
 import org.symphonyoss.integration.service.IntegrationBridge;
 
 import java.io.IOException;
@@ -82,9 +81,6 @@ public class ApplicationAuthenticationResource {
   @Autowired
   private IntegrationBridge integrationBridge;
 
-  @Autowired
-  private CryptoService cryptoService;
-
   /**
    * Start the JWT authentication between the App and the SBE.
    * @param configurationId Application identifier.
@@ -92,7 +88,8 @@ public class ApplicationAuthenticationResource {
    * @return The generated Token (Ta).
    */
   @PostMapping(value = "/authenticate")
-  public ResponseEntity authenticate(@PathVariable String configurationId, @RequestBody String body) {
+  public ResponseEntity authenticate(@PathVariable String configurationId,
+      @RequestBody String body) {
     JsonNode node = getJsonNode(POD_ID, AUTHENTICATE, body);
     String podId = node.path(POD_ID).asText();
 
@@ -144,14 +141,12 @@ public class ApplicationAuthenticationResource {
    * @return 200 OK if it's a valid pair or a 401 otherwise.
    */
   @PostMapping(value = "/tokens/validate")
-  public ResponseEntity validateTokens(@PathVariable String configurationId, @RequestBody String body) {
+  public ResponseEntity validateTokens(@PathVariable String configurationId,
+      @RequestBody String body) {
     JsonNode node = getJsonNode(APPLICATION_TOKEN, VALIDATE_TOKENS, body);
 
     String applicationToken = node.path(APPLICATION_TOKEN).asText();
     String symphonyToken = node.path(SYMPHONY_TOKEN).asText();
-
-    String bruno = cryptoService.encrypt(configurationId, "Bruno", true);
-    String campidelli = cryptoService.decrypt(configurationId, bruno, true);
 
     validateRequiredParameter(applicationToken, APPLICATION_TOKEN, VALIDATE_TOKENS);
     validateRequiredParameter(symphonyToken, SYMPHONY_TOKEN, VALIDATE_TOKENS);
@@ -174,7 +169,6 @@ public class ApplicationAuthenticationResource {
 
   /**
    * Retrieves the integration component name
-   *
    * @param configurationId Integration identifier
    * @return Integration component name
    */
