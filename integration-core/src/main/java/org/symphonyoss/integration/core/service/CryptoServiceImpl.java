@@ -4,14 +4,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.CryptoRuntimeException;
-import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.pod.api.client.BotApiClient;
 import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
-import org.symphonyoss.integration.pod.api.model.UserKeyManagerData;
 import org.symphonyoss.integration.service.CryptoService;
 import org.symphonyoss.integration.service.IntegrationBridge;
 
@@ -41,7 +38,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by campidelli on 9/5/17.
  */
 @Component
-  public class CryptoServiceImpl implements CryptoService {
+public class CryptoServiceImpl implements CryptoService {
 
   private static final int ITERATIONS = 65536;
   private static final int KEY_SIZE = 256;
@@ -54,23 +51,23 @@ import javax.crypto.spec.SecretKeySpec;
   private static final String CHARSET = "UTF-8";
 
   private static final String INVALID_PARAMETER = "core.crypto.invalid.parameter";
-  private static final String INVALID_PARAMETER_SOLUTION = INVALID_PARAMETER +  ".solution";
+  private static final String INVALID_PARAMETER_SOLUTION = INVALID_PARAMETER + ".solution";
   private static final String NO_SUCH_ALGORITHM = "core.crypto.no.such.algorithm";
-  private static final String NO_SUCH_ALGORITHM_SOLUTION = NO_SUCH_ALGORITHM +  ".solution";
+  private static final String NO_SUCH_ALGORITHM_SOLUTION = NO_SUCH_ALGORITHM + ".solution";
   private static final String INVALID_KEY_SPEC = "core.crypto.invalid.key.spec";
-  private static final String INVALID_KEY_SPEC_SOLUTION = INVALID_KEY_SPEC +  ".solution";
+  private static final String INVALID_KEY_SPEC_SOLUTION = INVALID_KEY_SPEC + ".solution";
   private static final String NO_SUCH_PADDING = "core.crypto.no.such.padding";
-  private static final String NO_SUCH_PADDING_SOLUTION = NO_SUCH_PADDING +  ".solution";
+  private static final String NO_SUCH_PADDING_SOLUTION = NO_SUCH_PADDING + ".solution";
   private static final String INVALID_KEY = "core.crypto.invalid.key";
-  private static final String INVALID_KEY_SOLUTION = INVALID_KEY +  ".solution";
+  private static final String INVALID_KEY_SOLUTION = INVALID_KEY + ".solution";
   private static final String INVALID_PARAM_SPEC = "core.crypto.invalid.param.spec";
-  private static final String INVALID_PARAM_SPEC_SOLUTION = INVALID_PARAM_SPEC +  ".solution";
+  private static final String INVALID_PARAM_SPEC_SOLUTION = INVALID_PARAM_SPEC + ".solution";
   private static final String ILLEGAL_BLOCK_SIZE = "core.crypto.illegal.block.size";
-  private static final String ILLEGAL_BLOCK_SIZE_SOLUTION = ILLEGAL_BLOCK_SIZE +  ".solution";
+  private static final String ILLEGAL_BLOCK_SIZE_SOLUTION = ILLEGAL_BLOCK_SIZE + ".solution";
   private static final String BAD_PADDING = "core.crypto.bad.padding";
-  private static final String BAD_PADDING_SOLUTION = BAD_PADDING +  ".solution";
+  private static final String BAD_PADDING_SOLUTION = BAD_PADDING + ".solution";
   private static final String UNSUPPORTED_ENCODING = "core.crypto.unsupported.encoding";
-  private static final String UNSUPPORTED_ENCODING_SOLUTION = UNSUPPORTED_ENCODING +  ".solution";
+  private static final String UNSUPPORTED_ENCODING_SOLUTION = UNSUPPORTED_ENCODING + ".solution";
 
   @Autowired
   private LogMessageSource logMessage;
@@ -89,30 +86,6 @@ import javax.crypto.spec.SecretKeySpec;
   @PostConstruct
   public void init() {
     botApiClient = new BotApiClient(symphonyHttpApiClient, logMessage);
-  }
-
-  @Override
-  public String encrypt(String configurationId, String plainText, boolean b) {
-    Integration integration = integrationBridge.getIntegrationById(configurationId);
-    String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
-    try {
-      UserKeyManagerData userKMData = botApiClient.getGetBotUserAccountKey(sessionToken);
-      return encrypt(plainText, userKMData.getPrivateKey());
-    } catch (RemoteApiException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public String decrypt(String configurationId, String plainText, boolean b) {
-    Integration integration = integrationBridge.getIntegrationById(configurationId);
-    String sessionToken = authenticationProxy.getSessionToken(integration.getSettings().getType());
-    try {
-      UserKeyManagerData userKMData = botApiClient.getGetBotUserAccountKey(sessionToken);
-      return encrypt(plainText, userKMData.getPrivateKey());
-    } catch (RemoteApiException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
