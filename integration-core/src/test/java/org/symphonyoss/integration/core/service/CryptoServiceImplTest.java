@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.symphonyoss.integration.exception.CryptoRuntimeException;
+import org.symphonyoss.integration.exception.CryptoException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
@@ -44,35 +44,35 @@ public class CryptoServiceImplTest {
   private CryptoServiceImpl cryptoService;
 
   @Test
-  public void testEncrypt() {
+  public void testEncrypt() throws CryptoException {
     String encryptedText = cryptoService.encrypt(TEXT, KEY);
     assertNotEquals(TEXT, encryptedText);
   }
 
   @Test
-  public void testDecrypt() {
+  public void testDecrypt() throws CryptoException {
     String encryptedText = cryptoService.encrypt(TEXT, KEY);
     String decryptedText = cryptoService.decrypt(encryptedText, KEY);
     assertEquals(TEXT, decryptedText);
   }
 
-  @Test(expected = CryptoRuntimeException.class)
-  public void testEncryptInvalidText() {
+  @Test(expected = CryptoException.class)
+  public void testEncryptInvalidText() throws CryptoException {
     cryptoService.encrypt(null, KEY);
   }
 
-  @Test(expected = CryptoRuntimeException.class)
-  public void testEncryptInvalidKey() {
+  @Test(expected = CryptoException.class)
+  public void testEncryptInvalidKey() throws CryptoException {
     cryptoService.encrypt(TEXT, null);
   }
 
-  @Test(expected = CryptoRuntimeException.class)
-  public void testDecryptInvalidText() {
+  @Test(expected = CryptoException.class)
+  public void testDecryptInvalidText() throws CryptoException {
     cryptoService.decrypt(null, KEY);
   }
 
-  @Test(expected = CryptoRuntimeException.class)
-  public void testDecryptInvalidKey() {
+  @Test(expected = CryptoException.class)
+  public void testDecryptInvalidKey() throws CryptoException {
     cryptoService.decrypt(TEXT, null);
   }
 }
