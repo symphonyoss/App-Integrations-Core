@@ -4,25 +4,22 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.CryptoRuntimeException;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.pod.api.client.BotApiClient;
-import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
 import org.symphonyoss.integration.service.CryptoService;
-import org.symphonyoss.integration.service.IntegrationBridge;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -72,22 +69,6 @@ public class CryptoServiceImpl implements CryptoService {
   @Autowired
   private LogMessageSource logMessage;
 
-  @Autowired
-  private SymphonyHttpApiClient symphonyHttpApiClient;
-
-  @Autowired
-  private IntegrationBridge integrationBridge;
-
-  @Autowired
-  private AuthenticationProxy authenticationProxy;
-
-  private BotApiClient botApiClient;
-
-  @PostConstruct
-  public void init() {
-    botApiClient = new BotApiClient(symphonyHttpApiClient, logMessage);
-  }
-
   /**
    * @see CryptoService#encrypt(String, String)
    */
@@ -100,12 +81,12 @@ public class CryptoServiceImpl implements CryptoService {
       byte[] saltBytes = generateSalt();
       SecretKeySpec secret = deriveKey(key, saltBytes);
 
-      Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-      cipher.init(Cipher.ENCRYPT_MODE, secret);
+      Cipher cipher = getCipher();
+      initCipher(cipher, Cipher.ENCRYPT_MODE, secret, null);
       blockSize = cipher.getBlockSize();
       AlgorithmParameters params = cipher.getParameters();
       byte[] ivBytes = params.getParameterSpec(IvParameterSpec.class).getIV();
-      byte[] encryptedTextBytes = cipher.doFinal(plainText.getBytes(CHARSET));
+      byte[] encryptedTextBytes = doCipher(cipher, plainText.getBytes(CHARSET));
 
       // Prepend Salt and VI
       byte[] buffer = new byte[saltBytes.length + ivBytes.length + encryptedTextBytes.length];
@@ -115,24 +96,9 @@ public class CryptoServiceImpl implements CryptoService {
           encryptedTextBytes.length);
 
       return Base64.encodeBase64String(buffer);
-    } catch (NoSuchAlgorithmException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(NO_SUCH_ALGORITHM), e,
-          logMessage.getMessage(NO_SUCH_ALGORITHM_SOLUTION, SPEC_ALGORITHM));
-    } catch (NoSuchPaddingException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(NO_SUCH_PADDING), e,
-          logMessage.getMessage(NO_SUCH_PADDING_SOLUTION, PADDING));
-    } catch (InvalidKeyException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(INVALID_KEY), e,
-          logMessage.getMessage(INVALID_KEY_SOLUTION));
     } catch (InvalidParameterSpecException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(INVALID_PARAM_SPEC), e,
           logMessage.getMessage(INVALID_PARAM_SPEC_SOLUTION));
-    } catch (IllegalBlockSizeException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(ILLEGAL_BLOCK_SIZE), e,
-          logMessage.getMessage(ILLEGAL_BLOCK_SIZE_SOLUTION, String.valueOf(blockSize)));
-    } catch (BadPaddingException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(BAD_PADDING), e,
-          logMessage.getMessage(BAD_PADDING_SOLUTION, TRANSFORMATION));
     } catch (UnsupportedEncodingException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(UNSUPPORTED_ENCODING), e,
           logMessage.getMessage(UNSUPPORTED_ENCODING_SOLUTION, CHARSET));
@@ -147,37 +113,58 @@ public class CryptoServiceImpl implements CryptoService {
     checkParameters("encryptedText", encryptedText);
     checkParameters("key", key);
     int blockSize = 0;
-    try {
-      Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-      blockSize = cipher.getBlockSize();
-      // Strip off the Salt and IV
-      ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(encryptedText));
-      byte[] saltBytes = new byte[SALT_SIZE];
-      buffer.get(saltBytes, 0, saltBytes.length);
-      byte[] ivBytes = new byte[blockSize];
-      buffer.get(ivBytes, 0, ivBytes.length);
-      byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length - ivBytes.length];
-      buffer.get(encryptedTextBytes);
+    Cipher cipher = getCipher();
+    blockSize = cipher.getBlockSize();
+    // Strip off the Salt and IV
+    ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(encryptedText));
+    byte[] saltBytes = new byte[SALT_SIZE];
+    buffer.get(saltBytes, 0, saltBytes.length);
+    byte[] ivBytes = new byte[blockSize];
+    buffer.get(ivBytes, 0, ivBytes.length);
+    byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length - ivBytes.length];
+    buffer.get(encryptedTextBytes);
 
-      SecretKey secret = deriveKey(key, saltBytes);
-      cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(ivBytes));
-      byte[] decryptedTextBytes = cipher.doFinal(encryptedTextBytes);
-      return new String(decryptedTextBytes);
+    SecretKey secret = deriveKey(key, saltBytes);
+    initCipher(cipher, Cipher.DECRYPT_MODE, secret, new IvParameterSpec(ivBytes));
+    byte[] decryptedTextBytes = doCipher(cipher, encryptedTextBytes);
+    return new String(decryptedTextBytes);
+  }
+
+  private Cipher getCipher() {
+    try {
+      return Cipher.getInstance(TRANSFORMATION);
     } catch (NoSuchAlgorithmException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(NO_SUCH_ALGORITHM), e,
           logMessage.getMessage(NO_SUCH_ALGORITHM_SOLUTION, SPEC_ALGORITHM));
     } catch (NoSuchPaddingException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(NO_SUCH_PADDING), e,
           logMessage.getMessage(NO_SUCH_PADDING_SOLUTION, PADDING));
+    }
+  }
+
+  private void initCipher(Cipher cipher, int mode, Key key, AlgorithmParameterSpec spec) {
+    try {
+      if (spec == null) {
+        cipher.init(mode, key);
+      } else {
+        cipher.init(mode, key, spec);
+      }
+    } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+      throw new CryptoRuntimeException(logMessage.getMessage(INVALID_KEY), e,
+          logMessage.getMessage(INVALID_KEY_SOLUTION));
+    }
+  }
+
+  private byte[] doCipher(Cipher cipher, byte[] text) {
+    int blockSize = cipher.getBlockSize();
+    try {
+      return cipher.doFinal(text);
     } catch (IllegalBlockSizeException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(ILLEGAL_BLOCK_SIZE), e,
           logMessage.getMessage(ILLEGAL_BLOCK_SIZE_SOLUTION, String.valueOf(blockSize)));
     } catch (BadPaddingException e) {
       throw new CryptoRuntimeException(logMessage.getMessage(BAD_PADDING), e,
           logMessage.getMessage(BAD_PADDING_SOLUTION, TRANSFORMATION));
-    } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-      throw new CryptoRuntimeException(logMessage.getMessage(INVALID_KEY), e,
-          logMessage.getMessage(INVALID_KEY_SOLUTION));
     }
   }
 

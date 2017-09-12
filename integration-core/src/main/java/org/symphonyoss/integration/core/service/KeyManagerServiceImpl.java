@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
-import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.UserKeyManagerData;
 import org.symphonyoss.integration.pod.api.client.BotApiClient;
@@ -50,11 +49,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
     AuthenticationToken tokens = authenticationProxy.getToken(userId);
     String sessionToken = tokens.getSessionToken();
     String kmSession = tokens.getKeyManagerToken();
-    try {
-      return botApiClient.getGetBotUserAccountKey(sessionToken, kmSession);
-    } catch (RemoteApiException e) {
-      throw new RuntimeException(e);
-    }
+    return botApiClient.getBotUserAccountKey(sessionToken, kmSession);
   }
 
   /**
