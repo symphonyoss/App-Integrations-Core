@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.symphonyoss.integration.config.exception.InstanceNotFoundException;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.config.ForbiddenUserException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
@@ -47,7 +48,6 @@ import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.IntegrationService;
 import org.symphonyoss.integration.web.exception.IntegrationBridgeUnavailableException;
-import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
@@ -259,8 +259,9 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(
-      {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class})
-  public ResponseEntity<String> handleIntegrationBridgeUnavailableException(Exception ex) {
+      {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class,
+          IntegrationUnavailableException.class})
+  public ResponseEntity<String> handleServiceUnavailableException(Exception ex) {
     String message = ex.getMessage();
     LOGGER.error(message);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
@@ -273,7 +274,8 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(WebHookUnprocessableEntityException.class)
-  public ResponseEntity<String> handleWebHookUnprocessableEntityException(WebHookUnprocessableEntityException e) {
+  public ResponseEntity<String> handleWebHookUnprocessableEntityException(
+      WebHookUnprocessableEntityException e) {
     String message = e.getMessage();
     LOGGER.info(message);
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(message);
@@ -290,4 +292,5 @@ public abstract class WebHookResource {
     LOGGER.error(ex.getMessage(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected exception");
   }
+
 }
