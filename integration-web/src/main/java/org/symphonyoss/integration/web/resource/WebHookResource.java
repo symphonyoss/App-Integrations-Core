@@ -259,8 +259,9 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(
-      {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class})
-  public ResponseEntity<String> handleIntegrationBridgeUnavailableException(Exception ex) {
+      {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class,
+          IntegrationUnavailableException.class})
+  public ResponseEntity<String> handleServiceUnavailableException(Exception ex) {
     String message = ex.getMessage();
     LOGGER.error(message);
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
@@ -273,7 +274,8 @@ public abstract class WebHookResource {
    */
   @ResponseBody
   @ExceptionHandler(WebHookUnprocessableEntityException.class)
-  public ResponseEntity<String> handleWebHookUnprocessableEntityException(WebHookUnprocessableEntityException e) {
+  public ResponseEntity<String> handleWebHookUnprocessableEntityException(
+      WebHookUnprocessableEntityException e) {
     String message = e.getMessage();
     LOGGER.info(message);
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(message);
@@ -289,20 +291,6 @@ public abstract class WebHookResource {
   public ResponseEntity<String> handleUnexpectedException(Exception ex) {
     LOGGER.error(ex.getMessage(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected exception");
-  }
-
-
-  /**
-   * Handle {@link IntegrationUnavailableException} exception.
-   * @param ex Exception object
-   * @return HTTP 503 (Service Unavailable)
-   */
-  @ResponseBody
-  @ExceptionHandler(IntegrationUnavailableException.class)
-  public ResponseEntity<String> handleUnavailableException(IntegrationUnavailableException ex) {
-    String message = ex.getMessage();
-    LOGGER.error(message);
-    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);
   }
 
 }

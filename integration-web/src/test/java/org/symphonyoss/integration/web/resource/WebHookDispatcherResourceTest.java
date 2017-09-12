@@ -358,7 +358,7 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
   @Test
   public void testIntegrationBridgeUnavailableHandler() {
     ResponseEntity<String> response =
-        webHookDispatcherResource.handleIntegrationBridgeUnavailableException(
+        webHookDispatcherResource.handleServiceUnavailableException(
             new IntegrationBridgeUnavailableException(IB_UNAVAILABLE_EXCEPTION_MESSAGE));
 
     Assert.assertTrue(response.toString().contains(IB_UNAVAILABLE_EXCEPTION_MESSAGE));
