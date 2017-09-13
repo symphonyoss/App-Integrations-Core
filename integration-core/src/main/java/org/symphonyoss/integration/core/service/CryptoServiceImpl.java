@@ -76,14 +76,12 @@ public class CryptoServiceImpl implements CryptoService {
   public String encrypt(String plainText, String key) throws CryptoException {
     checkParameters("plainText", plainText);
     checkParameters("key", key);
-    int blockSize = 0;
     try {
       byte[] saltBytes = generateSalt();
       SecretKeySpec secret = deriveKey(key, saltBytes);
 
       Cipher cipher = getCipher();
       initCipher(cipher, Cipher.ENCRYPT_MODE, secret, null);
-      blockSize = cipher.getBlockSize();
       AlgorithmParameters params = cipher.getParameters();
       byte[] ivBytes = params.getParameterSpec(IvParameterSpec.class).getIV();
       byte[] encryptedTextBytes = doCipher(cipher, plainText.getBytes(CHARSET));
@@ -112,14 +110,12 @@ public class CryptoServiceImpl implements CryptoService {
   public String decrypt(String encryptedText, String key) throws CryptoException {
     checkParameters("encryptedText", encryptedText);
     checkParameters("key", key);
-    int blockSize = 0;
     Cipher cipher = getCipher();
-    blockSize = cipher.getBlockSize();
     // Strip off the Salt and IV
     ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(encryptedText));
     byte[] saltBytes = new byte[SALT_SIZE];
     buffer.get(saltBytes, 0, saltBytes.length);
-    byte[] ivBytes = new byte[blockSize];
+    byte[] ivBytes = new byte[cipher.getBlockSize()];
     buffer.get(ivBytes, 0, ivBytes.length);
     byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length - ivBytes.length];
     buffer.get(encryptedTextBytes);
