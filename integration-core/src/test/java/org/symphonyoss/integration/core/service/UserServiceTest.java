@@ -18,25 +18,27 @@ package org.symphonyoss.integration.core.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.UserKeyManagerData;
+import org.symphonyoss.integration.model.config.IntegrationSettings;
+import org.symphonyoss.integration.pod.api.client.RelayApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
+import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.UserService;
 
 /**
@@ -54,17 +56,38 @@ public class UserServiceTest {
 
   private static final String USER_EMAIL = "symphony@symphony.com";
 
+  private static final String CONFIGURATION_ID = "configurationId";
+
+  private static final String KM_TOKEN = "kmToken";
+
+  private static final UserKeyManagerData KM_USER_DATA = new UserKeyManagerData();
+
   @Mock
   private UserApiClient usersApi;
 
   @Mock
   private AuthenticationProxy authenticationProxy;
 
-  @InjectMocks
-  private UserServiceImpl userService;
+  @Mock
+  private IntegrationBridge integrationBridge;
+
+  @Mock
+  private Integration integration;
+
+  @Mock
+  private IntegrationSettings integrationSettings;
+
+  @Mock
+  private AuthenticationToken tokens;
+
+  @Mock
+  private RelayApiClient relayApiClient;
 
   @Mock
   private LogMessageSource logMessage;
+
+  @InjectMocks
+  private UserServiceImpl userService;
 
   @Before
   public void setup() {
@@ -151,4 +174,18 @@ public class UserServiceTest {
     assertNull(user);
   }
 
+  @Test
+  public void testGetBotUserAccountKeyByConfiguration() {
+    String userId = String.valueOf(USER_ID);
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(integrationSettings).when(integration).getSettings();
+    doReturn(userId).when(integrationSettings).getType();
+    doReturn(tokens).when(authenticationProxy).getToken(userId);
+    doReturn(SESSION_TOKEN).when(tokens).getSessionToken();
+    doReturn(KM_TOKEN).when(tokens).getKeyManagerToken();
+    doReturn(KM_USER_DATA).when(relayApiClient).getUserAccountKeyManagerData(SESSION_TOKEN, KM_TOKEN);
+
+    UserKeyManagerData result = userService.getBotUserAccountKeyData(CONFIGURATION_ID);
+    assertEquals(KM_USER_DATA, result);
+  }
 }

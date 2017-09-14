@@ -65,7 +65,6 @@ public class JwtAuthenticationImpl implements JwtAuthentication {
   private static final String JWT_TOKEN_EMPTY = "integration.auth.jwt.empty";
   private static final String JWT_TOKEN_EMPTY_SOLUTION = JWT_TOKEN_EMPTY + ".solution";
 
-
   private static final String INTEGRATION_UNAVAILABLE = "integration.auth.integration.unavailable";
   private static final String INTEGRATION_UNAVAILABLE_SOLUTION =
       INTEGRATION_UNAVAILABLE + ".solution";

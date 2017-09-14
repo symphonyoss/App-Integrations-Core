@@ -88,7 +88,8 @@ public class ApplicationAuthenticationResource {
    * @return The generated Token (Ta).
    */
   @PostMapping(value = "/authenticate")
-  public ResponseEntity authenticate(@PathVariable String configurationId, @RequestBody String body) {
+  public ResponseEntity authenticate(@PathVariable String configurationId,
+      @RequestBody String body) {
     JsonNode node = getJsonNode(POD_ID, AUTHENTICATE, body);
     String podId = node.path(POD_ID).asText();
 
@@ -140,7 +141,8 @@ public class ApplicationAuthenticationResource {
    * @return 200 OK if it's a valid pair or a 401 otherwise.
    */
   @PostMapping(value = "/tokens/validate")
-  public ResponseEntity validateTokens(@PathVariable String configurationId, @RequestBody String body) {
+  public ResponseEntity validateTokens(@PathVariable String configurationId,
+      @RequestBody String body) {
     JsonNode node = getJsonNode(APPLICATION_TOKEN, VALIDATE_TOKENS, body);
 
     String applicationToken = node.path(APPLICATION_TOKEN).asText();
@@ -167,7 +169,6 @@ public class ApplicationAuthenticationResource {
 
   /**
    * Retrieves the integration component name
-   *
    * @param configurationId Integration identifier
    * @return Integration component name
    */
