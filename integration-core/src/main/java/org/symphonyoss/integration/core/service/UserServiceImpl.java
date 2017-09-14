@@ -25,12 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.UserKeyManagerData;
+import org.symphonyoss.integration.pod.api.client.RelayApiClient;
 import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
+import org.symphonyoss.integration.service.IntegrationBridge;
 import org.symphonyoss.integration.service.UserService;
 
 import javax.annotation.PostConstruct;
@@ -52,13 +58,22 @@ public class UserServiceImpl implements UserService {
   private PodHttpApiClient podHttpApiClient;
 
   @Autowired
+  private SymphonyHttpApiClient symphonyHttpApiClient;
+
+  @Autowired
+  private IntegrationBridge integrationBridge;
+
+  @Autowired
   private LogMessageSource logMessage;
 
   private UserApiClient userApiClient;
 
+  private RelayApiClient relayApiClient;
+
   @PostConstruct
   public void init() {
     this.userApiClient = new UserApiClient(podHttpApiClient, logMessage);
+    relayApiClient = new RelayApiClient(symphonyHttpApiClient, logMessage);
   }
 
   @Override
@@ -142,4 +157,16 @@ public class UserServiceImpl implements UserService {
     return user;
   }
 
+  /**
+   * @see UserService#getBotUserAccountKeyData(String)
+   */
+  @Override
+  public UserKeyManagerData getBotUserAccountKeyData(String configurationId) {
+    Integration integration = integrationBridge.getIntegrationById(configurationId);
+    String userId = integration.getSettings().getType();
+    AuthenticationToken tokens = authenticationProxy.getToken(userId);
+    String sessionToken = tokens.getSessionToken();
+    String kmSession = tokens.getKeyManagerToken();
+    return relayApiClient.getUserAccountKeyManagerData(sessionToken, kmSession);
+  }
 }

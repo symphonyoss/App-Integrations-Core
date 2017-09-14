@@ -41,11 +41,11 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
- * Unit test for {@link BotApiClient}
+ * Unit test for {@link RelayApiClient}
  * Created by campidelli on 19/11/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BotApiClientTest {
+public class RelayApiClientTest {
 
   private static final String MOCK_SESSION_TOKEN = "sessionToken";
   private static final String MOCK_KM_TOKEN = "kmToken";
@@ -58,11 +58,11 @@ public class BotApiClientTest {
   @Mock
   private HttpApiClient apiClient;
 
-  private BotApiClient botApiClient;
+  private RelayApiClient relayApiClient;
 
   @Before
   public void init() {
-    botApiClient = new BotApiClient(apiClient, logMessage);
+    relayApiClient = new RelayApiClient(apiClient, logMessage);
   }
 
   private Map<String, String> hParams() {
@@ -83,7 +83,7 @@ public class BotApiClientTest {
   public void testGetBotUserAccountKey() throws RemoteApiException {
     doReturn(MOCK_DATA).when(apiClient)
         .doGet(API_PATH, hParams(), qParams(), UserKeyManagerData.class);
-    UserKeyManagerData data = botApiClient.getBotUserAccountKey(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
+    UserKeyManagerData data = relayApiClient.getUserAccountKeyManagerData(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
     assertEquals(MOCK_DATA, data);
   }
 
@@ -92,7 +92,7 @@ public class BotApiClientTest {
     String failMsg =
         "Should have thrown UnexpectedAuthException containing a RemoteApiException (400).";
     try {
-      botApiClient.getBotUserAccountKey(MOCK_SESSION_TOKEN, null);
+      relayApiClient.getUserAccountKeyManagerData(MOCK_SESSION_TOKEN, null);
       fail(failMsg);
     } catch (UnexpectedAuthException e) {
       assertTrue(e.getCause() instanceof RemoteApiException);
@@ -108,7 +108,7 @@ public class BotApiClientTest {
     RemoteApiException rae = new RemoteApiException(Response.Status.UNAUTHORIZED.getStatusCode(),
         "UNAUTHORIZED");
     doThrow(rae).when(apiClient).doGet(API_PATH, hParams(), qParams(), UserKeyManagerData.class);
-    botApiClient.getBotUserAccountKey(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
+    relayApiClient.getUserAccountKeyManagerData(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
     fail("Should have thrown UnauthorizedUserException.");
   }
 
@@ -117,7 +117,7 @@ public class BotApiClientTest {
     RemoteApiException rae = new RemoteApiException(Response.Status.FORBIDDEN.getStatusCode(),
         "FORBIDDEN");
     doThrow(rae).when(apiClient).doGet(API_PATH, hParams(), qParams(), UserKeyManagerData.class);
-    botApiClient.getBotUserAccountKey(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
+    relayApiClient.getUserAccountKeyManagerData(MOCK_SESSION_TOKEN, MOCK_KM_TOKEN);
     fail("Should have thrown ForbiddenAuthException.");
   }
 }

@@ -31,7 +31,21 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Implementation of a text-based cryptography service.
+ * Implementation of a text-based cryptography service. Basically it works as follows:
+ *
+ * 1. A String is passed to be used as a SecretKey to encrypt/decrypt another given String.
+ * 2. The CryptoService derives from this key string.
+ *    2.1. To derive, it follows these steps:
+ *         a. Generates a SecureRandom Salt with 20 bytes;
+ *         b. Creates a password-based encryption spec using the PBKDF2WithHmacSHA1 algorithm,
+ *            the Key string as an array of bytes and the generated salt.
+ *         c. With the created spec, it generates an AES SecretKey, this will be the key used to
+ *            encrypt and decrypt the given plain text.
+ * 3. We concatenate the generated salt array of bytes to the encrypted text array of bytes.
+ * 4. The result array of bytes is returned as a Base64 string, when encrypting.
+ * 5. When decrypting, we use the same flow, but we have to convert the Base64 string to an array
+ *    of bytes, strip off the salt and decrypt it using the AES derived key.
+ *
  * Created by campidelli on 9/5/17.
  */
 @Component

@@ -35,10 +35,10 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
- * Holds all endpoints to deal with bot user.
+ * Holds all endpoints to deal with the RELAY endpoint.
  * Created by campidelli on 05-sep-17.
  */
-public class BotApiClient extends BasePodApiClient {
+public class RelayApiClient extends BasePodApiClient {
 
   private static final String COOKIE_HEADER_PARAM = "Cookie";
   private static final String SESSION_KEY_HEADER_PARAM = "skey";
@@ -53,7 +53,7 @@ public class BotApiClient extends BasePodApiClient {
 
   private HttpApiClient apiClient;
 
-  public BotApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
+  public RelayApiClient(HttpApiClient apiClient, LogMessageSource logMessage) {
     this.apiClient = apiClient;
     this.logMessage = logMessage;
   }
@@ -64,7 +64,7 @@ public class BotApiClient extends BasePodApiClient {
    * @param kmSession Key Manager session.
    * @return User KeyManager data.
    */
-  public UserKeyManagerData getBotUserAccountKey(String sessionToken, String kmSession) {
+  public UserKeyManagerData getUserAccountKeyManagerData(String sessionToken, String kmSession) {
     try {
       checkAuthToken(sessionToken);
       checkKMAuthToken(kmSession);
