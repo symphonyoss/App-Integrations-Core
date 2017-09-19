@@ -215,14 +215,13 @@ public class CompanyCertificateService {
 
     if (certificate != null) {
 
-      String issuerDNName = certificate.getIssuerDN().getName();
-      if (!issuerDNName.contains("EMAILADDRESS")) {
+      String subjectDNName = certificate.getSubjectDN().getName();
+      if (!subjectDNName.contains("EMAILADDRESS")) {
         return StringUtils.EMPTY;
       }
 
       Pattern p = Pattern.compile("(^|,)EMAILADDRESS=([^,]*)(,|$)");
-      Matcher m = p.matcher(issuerDNName);
-
+      Matcher m = p.matcher(subjectDNName);
 
       m.find();
 
