@@ -63,6 +63,8 @@ public class CryptoServiceImpl implements CryptoService {
 
   private static final String INVALID_PARAMETER = "core.crypto.invalid.parameter";
   private static final String INVALID_PARAMETER_SOLUTION = INVALID_PARAMETER + ".solution";
+  private static final String INVALID_ENCRYPTED_TXT = "core.crypto.invalid.encrypted.text";
+  private static final String INVALID_ENCRYPTED_TXT_SOLUTION = INVALID_ENCRYPTED_TXT + ".solution";
   private static final String NO_SUCH_ALGORITHM = "core.crypto.no.such.algorithm";
   private static final String NO_SUCH_ALGORITHM_SOLUTION = NO_SUCH_ALGORITHM + ".solution";
   private static final String INVALID_KEY_SPEC = "core.crypto.invalid.key.spec";
@@ -125,11 +127,19 @@ public class CryptoServiceImpl implements CryptoService {
     checkParameters("encryptedText", encryptedText);
     checkParameters("key", key);
     Cipher cipher = getCipher();
+    int blockSize = cipher.getBlockSize();
     // Strip off the Salt and IV
     ByteBuffer buffer = ByteBuffer.wrap(Base64.decodeBase64(encryptedText));
+    int minLength = SALT_SIZE + blockSize + 1;
+    if (buffer.capacity() < minLength) {
+      throw new CryptoException(logMessage.getMessage(INVALID_ENCRYPTED_TXT, encryptedText),
+          logMessage.getMessage(INVALID_ENCRYPTED_TXT_SOLUTION,
+              String.valueOf(buffer.capacity()), String.valueOf(minLength)));
+    }
+
     byte[] saltBytes = new byte[SALT_SIZE];
     buffer.get(saltBytes, 0, saltBytes.length);
-    byte[] ivBytes = new byte[cipher.getBlockSize()];
+    byte[] ivBytes = new byte[blockSize];
     buffer.get(ivBytes, 0, ivBytes.length);
     byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length - ivBytes.length];
     buffer.get(encryptedTextBytes);
