@@ -11,6 +11,10 @@
 
     <artifactId>integration-core</artifactId>
 
+    <properties>
+        <cobertura.totalLineRate>80</cobertura.totalLineRate>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
