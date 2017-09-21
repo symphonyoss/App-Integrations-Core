@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -228,6 +229,12 @@ public class WebHookDispatcherResource extends WebHookResource {
     payload.addParameter(DATA, data);
 
     return handleRequest(hash, configurationId, whiIntegration, payload);
+  }
+
+  @ExceptionHandler(RemoteApiException.class)
+  public ResponseEntity<String> handleRemoteApiException(RemoteApiException e) {
+    LOGGER.error(e.getMessage(), e);
+    return ResponseEntity.status(e.getCode()).body(e.getMessage());
   }
 
 }
