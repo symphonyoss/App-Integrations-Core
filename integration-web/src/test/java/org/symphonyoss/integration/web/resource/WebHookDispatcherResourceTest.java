@@ -394,6 +394,6 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
     ResponseEntity<String> expected = ResponseEntity.status(errorCode).body(e.getMessage());
     ResponseEntity response = webHookDispatcherResource.handleRemoteApiException(e);
 
-    Assert.assertEquals(expected,response);
+    assertEquals(expected,response);
   }
 }

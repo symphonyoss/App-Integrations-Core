@@ -233,6 +233,7 @@ public class WebHookDispatcherResource extends WebHookResource {
 
   @ExceptionHandler(RemoteApiException.class)
   public ResponseEntity<String> handleRemoteApiException(RemoteApiException e) {
+    LOGGER.error(e.getMessage(), e);
     return ResponseEntity.status(e.getCode()).body(e.getMessage());
   }
 
