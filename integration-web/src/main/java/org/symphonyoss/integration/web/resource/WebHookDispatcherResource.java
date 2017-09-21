@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
@@ -228,6 +230,11 @@ public class WebHookDispatcherResource extends WebHookResource {
     payload.addParameter(DATA, data);
 
     return handleRequest(hash, configurationId, whiIntegration, payload);
+  }
+
+  @ExceptionHandler(RemoteApiException.class)
+  private ResponseEntity<String> handleRemoteApiException(RemoteApiException e) {
+    return ResponseEntity.status(e.getCode()).body(e.getMessage());
   }
 
 }
