@@ -384,4 +384,16 @@ public class WebHookDispatcherResourceTest extends WebHookResourceTest {
 
     assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
   }
+
+  @Test
+  public void testRemoteApiExceptionHandler() {
+    int errorCode = -1;
+    String errorMessage = "errorMessage";
+    RemoteApiException e = new RemoteApiException(errorCode,errorMessage);
+
+    ResponseEntity<String> expected = ResponseEntity.status(errorCode).body(e.getMessage());
+    ResponseEntity response = webHookDispatcherResource.handleRemoteApiException(e);
+
+    Assert.assertEquals(expected,response);
+  }
 }

@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.symphonyoss.integration.entity.MessageMLParseException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.webhook.WebHookIntegration;
 import org.symphonyoss.integration.webhook.WebHookPayload;
 import org.symphonyoss.integration.webhook.exception.WebHookParseException;
@@ -233,7 +232,7 @@ public class WebHookDispatcherResource extends WebHookResource {
   }
 
   @ExceptionHandler(RemoteApiException.class)
-  private ResponseEntity<String> handleRemoteApiException(RemoteApiException e) {
+  public ResponseEntity<String> handleRemoteApiException(RemoteApiException e) {
     return ResponseEntity.status(e.getCode()).body(e.getMessage());
   }
 
