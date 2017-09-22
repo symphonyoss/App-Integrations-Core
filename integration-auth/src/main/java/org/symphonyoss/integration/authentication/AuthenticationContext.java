@@ -29,7 +29,7 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 
 import java.security.KeyStore;
 
@@ -58,16 +58,16 @@ public class AuthenticationContext {
    */
   private AuthenticationToken previousToken = AuthenticationToken.VOID_AUTH_TOKEN;
 
-  public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
+  public AuthenticationContext(String userId, KeyStore keyStore, String keyStorePass, HttpClientConfig apiClientConfig) {
     if (apiClientConfig == null) {
-      apiClientConfig = new ApiClientConfig();
+      apiClientConfig = new HttpClientConfig();
     }
 
     this.userId = userId;
     this.client = buildClient(keyStore, keyStorePass, apiClientConfig);
   }
 
-  private Client buildClient(KeyStore keyStore, String keyStorePass, ApiClientConfig apiClientConfig) {
+  private Client buildClient(KeyStore keyStore, String keyStorePass, HttpClientConfig apiClientConfig) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 

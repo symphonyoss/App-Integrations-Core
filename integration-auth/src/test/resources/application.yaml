@@ -1,7 +1,7 @@
 #
 # API Client configurations
 #
-api_client_config:
+http_client_config:
   connect_timeout: 1003
   read_timeout: 2004
   max_connections: 57

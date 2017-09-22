@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 
 import java.security.KeyStore;
 
@@ -155,11 +155,11 @@ public class AuthenticationContextTest {
 
   @Test
   public void testApiClientConfiguration() throws RemoteApiException {
-    ApiClientConfig apiClientConfig = new ApiClientConfig();
-    apiClientConfig.setConnectTimeout(ApiClientConfig.MAX_CONNECT_TIMEOUT);
-    apiClientConfig.setReadTimeout(ApiClientConfig.MAX_READ_TIMEOUT);
-    apiClientConfig.setMaxConnections(ApiClientConfig.MAX_TOTAL_CONNECTIONS);
-    apiClientConfig.setMaxConnectionsPerRoute(ApiClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
+    HttpClientConfig apiClientConfig = new HttpClientConfig();
+    apiClientConfig.setConnectTimeout(HttpClientConfig.MAX_CONNECT_TIMEOUT);
+    apiClientConfig.setReadTimeout(HttpClientConfig.MAX_READ_TIMEOUT);
+    apiClientConfig.setMaxConnections(HttpClientConfig.MAX_TOTAL_CONNECTIONS);
+    apiClientConfig.setMaxConnectionsPerRoute(HttpClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
 
     AuthenticationContext authContext = new AuthenticationContext(USER_ID, null, null, apiClientConfig);
 

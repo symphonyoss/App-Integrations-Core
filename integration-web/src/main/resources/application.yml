@@ -55,3 +55,10 @@ key_manager:
 management:
   security:
     enabled: false
+
+#
+# Health check timeouts
+#
+http_client_config:
+  connect_timeout: 1000
+  read_timeout: 5000

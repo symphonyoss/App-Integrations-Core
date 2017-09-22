@@ -293,7 +293,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    */
   @Override
   public void registerUser(String userId, KeyStore keyStore, String keyStorePass) {
-    authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass, properties.getApiClientConfig()));
+    authContexts.put(userId, new AuthenticationContext(userId, keyStore, keyStorePass, properties.getHttpClientConfig()));
   }
 
   /**
