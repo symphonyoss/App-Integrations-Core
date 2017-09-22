@@ -41,3 +41,10 @@ applications:
     state: PROVISIONED
     enabled: true
     visible: true
+
+#
+# Health check timeouts
+#
+health_check_timeouts:
+  connect_timeout_in_millis: 1000
+  read_timeout_in_millis: 5000

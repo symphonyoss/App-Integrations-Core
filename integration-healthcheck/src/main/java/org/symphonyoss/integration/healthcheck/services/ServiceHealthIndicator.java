@@ -18,13 +18,12 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .UNREGISTERED_USER;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
     .CACHE_IS_NOT_LOADED;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.IO_EXCEPTION;
 import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
     .PROCESSING_EXCEPTION;
 import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .IO_EXCEPTION;
+    .UNREGISTERED_USER;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.cache.CacheBuilder;
@@ -49,6 +48,7 @@ import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.TimeoutConfig;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -79,16 +79,6 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * String that should be replaced to retrieve the semantic version
    */
   private static final String SNAPSHOT_VERSION = "-SNAPSHOT";
-
-  /**
-   * HTTP Connection timeout (in miliseconds)
-   */
-  private static final int CONNECT_TIMEOUT_MILLIS = 1000;
-
-  /**
-   * HTTP Read timeout (in miliseconds)
-   */
-  private static final int READ_TIMEOUT_MILLIS = 5000;
 
   /**
    * Cache period (in seconds) to retrive the service information.
@@ -226,9 +216,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     }
 
     try {
+      TimeoutConfig timeouts = properties.getHealthCheckTimeouts();
       Invocation.Builder invocationBuilder = client.target(getHealthCheckUrl())
-          .property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MILLIS)
-          .property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT_MILLIS)
+          .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeoutInMillis())
+          .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeoutInMillis())
           .request()
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
@@ -306,4 +297,5 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   public String getCurrentVersion() {
     return currentVersion;
   }
+
 }
