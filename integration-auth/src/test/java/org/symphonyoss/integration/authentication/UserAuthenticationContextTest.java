@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Before;
@@ -31,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 
 import java.security.KeyStore;
 
@@ -155,14 +154,14 @@ public class UserAuthenticationContextTest {
 
   @Test
   public void testApiClientConfiguration() throws RemoteApiException {
-    ApiClientConfig apiClientConfig = new ApiClientConfig();
-    apiClientConfig.setConnectTimeout(ApiClientConfig.MAX_CONNECT_TIMEOUT);
-    apiClientConfig.setReadTimeout(ApiClientConfig.MAX_READ_TIMEOUT);
-    apiClientConfig.setMaxConnections(ApiClientConfig.MAX_TOTAL_CONNECTIONS);
-    apiClientConfig.setMaxConnectionsPerRoute(ApiClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
+    HttpClientConfig httpClientConfig = new HttpClientConfig();
+    httpClientConfig.setConnectTimeout(HttpClientConfig.MAX_CONNECT_TIMEOUT);
+    httpClientConfig.setReadTimeout(HttpClientConfig.MAX_READ_TIMEOUT);
+    httpClientConfig.setMaxConnections(HttpClientConfig.MAX_TOTAL_CONNECTIONS);
+    httpClientConfig.setMaxConnectionsPerRoute(HttpClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
 
     UserAuthenticationContext authContext =
-        new UserAuthenticationContext(USER_ID, null, null, apiClientConfig);
+        new UserAuthenticationContext(USER_ID, null, null, httpClientConfig);
 
     Client client = authContext.httpClientForContext();
     Configuration clientConfiguration = client.getConfiguration();
@@ -174,10 +173,10 @@ public class UserAuthenticationContextTest {
     Integer clientTotalConn = connectionManager.getMaxTotal();
     Integer clientTotalConnPerRoute = connectionManager.getDefaultMaxPerRoute();
 
-    assertEquals(apiClientConfig.getReadTimeout(), clientReadTimeout);
-    assertEquals(apiClientConfig.getConnectTimeout(), clientConnectTimeout);
-    assertEquals(apiClientConfig.getMaxConnections(), clientTotalConn);
-    assertEquals(apiClientConfig.getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+    assertEquals(httpClientConfig.getReadTimeout(), clientReadTimeout);
+    assertEquals(httpClientConfig.getConnectTimeout(), clientConnectTimeout);
+    assertEquals(httpClientConfig.getMaxConnections(), clientTotalConn);
+    assertEquals(httpClientConfig.getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
   }
 
 }

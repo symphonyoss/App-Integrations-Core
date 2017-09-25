@@ -43,8 +43,8 @@ applications:
     visible: true
 
 #
-# Health check timeouts
+# Default timeouts (in millis)
 #
-health_check_timeouts:
-  connect_timeout_in_millis: 1000
-  read_timeout_in_millis: 5000
+http_client_config:
+  connect_timeout: 2000
+  read_timeout: 5000

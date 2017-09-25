@@ -47,8 +47,8 @@ import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventD
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.model.yaml.TimeoutConfig;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -216,10 +216,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     }
 
     try {
-      TimeoutConfig timeouts = properties.getHealthCheckTimeouts();
+      HttpClientConfig timeouts = properties.getHttpClientConfig();
       Invocation.Builder invocationBuilder = client.target(getHealthCheckUrl())
-          .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeoutInMillis())
-          .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeoutInMillis())
+          .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeout())
+          .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeout())
           .request()
           .accept(MediaType.APPLICATION_JSON_TYPE);
 

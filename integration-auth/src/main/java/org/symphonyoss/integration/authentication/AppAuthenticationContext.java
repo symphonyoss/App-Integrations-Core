@@ -16,7 +16,7 @@
 
 package org.symphonyoss.integration.authentication;
 
-import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 
 import java.security.KeyStore;
 
@@ -36,11 +36,11 @@ public class AppAuthenticationContext extends AuthenticationContext {
    * @param applicationId Application identifier
    * @param keyStore Keystore object
    * @param keyStorePassword Keystore password
-   * @param apiClientConfig API client settings
+   * @param httpClientConfig API client settings
    */
   public AppAuthenticationContext(String applicationId, KeyStore keyStore, String keyStorePassword,
-      ApiClientConfig apiClientConfig) {
-    super(keyStore, keyStorePassword, apiClientConfig);
+      HttpClientConfig httpClientConfig) {
+    super(keyStore, keyStorePassword, httpClientConfig);
     this.applicationId = applicationId;
   }
 
