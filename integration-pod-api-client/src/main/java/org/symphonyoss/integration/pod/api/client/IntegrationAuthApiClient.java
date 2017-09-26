@@ -234,6 +234,9 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
       checkParam(integrationId, INTEGRATION_ID);
       checkParam(appToken.getAppToken(), TOKEN_APPLICATION);
       checkParam(appToken.getSymphonyToken(), TOKEN_SYMPHONY);
+      // Only AppToken and SymphonyToken are supported by this API
+      AppToken appTokenWithoutAppId = new AppToken(null, appToken.getAppToken(),
+          appToken.getSymphonyToken());
 
       String path =
           "/v1/configuration/" + apiClient.escapeString(integrationId) + "/authentication/";
@@ -241,7 +244,7 @@ public class IntegrationAuthApiClient extends BasePodApiClient {
       Map<String, String> headerParams = new HashMap<>();
       headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
 
-      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), appToken,
+      apiClient.doPost(path, headerParams, Collections.<String, String>emptyMap(), appTokenWithoutAppId,
           AppToken.class);
     } catch (RemoteApiException e) {
       if (e.getCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
