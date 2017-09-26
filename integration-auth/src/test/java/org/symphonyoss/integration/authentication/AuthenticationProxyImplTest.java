@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,10 +53,6 @@ import org.symphonyoss.integration.exception.authentication.UnexpectedAuthExcept
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.security.KeyStore;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
@@ -224,10 +219,10 @@ public class AuthenticationProxyImplTest {
     Integer clientTotalConn = connectionManager.getMaxTotal();
     Integer clientTotalConnPerRoute = connectionManager.getDefaultMaxPerRoute();
 
-    assertEquals(properties.getApiClientConfig().getReadTimeout(), clientReadTimeout);
-    assertEquals(properties.getApiClientConfig().getConnectTimeout(), clientConnectTimeout);
-    assertEquals(properties.getApiClientConfig().getMaxConnections(), clientTotalConn);
-    assertEquals(properties.getApiClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+    assertEquals(properties.getHttpClientConfig().getReadTimeout(), clientReadTimeout);
+    assertEquals(properties.getHttpClientConfig().getConnectTimeout(), clientConnectTimeout);
+    assertEquals(properties.getHttpClientConfig().getMaxConnections(), clientTotalConn);
+    assertEquals(properties.getHttpClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
 
   }
 

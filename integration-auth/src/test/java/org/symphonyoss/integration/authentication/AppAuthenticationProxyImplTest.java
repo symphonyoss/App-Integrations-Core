@@ -103,10 +103,10 @@ public class AppAuthenticationProxyImplTest {
     Integer clientTotalConn = connectionManager.getMaxTotal();
     Integer clientTotalConnPerRoute = connectionManager.getDefaultMaxPerRoute();
 
-    assertEquals(properties.getApiClientConfig().getReadTimeout(), clientReadTimeout);
-    assertEquals(properties.getApiClientConfig().getConnectTimeout(), clientConnectTimeout);
-    assertEquals(properties.getApiClientConfig().getMaxConnections(), clientTotalConn);
-    assertEquals(properties.getApiClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+    assertEquals(properties.getHttpClientConfig().getReadTimeout(), clientReadTimeout);
+    assertEquals(properties.getHttpClientConfig().getConnectTimeout(), clientConnectTimeout);
+    assertEquals(properties.getHttpClientConfig().getMaxConnections(), clientTotalConn);
+    assertEquals(properties.getHttpClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
   }
 
 }

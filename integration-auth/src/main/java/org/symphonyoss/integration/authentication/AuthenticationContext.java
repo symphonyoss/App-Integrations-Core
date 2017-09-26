@@ -29,7 +29,7 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.symphonyoss.integration.model.yaml.ApiClientConfig;
+import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 
 import java.security.KeyStore;
 
@@ -50,14 +50,15 @@ public abstract class AuthenticationContext {
    *
    * @param keyStore Keystore object
    * @param keyStorePassword Keystore password
-   * @param apiClientConfig API client settings
+   * @param httpClientConfig API client settings
    */
-  public AuthenticationContext(KeyStore keyStore, String keyStorePassword, ApiClientConfig apiClientConfig) {
-    if (apiClientConfig == null) {
-      apiClientConfig = new ApiClientConfig();
+  public AuthenticationContext(KeyStore keyStore, String keyStorePassword, HttpClientConfig
+      httpClientConfig) {
+    if (httpClientConfig == null) {
+      httpClientConfig = new HttpClientConfig();
     }
 
-    this.client = buildClient(keyStore, keyStorePassword, apiClientConfig);
+    this.client = buildClient(keyStore, keyStorePassword, httpClientConfig);
   }
 
   /**
@@ -65,16 +66,16 @@ public abstract class AuthenticationContext {
    *
    * @param keyStore Keystore object
    * @param keyStorePassword Keystore password
-   * @param apiClientConfig API client settings
+   * @param httpClientConfig API client settings
    * @return HTTP client
    */
-  private Client buildClient(KeyStore keyStore, String keyStorePassword, ApiClientConfig apiClientConfig) {
+  private Client buildClient(KeyStore keyStore, String keyStorePassword, HttpClientConfig httpClientConfig) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
     // Connect and read timeouts in milliseconds
-    clientConfig.property(ClientProperties.READ_TIMEOUT, apiClientConfig.getReadTimeout());
-    clientConfig.property(ClientProperties.CONNECT_TIMEOUT, apiClientConfig.getConnectTimeout());
+    clientConfig.property(ClientProperties.READ_TIMEOUT, httpClientConfig.getReadTimeout());
+    clientConfig.property(ClientProperties.CONNECT_TIMEOUT, httpClientConfig.getConnectTimeout());
 
     // Socket factory setup with custom SSL context settings
     SSLConnectionSocketFactory sslSocketFactory;
@@ -96,8 +97,8 @@ public abstract class AuthenticationContext {
 
     // Connection pool setup with custom socket factory and max connections
     PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-    connectionManager.setMaxTotal(apiClientConfig.getMaxConnections());
-    connectionManager.setDefaultMaxPerRoute(apiClientConfig.getMaxConnectionsPerRoute());
+    connectionManager.setMaxTotal(httpClientConfig.getMaxConnections());
+    connectionManager.setDefaultMaxPerRoute(httpClientConfig.getMaxConnectionsPerRoute());
 
     // Sets the connector provider and connection manager (as shared to avoid the client runtime to shut it down)
     clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);

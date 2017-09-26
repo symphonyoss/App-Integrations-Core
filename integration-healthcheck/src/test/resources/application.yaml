@@ -41,3 +41,10 @@ applications:
     state: PROVISIONED
     enabled: true
     visible: true
+
+#
+# Default timeouts (in millis)
+#
+http_client_config:
+  connect_timeout: 2000
+  read_timeout: 5000

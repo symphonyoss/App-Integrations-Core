@@ -60,3 +60,10 @@ management:
 # Time (in minutes) to persist in a local cache the pod certificate to check JWT signature
 #
 public_pod_certificate_cache_duration: 60
+
+#
+# Default timeouts (in millis)
+#
+http_client_config:
+  connect_timeout: 2000
+  read_timeout: 5000
