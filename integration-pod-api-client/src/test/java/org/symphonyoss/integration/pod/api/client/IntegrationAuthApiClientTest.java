@@ -1,6 +1,7 @@
 package org.symphonyoss.integration.pod.api.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -209,7 +210,7 @@ public class IntegrationAuthApiClientTest {
   public void testSaveAppAuthenticationTokenUnauthorized() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(401, "Unauthorized");
     doThrow(apiException).when(httpClient).doPost(eq(PATH_AUTHENTICATE), anyMap(),
-        anyMap(), eq(mockAppToken), eq(AppToken.class));
+        anyMap(), any(AppToken.class), eq(AppToken.class));
 
     apiClient.saveAppAuthenticationToken(MOCK_SESSION, MOCK_INTEGRATION_ID, mockAppToken);
   }
@@ -218,7 +219,7 @@ public class IntegrationAuthApiClientTest {
   public void testSaveAppAuthenticationTokenForbidden() throws RemoteApiException {
     RemoteApiException apiException = new RemoteApiException(403, "Forbidden");
     doThrow(apiException).when(httpClient).doPost(eq(PATH_AUTHENTICATE), anyMap(),
-        anyMap(), eq(mockAppToken), eq(AppToken.class));
+        anyMap(), any(AppToken.class), eq(AppToken.class));
 
     apiClient.saveAppAuthenticationToken(MOCK_SESSION, MOCK_INTEGRATION_ID, mockAppToken);
   }
