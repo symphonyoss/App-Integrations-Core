@@ -249,4 +249,14 @@ public class ApplicationAuthenticationResourceTest {
   public void testValidateJwtEmtptyToken() {
     appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_EMPTY_JWT);
   }
+
+  @Test
+  public void testMissingRequiredParameterExceptionHandler() {
+    MissingRequiredParameterException exception = new MissingRequiredParameterException("message", "solution");
+    ErrorResponse response = appAuthenticationResource.handleMissingRequiredParameterExeception(exception);
+    ErrorResponse expected = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+
+    assertEquals(expected.getMessage(), response.getMessage());
+    assertEquals(expected.getStatus(), response.getStatus());
+  }
 }
