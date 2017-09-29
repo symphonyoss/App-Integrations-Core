@@ -36,6 +36,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
+import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.json.JsonUtils;
@@ -104,8 +105,8 @@ public class ApplicationAuthenticationResource {
     }
 
     String component = getIntegrationComponent(configurationId);
-
     String token = jwtAuthentication.authenticate(configurationId);
+
     AppToken appToken = new AppToken(component, token, null);
 
     return ResponseEntity.ok().body(appToken);
@@ -208,8 +209,9 @@ public class ApplicationAuthenticationResource {
   }
 
   @ExceptionHandler(MissingRequiredParameterException.class)
-  public ErrorResponse handleMissingRequiredParameterException(MissingRequiredParameterException e) {
-    return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+  public ResponseEntity handleMissingRequiredParameterException(MissingRequiredParameterException e) {
+    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
 }
