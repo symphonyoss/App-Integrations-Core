@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
+import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.json.JsonUtils;
@@ -204,6 +206,12 @@ public class ApplicationAuthenticationResource {
 
       throw new MissingRequiredParameterException(reason, solution);
     }
+  }
+
+  @ExceptionHandler(UnregisteredAppAuthException.class)
+  public ResponseEntity handleUnregisteredAppAuthException(UnregisteredAppAuthException e) {
+    ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getMessage());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
 }
