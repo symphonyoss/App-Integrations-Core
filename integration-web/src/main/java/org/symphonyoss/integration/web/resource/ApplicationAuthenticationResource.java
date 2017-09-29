@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -204,6 +205,11 @@ public class ApplicationAuthenticationResource {
 
       throw new MissingRequiredParameterException(reason, solution);
     }
+  }
+
+  @ExceptionHandler(MissingRequiredParameterException.class)
+  public ErrorResponse handleMissingRequiredParameterExeception(MissingRequiredParameterException e) {
+    return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
   }
 
 }
