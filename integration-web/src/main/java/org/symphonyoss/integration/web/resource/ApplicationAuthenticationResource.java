@@ -208,7 +208,7 @@ public class ApplicationAuthenticationResource {
   }
 
   @ExceptionHandler(MissingRequiredParameterException.class)
-  public ErrorResponse handleMissingRequiredParameterExeception(MissingRequiredParameterException e) {
+  public ErrorResponse handleMissingRequiredParameterException(MissingRequiredParameterException e) {
     return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
   }
 

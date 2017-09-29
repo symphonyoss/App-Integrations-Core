@@ -253,7 +253,7 @@ public class ApplicationAuthenticationResourceTest {
   @Test
   public void testMissingRequiredParameterExceptionHandler() {
     MissingRequiredParameterException exception = new MissingRequiredParameterException("message", "solution");
-    ErrorResponse response = appAuthenticationResource.handleMissingRequiredParameterExeception(exception);
+    ErrorResponse response = appAuthenticationResource.handleMissingRequiredParameterException(exception);
     ErrorResponse expected = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
 
     assertEquals(expected.getMessage(), response.getMessage());
