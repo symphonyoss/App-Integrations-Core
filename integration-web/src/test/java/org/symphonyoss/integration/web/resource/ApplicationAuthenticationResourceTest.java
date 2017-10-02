@@ -34,7 +34,6 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.api.jwt.JwtAuthentication;
 import org.symphonyoss.integration.authentication.api.model.AppToken;
 import org.symphonyoss.integration.authentication.api.model.JwtPayload;
-import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -250,17 +249,4 @@ public class ApplicationAuthenticationResourceTest {
   public void testValidateJwtEmtptyToken() {
     appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_EMPTY_JWT);
   }
-
-  @Test
-  public void testMissingRequiredParameterExceptionHandler() {
-    MissingRequiredParameterException exception = new MissingRequiredParameterException("message", "solution");
-    ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
-
-    ResponseEntity response = appAuthenticationResource.handleMissingRequiredParameterException(exception);
-    ResponseEntity expected = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-
-    assertEquals(expected.getBody().toString(), response.getBody().toString());
-    assertEquals(expected.getStatusCodeValue(), response.getStatusCodeValue());
-  }
-
 }

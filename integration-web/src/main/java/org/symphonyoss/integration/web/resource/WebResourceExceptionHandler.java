@@ -7,10 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.model.ErrorResponse;
 
 /**
@@ -96,6 +97,18 @@ public class WebResourceExceptionHandler {
 
   private ErrorResponse buildErrorResponse(int status, String message) {
     return new ErrorResponse(status, message);
+  }
+
+  /**
+   * Handle {@link MissingRequiredParameterException} exception.
+   * @param ex Exception object
+   * @return HTTP 400 (Bad Request)
+   */
+  @ResponseBody
+  @ExceptionHandler(MissingRequiredParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingRequiredParameterException(MissingRequiredParameterException ex) {
+    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
 }

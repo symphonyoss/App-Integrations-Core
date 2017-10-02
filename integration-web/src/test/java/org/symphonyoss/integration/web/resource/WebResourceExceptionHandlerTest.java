@@ -4,10 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
-import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 
 /**
  * Unit tests for {@link WebResourceExceptionHandler}
@@ -72,4 +73,12 @@ public class WebResourceExceptionHandlerTest {
     assertEquals(HttpStatus.FORBIDDEN, exceptionHandler.handleForbiddenException(ex).getStatusCode());
   }
 
+  /**
+   * Test an HTTP Unauthorized caused by {@link MissingRequiredParameterException}
+   */
+  @Test
+  public void testMissingRequiredParameter() {
+    MissingRequiredParameterException ex = new MissingRequiredParameterException("User has no permission to access the resource");
+    assertEquals(HttpStatus.BAD_REQUEST, exceptionHandler.handleMissingRequiredParameterException(ex).getStatusCode());
+  }
 }
