@@ -105,6 +105,7 @@ public class WebResourceExceptionHandler {
    * @return HTTP 403 (Forbidden)
    */
 
+  @ResponseBody
   @ExceptionHandler(UnregisteredAppAuthException.class)
   public ResponseEntity handleUnregisteredAppAuthException(UnregisteredAppAuthException ex) {
     ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
