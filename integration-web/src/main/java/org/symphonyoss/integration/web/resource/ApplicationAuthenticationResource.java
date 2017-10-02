@@ -103,8 +103,8 @@ public class ApplicationAuthenticationResource {
     }
 
     String component = getIntegrationComponent(configurationId);
-    String token = jwtAuthentication.authenticate(configurationId);
 
+    String token = jwtAuthentication.authenticate(configurationId);
     AppToken appToken = new AppToken(component, token, null);
 
     return ResponseEntity.ok().body(appToken);
