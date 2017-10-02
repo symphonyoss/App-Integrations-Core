@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
@@ -96,6 +97,18 @@ public class WebResourceExceptionHandler {
 
   private ErrorResponse buildErrorResponse(int status, String message) {
     return new ErrorResponse(status, message);
+  }
+
+  /**
+   * Handle {@link UnregisteredAppAuthException} exception
+   * @param ex Exception object
+   * @return HTTP 403 (Forbidden)
+   */
+
+  @ExceptionHandler(UnregisteredAppAuthException.class)
+  public ResponseEntity handleUnregisteredAppAuthException(UnregisteredAppAuthException ex) {
+    ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
 }

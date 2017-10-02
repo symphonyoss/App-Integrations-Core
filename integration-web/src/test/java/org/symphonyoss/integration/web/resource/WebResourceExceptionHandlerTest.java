@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
+import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
 import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
@@ -70,6 +71,15 @@ public class WebResourceExceptionHandlerTest {
   public void testForbiddenAuthException() {
     ForbiddenAuthException ex = new ForbiddenAuthException("User has no permission to access the resource");
     assertEquals(HttpStatus.FORBIDDEN, exceptionHandler.handleForbiddenException(ex).getStatusCode());
+  }
+
+  /**
+   * Test an HTTP Unauthorized caused by {@link UnregisteredAppAuthException}
+   */
+  @Test
+  public void testUnregisteredAppAuthException() {
+    UnregisteredAppAuthException ex = new UnregisteredAppAuthException("User has no permission to access the resource");
+    assertEquals(HttpStatus.FORBIDDEN, exceptionHandler.handleUnregisteredAppAuthException(ex).getStatusCode());
   }
 
 }
