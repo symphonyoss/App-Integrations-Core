@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
-import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
-import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
+import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.exception.authentication.AuthenticationException;
+import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;
+import org.symphonyoss.integration.exception.authentication.MissingRequiredParameterException;
+import org.symphonyoss.integration.exception.authentication.UnauthorizedUserException;
 import org.symphonyoss.integration.model.ErrorResponse;
 
 /**
@@ -84,8 +86,8 @@ public class WebResourceExceptionHandler {
    * @return HTTP 403 (Forbidden)
    */
   @ResponseBody
-  @ExceptionHandler(ForbiddenAuthException.class)
-  public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenAuthException ex) {
+  @ExceptionHandler({ ForbiddenAuthException.class, UnregisteredAppAuthException.class })
+  public ResponseEntity<ErrorResponse> handleForbiddenException(AuthenticationException ex) {
     String message = ex.getMessage();
     LOGGER.error(message);
 
@@ -100,16 +102,15 @@ public class WebResourceExceptionHandler {
   }
 
   /**
-   * Handle {@link UnregisteredAppAuthException} exception
+   * Handle {@link MissingRequiredParameterException} exception.
    * @param ex Exception object
-   * @return HTTP 403 (Forbidden)
+   * @return HTTP 400 (Bad Request)
    */
-
   @ResponseBody
-  @ExceptionHandler(UnregisteredAppAuthException.class)
-  public ResponseEntity handleUnregisteredAppAuthException(UnregisteredAppAuthException ex) {
-    ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  @ExceptionHandler(MissingRequiredParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingRequiredParameterException(MissingRequiredParameterException ex) {
+    ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
 }
