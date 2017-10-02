@@ -205,4 +205,5 @@ public class ApplicationAuthenticationResource {
       throw new MissingRequiredParameterException(reason, solution);
     }
   }
+
 }

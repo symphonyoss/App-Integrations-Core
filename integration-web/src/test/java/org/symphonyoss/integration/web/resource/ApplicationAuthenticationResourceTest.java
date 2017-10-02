@@ -249,5 +249,4 @@ public class ApplicationAuthenticationResourceTest {
   public void testValidateJwtEmtptyToken() {
     appAuthenticationResource.validate(CONFIGURATION_ID, REQUEST_EMPTY_JWT);
   }
-
 }
