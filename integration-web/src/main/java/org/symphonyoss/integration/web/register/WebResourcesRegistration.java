@@ -124,7 +124,7 @@ public class WebResourcesRegistration {
     return new WebMvcConfigurerAdapter() {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping(CORS_MAPPING);
+        registry.addMapping(CORS_MAPPING).allowedMethods(PATH_WILDCARD);
       }
     };
   }
