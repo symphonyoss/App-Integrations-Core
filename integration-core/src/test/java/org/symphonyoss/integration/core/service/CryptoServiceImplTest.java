@@ -18,8 +18,6 @@ package org.symphonyoss.integration.core.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +26,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.CryptoException;
 import org.symphonyoss.integration.logging.LogMessageSource;
-
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  * Class with unit tests for {@link CryptoServiceImpl}
@@ -84,15 +80,4 @@ public class CryptoServiceImplTest {
   public void testDecryptInvalidKey() throws CryptoException {
     cryptoService.decrypt(TEXT, null);
   }
-
-  @Test
-  public void testDecryptInvalidBlockSize() throws CryptoException {
-    try {
-      cryptoService.decrypt("M4D4iJoiXPyhaJhdRq04BqY4UDmpObk9M4D4iJoiXPyhaJhdRq04BqY4UDmpObk", KEY);
-      fail("Should have thrown CryptoException.");
-    } catch (CryptoException e) {
-      assertTrue(e.getCause() instanceof IllegalBlockSizeException);
-    }
-  }
-
 }

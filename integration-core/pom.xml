@@ -31,6 +31,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.symphony</groupId>
+            <artifactId>crypto</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-commons</artifactId>
             <version>${project.version}</version>
