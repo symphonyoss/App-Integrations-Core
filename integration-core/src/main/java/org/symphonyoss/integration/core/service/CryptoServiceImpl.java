@@ -8,6 +8,7 @@ import com.symphony.security.exceptions.SymphonyInputException;
 import com.symphony.security.helper.ClientCryptoHandler;
 import com.symphony.security.helper.IClientCryptoHandler;
 import com.symphony.security.helper.KeyIdentifier;
+import com.symphony.security.utils.Bytes;
 import com.gs.ti.wpt.lc.security.cryptolib.PBKDF;
 
 import org.apache.commons.codec.binary.Base64;
@@ -64,6 +65,8 @@ public class CryptoServiceImpl implements CryptoService {
   @Autowired
   private LogMessageSource logMessage;
 
+  private IClientCryptoHandler clientCryptoHandler = new ClientCryptoHandler();
+
   /**
    * @see CryptoService#encrypt(String, String)
    */
@@ -71,20 +74,38 @@ public class CryptoServiceImpl implements CryptoService {
   public String encrypt(String plainText, String key) throws CryptoException {
     checkParameters("plainText", plainText);
     checkParameters("key", key);
+    try {
+      // Generate a random salt
+      byte saltBytes[] = new byte[SALT_SIZE];
+      Bytes.random(saltBytes);
 
-    // Generate a random salt
-    SecureRandom random = new SecureRandom();
-    byte saltBytes[] = new byte[SALT_SIZE];
-    random.nextBytes(saltBytes);
+      // Derive a Password-based key from the key parameter + salt
+      byte[] pbKey = PBKDF.PBKDF2_SHA256(key.getBytes(CHARSET), saltBytes, NUMBER_OF_ITERATIONS);
 
-    // Encrypt the plain text
-    byte[] encryptedTextBytes = doCipher(key, plainText, saltBytes, true);
+      // Encrypt the plain text
+      KeyIdentifier keyId = new KeyIdentifier(new byte[STREAM_ID_SIZE], 0L, 0L);
+      byte[] encryptedTextBytes = clientCryptoHandler.encryptMsg(pbKey, keyId,
+          plainText.getBytes(CHARSET));
 
-    // Prepend salt
-    byte[] buffer = new byte[saltBytes.length + encryptedTextBytes.length];
-    System.arraycopy(saltBytes, 0, buffer, 0, saltBytes.length);
-    System.arraycopy(encryptedTextBytes, 0, buffer, saltBytes.length, encryptedTextBytes.length);
-    return Base64.encodeBase64String(buffer);
+      // Prepend salt
+      byte[] buffer = new byte[saltBytes.length + encryptedTextBytes.length];
+      System.arraycopy(saltBytes, 0, buffer, 0, saltBytes.length);
+      System.arraycopy(encryptedTextBytes, 0, buffer, saltBytes.length, encryptedTextBytes.length);
+      return Base64.encodeBase64String(buffer);
+
+    } catch (SymphonyEncryptionException e) {
+      throw new CryptoException(logMessage.getMessage(GENERAL_CRYPTO_ERROR), e,
+          logMessage.getMessage(GENERAL_CRYPTO_ERROR_SOLUTION, e.getMessage()));
+    } catch (SymphonyInputException e) {
+      throw new CryptoException(logMessage.getMessage(INVALID_INPUT_TXT), e,
+          logMessage.getMessage(INVALID_INPUT_TXT_SOLUTION, e.getMessage()));
+    } catch (CiphertextTransportVersionException e) {
+      throw new CryptoException(logMessage.getMessage(INVALID_CIPHER_TXT), e,
+          logMessage.getMessage(INVALID_CIPHER_TXT_SOLUTION, e.getMessage()));
+    } catch (UnsupportedEncodingException e) {
+      throw new CryptoException(logMessage.getMessage(UNSUPPORTED_ENCODING), e,
+          logMessage.getMessage(UNSUPPORTED_ENCODING_SOLUTION, CHARSET));
+    }
   }
 
   /**
@@ -107,63 +128,13 @@ public class CryptoServiceImpl implements CryptoService {
       buffer.get(saltBytes, 0, saltBytes.length);
       byte[] encryptedTextBytes = new byte[buffer.capacity() - saltBytes.length];
       buffer.get(encryptedTextBytes);
-      encryptedText = Base64.encodeBase64String(encryptedTextBytes);
-
-      // Decrypt the encrypted text
-      byte[] decryptedTextBytes = doCipher(key, encryptedText, saltBytes, false);
-      return new String(decryptedTextBytes, CHARSET);
-
-    } catch (UnsupportedEncodingException e) {
-      throw new CryptoException(logMessage.getMessage(UNSUPPORTED_ENCODING), e,
-          logMessage.getMessage(UNSUPPORTED_ENCODING_SOLUTION, CHARSET));
-    }
-  }
-
-  /**
-   * Check if the given parameter is present and valid.
-   * @param param Parameter name.
-   * @param value Parameter value.
-   * @throws CryptoException Thrown when the parameter is invalid or absent.
-   */
-  private void checkParameters(String param, String value) throws CryptoException {
-    if (!StringUtils.isEmpty(param) && StringUtils.isEmpty(value)) {
-      throw new CryptoException(logMessage.getMessage(INVALID_PARAMETER, param),
-          logMessage.getMessage(INVALID_PARAMETER_SOLUTION, param));
-    }
-  }
-
-  /**
-   * This method was created to decrease the amount of duplicate code (exception
-   * handling), since those exceptions are not throwable from the Unit Test and our minimum
-   * coverage is 90% per project.
-   *
-   * It performs an encryption or decryption according to the passed MODE.
-   *
-   * @param key Key used to derive a PasswordBasedKey used during the cryptography process.
-   * @param text Text to encrypted or decrypted.
-   * @param salt Salt used to reinforce the security.
-   * @param encrypt MODE, set to TRUE to encrypt or FALSE to decrypt.
-   * @return Encrypted or decrypted text as an array of bytes.
-   * @throws CryptoException In case of error during the cryptography process.
-   */
-  private byte[] doCipher(String key, String text, byte[] salt, boolean encrypt)
-      throws CryptoException {
-    try {
-      if (encrypt) {
-        // Derive a Password-based key from the key parameter + salt
-        byte[] pbKey = PBKDF.PBKDF2_SHA256(key.getBytes(CHARSET), salt, NUMBER_OF_ITERATIONS);
-        // Encrypt the plain text
-        KeyIdentifier keyId = new KeyIdentifier(new byte[STREAM_ID_SIZE], 0L, 0L);
-        IClientCryptoHandler clientCryptoHandler = new ClientCryptoHandler();
-        return clientCryptoHandler.encryptMsg(pbKey, keyId, text.getBytes(CHARSET));
-      }
 
       // Derive a Password-based key from the key parameter + salt
-      byte[] pbKey = PBKDF.PBKDF2_SHA256(key.getBytes(CHARSET), salt, NUMBER_OF_ITERATIONS);
+      byte[] pbKey = PBKDF.PBKDF2_SHA256(key.getBytes(CHARSET), saltBytes, NUMBER_OF_ITERATIONS);
+
       // Decrypt the encrypted text
-      IClientCryptoHandler clientCryptoHandler = new ClientCryptoHandler();
-      byte[] encryptedTextBytes = Base64.decodeBase64(text);
-      return clientCryptoHandler.decryptMsg(pbKey, encryptedTextBytes);
+      byte[] decryptedTextBytes = clientCryptoHandler.decryptMsg(pbKey, encryptedTextBytes);
+      return new String(decryptedTextBytes, CHARSET);
 
     } catch (SymphonyEncryptionException | InvalidDataException e) {
       throw new CryptoException(logMessage.getMessage(GENERAL_CRYPTO_ERROR), e,
@@ -179,4 +150,13 @@ public class CryptoServiceImpl implements CryptoService {
           logMessage.getMessage(UNSUPPORTED_ENCODING_SOLUTION, CHARSET));
     }
   }
+
+  private void checkParameters(String param, String value) throws CryptoException {
+    if (!StringUtils.isEmpty(param) && StringUtils.isEmpty(value)) {
+      throw new CryptoException(logMessage.getMessage(INVALID_PARAMETER, param),
+          logMessage.getMessage(INVALID_PARAMETER_SOLUTION, param));
+    }
+  }
+
+  
 }
