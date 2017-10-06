@@ -30,6 +30,21 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- REMOVE after cryptoLib becomes open-source **** START **** -->
+        <dependency>
+            <groupId>com.symphony</groupId>
+            <artifactId>crypto</artifactId>
+            <version>1.48.2.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.48.2.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpg-jdk15on</artifactId>
+            <version>1.51</version>
+        </dependency>
+        <!-- REMOVE after cryptoLib becomes open-source **** END **** -->
+
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-commons</artifactId>
