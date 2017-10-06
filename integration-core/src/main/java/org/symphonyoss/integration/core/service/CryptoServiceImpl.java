@@ -82,7 +82,8 @@ public class CryptoServiceImpl implements CryptoService {
       // Derive a Password-based key from the key parameter + salt
       byte[] pbKey = PBKDF.PBKDF2_SHA256(key.getBytes(CHARSET), saltBytes, NUMBER_OF_ITERATIONS);
 
-      // Encrypt the plain text
+      // Encrypt the plain text - since we don't have a thread id to work with, we create
+      // an empty KeyIdentifier
       KeyIdentifier keyId = new KeyIdentifier(new byte[STREAM_ID_SIZE], 0L, 0L);
       byte[] encryptedTextBytes = clientCryptoHandler.encryptMsg(pbKey, keyId,
           plainText.getBytes(CHARSET));
