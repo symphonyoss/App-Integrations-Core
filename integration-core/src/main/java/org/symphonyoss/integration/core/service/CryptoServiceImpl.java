@@ -135,7 +135,10 @@ public class CryptoServiceImpl implements CryptoService {
 
       // Decrypt the encrypted text
       byte[] decryptedTextBytes = clientCryptoHandler.decryptMsg(pbKey, encryptedTextBytes);
-      return new String(decryptedTextBytes, CHARSET);
+      if (decryptedTextBytes != null) {
+        return new String(decryptedTextBytes, CHARSET);
+      }
+      return null;
 
     } catch (SymphonyEncryptionException | InvalidDataException e) {
       throw new CryptoException(logMessage.getMessage(GENERAL_CRYPTO_ERROR), e,
