@@ -26,10 +26,6 @@ import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProp
     .UNREGISTERED_USER;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
@@ -51,10 +47,10 @@ import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -85,6 +81,11 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    */
   private static final int SERVICE_CACHE_PERIOD_SECS = 20;
 
+  /**
+   * Lock waiting period (in seconds)
+   */
+  private static final int LOCK_PERIOD_SECS = 5;
+
   @Autowired
   protected IntegrationProperties properties;
 
@@ -100,24 +101,22 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   /**
    * Cache for the service information.
    */
-  private LoadingCache<String, IntegrationBridgeService> serviceInfoCache;
+  private IntegrationBridgeService serviceInfoCache;
 
+  /**
+   * Current version
+   */
   private String currentVersion;
 
-  @PostConstruct
-  public void init() {
-    serviceInfoCache = CacheBuilder.newBuilder().expireAfterWrite(SERVICE_CACHE_PERIOD_SECS,
-        TimeUnit.SECONDS).build(new CacheLoader<String, IntegrationBridgeService>() {
-      @Override
-      public IntegrationBridgeService load(String key) throws Exception {
-        if (key.equals(getServiceName())) {
-          return retrieveServiceInfo();
-        }
+  /**
+   * Lock to avoid concurrent execution
+   */
+  private Lock lock = new ReentrantLock();
 
-        return null;
-      }
-    });
-  }
+  /**
+   * Timestamp for the latest execution
+   */
+  private long lastExecution = 0;
 
   /**
    * Trigger the health check process on the required service defined in the event.
@@ -139,11 +138,22 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     String serviceName = getServiceName();
 
     try {
-      IntegrationBridgeService service = serviceInfoCache.get(serviceName);
-      return Health.status(service.getConnectivity()).withDetail(serviceName, service).build();
-    } catch (UncheckedExecutionException | ExecutionException e) {
+      boolean locked = lock.tryLock(LOCK_PERIOD_SECS, TimeUnit.SECONDS);
+      long nextExecution = lastExecution + TimeUnit.SECONDS.toMillis(SERVICE_CACHE_PERIOD_SECS);
+
+      if (!locked || System.currentTimeMillis() > nextExecution) {
+        serviceInfoCache = retrieveServiceInfo();
+        lastExecution = System.currentTimeMillis();
+      }
+
+      return Health.status(serviceInfoCache.getConnectivity())
+          .withDetail(serviceName, serviceInfoCache)
+          .build();
+    } catch (Exception e) {
       LOG.error(logMessageSource.getMessage(CACHE_IS_NOT_LOADED, serviceName), e);
       return Health.unknown().build();
+    } finally {
+      lock.unlock();
     }
   }
 

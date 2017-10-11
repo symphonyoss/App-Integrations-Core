@@ -17,9 +17,13 @@
 package org.symphonyoss.integration.healthcheck;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator.APPLICATIONS;
-import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator.SERVICES;
+import static org.mockito.Mockito.mock;
+import static org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator
+    .APPLICATIONS;
+import static org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator
+    .SERVICES;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +38,11 @@ import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Unit test for {@link AsyncCompositeHealthEndpoint}
@@ -59,8 +68,8 @@ public class AsyncCompositeHealthEndpointTest {
 
   private IntegrationBridgeHealthAggregator aggregator = new IntegrationBridgeHealthAggregator();
 
-  private AsyncCompositeHealthIndicator asyncCompositeHealthIndicator =
-      new AsyncCompositeHealthIndicator(aggregator, new LogMessageSource());
+  @Mock
+  private HealthCheckExecutorService service;
 
   @Mock
   private ApplicationsHealthIndicator applicationsHealthIndicator;
@@ -68,10 +77,15 @@ public class AsyncCompositeHealthEndpointTest {
   @Mock
   private CompositeServiceHealthIndicator servicesHealthIndicator;
 
+  private AsyncCompositeHealthIndicator asyncCompositeHealthIndicator;
+
   private Health.Builder builder;
 
   @Before
   public void init() {
+    asyncCompositeHealthIndicator =
+        new AsyncCompositeHealthIndicator(aggregator, new LogMessageSource(), service);
+
     builder = Health.unknown()
         .withDetail(VERSION, UNKNOWN_VERSION)
         .withDetail(SERVICES, new LinkedHashMap<>())
@@ -79,9 +93,15 @@ public class AsyncCompositeHealthEndpointTest {
   }
 
   @Test
-  public void testDownApplications() {
-    doReturn(Health.down().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.up().build()).when(servicesHealthIndicator).health();
+  public void testDownApplications()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    Future<Health> future1 = mock(Future.class);
+    Future<Health> future2 = mock(Future.class);
+
+    doReturn(future1).doReturn(future2).when(service).submit(any(Callable.class));
+
+    doReturn(Health.down().build()).when(future1).get(0, TimeUnit.SECONDS);
+    doReturn(Health.up().build()).when(future2).get(0, TimeUnit.SECONDS);
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
@@ -92,9 +112,15 @@ public class AsyncCompositeHealthEndpointTest {
   }
 
   @Test
-  public void testDownConnectivity() {
-    doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.down().build()).when(servicesHealthIndicator).health();
+  public void testDownConnectivity()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    Future<Health> future1 = mock(Future.class);
+    Future<Health> future2 = mock(Future.class);
+
+    doReturn(future1).doReturn(future2).when(service).submit(any(Callable.class));
+
+    doReturn(Health.up().build()).when(future1).get(0, TimeUnit.SECONDS);
+    doReturn(Health.down().build()).when(future2).get(0, TimeUnit.SECONDS);
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
@@ -107,9 +133,14 @@ public class AsyncCompositeHealthEndpointTest {
   }
 
   @Test
-  public void testUp() {
-    doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
-    doReturn(Health.up().build()).when(servicesHealthIndicator).health();
+  public void testUp() throws InterruptedException, ExecutionException, TimeoutException {
+    Future<Health> future1 = mock(Future.class);
+    Future<Health> future2 = mock(Future.class);
+
+    doReturn(future1).doReturn(future2).when(service).submit(any(Callable.class));
+
+    doReturn(Health.up().build()).when(future1).get(0, TimeUnit.SECONDS);
+    doReturn(Health.up().build()).when(future2).get(0, TimeUnit.SECONDS);
 
     AsyncCompositeHealthEndpoint endpoint =
         new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
