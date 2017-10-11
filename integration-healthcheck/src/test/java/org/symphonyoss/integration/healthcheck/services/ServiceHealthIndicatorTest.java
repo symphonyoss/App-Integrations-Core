@@ -24,7 +24,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -92,8 +91,6 @@ public class ServiceHealthIndicatorTest {
 
   @Before
   public void init() {
-    healthIndicator.init();
-
     Client client = mock(Client.class);
     WebTarget target = mock(WebTarget.class);
     invocationBuilder = mock(Invocation.Builder.class);
@@ -107,6 +104,8 @@ public class ServiceHealthIndicatorTest {
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
 
     ReflectionTestUtils.setField(healthIndicator, "publisher", publisher);
+    ReflectionTestUtils.setField(healthIndicator, "serviceInfoCache", null);
+    ReflectionTestUtils.setField(healthIndicator, "lastExecution", 0);
   }
 
   @Test
@@ -232,6 +231,21 @@ public class ServiceHealthIndicatorTest {
 
     String currentVersion = healthIndicator.getCurrentVersion();
     assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+  }
+
+  @Test
+  public void testCachedResult() {
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    service.setConnectivity(Status.UP);
+    service.setCurrentVersion(MOCK_CURRENT_VERSION);
+
+    ReflectionTestUtils.setField(healthIndicator, "serviceInfoCache", service);
+    ReflectionTestUtils.setField(healthIndicator, "lastExecution", System.currentTimeMillis());
+
+    Health expected = Health.up().withDetail(healthIndicator.getServiceName(), service).build();
+    Health result = healthIndicator.health();
+
+    assertEquals(expected, result);
   }
 
 }
