@@ -11,6 +11,34 @@
 
     <artifactId>integration-core</artifactId>
 
+    <!-- REMOVE after cryptoLib becomes open-source **** START **** -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>prepare-crypto</id>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <tasks>
+                                <echo message="Preparing Symphony CryptoLib..." />
+                                <unzip src="${project.build.outputDirectory}/lib/crypto-1.48.2.1.jar"
+                                       dest="${project.build.outputDirectory}" />
+                                <delete dir="${project.build.outputDirectory}/lib"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <!-- REMOVE after cryptoLib becomes open-source **** END **** -->
+
     <dependencies>
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
@@ -29,6 +57,21 @@
             <artifactId>integration-authorization</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- REMOVE after cryptoLib becomes open-source **** START **** -->
+        <dependency>
+            <groupId>com.symphony</groupId>
+            <artifactId>crypto</artifactId>
+            <version>1.48.2.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.48.2.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpg-jdk15on</artifactId>
+            <version>1.51</version>
+        </dependency>
+        <!-- REMOVE after cryptoLib becomes open-source **** END **** -->
 
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>

@@ -18,18 +18,30 @@ package org.symphonyoss.integration.core.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+
+import com.symphony.security.exceptions.CiphertextTransportVersionException;
+import com.symphony.security.exceptions.SymphonyEncryptionException;
+import com.symphony.security.exceptions.SymphonyInputException;
+import com.symphony.security.helper.ClientCryptoHandler;
+import com.symphony.security.helper.IClientCryptoHandler;
+import com.symphony.security.helper.KeyIdentifier;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.CryptoException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
-import javax.crypto.IllegalBlockSizeException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Class with unit tests for {@link CryptoServiceImpl}
@@ -40,9 +52,13 @@ public class CryptoServiceImplTest {
 
   private static final String TEXT = "Lorem ipsum dolor sit amet...";
   private static final String KEY = "crypto@key123";
+  private static final String FAIL_MSG = "Should have thrown a CryptoException.";
 
   @Mock
   private LogMessageSource logMessage;
+
+  @Spy
+  private IClientCryptoHandler clientCryptoHandler = new ClientCryptoHandler();
 
   @InjectMocks
   private CryptoServiceImpl cryptoService;
@@ -86,13 +102,70 @@ public class CryptoServiceImplTest {
   }
 
   @Test
-  public void testDecryptInvalidBlockSize() throws CryptoException {
+  public void testEncryptSymphonyEncryptionException() {
+    testEncryptCryptoLibExceptions(SymphonyEncryptionException.class);
+  }
+
+  @Test
+  public void testEncryptSymphonyInputException() {
+    testEncryptCryptoLibExceptions(SymphonyInputException.class);
+  }
+
+  @Test
+  public void testEncryptCiphertextTransportVersionException() {
+    testEncryptCryptoLibExceptions(CiphertextTransportVersionException.class);
+  }
+
+  @Test
+  public void testEncryptUnsupportedEncodingException() {
+    testEncryptCryptoLibExceptions(UnsupportedEncodingException.class);
+  }
+
+  private void testEncryptCryptoLibExceptions(Class exceptionClass) {
     try {
-      cryptoService.decrypt("M4D4iJoiXPyhaJhdRq04BqY4UDmpObk9M4D4iJoiXPyhaJhdRq04BqY4UDmpObk", KEY);
-      fail("Should have thrown CryptoException.");
-    } catch (CryptoException e) {
-      assertTrue(e.getCause() instanceof IllegalBlockSizeException);
+      doThrow(exceptionClass).when(clientCryptoHandler).encryptMsg(
+          any(byte[].class), any(KeyIdentifier.class), any(byte[].class));
+      cryptoService.encrypt(TEXT, KEY);
+      fail(FAIL_MSG);
+    } catch (Exception e) {
+      assertTrue(e instanceof CryptoException);
+      CryptoException ce = (CryptoException) e;
+      assertNotNull(ce.getCause());
+      assertEquals(ce.getCause().getClass(), exceptionClass);
     }
   }
 
+  @Test
+  public void testDecryptSymphonyEncryptionException() {
+    testDecryptCryptoLibExceptions(SymphonyEncryptionException.class);
+  }
+
+  @Test
+  public void testDecryptSymphonyInputException() {
+    testDecryptCryptoLibExceptions(SymphonyInputException.class);
+  }
+
+  @Test
+  public void testDecryptCiphertextTransportVersionException() {
+    testDecryptCryptoLibExceptions(CiphertextTransportVersionException.class);
+  }
+
+  @Test
+  public void testDecryptUnsupportedEncodingException() {
+    testDecryptCryptoLibExceptions(UnsupportedEncodingException.class);
+  }
+
+  private void testDecryptCryptoLibExceptions(Class exceptionClass) {
+    try {
+      doThrow(exceptionClass).when(clientCryptoHandler).decryptMsg(any(byte[].class),
+          any(byte[].class));
+      cryptoService.decrypt(TEXT, KEY);
+      fail(FAIL_MSG);
+    } catch (Exception e) {
+      assertTrue(e instanceof CryptoException);
+      CryptoException ce = (CryptoException) e;
+      assertNotNull(ce.getCause());
+      assertEquals(ce.getCause().getClass(), exceptionClass);
+    }
+  }
 }
