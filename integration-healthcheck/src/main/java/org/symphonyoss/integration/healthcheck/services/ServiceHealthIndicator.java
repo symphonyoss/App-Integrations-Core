@@ -139,22 +139,39 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
     try {
       boolean locked = lock.tryLock(LOCK_PERIOD_SECS, TimeUnit.SECONDS);
+
+      if (!locked) {
+        IntegrationBridgeService service = retrieveServiceInfo();
+        return reportServiceHealth(serviceName, service);
+      }
+
       long nextExecution = lastExecution + TimeUnit.SECONDS.toMillis(SERVICE_CACHE_PERIOD_SECS);
 
-      if (!locked || System.currentTimeMillis() > nextExecution) {
+      if (System.currentTimeMillis() > nextExecution) {
         serviceInfoCache = retrieveServiceInfo();
         lastExecution = System.currentTimeMillis();
       }
 
-      return Health.status(serviceInfoCache.getConnectivity())
-          .withDetail(serviceName, serviceInfoCache)
-          .build();
+      return reportServiceHealth(serviceName, serviceInfoCache);
     } catch (Exception e) {
       LOG.error(logMessageSource.getMessage(CACHE_IS_NOT_LOADED, serviceName), e);
       return Health.unknown().build();
     } finally {
       lock.unlock();
     }
+  }
+
+  /**
+   * Returns the service health
+   *
+   * @param serviceName Service name
+   * @param service Service response
+   * @return Service health
+   */
+  private Health reportServiceHealth(String serviceName, IntegrationBridgeService service) {
+    return Health.status(service.getConnectivity())
+        .withDetail(serviceName, service)
+        .build();
   }
 
   /**
