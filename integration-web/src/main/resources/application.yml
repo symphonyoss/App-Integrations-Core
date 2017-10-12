@@ -62,3 +62,7 @@ management:
 http_client_config:
   connect_timeout: 1000
   read_timeout: 5000
+
+health:
+  thread-pool-size: 15
+  execution-timeout: 10

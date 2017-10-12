@@ -24,21 +24,21 @@ import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProp
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * {@link HealthIndicator} that returns health indications from all registered delegates using
@@ -56,14 +56,10 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private static final String ERROR_KEY = "error";
 
   /**
-   * Thread pool size
-   */
-  private static final Integer MAX_POOL_SIZE = 10;
-
-  /**
    * Timeout in seconds to verify if the execution was done
    */
-  private static final Long EXECUTION_TIMEOUT = 10L;
+  @Value("${health.execution-timeout:10}")
+  private int executionTime;
 
   /**
    * Registered indicators
@@ -77,11 +73,15 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
 
   private final LogMessageSource logMessageSource;
 
+  private final HealthCheckExecutorService service;
+
   @Autowired
-  public AsyncCompositeHealthIndicator(HealthAggregator aggregator, LogMessageSource logMessageSource) {
+  public AsyncCompositeHealthIndicator(HealthAggregator aggregator,
+      LogMessageSource logMessageSource, HealthCheckExecutorService service) {
     this.healthAggregator = aggregator;
     this.logMessageSource = logMessageSource;
-    this.indicators = new HashMap<>();
+    this.service = service;
+    this.indicators = Collections.synchronizedMap(new LinkedHashMap<String, HealthIndicator>());
   }
 
   /**
@@ -98,6 +98,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
     try {
       Map<String, Future<Health>> result = asyncExecution();
       Map<String, Health> healths = extractResult(result);
+
       return this.healthAggregator.aggregate(healths);
     } catch (InterruptedException e) {
       String message = logMessageSource.getMessage(INTERRUPTED_EXCEPTION);
@@ -114,10 +115,6 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
   private Map<String, Future<Health>> asyncExecution() throws InterruptedException {
     Map<String, Future<Health>> result = new LinkedHashMap<>();
 
-    int indicatorSize = Math.max(1, indicators.size());
-    int poolSize = Math.min(MAX_POOL_SIZE, indicatorSize);
-    ExecutorService service = Executors.newFixedThreadPool(poolSize);
-
     for (Map.Entry<String, HealthIndicator> entry : indicators.entrySet()) {
       final HealthIndicator indicator = entry.getValue();
 
@@ -131,24 +128,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
       result.put(entry.getKey(), execution);
     }
 
-    shutdownService(service);
-
     return result;
-  }
-
-  /**
-   * Shutdown the executor service
-   * @param service Executor Service object
-   * @throws InterruptedException Thread execution interrupted
-   */
-  private void shutdownService(ExecutorService service) throws InterruptedException {
-    service.shutdown();
-
-    service.awaitTermination(EXECUTION_TIMEOUT, TimeUnit.SECONDS);
-
-    if (!service.isTerminated()) {
-      service.shutdownNow();
-    }
   }
 
   /**
@@ -162,7 +142,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
     for (Map.Entry<String, Future<Health>> entry : asyncResult.entrySet()) {
       Future<Health> value = entry.getValue();
 
-      Health health = getExecutionValue(value);
+      Health health = getExecutionValue(value, executionTime, TimeUnit.SECONDS);
       healths.put(entry.getKey(), health);
     }
 
@@ -174,15 +154,20 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
    * @param value Asynchronous execution result
    * @return Health indication
    */
-  private Health getExecutionValue(Future<Health> value) {
+  private Health getExecutionValue(Future<Health> value, long timeout, TimeUnit unit) {
     try {
-      return value.get();
+      return value.get(timeout, unit);
     } catch (InterruptedException e) {
       return Health.down().withDetail(ERROR_KEY, logMessageSource.getMessage(INTERRUPTED_EXCEPTION)).build();
     } catch (ExecutionException e) {
       String message = logMessageSource.getMessage(EXECUTION_EXCEPTION);
       LOG.error(message, e.getCause());
+
+      return Health.down().withDetail(ERROR_KEY, message).build();
+    } catch (TimeoutException e) {
+      String message = logMessageSource.getMessage(EXECUTION_EXCEPTION);
       return Health.down().withDetail(ERROR_KEY, message).build();
     }
   }
+
 }
