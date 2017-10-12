@@ -31,6 +31,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -80,7 +81,7 @@ public class AsyncCompositeHealthIndicator implements HealthIndicator {
     this.healthAggregator = aggregator;
     this.logMessageSource = logMessageSource;
     this.service = service;
-    this.indicators = new LinkedHashMap<>();
+    this.indicators = Collections.synchronizedMap(new LinkedHashMap<String, HealthIndicator>());
   }
 
   /**
