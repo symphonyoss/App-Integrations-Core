@@ -30,6 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.IntegrationStatus;
+import org.symphonyoss.integration.healthcheck.HealthCheckExecutorService;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -40,8 +41,8 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, TestWebHookIntegration.class,
-    ApplicationsHealthIndicator.class})
+@ContextConfiguration(classes = { IntegrationProperties.class, TestWebHookIntegration.class,
+    ApplicationsHealthIndicator.class, HealthCheckExecutorService.class })
 public class ApplicationsHealthIndicatorTest {
 
   private static final String INTEGRATION_USER = "testUser";
@@ -54,6 +55,9 @@ public class ApplicationsHealthIndicatorTest {
 
   @MockBean
   private LogMessageSource logMessageSource;
+
+  @Autowired
+  private HealthCheckExecutorService service;
 
   @Before
   public void init() {
