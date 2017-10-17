@@ -146,8 +146,7 @@ public class ApplicationAuthorizationResource {
    */
   @RequestMapping(value = "/authorize")
   public ResponseEntity authorize(@PathVariable String configurationId, HttpServletRequest request,
-      @RequestBody(required = false) String body) throws RemoteApiException,
-      AuthorizationException {
+      @RequestBody(required = false) String body) throws RemoteApiException {
 
     AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
