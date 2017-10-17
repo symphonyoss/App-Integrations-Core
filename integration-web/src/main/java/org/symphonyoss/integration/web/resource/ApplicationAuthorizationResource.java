@@ -145,21 +145,14 @@ public class ApplicationAuthorizationResource {
    */
   @RequestMapping(value = "/authorize")
   public ResponseEntity authorize(@PathVariable String configurationId, HttpServletRequest request,
-      @RequestBody(required = false) String body) throws RemoteApiException {
+      @RequestBody(required = false) String body) throws RemoteApiException,
+      AuthorizationException {
 
     AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
     AuthorizationPayload authPayload = getAuthorizationPayload(request, body);
 
-    String url;
-
-    try {
-      authIntegration.authorize(authPayload);
-      url = authIntegration.getAuthorizationRedirectUrl();
-    } catch (AuthorizationException e) {
-      ErrorResponse response = new ErrorResponse(
-          HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
+    authIntegration.authorize(authPayload);
+    String url = authIntegration.getAuthorizationRedirectUrl();
 
     // Must return to a HTML page that closes the popup window
     if (StringUtils.isNotEmpty(url)) {

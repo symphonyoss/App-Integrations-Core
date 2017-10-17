@@ -16,6 +16,7 @@
 
 package org.symphonyoss.integration.web.resource;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -40,6 +41,7 @@ import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1Exception;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -244,27 +246,5 @@ public class ApplicationAuthorizationResourceTest {
         CONFIGURATION_ID, httpRequest, null);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-  }
-
-  @Test
-  public void testAuthorizeInternalError() throws RemoteApiException, AuthorizationException {
-    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
-    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
-
-    doThrow(AuthorizationException.class).when(integration).authorize(
-        any(AuthorizationPayload.class));
-
-    Enumeration parameters = new StringTokenizer("param1\tparam2");
-    doReturn(parameters).when(httpRequest).getParameterNames();
-    doReturn("value").when(httpRequest).getParameter(anyString());
-
-    Enumeration headers = new StringTokenizer("param1\tparam2");
-    doReturn(headers).when(httpRequest).getHeaderNames();
-    doReturn("value").when(httpRequest).getHeader(anyString());
-
-    ResponseEntity response = applicationAuthorizationResource.authorize(
-        CONFIGURATION_ID, httpRequest, null);
-
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
 }
