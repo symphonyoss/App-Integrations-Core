@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
-import org.symphonyoss.integration.authorization.oauth.v1.OAuth1Exception;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.AuthenticationException;
@@ -113,12 +112,4 @@ public class WebResourceExceptionHandler {
     ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
-
-  @ResponseBody
-  @ExceptionHandler(OAuth1Exception.class)
-  public ResponseEntity<ErrorResponse> handleOAuth1Exception(OAuth1Exception ex) {
-    ErrorResponse response = new ErrorResponse(ex.getCode(), ex.getMessage());
-    return ResponseEntity.status(ex.getCode()).body(response);
-  }
-
 }

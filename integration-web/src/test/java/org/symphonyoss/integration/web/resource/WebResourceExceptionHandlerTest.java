@@ -93,13 +93,4 @@ public class WebResourceExceptionHandlerTest {
     assertEquals(HttpStatus.FORBIDDEN, exceptionHandler.handleForbiddenException(ex).getStatusCode());
   }
 
-  /**
-   * Test an exception caused by {@link OAuth1Exception}
-   */
-  @Test
-  public void testOAuth1Exception() {
-    OAuth1Exception ex = new OAuth1Exception("message", -1, "solutions");
-    assertEquals(-1, exceptionHandler.handleOAuth1Exception(ex).getStatusCodeValue());
-  }
-
 }
