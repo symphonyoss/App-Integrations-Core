@@ -157,10 +157,14 @@ public class ApplicationAuthorizationResource {
       authIntegration.authorize(authPayload);
       url = authIntegration.getAuthorizationRedirectUrl();
     } catch (OAuth1MissingParametersException e) {
-      throw new RemoteApiException(HttpStatus.BAD_REQUEST.value(), e);
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.BAD_REQUEST.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 
     } catch (OAuth1IntegrationNotFoundException e) {
-      throw new RemoteApiException(HttpStatus.NOT_FOUND.value(), e);
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.NOT_FOUND.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 
     } catch (AuthorizationException e) {
       ErrorResponse response = new ErrorResponse(
