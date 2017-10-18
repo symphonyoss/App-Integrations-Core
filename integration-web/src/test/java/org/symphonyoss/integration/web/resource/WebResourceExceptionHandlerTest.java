@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1Exception;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.authentication.ForbiddenAuthException;

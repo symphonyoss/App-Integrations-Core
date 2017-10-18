@@ -112,5 +112,4 @@ public class WebResourceExceptionHandler {
     ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
-
 }

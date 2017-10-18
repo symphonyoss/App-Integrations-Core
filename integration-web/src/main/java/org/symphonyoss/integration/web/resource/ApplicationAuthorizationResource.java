@@ -16,9 +16,10 @@
 
 package org.symphonyoss.integration.web.resource;
 
-import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE;
-import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys.INTEGRATION_UNAVAILABLE_SOLUTION;
-
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys
+    .INTEGRATION_UNAVAILABLE;
+import static org.symphonyoss.integration.web.properties.AuthErrorMessageKeys
+    .INTEGRATION_UNAVAILABLE_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -36,12 +37,14 @@ import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1IntegrationNotFoundException;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1MissingParametersException;
+import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.ErrorResponse;
 import org.symphonyoss.integration.model.yaml.AppAuthorizationModel;
 import org.symphonyoss.integration.service.IntegrationBridge;
-import org.symphonyoss.integration.exception.IntegrationUnavailableException;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -79,7 +82,6 @@ public class ApplicationAuthorizationResource {
 
   /**
    * Get authentication properties according to the application identifier.
-   *
    * @param configurationId Application identifier
    * @return Authentication properties
    */
@@ -99,7 +101,6 @@ public class ApplicationAuthorizationResource {
 
   /**
    * Get user authentication data according to the application identifier and integration URL.
-   *
    * @param configurationId Application identifier
    * @param integrationUrl Integration URL
    * @return User authentication data if the user is authenticated or HTTP 401 (Unauthorized)
@@ -155,6 +156,16 @@ public class ApplicationAuthorizationResource {
     try {
       authIntegration.authorize(authPayload);
       url = authIntegration.getAuthorizationRedirectUrl();
+    } catch (OAuth1MissingParametersException e) {
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.BAD_REQUEST.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
+    } catch (OAuth1IntegrationNotFoundException e) {
+      ErrorResponse response = new ErrorResponse(
+          HttpStatus.NOT_FOUND.value(), e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
     } catch (AuthorizationException e) {
       ErrorResponse response = new ErrorResponse(
           HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
