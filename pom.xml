@@ -43,6 +43,12 @@
     </description>
     <url>https://github.com/symphonyoss/App-Integrations-Core</url>
 
+    <properties>
+        <!-- This is temporary; set to true as soon as the WhiteSource dashboard is clean -->
+        <whitesource.product>Integration Bridge</whitesource.product>
+        <whitesource.checkPolicies>false</whitesource.checkPolicies>
+    </properties>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
