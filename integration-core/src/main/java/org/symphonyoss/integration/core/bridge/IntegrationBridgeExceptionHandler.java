@@ -45,6 +45,7 @@ import org.symphonyoss.integration.exception.ExceptionHandler;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.exception.config.IntegrationConfigException;
+import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.message.Message;
@@ -57,6 +58,7 @@ import org.symphonyoss.integration.service.StreamService;
 import org.symphonyoss.integration.utils.WebHookConfigurationUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -96,6 +98,8 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   private static final String ROOMS = "rooms";
 
+  private static final String CODE = "code";
+
   @Autowired
   private AuthenticationProxy authenticationProxy;
 
@@ -127,7 +131,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
     LOGGER.error(message, remoteException);
 
-    if (forbiddenError(code)) {
+    if (shouldUpdateStreams(status, remoteException.getResponseMessage())) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
       LOGGER.warn(logMessage.getMessage(INVALID_MESSAGE, stream, instance.getInstanceId()),
@@ -137,6 +141,29 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
   public void handleUnexpectedException(Exception e) {
     LOGGER.error(logMessage.getMessage(FAIL_POST_MESSAGE), e);
+  }
+
+  /**
+   * Verify if the error returned by the Agent is related to FORBIDDEN exception.
+   *
+   * @param status HTTP status code
+   * @param responseMessage Message returned by the Agent
+   * @return true if the HTTP status is equals to 403 and HTTP response body contains a JSON
+   * object with code field reporting 403 as well.
+   */
+  private boolean shouldUpdateStreams(Status status, String responseMessage) {
+    if (!forbiddenError(status.getStatusCode())) {
+      return false;
+    }
+
+    try {
+      JsonNode errorNode = JsonUtils.readTree(responseMessage);
+
+      int code = errorNode.path(CODE).asInt(0);
+      return forbiddenError(code);
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   /**
@@ -152,6 +179,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
           WebHookConfigurationUtils.fromJsonString(instance.getOptionalProperties())
               .path(ROOMS)
               .iterator();
+
       while (rooms.hasNext()) {
         JsonNode room = rooms.next();
         // removes url unsafe chars from the streamId field, so it can be compared to the stream
@@ -181,13 +209,16 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
    */
   private void removeStreamFromInstance(IntegrationInstance instance, String integrationUser,
       String stream) throws IOException {
-    String optionalProperties = instance.getOptionalProperties();
-
     List<String> streams = streamService.getStreams(instance);
     streams.remove(stream);
 
+    String optionalProperties = instance.getOptionalProperties();
+
     JsonNode optionalPropertiesNode =
         WebHookConfigurationUtils.setStreams(optionalProperties, streams);
+    optionalPropertiesNode =
+        WebHookConfigurationUtils.setRemovedStreams(optionalPropertiesNode, Arrays.asList(stream));
+
     instance.setOptionalProperties(WebHookConfigurationUtils.toJsonString(optionalPropertiesNode));
 
     integrationService.save(instance, integrationUser);
