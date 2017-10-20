@@ -79,6 +79,16 @@ public class IntegrationBridgeExceptionHandlerTest {
 
   private static final String USER_ID = "268745369";
 
+  private static final String HTML_RESPONSE = "<html> <head><title>403 Forbidden</title></head> "
+      + "<body bgcolor=\"white\"> <center><h1>403 Forbidden</h1></center> "
+      + "<hr><center>nginx</center> </body> </html>";
+
+  private static final String JSON_401_RESPONSE = "{\"code\": 301,\"message\": \"Invalid session\"}";
+
+  private static final String JSON_403_RESPONSE = "{\"code\":403,\"message\":\"403 Forbidden: "
+      + "{\\\"message\\\":\\\"User does not belong to room: userId=10651518894129, "
+      + "threadId=81NYrj5fWcB2BxlVZQmeRX///qjLh236dA==\\\",\\\"status\\\":\\\"FORBIDDEN\\\"}\"}";
+
   @Spy
   private StreamService streamService = new StreamServiceImpl();
 
@@ -103,9 +113,20 @@ public class IntegrationBridgeExceptionHandlerTest {
   private IntegrationInstance savedInstance;
 
   @Before
-  public void setup() {
+  public void setup() throws RemoteApiException {
     this.messagePosted = "";
     this.savedInstance = null;
+
+    doAnswer(new Answer<Message>() {
+      @Override
+      public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Message messageSubmission = (Message) invocationOnMock.getArguments()[2];
+        messagePosted = messageSubmission.getMessage();
+        Message message = new Message();
+        message.setMessage(messageSubmission.getMessage());
+        return message;
+      }
+    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
   }
 
   @Test
@@ -118,14 +139,35 @@ public class IntegrationBridgeExceptionHandlerTest {
   }
 
   @Test
+  public void testForbiddenHTMLResponse() throws IntegrationConfigException, IOException {
+    IntegrationInstance instance = mockInstance();
+
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, HTML_RESPONSE),
+        instance, INTEGRATION_USER, STREAM);
+
+    assertTrue(messagePosted.isEmpty());
+  }
+
+  @Test
+  public void testUnauthorizedResponse() throws IntegrationConfigException, IOException {
+    IntegrationInstance instance = mockInstance();
+
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, JSON_401_RESPONSE),
+        instance, INTEGRATION_USER, STREAM);
+
+    assertTrue(messagePosted.isEmpty());
+  }
+
+  @Test
   public void testForbiddenConfigurationException() throws IntegrationConfigException, IOException {
     IntegrationInstance instance = mockInstance();
 
     doThrow(SaveConfigurationException.class).when(integrationService).save(any(IntegrationInstance.class),
         anyString());
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, JSON_403_RESPONSE),
         instance, INTEGRATION_USER, STREAM);
+
     assertTrue(messagePosted.isEmpty());
   }
 
@@ -161,7 +203,7 @@ public class IntegrationBridgeExceptionHandlerTest {
 
     doThrow(RemoteApiException.class).when(streamService).createIM(anyString(), anyLong());
 
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, JSON_403_RESPONSE),
         instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
@@ -199,18 +241,7 @@ public class IntegrationBridgeExceptionHandlerTest {
     userInfo.setDisplayName(DISPLAY_NAME);
     when(usersApi.getUserByUsername(TOKEN, INTEGRATION_USER)).thenReturn(userInfo);
 
-    doAnswer(new Answer<Message>() {
-      @Override
-      public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Message messageSubmission = (Message) invocationOnMock.getArguments()[2];
-        messagePosted = messageSubmission.getMessage();
-        Message message = new Message();
-        message.setMessage(messageSubmission.getMessage());
-        return message;
-      }
-    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
-
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, JSON_403_RESPONSE),
         instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
@@ -239,18 +270,7 @@ public class IntegrationBridgeExceptionHandlerTest {
     userInfo.setDisplayName(DISPLAY_NAME);
     when(usersApi.getUserByUsername(TOKEN, INTEGRATION_USER)).thenReturn(userInfo);
 
-    doAnswer(new Answer<Message>() {
-      @Override
-      public Message answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Message messageSubmission = (Message) invocationOnMock.getArguments()[2];
-        messagePosted = messageSubmission.getMessage();
-        Message message = new Message();
-        message.setMessage(messageSubmission.getMessage());
-        return message;
-      }
-    }).when(streamService).postMessage(eq(INTEGRATION_USER), eq(IM), any(Message.class));
-
-    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, new RuntimeException()),
+    exceptionHandler.handleRemoteApiException(new RemoteApiException(403, JSON_403_RESPONSE),
         instance, INTEGRATION_USER, STREAM);
 
     List<String> streams =
