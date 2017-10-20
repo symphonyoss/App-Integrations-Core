@@ -131,7 +131,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
 
     LOGGER.error(message, remoteException);
 
-    if (shouldUpdateStreams(status, remoteException.getResponseMessage())) {
+    if (isForbiddenError(status, remoteException.getResponseMessage())) {
       updateStreams(instance, integrationUser, stream);
     } else if (Status.BAD_REQUEST.equals(status)) {
       LOGGER.warn(logMessage.getMessage(INVALID_MESSAGE, stream, instance.getInstanceId()),
@@ -151,7 +151,7 @@ public class IntegrationBridgeExceptionHandler extends ExceptionHandler {
    * @return true if the HTTP status is equals to 403 and HTTP response body contains a JSON
    * object with code field reporting 403 as well.
    */
-  private boolean shouldUpdateStreams(Status status, String responseMessage) {
+  private boolean isForbiddenError(Status status, String responseMessage) {
     if (!forbiddenError(status.getStatusCode())) {
       return false;
     }
