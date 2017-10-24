@@ -39,13 +39,10 @@ import org.symphonyoss.integration.exception.config.RemoteConfigurationException
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
-import org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient;
-import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
+import org.symphonyoss.integration.pod.api.client.IntegrationApiClient;
+import org.symphonyoss.integration.pod.api.client.IntegrationInstanceAdminApiClient;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
-
-import javax.ws.rs.core.Response;
 
 /**
  * Tests for {@link RemoteIntegrationService}
@@ -70,10 +67,10 @@ public class RemoteIntegrationServiceTest {
   private AuthenticationProxy authenticationProxy;
 
   @Mock
-  private ConfigurationApiClient configurationApiClient;
+  private IntegrationApiClient configurationApiClient;
 
   @Mock
-  private ConfigurationInstanceApiClient instanceApiClient;
+  private IntegrationInstanceAdminApiClient instanceApiClient;
 
   @Mock
   private LogMessageSource logMesagge;
@@ -234,44 +231,14 @@ public class RemoteIntegrationServiceTest {
     assertEquals(expectedConfigurationInstance, result);
   }
 
-  @Test(expected = RemoteConfigurationException.class)
-  public void testSaveInstanceCreateFailed() throws Exception {
-    IntegrationInstance instance = buildInstance();
-
-    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
-        instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
-
-    doThrow(RemoteApiException.class).when(instanceApiClient)
-        .createInstance(eq(TOKEN), any(IntegrationInstanceSubmissionCreate.class));
-
-    remoteIntegrationService.save(instance, USER_ID);
-  }
-
-  @Test(expected = RemoteConfigurationException.class)
-  public void testSaveInstanceCreateBadRequest() throws Exception {
-    IntegrationInstance instance = buildInstance();
-
-    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
-        instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
-
-    doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
-        instanceApiClient)
-        .createInstance(eq(TOKEN), any(IntegrationInstanceSubmissionCreate.class));
-
-    remoteIntegrationService.save(instance, USER_ID);
-  }
-
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testSaveInstanceCreate() throws Exception {
     IntegrationInstance instance = buildInstance();
 
     doThrow(new RemoteApiException(BAD_REQUEST.getStatusCode(), API_EXCEPTION_MESSAGE)).when(
         instanceApiClient).getInstanceById(TOKEN, CONFIGURATION_ID, INSTANCE_ID);
 
-    doReturn(instance).when(instanceApiClient)
-        .createInstance(eq(TOKEN), any(IntegrationInstanceSubmissionCreate.class));
-
-    assertEquals(instance, remoteIntegrationService.save(instance, USER_ID));
+    remoteIntegrationService.save(instance, USER_ID);
   }
 
   @Test(expected = RemoteConfigurationException.class)
