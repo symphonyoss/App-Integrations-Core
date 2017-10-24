@@ -41,10 +41,9 @@ import org.symphonyoss.integration.exception.config.RemoteConfigurationException
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationInstance;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
-import org.symphonyoss.integration.pod.api.client.ConfigurationApiClient;
-import org.symphonyoss.integration.pod.api.client.ConfigurationInstanceApiClient;
-import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
-import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionCreate;
+import org.symphonyoss.integration.pod.api.client.IntegrationApiClient;
+import org.symphonyoss.integration.pod.api.client.IntegrationHttpApiClient;
+import org.symphonyoss.integration.pod.api.client.IntegrationInstanceAdminApiClient;
 import org.symphonyoss.integration.pod.api.model.IntegrationInstanceSubmissionUpdate;
 import org.symphonyoss.integration.pod.api.model.IntegrationSubmissionCreate;
 import org.symphonyoss.integration.service.IntegrationService;
@@ -66,17 +65,17 @@ public class RemoteIntegrationService implements IntegrationService {
   private LogMessageSource logMessage;
 
   @Autowired
-  private PodHttpApiClient client;
+  private IntegrationHttpApiClient client;
 
-  private ConfigurationApiClient configurationApiClient;
+  private IntegrationApiClient configurationApiClient;
 
-  private ConfigurationInstanceApiClient instanceApiClient;
+  private IntegrationInstanceAdminApiClient instanceApiClient;
 
   @Override
   @PostConstruct
   public void init() {
-    configurationApiClient = new ConfigurationApiClient(client,logMessage);
-    instanceApiClient = new ConfigurationInstanceApiClient(client,logMessage);
+    configurationApiClient = new IntegrationApiClient(client,logMessage);
+    instanceApiClient = new IntegrationInstanceAdminApiClient(client,logMessage);
   }
 
   @Override
@@ -167,7 +166,7 @@ public class RemoteIntegrationService implements IntegrationService {
     if (instanceExists(instance, userId)) {
       return updateInstance(instance, userId);
     } else {
-      return createInstance(instance, userId);
+      throw new UnsupportedOperationException("Integration Bridge mustn't create new instances");
     }
   }
 
@@ -249,30 +248,6 @@ public class RemoteIntegrationService implements IntegrationService {
 
     try {
       return instanceApiClient.updateInstance(authenticationProxy.getSessionToken(userId), instanceUpdate);
-    } catch (RemoteApiException e) {
-      checkExceptionCodeForbidden(e);
-
-      if (e.getCode() == BAD_REQUEST.getStatusCode()) {
-        String message = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE);
-        String solution = logMessage.getMessage(INVALID_INTEGRATION_INSTANCE_SOLUTION);
-
-        throw new RemoteConfigurationException(message, e, solution);
-      }
-
-      throw getUnknownException(e);
-    }
-  }
-
-  private IntegrationInstance createInstance(IntegrationInstance instance, String userId)
-      throws RemoteConfigurationException {
-    IntegrationInstanceSubmissionCreate instanceCreate = new IntegrationInstanceSubmissionCreate();
-    instanceCreate.setConfigurationId(instance.getConfigurationId());
-    instanceCreate.setName(instance.getName());
-    instanceCreate.setCreatorId(instance.getCreatorId());
-    instanceCreate.setOptionalProperties(instance.getOptionalProperties());
-
-    try {
-      return instanceApiClient.createInstance(authenticationProxy.getSessionToken(userId), instanceCreate);
     } catch (RemoteApiException e) {
       checkExceptionCodeForbidden(e);
 
