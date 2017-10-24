@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.pod.api.model;
 
+import java.util.Map;
+
 /**
  * Holds the information required to create a new integration.
  * Created by rsanchez on 20/02/17.
@@ -29,6 +31,8 @@ public class IntegrationSubmissionCreate {
   private String description;
 
   private String username;
+
+  private Map<String, Object> data;
 
   public String getType() {
     return type;
@@ -60,5 +64,13 @@ public class IntegrationSubmissionCreate {
 
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public Map<String, Object> getData() {
+    return data;
+  }
+
+  public void setData(Map<String, Object> data) {
+    this.data = data;
   }
 }
