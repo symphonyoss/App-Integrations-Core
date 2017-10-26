@@ -22,6 +22,7 @@ import static org.symphonyoss.integration.config.properties.RemoteIntegrationSer
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.FORBIDDEN_USER_SOLUTION;
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND;
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_INSTANCE_NOT_FOUND_SOLUTION;
+import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_INSTANCE_UNSUPPORTED_OPERATION;
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_NOT_FOUND;
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INTEGRATION_NOT_FOUND_SOLUTION;
 import static org.symphonyoss.integration.config.properties.RemoteIntegrationServiceProperties.INVALID_INTEGRATION_INSTANCE;
@@ -166,7 +167,7 @@ public class RemoteIntegrationService implements IntegrationService {
     if (instanceExists(instance, userId)) {
       return updateInstance(instance, userId);
     } else {
-      throw new UnsupportedOperationException("Integration Bridge mustn't create new instances");
+      throw new UnsupportedOperationException(logMessage.getMessage(INTEGRATION_INSTANCE_UNSUPPORTED_OPERATION));
     }
   }
 
