@@ -47,4 +47,6 @@ public class RemoteIntegrationServiceProperties {
 
   public static final String UNHEALTH_API_SOLUTION = UNHEALTH_API + ".solution";
 
+  public static final String INTEGRATION_INSTANCE_UNSUPPORTED_OPERATION = "integration.remote.integration.instance.create.exception";
+
 }

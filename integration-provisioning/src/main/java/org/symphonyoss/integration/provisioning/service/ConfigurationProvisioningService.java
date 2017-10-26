@@ -72,6 +72,7 @@ public class ConfigurationProvisioningService {
 
       if (saved != null) {
         settings.setConfigurationId(saved.getConfigurationId());
+        settings.setData(saved.getData());
       }
 
       return integrationService.save(settings, DEFAULT_USER_ID);
