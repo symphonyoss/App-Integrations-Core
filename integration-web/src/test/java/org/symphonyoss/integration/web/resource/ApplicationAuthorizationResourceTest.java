@@ -42,6 +42,7 @@ import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
 import org.symphonyoss.integration.authorization.oauth.v1.OAuth1Exception;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1HttpRequestException;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -220,6 +221,21 @@ public class ApplicationAuthorizationResourceTest {
         CONFIGURATION_ID, INTEGRATION_URL, null);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  @Test
+  public void testGetAuthorizationUserUnauthorized() throws RemoteApiException,
+      AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    OAuth1HttpRequestException exception = new OAuth1HttpRequestException("Unauthorized", 401);
+    doThrow(exception).when(integration).isUserAuthorized(anyString(), anyLong());
+
+    ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
+        CONFIGURATION_ID, INTEGRATION_URL, null);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   @Test
