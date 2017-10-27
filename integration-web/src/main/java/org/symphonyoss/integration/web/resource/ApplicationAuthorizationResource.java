@@ -37,6 +37,7 @@ import org.symphonyoss.integration.authorization.AuthorizationException;
 import org.symphonyoss.integration.authorization.AuthorizationPayload;
 import org.symphonyoss.integration.authorization.AuthorizedIntegration;
 import org.symphonyoss.integration.authorization.UserAuthorizationData;
+import org.symphonyoss.integration.authorization.oauth.v1.OAuth1HttpRequestException;
 import org.symphonyoss.integration.authorization.oauth.v1.OAuth1IntegrationNotFoundException;
 import org.symphonyoss.integration.authorization.oauth.v1.OAuth1MissingParametersException;
 import org.symphonyoss.integration.exception.IntegrationUnavailableException;
@@ -127,6 +128,10 @@ public class ApplicationAuthorizationResource {
         response.setProperties(properties);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
       }
+    } catch (OAuth1HttpRequestException e) {
+      int code = e.getCode();
+      ErrorResponse response = new ErrorResponse(code, e.getMessage());
+      return ResponseEntity.status(code).body(response);
     } catch (AuthorizationException e) {
       ErrorResponse response = new ErrorResponse(
           HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
