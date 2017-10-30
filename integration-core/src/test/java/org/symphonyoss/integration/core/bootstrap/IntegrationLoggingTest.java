@@ -36,7 +36,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.healthcheck.CompositeHealthEndpoint;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -57,7 +57,7 @@ public class IntegrationLoggingTest {
   private static final String WEBHOOKINTEGRATION_TYPE_JIRA = "jiraWebHookIntegration";
 
   @Mock
-  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+  private CompositeHealthEndpoint asyncCompositeHealthEndpoint;
 
   @Mock
   private Integration integration;

@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.boot.actuate.health.CompositeHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthIndicator;
 import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
@@ -39,11 +40,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Unit test for {@link AsyncCompositeHealthEndpoint}
+ * Unit test for {@link CompositeHealthEndpoint}
  * Created by rsanchez on 19/01/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AsyncCompositeHealthEndpointTest {
+public class CompositeHealthEndpointTest {
 
   /**
    * Unknown version message
@@ -68,14 +69,14 @@ public class AsyncCompositeHealthEndpointTest {
   @Mock
   private CompositeServiceHealthIndicator servicesHealthIndicator;
 
-  private AsyncCompositeHealthIndicator asyncCompositeHealthIndicator;
+  private CompositeHealthIndicator compositeHealthIndicator;
 
   private Health.Builder builder;
 
   @Before
   public void init() {
-    asyncCompositeHealthIndicator =
-        new AsyncCompositeHealthIndicator(aggregator);
+    compositeHealthIndicator =
+        new CompositeHealthIndicator(aggregator);
 
     builder = Health.unknown()
         .withDetail(VERSION, UNKNOWN_VERSION)
@@ -89,12 +90,13 @@ public class AsyncCompositeHealthEndpointTest {
     doReturn(Health.down().build()).when(applicationsHealthIndicator).health();
     doReturn(Health.up().build()).when(servicesHealthIndicator).health();
 
-    AsyncCompositeHealthEndpoint endpoint =
-        new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, servicesHealthIndicator);
+    CompositeHealthEndpoint endpoint =
+        new CompositeHealthEndpoint(aggregator, applicationsHealthIndicator,
+            servicesHealthIndicator);
 
     Health health = endpoint.invoke();
-    assertEquals(builder.down().withDetail(MESSAGE, "There is no active Integration").build(), health);
+    assertEquals(builder.down().withDetail(MESSAGE, "There is no active Integration").build(),
+        health);
   }
 
   @Test
@@ -103,9 +105,9 @@ public class AsyncCompositeHealthEndpointTest {
     doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
     doReturn(Health.down().build()).when(servicesHealthIndicator).health();
 
-    AsyncCompositeHealthEndpoint endpoint =
-        new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, servicesHealthIndicator);
+    CompositeHealthEndpoint endpoint =
+        new CompositeHealthEndpoint(aggregator, applicationsHealthIndicator,
+            servicesHealthIndicator);
 
     Health health = endpoint.invoke();
     assertEquals(
@@ -118,9 +120,9 @@ public class AsyncCompositeHealthEndpointTest {
     doReturn(Health.up().build()).when(applicationsHealthIndicator).health();
     doReturn(Health.up().build()).when(servicesHealthIndicator).health();
 
-    AsyncCompositeHealthEndpoint endpoint =
-        new AsyncCompositeHealthEndpoint(aggregator, asyncCompositeHealthIndicator,
-            applicationsHealthIndicator, servicesHealthIndicator);
+    CompositeHealthEndpoint endpoint =
+        new CompositeHealthEndpoint(aggregator, applicationsHealthIndicator,
+            servicesHealthIndicator);
 
     Health health = endpoint.invoke();
     assertEquals(builder.up().withDetail(MESSAGE, "Success").build(), health);

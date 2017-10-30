@@ -17,8 +17,8 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.CompositeHealthIndicator;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
  * Created by rsanchez on 13/01/17.
  */
 @Component
-public class CompositeServiceHealthIndicator extends AsyncCompositeHealthIndicator {
+public class CompositeServiceHealthIndicator extends CompositeHealthIndicator {
 
   public static final String SERVICES = "services";
 
