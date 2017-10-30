@@ -21,6 +21,7 @@ import static org.symphonyoss.integration.healthcheck.services.CompositeServiceH
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.actuate.health.CompositeHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthInd
 import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * Customized health endpoint to aggregate the information about the current deployed
@@ -39,20 +41,20 @@ import java.util.Collections;
  * Created by rsanchez on 17/01/17.
  */
 @Component
-public class AsyncCompositeHealthEndpoint extends HealthEndpoint {
+public class CompositeHealthEndpoint extends HealthEndpoint {
 
-  private AsyncCompositeHealthIndicator healthIndicator;
+  private CompositeHealthIndicator healthIndicator;
 
   @Autowired
-  public AsyncCompositeHealthEndpoint(IntegrationBridgeHealthAggregator healthAggregator,
-      AsyncCompositeHealthIndicator asyncCompositeHealthIndicator,
+  public CompositeHealthEndpoint(IntegrationBridgeHealthAggregator healthAggregator,
       ApplicationsHealthIndicator applicationsHealthIndicator,
       CompositeServiceHealthIndicator servicesHealthIndicator) {
     super(healthAggregator, Collections.<String, HealthIndicator>emptyMap());
 
-    this.healthIndicator = asyncCompositeHealthIndicator;
+    this.healthIndicator = new CompositeHealthIndicator(healthAggregator);
     this.healthIndicator.addHealthIndicator(APPLICATIONS, applicationsHealthIndicator);
     this.healthIndicator.addHealthIndicator(SERVICES, servicesHealthIndicator);
+
   }
 
   @Override

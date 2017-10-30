@@ -48,7 +48,7 @@ import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.healthcheck.CompositeHealthEndpoint;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.metrics.IntegrationMetricsController;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -102,7 +102,7 @@ public class IntegrationBootstrapContextTest {
   private ApplicationEventPublisher publisher;
 
   @Mock
-  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+  private CompositeHealthEndpoint compositeHealthEndpoint;
 
   @InjectMocks
   private IntegrationBootstrapContext integrationBootstrapContext =
