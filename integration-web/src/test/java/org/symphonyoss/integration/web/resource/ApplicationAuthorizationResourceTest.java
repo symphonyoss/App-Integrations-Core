@@ -221,8 +221,7 @@ public class ApplicationAuthorizationResourceTest {
             applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
                     null, false));
   }
-
-
+  
   @Test
   public void testGetAuthorizationUserInternalError() throws RemoteApiException,
       AuthorizationException {
