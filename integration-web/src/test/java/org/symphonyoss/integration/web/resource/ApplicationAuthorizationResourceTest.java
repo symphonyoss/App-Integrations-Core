@@ -209,6 +209,21 @@ public class ApplicationAuthorizationResourceTest {
   }
 
   @Test
+  public void testGetAuthorizationUserWithInitOauthFalse()
+          throws RemoteApiException, AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+    doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
+
+    UserAuthorizationData authorizationData = new UserAuthorizationData(INTEGRATION_URL, 0L);
+
+    assertEquals(ResponseEntity.ok().body(authorizationData),
+            applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
+                    null, false));
+  }
+
+
+  @Test
   public void testGetAuthorizationUserInternalError() throws RemoteApiException,
       AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
