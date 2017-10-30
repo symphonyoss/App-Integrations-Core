@@ -131,12 +131,12 @@ public class IntegrationLoggingTest {
     integrationLogging.logHealth();
 
     assertFalse(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(1)).invoke();
+    verify(compositeHealthEndpoint, times(1)).invoke();
   }
 
   @Test
   public void testlogHealthRemoteApiException() throws InterruptedException {
-    doThrow(RemoteApiException.class).when(asyncCompositeHealthEndpoint).invoke();
+    doThrow(RemoteApiException.class).when(compositeHealthEndpoint).invoke();
     integrationLogging.ready();
     integrationLogging.logHealth();
     assertEquals(0, queue.size());
@@ -147,7 +147,7 @@ public class IntegrationLoggingTest {
     integrationLogging.logHealth();
 
     assertTrue(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(0)).invoke();
+    verify(compositeHealthEndpoint, times(0)).invoke();
   }
 
   @Test
@@ -159,13 +159,13 @@ public class IntegrationLoggingTest {
     assertEquals(1, queue.size());
     assertTrue(queue.contains(integration));
     assertTrue(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(0)).invoke();
+    verify(compositeHealthEndpoint, times(0)).invoke();
 
     integrationLogging.ready();
 
     assertTrue(ready.get());
     assertTrue(queue.isEmpty());
-    verify(asyncCompositeHealthEndpoint, times(1)).invoke();
+    verify(compositeHealthEndpoint, times(1)).invoke();
   }
 
 
