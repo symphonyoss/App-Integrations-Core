@@ -51,11 +51,10 @@ public class CompositeHealthEndpoint extends HealthEndpoint {
       CompositeServiceHealthIndicator servicesHealthIndicator) {
     super(healthAggregator, Collections.<String, HealthIndicator>emptyMap());
 
-    CompositeHealthIndicator healthIndicator = new CompositeHealthIndicator(healthAggregator);
-    healthIndicator.addHealthIndicator(APPLICATIONS, applicationsHealthIndicator);
-    healthIndicator.addHealthIndicator(SERVICES, servicesHealthIndicator);
+    this.healthIndicator = new CompositeHealthIndicator(healthAggregator);
+    this.healthIndicator.addHealthIndicator(APPLICATIONS, applicationsHealthIndicator);
+    this.healthIndicator.addHealthIndicator(SERVICES, servicesHealthIndicator);
 
-    this.healthIndicator = healthIndicator;
   }
 
   @Override

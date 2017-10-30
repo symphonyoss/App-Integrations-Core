@@ -57,7 +57,7 @@ public class IntegrationLoggingTest {
   private static final String WEBHOOKINTEGRATION_TYPE_JIRA = "jiraWebHookIntegration";
 
   @Mock
-  private CompositeHealthEndpoint asyncCompositeHealthEndpoint;
+  private CompositeHealthEndpoint compositeHealthEndpoint;
 
   @Mock
   private Integration integration;
