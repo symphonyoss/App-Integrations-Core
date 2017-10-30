@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
-import org.symphonyoss.integration.healthcheck.HealthCheckExecutorService;
 import org.symphonyoss.integration.healthcheck.IntegrationHealthIndicatorAdapter;
-import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.ApplicationState;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -48,8 +46,8 @@ public class ApplicationsHealthIndicator extends AsyncCompositeHealthIndicator {
   private Map<String, Integration> integrations;
 
   @Autowired
-  public ApplicationsHealthIndicator(LogMessageSource logMessageSource, HealthCheckExecutorService service) {
-    super(new ApplicationsHealthAggregator(), logMessageSource, service);
+  public ApplicationsHealthIndicator() {
+    super(new ApplicationsHealthAggregator());
   }
 
   @PostConstruct

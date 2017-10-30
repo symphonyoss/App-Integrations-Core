@@ -19,8 +19,6 @@ package org.symphonyoss.integration.healthcheck.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthIndicator;
-import org.symphonyoss.integration.healthcheck.HealthCheckExecutorService;
-import org.symphonyoss.integration.logging.LogMessageSource;
 
 import java.util.List;
 
@@ -40,8 +38,8 @@ public class CompositeServiceHealthIndicator extends AsyncCompositeHealthIndicat
   private List<ServiceHealthIndicator> serviceHealthIndicators;
 
   @Autowired
-  public CompositeServiceHealthIndicator(LogMessageSource logMessageSource, HealthCheckExecutorService service) {
-    super(new CompositeServiceHealthAggregator(), logMessageSource, service);
+  public CompositeServiceHealthIndicator() {
+    super(new CompositeServiceHealthAggregator());
   }
 
   @PostConstruct
