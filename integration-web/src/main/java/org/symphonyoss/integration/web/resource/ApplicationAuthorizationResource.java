@@ -104,13 +104,15 @@ public class ApplicationAuthorizationResource {
    * Get user authentication data according to the application identifier and integration URL.
    * @param configurationId Application identifier
    * @param integrationUrl Integration URL
+   * @pam initOAuth Init oAuth Dance
    * @return User authentication data if the user is authenticated or HTTP 401 (Unauthorized)
    * otherwise.
    */
   @GetMapping("/userSession")
   public ResponseEntity getUserAuthorizationData(@PathVariable String configurationId,
       @RequestParam(name = "integrationUrl") String integrationUrl,
-      @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      @RequestParam(name = "initOAuth") boolean initOAuth)
       throws RemoteApiException {
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(configurationId,
@@ -119,7 +121,7 @@ public class ApplicationAuthorizationResource {
 
     try {
       AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
-      if (!authIntegration.isUserAuthorized(integrationUrl, userId)) {
+      if (!authIntegration.isUserAuthorized(integrationUrl, userId) && initOAuth) {
         String authorizationUrl = authIntegration.getAuthorizationUrl(integrationUrl, userId);
         Map<String, String> properties = new HashMap<>();
         properties.put("authorizationUrl", authorizationUrl);

@@ -155,7 +155,7 @@ public class ApplicationAuthorizationResourceTest {
   @Test(expected = IntegrationUnavailableException.class)
   public void testGetAuthorizationUserSessionIntegrationNotFound()
       throws RemoteApiException {
-    applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
+    applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null, true);
   }
 
   @Test
@@ -182,7 +182,7 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(AUTHORIZATION_URL).when(integration).getAuthorizationUrl(INTEGRATION_URL, 0L);
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertTrue(response.getBody() instanceof ErrorResponse);
@@ -205,7 +205,7 @@ public class ApplicationAuthorizationResourceTest {
 
     assertEquals(ResponseEntity.ok().body(authorizationData),
         applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
-            null));
+            null, true));
   }
 
   @Test
@@ -218,7 +218,7 @@ public class ApplicationAuthorizationResourceTest {
         anyString(), anyLong());
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
@@ -233,7 +233,7 @@ public class ApplicationAuthorizationResourceTest {
     doThrow(exception).when(integration).isUserAuthorized(anyString(), anyLong());
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
