@@ -96,7 +96,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   protected ApplicationEventPublisher publisher;
 
   @Autowired
-  private LogMessageSource logMessageSource;
+  protected LogMessageSource logMessageSource;
 
   /**
    * Cache for the service information.
@@ -188,7 +188,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     if (healthResponse == null) {
       service.setConnectivity(Status.DOWN);
     } else {
-      service.setConnectivity(Status.UP);
+      handleHealthResponse(service, healthResponse);
 
       String version = retrieveCurrentVersion(healthResponse);
 
@@ -200,6 +200,16 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     }
 
     return service;
+  }
+
+  /**
+   * Handle health check response.
+   *
+   * @param service Service information
+   * @param healthResponse Health check response
+   */
+  protected void handleHealthResponse(IntegrationBridgeService service, String healthResponse) {
+    service.setConnectivity(Status.UP);
   }
 
   /**

@@ -36,7 +36,8 @@ public class IntegrationBridgeService {
 
   public enum Compability {
     OK,
-    NOK
+    NOK,
+    UNKNOWN
   }
 
   private Status connectivity = Status.UNKNOWN;
@@ -73,10 +74,18 @@ public class IntegrationBridgeService {
   }
 
   public String getMinVersion() {
+    if (StringUtils.isEmpty(minVersion)) {
+      return NOT_AVAILABLE;
+    }
+
     return minVersion;
   }
 
   public Compability getCompatibility() {
+    if (StringUtils.isEmpty(minVersion)) {
+      return Compability.UNKNOWN;
+    }
+
     if (StringUtils.isEmpty(currentVersion)) {
       return Compability.NOK;
     }

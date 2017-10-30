@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ public class PodSessionManagerHealthIndicatorTest {
 
   private static final String POD_SERVICE_NAME = "POD";
 
+  private static final String SERVICE_FIELD = "sessionauth";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -57,6 +60,12 @@ public class PodSessionManagerHealthIndicatorTest {
 
   @Autowired
   private PodSessionManagerHealthIndicator indicator;
+
+  @Before
+  public void init() {
+    // Cleanup POD version
+    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, null));
+  }
 
   @Test
   public void testHealthCheckUrl() {
@@ -70,7 +79,13 @@ public class PodSessionManagerHealthIndicatorTest {
   }
 
   @Test
+  public void testUnknownMinVersion() {
+    assertNull(indicator.getMinVersion());
+  }
+
+  @Test
   public void testMinVersion() {
+    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
     assertEquals(MOCK_VERSION, indicator.getMinVersion());
   }
 
@@ -91,4 +106,10 @@ public class PodSessionManagerHealthIndicatorTest {
 
     assertEquals(MOCK_VERSION, indicator.retrieveCurrentVersion(StringUtils.EMPTY));
   }
+
+  @Test
+  public void testServiceField() {
+    assertEquals(SERVICE_FIELD, indicator.getServiceField());
+  }
+
 }

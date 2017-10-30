@@ -30,6 +30,8 @@ public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealt
 
   private static final String SERVICE_NAME = "POD Authentication Service";
 
+  private static final String SERVICE_FIELD = "sessionauth";
+
   @Override
   protected String getServiceName() {
     return SERVICE_NAME;
@@ -37,7 +39,11 @@ public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealt
 
   @Override
   protected String getMinVersion() {
-    return properties.getPodSessionManager().getMinVersion();
+    if (currentVersion != null) {
+      return properties.getPodSessionManager().getMinVersion();
+    }
+
+    return null;
   }
 
   @Override
@@ -45,4 +51,8 @@ public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealt
     return properties.getSessionManagerAuthUrl();
   }
 
+  @Override
+  protected String getServiceField() {
+    return SERVICE_FIELD;
+  }
 }

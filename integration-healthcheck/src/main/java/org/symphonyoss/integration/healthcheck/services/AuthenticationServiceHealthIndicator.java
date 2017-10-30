@@ -16,8 +16,17 @@
 
 package org.symphonyoss.integration.healthcheck.services;
 
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.IO_EXCEPTION;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.json.JsonUtils;
+
+import java.io.IOException;
 
 /**
  * Abstract class that holds common methods to all authentication service health indicators.
@@ -25,6 +34,8 @@ import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventD
  * Created by rsanchez on 30/10/17.
  */
 public abstract class AuthenticationServiceHealthIndicator extends ServiceHealthIndicator {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceHealthIndicator.class);
 
   private static final String POD_SERVICE_NAME = "POD";
 
@@ -38,6 +49,23 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   @Override
   protected String retrieveCurrentVersion(String healthResponse) {
     return currentVersion;
+  }
+
+  @Override
+  protected void handleHealthResponse(IntegrationBridgeService service, String healthResponse) {
+    try {
+      JsonNode node = JsonUtils.readTree(healthResponse);
+      String serviceField = node.path(getServiceField()).asText();
+
+      if (Boolean.parseBoolean(serviceField)) {
+        service.setConnectivity(Status.UP);
+      } else {
+        service.setConnectivity(Status.DOWN);
+      }
+    } catch (IOException e) {
+      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName()));
+      service.setConnectivity(Status.DOWN);
+    }
   }
 
   /**
@@ -54,5 +82,11 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
       this.currentVersion = event.getNewVersion();
     }
   }
+
+  /**
+   * Returns the field name of this service in the aggregated health check.
+   * @return field name of this service in the aggregated health check.
+   */
+  protected abstract String getServiceField();
 
 }

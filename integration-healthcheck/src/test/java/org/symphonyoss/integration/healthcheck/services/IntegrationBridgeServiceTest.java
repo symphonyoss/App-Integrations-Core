@@ -41,7 +41,7 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testNullVersion() {
-    assertEquals(IntegrationBridgeService.Compability.NOK,
+    assertEquals(IntegrationBridgeService.Compability.UNKNOWN,
         new IntegrationBridgeService(null, SERVICE_URL).getCompatibility());
     assertEquals(IntegrationBridgeService.Compability.NOK,
         new IntegrationBridgeService(NEW_VERSION, SERVICE_URL).getCompatibility());
@@ -106,6 +106,12 @@ public class IntegrationBridgeServiceTest {
     IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(StringUtils.EMPTY);
     assertEquals(NOT_AVAILABLE, service.getCurrentVersion());
+  }
+
+  @Test
+  public void testGetMinVersionNA() {
+    IntegrationBridgeService service = new IntegrationBridgeService(StringUtils.EMPTY, SERVICE_URL);
+    assertEquals(NOT_AVAILABLE, service.getMinVersion());
   }
 
   @Test
