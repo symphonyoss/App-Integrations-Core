@@ -30,12 +30,12 @@ import static org.symphonyoss.integration.core.properties.IntegrationLoggingProp
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
 import java.util.concurrent.BlockingQueue;
@@ -53,7 +53,7 @@ public class IntegrationLogging {
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationLogging.class);
 
   @Autowired
-  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+  private HealthEndpoint healthEndpoint;
 
   @Autowired
   private LogMessageSource logMessage;
@@ -127,7 +127,7 @@ public class IntegrationLogging {
    */
   private void logHealthCheck() {
     try {
-      Health health = asyncCompositeHealthEndpoint.invoke();
+      Health health = healthEndpoint.invoke();
       String applicationHealthString = jsonUtils.serialize(health);
       String applicationHealthLog =
           logMessage.getMessage(APPLICATION_HEALTH_CORE, applicationHealthString);

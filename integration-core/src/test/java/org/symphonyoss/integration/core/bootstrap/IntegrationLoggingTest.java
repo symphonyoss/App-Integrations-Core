@@ -36,7 +36,7 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
-import org.symphonyoss.integration.healthcheck.AsyncCompositeHealthEndpoint;
+import org.symphonyoss.integration.healthcheck.CompositeHealthEndpoint;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
@@ -57,7 +57,7 @@ public class IntegrationLoggingTest {
   private static final String WEBHOOKINTEGRATION_TYPE_JIRA = "jiraWebHookIntegration";
 
   @Mock
-  private AsyncCompositeHealthEndpoint asyncCompositeHealthEndpoint;
+  private CompositeHealthEndpoint compositeHealthEndpoint;
 
   @Mock
   private Integration integration;
@@ -131,12 +131,12 @@ public class IntegrationLoggingTest {
     integrationLogging.logHealth();
 
     assertFalse(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(1)).invoke();
+    verify(compositeHealthEndpoint, times(1)).invoke();
   }
 
   @Test
   public void testlogHealthRemoteApiException() throws InterruptedException {
-    doThrow(RemoteApiException.class).when(asyncCompositeHealthEndpoint).invoke();
+    doThrow(RemoteApiException.class).when(compositeHealthEndpoint).invoke();
     integrationLogging.ready();
     integrationLogging.logHealth();
     assertEquals(0, queue.size());
@@ -147,7 +147,7 @@ public class IntegrationLoggingTest {
     integrationLogging.logHealth();
 
     assertTrue(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(0)).invoke();
+    verify(compositeHealthEndpoint, times(0)).invoke();
   }
 
   @Test
@@ -159,13 +159,13 @@ public class IntegrationLoggingTest {
     assertEquals(1, queue.size());
     assertTrue(queue.contains(integration));
     assertTrue(executeHealthcheck.get());
-    verify(asyncCompositeHealthEndpoint, times(0)).invoke();
+    verify(compositeHealthEndpoint, times(0)).invoke();
 
     integrationLogging.ready();
 
     assertTrue(ready.get());
     assertTrue(queue.isEmpty());
-    verify(asyncCompositeHealthEndpoint, times(1)).invoke();
+    verify(compositeHealthEndpoint, times(1)).invoke();
   }
 
 
