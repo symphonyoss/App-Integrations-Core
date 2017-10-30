@@ -44,7 +44,12 @@ public class KmHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected String getHealthCheckUrl() {
-    return properties.getKeyManagerUrl() + KM_URL_PATH;
+    return getServiceBaseUrl() + KM_URL_PATH;
+  }
+
+  @Override
+  protected String getServiceBaseUrl() {
+    return properties.getKeyManagerUrl();
   }
 
 }

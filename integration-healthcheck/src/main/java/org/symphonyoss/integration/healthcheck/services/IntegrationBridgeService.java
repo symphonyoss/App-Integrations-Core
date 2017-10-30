@@ -45,8 +45,11 @@ public class IntegrationBridgeService {
 
   private String minVersion;
 
-  public IntegrationBridgeService(String minVersion) {
+  private String url;
+
+  public IntegrationBridgeService(String minVersion, String url) {
     this.minVersion = minVersion;
+    this.url = url;
   }
 
   public String getConnectivity() {
@@ -90,6 +93,10 @@ public class IntegrationBridgeService {
     } catch (ParseException e) {
       return Compability.NOK;
     }
+  }
+
+  public String getUrl() {
+    return url;
   }
 
   @Override

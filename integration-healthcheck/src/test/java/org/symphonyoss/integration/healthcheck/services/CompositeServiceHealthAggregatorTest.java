@@ -25,6 +25,12 @@ public class CompositeServiceHealthAggregatorTest {
 
   private static final String POD_SERVICE = "POD";
 
+  private static final String POD_URL = "https://test.symphony.com";
+
+  private static final String KM_URL = "https://km.test.symphony.com";
+
+  private static final String AGENT_URL = "https://agent.test.symphony.com";
+
   private CompositeServiceHealthAggregator aggregator = new CompositeServiceHealthAggregator();
 
   @Test
@@ -32,9 +38,9 @@ public class CompositeServiceHealthAggregatorTest {
     Map<String, Health> healths = new HashMap<>();
 
     IntegrationBridgeService agentService =
-        mockIntegrationBridgeService(Status.DOWN, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.DOWN, OLD_VERSION, NEW_VERSION, AGENT_URL);
     IntegrationBridgeService podService =
-        mockIntegrationBridgeService(Status.UP, NEW_VERSION, OLD_VERSION);
+        mockIntegrationBridgeService(Status.UP, NEW_VERSION, OLD_VERSION, POD_URL);
 
     healths.put(AGENT_SERVICE, mockHealth(AGENT_SERVICE, agentService));
     healths.put(KM_SERVICE, Health.up().build());
@@ -55,11 +61,11 @@ public class CompositeServiceHealthAggregatorTest {
     Map<String, Health> healths = new HashMap<>();
 
     IntegrationBridgeService agentService =
-        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION, AGENT_URL);
     IntegrationBridgeService kmService =
-        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION, KM_URL);
     IntegrationBridgeService podService =
-        mockIntegrationBridgeService(Status.UP, NEW_VERSION, OLD_VERSION);
+        mockIntegrationBridgeService(Status.UP, NEW_VERSION, OLD_VERSION, POD_URL);
 
     healths.put(AGENT_SERVICE, mockHealth(AGENT_SERVICE, agentService));
     healths.put(KM_SERVICE, mockHealth(KM_SERVICE, kmService));
@@ -81,11 +87,11 @@ public class CompositeServiceHealthAggregatorTest {
     Map<String, Health> healths = new HashMap<>();
 
     IntegrationBridgeService agentService =
-        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION, AGENT_URL);
     IntegrationBridgeService kmService =
-        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION, KM_URL);
     IntegrationBridgeService podService =
-        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION);
+        mockIntegrationBridgeService(Status.UP, OLD_VERSION, NEW_VERSION, POD_URL);
 
     healths.put(AGENT_SERVICE, mockHealth(AGENT_SERVICE, agentService));
     healths.put(KM_SERVICE, mockHealth(KM_SERVICE, kmService));
@@ -103,8 +109,8 @@ public class CompositeServiceHealthAggregatorTest {
   }
 
   private IntegrationBridgeService mockIntegrationBridgeService(Status status, String minVersion,
-      String currentVersion) {
-    IntegrationBridgeService service = new IntegrationBridgeService(minVersion);
+      String currentVersion, String url) {
+    IntegrationBridgeService service = new IntegrationBridgeService(minVersion, url);
     service.setCurrentVersion(currentVersion);
     service.setConnectivity(status);
 

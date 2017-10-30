@@ -181,7 +181,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   private IntegrationBridgeService retrieveServiceInfo() {
     LOG.debug("Retrieve service info: {}", getServiceName());
 
-    IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion());
+    IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
 
     String healthResponse = getHealthResponse();
 
@@ -317,12 +317,18 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   /**
    * Build the specific health check URL for the component which compatibility will be checked for.
-   * @return the built service URL.
+   * @return the built health check URL.
    */
   protected abstract String getHealthCheckUrl();
 
   public String getCurrentVersion() {
     return currentVersion;
   }
+
+  /**
+   * Build the base URL for the service.
+   * @return the base URL for the service.
+   */
+  protected abstract String getServiceBaseUrl();
 
 }

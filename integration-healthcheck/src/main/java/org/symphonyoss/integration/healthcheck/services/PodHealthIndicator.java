@@ -44,7 +44,12 @@ public class PodHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected String getHealthCheckUrl() {
-    return properties.getSymphonyUrl() + POD_URL_PATH;
+    return getServiceBaseUrl() + POD_URL_PATH;
+  }
+
+  @Override
+  protected String getServiceBaseUrl() {
+    return properties.getSymphonyUrl();
   }
 
 }

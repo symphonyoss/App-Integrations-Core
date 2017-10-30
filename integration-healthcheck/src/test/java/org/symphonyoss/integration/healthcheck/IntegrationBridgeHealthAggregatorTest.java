@@ -53,6 +53,12 @@ public class IntegrationBridgeHealthAggregatorTest {
 
   private static final String POD_SERVICE = "POD";
 
+  private static final String POD_URL = "https://test.symphony.com";
+
+  private static final String KM_URL = "https://km.test.symphony.com";
+
+  private static final String AGENT_URL = "https://agent.test.symphony.com";
+
   private IntegrationBridgeHealthAggregator aggregator = new IntegrationBridgeHealthAggregator();
 
   private Health.Builder builder;
@@ -153,9 +159,9 @@ public class IntegrationBridgeHealthAggregatorTest {
   private Map<String, IntegrationBridgeService> mockServices() {
     Map<String, IntegrationBridgeService> services = new LinkedHashMap<>();
 
-    services.put(AGENT_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
-    services.put(KM_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
-    services.put(POD_SERVICE, new IntegrationBridgeService(MOCK_VERSION));
+    services.put(AGENT_SERVICE, new IntegrationBridgeService(MOCK_VERSION, AGENT_URL));
+    services.put(KM_SERVICE, new IntegrationBridgeService(MOCK_VERSION, KM_URL));
+    services.put(POD_SERVICE, new IntegrationBridgeService(MOCK_VERSION, POD_URL));
 
     return services;
   }
