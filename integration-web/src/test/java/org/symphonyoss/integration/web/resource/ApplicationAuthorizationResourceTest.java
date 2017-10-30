@@ -213,13 +213,30 @@ public class ApplicationAuthorizationResourceTest {
           throws RemoteApiException, AuthorizationException {
     doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
     doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
-    doReturn(true).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
 
-    UserAuthorizationData authorizationData = new UserAuthorizationData(INTEGRATION_URL, 0L);
+    UserAuthorizationData authorizationData = new UserAuthorizationData();
 
-    assertEquals(ResponseEntity.ok().body(authorizationData),
-            applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
-                    null, false));
+    String path = "/v1/configuration" + CONFIGURATION_ID + "/auth/user";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
+
+    Map<String, String> queryParams = new HashMap<>();
+    queryParams.put(USER_ID, "0");
+    queryParams.put(URL, INTEGRATION_URL);
+
+    doReturn(CONFIGURATION_ID).when(client).escapeString(CONFIGURATION_ID);
+    doReturn(authorizationData).when(client).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+
+    doReturn(false).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
+    doReturn(AUTHORIZATION_URL).when(integration).getAuthorizationUrl(INTEGRATION_URL, 0L);
+
+    ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
+            CONFIGURATION_ID, INTEGRATION_URL, null, false);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertTrue(response.getBody() instanceof ErrorResponse);
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
   }
   
   @Test

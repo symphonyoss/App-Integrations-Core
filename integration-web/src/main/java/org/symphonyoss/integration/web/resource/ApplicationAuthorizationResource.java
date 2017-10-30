@@ -112,7 +112,7 @@ public class ApplicationAuthorizationResource {
   public ResponseEntity getUserAuthorizationData(@PathVariable String configurationId,
       @RequestParam(name = "integrationUrl") String integrationUrl,
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
-      @RequestParam(name = "initOAuth") boolean initOAuth)
+      @RequestParam(name = "initOAuth", defaultValue = "true") boolean initOAuth)
       throws RemoteApiException {
 
     Long userId = jwtAuthentication.getUserIdFromAuthorizationHeader(configurationId,
@@ -121,13 +121,17 @@ public class ApplicationAuthorizationResource {
 
     try {
       AuthorizedIntegration authIntegration = getAuthorizedIntegration(configurationId);
-      if (!authIntegration.isUserAuthorized(integrationUrl, userId) && initOAuth) {
-        String authorizationUrl = authIntegration.getAuthorizationUrl(integrationUrl, userId);
-        Map<String, String> properties = new HashMap<>();
-        properties.put("authorizationUrl", authorizationUrl);
+      if (!authIntegration.isUserAuthorized(integrationUrl, userId)) {
         ErrorResponse response = new ErrorResponse();
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setProperties(properties);
+
+        if (initOAuth) {
+          String authorizationUrl = authIntegration.getAuthorizationUrl(integrationUrl, userId);
+          Map<String, String> properties = new HashMap<>();
+          properties.put("authorizationUrl", authorizationUrl);
+          response.setProperties(properties);
+        }
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
       }
     } catch (OAuth1HttpRequestException e) {
