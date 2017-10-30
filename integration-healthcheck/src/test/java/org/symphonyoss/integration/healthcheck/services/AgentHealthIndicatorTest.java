@@ -53,6 +53,10 @@ public class AgentHealthIndicatorTest {
 
   private static final String AGENT_MESSAGEML_VERSION2_SNAPSHOT = "1.46.0-SNAPSHOT";
 
+  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:8444/agent";
+
+  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/v1/HealthCheck";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -71,7 +75,7 @@ public class AgentHealthIndicatorTest {
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:8444/agent/v1/HealthCheck", indicator.getHealthCheckUrl());
+    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
   }
 
   @Test
@@ -107,4 +111,10 @@ public class AgentHealthIndicatorTest {
     MessageMLVersionUpdatedEventData updatedEvent = publisher.getEvent();
     assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
   }
+
+  @Test
+  public void testServiceBaseUrl() {
+    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
+  }
+
 }

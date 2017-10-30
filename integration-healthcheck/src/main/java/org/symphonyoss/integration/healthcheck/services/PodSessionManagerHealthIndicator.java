@@ -20,17 +20,17 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Service health indicator for POD.
+ * Service health indicator for POD Session Manager.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by rsanchez on 30/10/17.
  */
 @Component
 @Lazy
-public class PodHealthIndicator extends ServiceHealthIndicator {
+public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealthIndicator {
 
-  private static final String SERVICE_NAME = "POD";
+  private static final String SERVICE_NAME = "POD Authentication Service";
 
-  private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
+  private static final String SERVICE_FIELD = "sessionauth";
 
   @Override
   protected String getServiceName() {
@@ -39,17 +39,20 @@ public class PodHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected String getMinVersion() {
-    return properties.getPod().getMinVersion();
-  }
+    if (currentVersion != null) {
+      return properties.getPodSessionManager().getMinVersion();
+    }
 
-  @Override
-  protected String getHealthCheckUrl() {
-    return getServiceBaseUrl() + POD_URL_PATH;
+    return null;
   }
 
   @Override
   protected String getServiceBaseUrl() {
-    return properties.getSymphonyUrl();
+    return properties.getSessionManagerAuthUrl();
   }
 
+  @Override
+  protected String getServiceField() {
+    return SERVICE_FIELD;
+  }
 }

@@ -49,7 +49,12 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected String getHealthCheckUrl() {
-    return properties.getAgentUrl() + AGENT_URL_PATH;
+    return getServiceBaseUrl() + AGENT_URL_PATH;
+  }
+
+  @Override
+  protected String getServiceBaseUrl() {
+    return properties.getAgentUrl();
   }
 
   /**

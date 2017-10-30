@@ -45,6 +45,10 @@ public class KmHealthIndicatorTest {
 
   private static final String SERVICE_NAME = "Key Manager";
 
+  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443/relay";
+
+  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/HealthCheck/version";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -56,8 +60,7 @@ public class KmHealthIndicatorTest {
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck/version",
-        indicator.getHealthCheckUrl());
+    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
   }
 
   @Test
@@ -68,5 +71,10 @@ public class KmHealthIndicatorTest {
   @Test
   public void testMinVersion() {
     assertEquals(MOCK_VERSION, indicator.getMinVersion());
+  }
+
+  @Test
+  public void testServiceBaseUrl() {
+    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
   }
 }

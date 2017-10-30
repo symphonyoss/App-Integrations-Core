@@ -37,17 +37,19 @@ public class IntegrationBridgeServiceTest {
 
   private static final String NOT_AVAILABLE = "N/A";
 
+  private static final String SERVICE_URL = "https://test.symphony.com";
+
   @Test
   public void testNullVersion() {
+    assertEquals(IntegrationBridgeService.Compability.UNKNOWN,
+        new IntegrationBridgeService(null, SERVICE_URL).getCompatibility());
     assertEquals(IntegrationBridgeService.Compability.NOK,
-        new IntegrationBridgeService(null).getCompatibility());
-    assertEquals(IntegrationBridgeService.Compability.NOK,
-        new IntegrationBridgeService(NEW_VERSION).getCompatibility());
+        new IntegrationBridgeService(NEW_VERSION, SERVICE_URL).getCompatibility());
   }
 
   @Test
   public void testInvalidVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(INVALID_VERSION);
 
     assertEquals(IntegrationBridgeService.Compability.NOK, service.getCompatibility());
@@ -55,7 +57,7 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testCompare() {
-    IntegrationBridgeService service1 = new IntegrationBridgeService(OLD_VERSION);
+    IntegrationBridgeService service1 = new IntegrationBridgeService(OLD_VERSION, SERVICE_URL);
     service1.setCurrentVersion(OLD_VERSION);
     assertEquals(IntegrationBridgeService.Compability.OK, service1.getCompatibility());
 
@@ -68,7 +70,7 @@ public class IntegrationBridgeServiceTest {
     service1.setCurrentVersion(NEW_VERSION + SNAPSHOT_SUFFIX);
     assertEquals(IntegrationBridgeService.Compability.OK, service1.getCompatibility());
 
-    IntegrationBridgeService service2 = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service2 = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service2.setCurrentVersion(OLD_VERSION);
     assertEquals(IntegrationBridgeService.Compability.NOK, service2.getCompatibility());
 
@@ -84,7 +86,7 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testEquals() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
     assertEquals(IntegrationBridgeService.Compability.OK, service.getCompatibility());
 
@@ -94,27 +96,33 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testGetCurrentVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
     assertEquals(NEW_VERSION, service.getCurrentVersion());
   }
 
   @Test
   public void testGetCurrentVersionNA() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(StringUtils.EMPTY);
     assertEquals(NOT_AVAILABLE, service.getCurrentVersion());
   }
 
   @Test
+  public void testGetMinVersionNA() {
+    IntegrationBridgeService service = new IntegrationBridgeService(StringUtils.EMPTY, SERVICE_URL);
+    assertEquals(NOT_AVAILABLE, service.getMinVersion());
+  }
+
+  @Test
   public void testGetMinVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     assertEquals(NEW_VERSION, service.getMinVersion());
   }
 
   @Test
   public void testToString() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
     String expected = "IntegrationBridgeService{" +
         "connectivity=" + service.getConnectivity() +
@@ -125,7 +133,7 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testHashCode() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
 
     int expected = service.getConnectivity().hashCode();

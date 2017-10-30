@@ -20,6 +20,7 @@ agent:
 pod_session_manager:
   host: nexus.symphony.com
   port: 8444
+  min_version: 1.48.0
 
 #
 # Indicate the host and ports for the POD's Key Manager.

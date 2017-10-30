@@ -96,7 +96,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   protected ApplicationEventPublisher publisher;
 
   @Autowired
-  private LogMessageSource logMessageSource;
+  protected LogMessageSource logMessageSource;
 
   /**
    * Cache for the service information.
@@ -106,7 +106,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   /**
    * Current version
    */
-  private String currentVersion;
+  protected String currentVersion;
 
   /**
    * Lock to avoid concurrent execution
@@ -181,14 +181,14 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   private IntegrationBridgeService retrieveServiceInfo() {
     LOG.debug("Retrieve service info: {}", getServiceName());
 
-    IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion());
+    IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
 
     String healthResponse = getHealthResponse();
 
     if (healthResponse == null) {
       service.setConnectivity(Status.DOWN);
     } else {
-      service.setConnectivity(Status.UP);
+      handleHealthResponse(service, healthResponse);
 
       String version = retrieveCurrentVersion(healthResponse);
 
@@ -200,6 +200,16 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     }
 
     return service;
+  }
+
+  /**
+   * Handle health check response.
+   *
+   * @param service Service information
+   * @param healthResponse Health check response
+   */
+  protected void handleHealthResponse(IntegrationBridgeService service, String healthResponse) {
+    service.setConnectivity(Status.UP);
   }
 
   /**
@@ -317,12 +327,18 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   /**
    * Build the specific health check URL for the component which compatibility will be checked for.
-   * @return the built service URL.
+   * @return the built health check URL.
    */
   protected abstract String getHealthCheckUrl();
 
   public String getCurrentVersion() {
     return currentVersion;
   }
+
+  /**
+   * Build the base URL for the service.
+   * @return the base URL for the service.
+   */
+  protected abstract String getServiceBaseUrl();
 
 }

@@ -75,6 +75,8 @@ public class ServiceHealthIndicatorTest {
 
   private static final String MOCK_SERVICE_NAME = "POD";
 
+  private static final String SERVICE_URL = "https://test.symphony.com";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -112,7 +114,7 @@ public class ServiceHealthIndicatorTest {
   public void testNullClient() {
     doThrow(UnregisteredUserAuthException.class).when(authenticationProxy).httpClientForUser(anyString());
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected = Health.down().withDetail(healthIndicator.getServiceName(), service).build();
@@ -135,7 +137,7 @@ public class ServiceHealthIndicatorTest {
   public void testConnectivityException() {
     doThrow(ProcessingException.class).when(invocationBuilder).get();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected = Health.down().withDetail(healthIndicator.getServiceName(), service).build();
@@ -149,7 +151,7 @@ public class ServiceHealthIndicatorTest {
     Response responseError = Response.serverError().build();
     doReturn(responseError).when(invocationBuilder).get();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected = Health.down().withDetail(healthIndicator.getServiceName(), service).build();
@@ -162,7 +164,7 @@ public class ServiceHealthIndicatorTest {
   public void testServiceUp() {
     mockServiceUp();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
 
@@ -196,7 +198,7 @@ public class ServiceHealthIndicatorTest {
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{}").when(mockResponse).readEntity(String.class);
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
 
     Health expected = Health.up().withDetail(healthIndicator.getServiceName(), service).build();
@@ -235,7 +237,7 @@ public class ServiceHealthIndicatorTest {
 
   @Test
   public void testCachedResult() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION);
+    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
 
