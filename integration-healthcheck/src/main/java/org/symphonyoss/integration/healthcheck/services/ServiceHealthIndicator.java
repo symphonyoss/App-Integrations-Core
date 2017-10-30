@@ -106,7 +106,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   /**
    * Current version
    */
-  private String currentVersion;
+  protected String currentVersion;
 
   /**
    * Lock to avoid concurrent execution

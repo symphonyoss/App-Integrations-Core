@@ -44,13 +44,19 @@ endpoints:
       enabled: false
 
 pod:
-  min_version: 1.44.0
+  min_version: 1.48.0
 
 agent:
-  min_version: 1.44.0
+  min_version: 1.48.0
 
 key_manager:
-  min_version: 1.44.0
+  min_version: 1.48.0
+
+key_manager_auth:
+  min_version: 1.48.0
+
+pod_session_manager:
+  min_version: 1.48.0
 
 management:
   security:
