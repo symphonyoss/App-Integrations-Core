@@ -44,6 +44,10 @@ public class PodHealthIndicatorTest {
 
   private static final String SERVICE_NAME = "POD";
 
+  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443";
+
+  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/webcontroller/HealthCheck/version";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -55,8 +59,7 @@ public class PodHealthIndicatorTest {
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/webcontroller/HealthCheck/version",
-        indicator.getHealthCheckUrl());
+    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
   }
 
   @Test
@@ -71,6 +74,6 @@ public class PodHealthIndicatorTest {
 
   @Test
   public void testServiceBaseUrl() {
-    assertEquals("https://nexus.symphony.com:443", indicator.getServiceBaseUrl());
+    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
   }
 }

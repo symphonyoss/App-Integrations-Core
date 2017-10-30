@@ -55,9 +55,9 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   protected void handleHealthResponse(IntegrationBridgeService service, String healthResponse) {
     try {
       JsonNode node = JsonUtils.readTree(healthResponse);
-      String serviceField = node.path(getServiceField()).asText();
+      boolean serviceField = node.path(getServiceField()).asBoolean();
 
-      if (Boolean.parseBoolean(serviceField)) {
+      if (serviceField) {
         service.setConnectivity(Status.UP);
       } else {
         service.setConnectivity(Status.DOWN);
