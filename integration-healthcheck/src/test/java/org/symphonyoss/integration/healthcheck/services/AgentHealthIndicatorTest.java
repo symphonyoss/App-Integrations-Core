@@ -107,4 +107,10 @@ public class AgentHealthIndicatorTest {
     MessageMLVersionUpdatedEventData updatedEvent = publisher.getEvent();
     assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
   }
+
+  @Test
+  public void testServiceBaseUrl() {
+    assertEquals("https://nexus.symphony.com:8444/agent", indicator.getServiceBaseUrl());
+  }
+
 }

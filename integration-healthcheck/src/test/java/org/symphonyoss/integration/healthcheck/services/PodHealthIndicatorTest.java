@@ -68,4 +68,9 @@ public class PodHealthIndicatorTest {
   public void testMinVersion() {
     assertEquals(MOCK_VERSION, indicator.getMinVersion());
   }
+
+  @Test
+  public void testServiceBaseUrl() {
+    assertEquals("https://nexus.symphony.com:443", indicator.getServiceBaseUrl());
+  }
 }

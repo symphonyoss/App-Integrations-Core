@@ -17,10 +17,11 @@
 package org.symphonyoss.integration.healthcheck.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,22 +29,25 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link KmHealthIndicator}
+ * Test class to validate {@link PodHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, KmHealthIndicator.class})
-public class KmHealthIndicatorTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, PodSessionManagerHealthIndicator.class})
+public class PodSessionManagerHealthIndicatorTest {
 
-  private static final String MOCK_VERSION = "1.45.0";
+  private static final String MOCK_VERSION = "1.48.0";
 
-  private static final String SERVICE_NAME = "Key Manager";
+  private static final String SERVICE_NAME = "POD Authentication Service";
+
+  private static final String POD_SERVICE_NAME = "POD";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -52,11 +56,11 @@ public class KmHealthIndicatorTest {
   private LogMessageSource logMessageSource;
 
   @Autowired
-  private KmHealthIndicator indicator;
+  private PodSessionManagerHealthIndicator indicator;
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals("https://nexus.symphony.com:443/relay/HealthCheck/version",
+    assertEquals("https://nexus.symphony.com:443/webcontroller/HealthCheck/aggregated",
         indicator.getHealthCheckUrl());
   }
 
@@ -72,6 +76,19 @@ public class KmHealthIndicatorTest {
 
   @Test
   public void testServiceBaseUrl() {
-    assertEquals("https://nexus.symphony.com:443/relay", indicator.getServiceBaseUrl());
+    assertEquals("https://nexus.symphony.com:8444/sessionauth", indicator.getServiceBaseUrl());
+  }
+
+  @Test
+  public void testCurrentVersion() {
+    assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
+
+    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(SERVICE_NAME, null, MOCK_VERSION));
+
+    assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
+
+    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
+
+    assertEquals(MOCK_VERSION, indicator.retrieveCurrentVersion(StringUtils.EMPTY));
   }
 }
