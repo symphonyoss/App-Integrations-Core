@@ -44,6 +44,14 @@ applications:
     visible: true
 
 #
+# Indicate the host and ports for the POD's Key Manager Auth.
+#
+key_manager_auth:
+  host: nexus.symphony.com
+  port: 443
+  min_version: 1.48.0
+
+#
 # Default timeouts (in millis)
 #
 http_client_config:
