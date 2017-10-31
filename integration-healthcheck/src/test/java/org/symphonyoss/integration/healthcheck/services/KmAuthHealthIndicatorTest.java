@@ -62,4 +62,9 @@ public class KmAuthHealthIndicatorTest {
     assertEquals(MOCK_SERVICE_URL + SERVICE_FIELD, indicator.getServiceBaseUrl());
   }
 
+  @Test
+  public void testServiceField() {
+    assertEquals(SERVICE_FIELD, indicator.getServiceField());
+  }
+
 }
