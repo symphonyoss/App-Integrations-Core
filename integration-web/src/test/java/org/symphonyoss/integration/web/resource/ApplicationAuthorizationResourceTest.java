@@ -19,6 +19,7 @@ package org.symphonyoss.integration.web.resource;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -155,7 +156,7 @@ public class ApplicationAuthorizationResourceTest {
   @Test(expected = IntegrationUnavailableException.class)
   public void testGetAuthorizationUserSessionIntegrationNotFound()
       throws RemoteApiException {
-    applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null);
+    applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL, null, true);
   }
 
   @Test
@@ -182,7 +183,7 @@ public class ApplicationAuthorizationResourceTest {
     doReturn(AUTHORIZATION_URL).when(integration).getAuthorizationUrl(INTEGRATION_URL, 0L);
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertTrue(response.getBody() instanceof ErrorResponse);
@@ -205,9 +206,41 @@ public class ApplicationAuthorizationResourceTest {
 
     assertEquals(ResponseEntity.ok().body(authorizationData),
         applicationAuthorizationResource.getUserAuthorizationData(CONFIGURATION_ID, INTEGRATION_URL,
-            null));
+            null, true));
   }
 
+  @Test
+  public void testGetAuthorizationUserWithInitOauthFalse()
+          throws RemoteApiException, AuthorizationException {
+    doReturn(integration).when(integrationBridge).getIntegrationById(CONFIGURATION_ID);
+    doReturn(MOCK_SESSION).when(authenticationProxy).getSessionToken(INTEGRATION_TYPE);
+
+    UserAuthorizationData authorizationData = new UserAuthorizationData();
+
+    String path = "/v1/configuration" + CONFIGURATION_ID + "/auth/user";
+
+    Map<String, String> headerParams = new HashMap<>();
+    headerParams.put(SESSION_TOKEN_HEADER_PARAM, MOCK_SESSION);
+
+    Map<String, String> queryParams = new HashMap<>();
+    queryParams.put(USER_ID, "0");
+    queryParams.put(URL, INTEGRATION_URL);
+
+    doReturn(CONFIGURATION_ID).when(client).escapeString(CONFIGURATION_ID);
+    doReturn(authorizationData).when(client).doGet(path, headerParams, queryParams, UserAuthorizationData.class);
+
+    doReturn(false).when(integration).isUserAuthorized(INTEGRATION_URL, 0L);
+    doReturn(AUTHORIZATION_URL).when(integration).getAuthorizationUrl(INTEGRATION_URL, 0L);
+
+    ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
+            CONFIGURATION_ID, INTEGRATION_URL, null, false);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertTrue(response.getBody() instanceof ErrorResponse);
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+    assertNull(errorResponse.getProperties());
+  }
+  
   @Test
   public void testGetAuthorizationUserInternalError() throws RemoteApiException,
       AuthorizationException {
@@ -218,7 +251,7 @@ public class ApplicationAuthorizationResourceTest {
         anyString(), anyLong());
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
@@ -233,7 +266,7 @@ public class ApplicationAuthorizationResourceTest {
     doThrow(exception).when(integration).isUserAuthorized(anyString(), anyLong());
 
     ResponseEntity response = applicationAuthorizationResource.getUserAuthorizationData(
-        CONFIGURATION_ID, INTEGRATION_URL, null);
+        CONFIGURATION_ID, INTEGRATION_URL, null, true);
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
