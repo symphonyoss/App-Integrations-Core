@@ -19,6 +19,7 @@ package org.symphonyoss.integration.web.resource;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -237,6 +238,7 @@ public class ApplicationAuthorizationResourceTest {
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertTrue(response.getBody() instanceof ErrorResponse);
     ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+    assertNull(errorResponse.getProperties());
   }
   
   @Test
