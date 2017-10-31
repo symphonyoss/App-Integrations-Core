@@ -22,7 +22,13 @@ public class KmAuthHealthIndicator extends AuthenticationServiceHealthIndicator 
   }
 
   @Override
-  protected String getMinVersion() { return properties.getKeyManagerAuth().getMinVersion(); }
+  protected String getMinVersion() {
+    if (currentVersion != null) {
+      return properties.getKeyManagerAuth().getMinVersion();
+    }
+
+    return null;
+  }
 
   @Override
   protected String getServiceBaseUrl() {
