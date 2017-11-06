@@ -65,6 +65,7 @@ public class IntegrationApiClientTest {
   private static final String MOCK_CONFIGURATION_ID = "57d6f328e4b0396198ce723d";
 
   private static final String MOCK_TYPE = "jiraWebHookIntegration";
+  private static final String MOCK_USERNAME = "jiraBot";
   private static final String CREATE_INTEGRATION = "createIntegration";
   private static final String GET_INTEGRATION_BY_ID = "getIntegrationById";
   private static final String INTEGRATION_TYPE = "integrationType";
@@ -140,13 +141,19 @@ public class IntegrationApiClientTest {
     IntegrationSubmissionCreate create = new IntegrationSubmissionCreate();
     create.setName(integration.getName());
     create.setType(integration.getType());
+    create.setData(integration.getData());
+    create.setUsername(integration.getUsername());
 
     doReturn(integration).when(httpClient).doPost("/v1/configuration", headerParams,
         Collections.<String, String>emptyMap(), create, IntegrationSettings.class);
 
     IntegrationSettings result = apiClient.createIntegration(MOCK_SESSION, create);
 
-    assertEquals(integration, result);
+    assertEquals(create.getName(), result.getName());
+    assertEquals(create.getType(), result.getType());
+    assertNull(result.getDescription());
+    assertEquals(create.getData(), result.getData());
+    assertEquals(create.getUsername(), result.getUsername());
   }
 
   private IntegrationSettings mockIntegration() {
@@ -154,8 +161,14 @@ public class IntegrationApiClientTest {
     integration.setConfigurationId(MOCK_CONFIGURATION_ID);
     integration.setName("JIRA");
     integration.setType(MOCK_TYPE);
+    integration.setUsername(MOCK_USERNAME);
     integration.setEnabled(Boolean.FALSE);
     integration.setVisible(Boolean.FALSE);
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("object", "mock");
+
+    integration.setData(data);
 
     return integration;
   }
@@ -434,6 +447,8 @@ public class IntegrationApiClientTest {
     IntegrationSubmissionCreate create = new IntegrationSubmissionCreate();
     create.setName(integration.getName());
     create.setType(integration.getType());
+    create.setData(integration.getData());
+    create.setUsername(integration.getUsername());
 
     String path = "/v1/configuration/" + MOCK_CONFIGURATION_ID;
 
@@ -445,7 +460,11 @@ public class IntegrationApiClientTest {
     IntegrationSettings result =
         apiClient.updateIntegration(MOCK_SESSION, MOCK_CONFIGURATION_ID, create);
 
-    assertEquals(integration, result);
+    assertEquals(create.getName(), result.getName());
+    assertEquals(create.getType(), result.getType());
+    assertNull(result.getDescription());
+    assertEquals(create.getData(), result.getData());
+    assertEquals(create.getUsername(), result.getUsername());
   }
 
 }
