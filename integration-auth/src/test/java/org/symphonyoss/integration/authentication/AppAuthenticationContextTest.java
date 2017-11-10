@@ -44,6 +44,8 @@ public class AppAuthenticationContextTest {
 
   private static final String APP_ID = "jira";
 
+  private static final String SERVICE_NAME = "serviceName";
+
   private AppAuthenticationContext authContext;
 
   @Mock
@@ -62,7 +64,7 @@ public class AppAuthenticationContextTest {
   @Test
   public void testInitialState() throws RemoteApiException {
     assertEquals(APP_ID, authContext.getApplicationId());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -76,7 +78,7 @@ public class AppAuthenticationContextTest {
     AppAuthenticationContext authContext =
         new AppAuthenticationContext(APP_ID, null, null, httpClientConfig);
 
-    Client client = authContext.httpClientForContext();
+    Client client = authContext.httpClientForContext(SERVICE_NAME);
     Configuration clientConfiguration = client.getConfiguration();
 
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);

@@ -57,6 +57,8 @@ public class AppAuthenticationProxyImplTest {
 
   private static final String JIRA = "jira";
 
+  private static final String SERVICE_NAME = "serviceName";
+
   @Autowired
   private IntegrationProperties properties;
 
@@ -82,7 +84,7 @@ public class AppAuthenticationProxyImplTest {
     doReturn(solution).when(logMessage).getMessage(UNREGISTERED_APP_SOLUTION, JIRA);
 
     try {
-      proxy.httpClientForApplication(JIRA);
+      proxy.httpClientForApplication(JIRA, SERVICE_NAME);
       fail();
     } catch (UnregisteredAppAuthException e) {
       assertEquals(ExceptionMessageFormatter.format("Authentication Proxy", message, solution),
@@ -95,7 +97,7 @@ public class AppAuthenticationProxyImplTest {
     proxy.registerApplication(JIRA, null, StringUtils.EMPTY);
 
     // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
-    Configuration clientConfiguration = proxy.httpClientForApplication(JIRA).getConfiguration();
+    Configuration clientConfiguration = proxy.httpClientForApplication(JIRA, SERVICE_NAME).getConfiguration();
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
     Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)

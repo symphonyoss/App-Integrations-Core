@@ -140,7 +140,7 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = UnregisteredSessionTokenException.class)
   public void UnregisteredSessionTokenException() throws RemoteApiException {
-    proxy.httpClientForSessionToken(SESSION_TOKEN);
+    proxy.httpClientForSessionToken(SESSION_TOKEN, null);
   }
 
   @Test(expected = UnexpectedAuthException.class)
@@ -211,7 +211,7 @@ public class AuthenticationProxyImplTest {
     assertEquals(kmToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getKeyManagerToken());
 
     // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
-    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK).getConfiguration();
+    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK, null).getConfiguration();
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
     Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)

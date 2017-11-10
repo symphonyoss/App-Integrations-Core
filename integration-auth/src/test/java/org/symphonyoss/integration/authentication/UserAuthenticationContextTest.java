@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
 
@@ -63,19 +64,24 @@ public class UserAuthenticationContextTest {
 
   private static final String USER_ID = "jiraWebHookIntegration";
 
+  private static final String SERVICE_NAME = "serviceName";
+
   private UserAuthenticationContext authContext;
 
   @Mock
   private KeyStore keyStore;
 
+  @Mock
+  private IntegrationProperties properties;
+
   @Before
   public void initAuthenticationContext() {
-    authContext = new UserAuthenticationContext(USER_ID, null, null, null);
+    authContext = new UserAuthenticationContext(USER_ID, null, null, null, properties);
   }
 
   @Test (expected = IllegalStateException.class)
   public void testInvalidKeystore() throws RemoteApiException {
-    authContext = new UserAuthenticationContext(USER_ID, keyStore, "12345", null);
+    authContext = new UserAuthenticationContext(USER_ID, keyStore, "12345", null, properties);
   }
 
   @Test
@@ -84,7 +90,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AuthenticationToken.VOID_AUTH_TOKEN, authContext.getToken());
     assertEquals(AuthenticationToken.VOID_AUTH_TOKEN, authContext.getPreviousToken());
     assertFalse(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -94,7 +100,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN1, authContext.getToken());
     assertEquals(AuthenticationToken.VOID_AUTH_TOKEN, authContext.getPreviousToken());
     assertTrue(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -105,7 +111,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN2, authContext.getToken());
     assertEquals(AUTH_TOKEN1, authContext.getPreviousToken());
     assertTrue(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -116,7 +122,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN3, authContext.getToken());
     assertEquals(AUTH_TOKEN2, authContext.getPreviousToken());
     assertTrue(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -127,7 +133,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN2, authContext.getToken());
     assertEquals(AUTH_TOKEN1, authContext.getPreviousToken());
     assertFalse(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -138,7 +144,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN2, authContext.getToken());
     assertEquals(AUTH_TOKEN1, authContext.getPreviousToken());
     assertFalse(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -149,7 +155,7 @@ public class UserAuthenticationContextTest {
     assertEquals(AUTH_TOKEN2, authContext.getToken());
     assertEquals(AUTH_TOKEN1, authContext.getPreviousToken());
     assertFalse(authContext.isAuthenticated());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -161,9 +167,9 @@ public class UserAuthenticationContextTest {
     httpClientConfig.setMaxConnectionsPerRoute(HttpClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
 
     UserAuthenticationContext authContext =
-        new UserAuthenticationContext(USER_ID, null, null, httpClientConfig);
+        new UserAuthenticationContext(USER_ID, null, null, httpClientConfig, properties);
 
-    Client client = authContext.httpClientForContext();
+    Client client = authContext.httpClientForContext(SERVICE_NAME);
     Configuration clientConfiguration = client.getConfiguration();
 
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);

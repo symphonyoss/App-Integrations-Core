@@ -17,6 +17,8 @@
 package org.symphonyoss.integration.authentication;
 
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 import java.security.KeyStore;
 
@@ -50,8 +52,8 @@ public class UserAuthenticationContext extends AuthenticationContext {
    * @param httpClientConfig API client settings
    */
   public UserAuthenticationContext(String userId, KeyStore keyStore, String keyStorePassword,
-      HttpClientConfig httpClientConfig) {
-    super(keyStore, keyStorePassword, httpClientConfig);
+      HttpClientConfig httpClientConfig, IntegrationProperties properties) {
+    super(keyStore, keyStorePassword, httpClientConfig, properties);
 
     this.userId = userId;
   }

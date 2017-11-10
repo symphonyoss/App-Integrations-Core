@@ -78,8 +78,8 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
   }
 
   @Override
-  public Client httpClientForApplication(String applicationId) {
-    return contextForApplication(applicationId).httpClientForContext();
+  public Client httpClientForApplication(String applicationId, String serviceName) {
+    return contextForApplication(applicationId).httpClientForContext(serviceName);
   }
 
   /**

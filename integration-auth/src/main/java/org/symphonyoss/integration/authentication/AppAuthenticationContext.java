@@ -40,7 +40,7 @@ public class AppAuthenticationContext extends AuthenticationContext {
    */
   public AppAuthenticationContext(String applicationId, KeyStore keyStore, String keyStorePassword,
       HttpClientConfig httpClientConfig) {
-    super(keyStore, keyStorePassword, httpClientConfig);
+    super(keyStore, keyStorePassword, httpClientConfig, null);
     this.applicationId = applicationId;
   }
 
