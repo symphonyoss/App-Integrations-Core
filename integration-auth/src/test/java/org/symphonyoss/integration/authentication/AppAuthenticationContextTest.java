@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 import java.security.KeyStore;
 
@@ -44,25 +45,30 @@ public class AppAuthenticationContextTest {
 
   private static final String APP_ID = "jira";
 
+  private static final String SERVICE_NAME = "serviceName";
+
   private AppAuthenticationContext authContext;
 
   @Mock
   private KeyStore keyStore;
 
+  @Mock
+  private IntegrationProperties properties;
+
   @Before
   public void initAuthenticationContext() {
-    authContext = new AppAuthenticationContext(APP_ID, null, null, null);
+    authContext = new AppAuthenticationContext(APP_ID, null, null, null, properties);
   }
 
   @Test (expected = IllegalStateException.class)
   public void testInvalidKeystore() throws RemoteApiException {
-    authContext = new AppAuthenticationContext(APP_ID, keyStore, "12345", null);
+    authContext = new AppAuthenticationContext(APP_ID, keyStore, "12345", null, properties);
   }
 
   @Test
   public void testInitialState() throws RemoteApiException {
     assertEquals(APP_ID, authContext.getApplicationId());
-    assertNotNull(authContext.httpClientForContext());
+    assertNotNull(authContext.httpClientForContext(SERVICE_NAME));
   }
 
   @Test
@@ -74,9 +80,9 @@ public class AppAuthenticationContextTest {
     httpClientConfig.setMaxConnectionsPerRoute(HttpClientConfig.MAX_TOTAL_CONNECTIONS_PER_ROUTE);
 
     AppAuthenticationContext authContext =
-        new AppAuthenticationContext(APP_ID, null, null, httpClientConfig);
+        new AppAuthenticationContext(APP_ID, null, null, httpClientConfig, properties);
 
-    Client client = authContext.httpClientForContext();
+    Client client = authContext.httpClientForContext(SERVICE_NAME);
     Configuration clientConfiguration = client.getConfiguration();
 
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);

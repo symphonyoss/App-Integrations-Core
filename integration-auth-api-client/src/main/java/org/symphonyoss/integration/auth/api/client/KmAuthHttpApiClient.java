@@ -17,10 +17,9 @@
 package org.symphonyoss.integration.auth.api.client;
 
 import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
-    .MISSING_CONFIG_INFO_SOLUTION;
-import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
     .MISSING_CONFIG_INFO;
-
+import static org.symphonyoss.integration.auth.api.properties.AuthApiClientProperties
+    .MISSING_CONFIG_INFO_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 /**
  * Low-level HTTP client to query Authentication API used to authenticate on the Key Manager.
@@ -40,9 +39,6 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
   private static final String SERVICE_NAME = "Key Manager Auth";
 
   private static final String REQUIRED_KEY = "key_manager_auth.host";
-
-  @Autowired
-  private IntegrationProperties properties;
 
   @Autowired
   private LogMessageSource logMessageSource;
@@ -62,6 +58,11 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
     }
 
     return url;
+  }
+
+  @Override
+  protected ProxyConnectionInfo getProxy() {
+    return this.properties.getKeyManagerAuth().getProxy();
   }
 
 }

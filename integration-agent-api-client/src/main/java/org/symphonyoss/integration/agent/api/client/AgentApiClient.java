@@ -28,6 +28,7 @@ import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 /**
  * Low-level HTTP client to query Agent API.
@@ -63,6 +64,11 @@ public class AgentApiClient extends SymphonyApiClient {
     }
 
     return url;
+  }
+
+  @Override
+  protected ProxyConnectionInfo getProxy() {
+    return this.properties.getAgent().getProxy();
   }
 
 }
