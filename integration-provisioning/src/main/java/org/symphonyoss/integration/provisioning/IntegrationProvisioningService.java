@@ -16,11 +16,16 @@
 
 package org.symphonyoss.integration.provisioning;
 
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_AVATAR_FAIL;
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_AVATAR_NOT_FOUND;
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_FAIL;
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_MISSING_INFO;
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.APP_MISSING_INFO_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.APP_AVATAR_FAIL;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.APP_AVATAR_NOT_FOUND;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.APP_FAIL;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.APP_MISSING_INFO;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.APP_MISSING_INFO_SOLUTION;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -44,7 +49,6 @@ import org.symphonyoss.integration.provisioning.service.AppKeyPairService;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
-import org.symphonyoss.integration.provisioning.service.KeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserKeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
@@ -63,7 +67,8 @@ import java.util.Map;
 @Service
 public class IntegrationProvisioningService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationProvisioningService.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(IntegrationProvisioningService.class);
 
   private static final String DEFAULT_AVATAR_FILENAME = "logo.png";
 
@@ -112,18 +117,12 @@ public class IntegrationProvisioningService {
   public boolean configure() {
     LOGGER.info("Retrieving applications.\n");
 
+    Map<String, Application> applications = properties.getApplications();
+
     Map<String, ApplicationState> summary = new LinkedHashMap<>();
-
     String appId = StringUtils.EMPTY;
-
-    try {
-      Map<String, Application> applications = properties.getApplications();
-
-      for (String app : applications.keySet()) {
-        summary.put(app, ApplicationState.SKIPPED);
-      }
-
-      for (Map.Entry<String, Application> entry : applications.entrySet()) {
+    for (Map.Entry<String, Application> entry : applications.entrySet()) {
+      try {
         Application application = entry.getValue();
         appId = entry.getKey();
 
@@ -134,23 +133,23 @@ public class IntegrationProvisioningService {
         } else {
           disableApplication(application);
         }
-
         summary.put(appId, application.getState());
+
+      } catch (IntegrationRuntimeException e) {
+        LOGGER.error(logMessage.getMessage(APP_FAIL, appId, e.getMessage()));
+        summary.put(appId, ApplicationState.FAILED);
+      } catch (Exception e) {
+        LOGGER.error(logMessage.getMessage(APP_FAIL, appId, StringUtils.EMPTY), e);
+        summary.put(appId, ApplicationState.FAILED);
       }
-    } catch (IntegrationRuntimeException e) {
-      LOGGER.error(logMessage.getMessage(APP_FAIL, appId, e.getMessage()));
-      summary.put(appId, ApplicationState.FAILED);
-    } catch (Exception e) {
-      LOGGER.error(logMessage.getMessage(APP_FAIL, appId, StringUtils.EMPTY), e);
-      summary.put(appId, ApplicationState.FAILED);
-    } finally {
-      printSummary(summary);
     }
 
     Collection<ApplicationState> appStatus = summary.values();
     boolean failedOrSkippedApps = appStatus.contains(ApplicationState.FAILED) ||
         appStatus.contains(ApplicationState.UNKNOWN) ||
         appStatus.contains(ApplicationState.SKIPPED);
+
+    printSummary(summary);
 
     return !failedOrSkippedApps;
   }
