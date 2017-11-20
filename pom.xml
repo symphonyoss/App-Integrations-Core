@@ -47,6 +47,9 @@
         <!-- This is temporary; set to true as soon as the WhiteSource dashboard is clean -->
         <whitesource.product>Integration Bridge</whitesource.product>
         <whitesource.checkPolicies>false</whitesource.checkPolicies>
+
+        <!-- Dependency plugin -->
+        <dependency.plugin.version>3.0.1</dependency.plugin.version>
     </properties>
 
     <licenses>
@@ -159,6 +162,83 @@
     </scm>
 
     <profiles>
+        <profile>
+            <id>docker</id>
+            <activation>
+                <property>
+                    <name>docker</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${dependency.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
+                                    <artifactId>integration-github</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                    <destFileName>integration-github.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
+                                    <artifactId>integration-jira</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                    <destFileName>integration-jira.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
+                                    <artifactId>integration-salesforce</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                    <destFileName>integration-salesforce.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
+                                    <artifactId>integration-universal-whi</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                    <destFileName>integration-universal.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
+                                    <artifactId>integration-zapier</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                    <destFileName>integration-zapier.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <id>Provisioning</id>
