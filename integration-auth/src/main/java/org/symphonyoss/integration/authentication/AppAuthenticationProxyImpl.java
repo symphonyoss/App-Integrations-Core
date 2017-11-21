@@ -72,7 +72,7 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
   public void registerApplication(String applicationId, KeyStore keyStore, String keyStorePassword) {
     AppAuthenticationContext context =
         new AppAuthenticationContext(applicationId, keyStore, keyStorePassword,
-            properties.getHttpClientConfig());
+            properties.getHttpClientConfig(), properties);
 
     appContexts.put(applicationId, context);
   }
