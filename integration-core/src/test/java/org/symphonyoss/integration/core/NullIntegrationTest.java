@@ -84,7 +84,7 @@ public class NullIntegrationTest extends MockKeystore {
     application.setId(APP_ID);
     application.setComponent(APP_TYPE);
 
-    this.integration = new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
+    this.integration = new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage, environment);
 
     ReflectionTestUtils.setField(integration, "environment", environment);
   }
@@ -194,7 +194,7 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testGetSettings() {
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage, environment);
 
     assertNull(integration.getSettings());
   }
@@ -202,7 +202,7 @@ public class NullIntegrationTest extends MockKeystore {
   @Test
   public void testGetIntegrationWhiteList() {
     NullIntegration integration =
-        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage);
+        new NullIntegration(healthIndicator, application, utils, authenticationProxy, logMessage, environment);
 
     assertEquals(Collections.emptySet(), integration.getIntegrationWhiteList());
   }

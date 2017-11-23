@@ -241,7 +241,7 @@ public class IntegrationBridgeTest {
 
   @Test
   public void testGetIntegrationById() {
-    Integration integration = new NullIntegration(null, null, null, null, null);
+    Integration integration = new NullIntegration(null, null, null, null, null, null);
 
     doReturn(integration).when(bootstrap).getIntegrationById(any(String.class));
 

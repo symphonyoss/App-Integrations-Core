@@ -21,6 +21,7 @@ import static org.symphonyoss.integration.model.healthcheck.IntegrationFlags.Val
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.symphonyoss.integration.BaseIntegration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.exception.bootstrap.BootstrapException;
@@ -53,13 +54,14 @@ public class NullIntegration extends BaseIntegration {
 
   public NullIntegration(ApplicationsHealthIndicator healthIndicator, Application application,
       IntegrationUtils utils, AuthenticationProxy authenticationProxy,
-      LogMessageSource logMessage) {
+      LogMessageSource logMessage, Environment environment) {
     this.healthIndicator = healthIndicator;
     this.application = application;
     this.utils = utils;
     this.authenticationProxy = authenticationProxy;
     this.healthManager = new IntegrationHealthManager();
     this.logMessage = logMessage;
+    this.environment = environment;
   }
 
   @Override

@@ -43,6 +43,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
@@ -133,6 +134,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private LogMessageSource logMessage;
+
+  @Autowired
+  private Environment environment;
 
   /**
    * Atomic  Integer used to control when the application should log its health.
@@ -226,7 +230,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
         NullIntegration integration =
             new NullIntegration(applicationsHealthIndicator, application, utils,
-                authenticationProxy, logMessage);
+                authenticationProxy, logMessage, environment);
 
         try {
           integration.onCreate(appId);
