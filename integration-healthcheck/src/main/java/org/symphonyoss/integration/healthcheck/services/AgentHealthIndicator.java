@@ -57,24 +57,4 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
     return properties.getAgentUrl();
   }
 
-  /**
-   * Agent version greater than '1.46.0' must raise the MessageML version updated event.
-   * @param version Service version
-   */
-  @Override
-  protected void fireUpdatedServiceVersionEvent(String version) {
-    super.fireUpdatedServiceVersionEvent(version);
-
-    MessageMLVersion messageMLVersion = MessageMLVersion.V1;
-
-    String currentSemanticVersion = getSemanticVersion(version);
-
-    if (Version.valueOf(currentSemanticVersion).greaterThanOrEqualTo(AGENT_MESSAGEML_VERSION2)) {
-       messageMLVersion = MessageMLVersion.V2;
-    }
-
-    MessageMLVersionUpdatedEventData updatedEvent = new MessageMLVersionUpdatedEventData(messageMLVersion);
-    publisher.publishEvent(updatedEvent);
-  }
-
 }

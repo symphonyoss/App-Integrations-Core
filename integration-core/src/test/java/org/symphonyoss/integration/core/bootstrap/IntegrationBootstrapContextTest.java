@@ -184,9 +184,6 @@ public class IntegrationBootstrapContextTest {
     Integration integration = this.integrationBootstrapContext.getIntegrationById(CONFIGURATION_ID);
     assertNotNull(integration);
     assertEquals(this.integration, integration);
-
-    verify(publisher, times(1)).publishEvent(any(HealthCheckEventData.class));
-
   }
 
   /**
