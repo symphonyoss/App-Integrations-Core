@@ -89,30 +89,6 @@ public class AgentHealthIndicatorTest {
   }
 
   @Test
-  public void testMessageMLVersionUpdatedEventV1() {
-    indicator.fireUpdatedServiceVersionEvent(MOCK_VERSION);
-
-    MessageMLVersionUpdatedEventData updatedEvent = publisher.getEvent();
-    assertEquals(MessageMLVersion.V1, updatedEvent.getVersion());
-  }
-
-  @Test
-  public void testMessageMLVersionUpdatedEventV2() {
-    indicator.fireUpdatedServiceVersionEvent(AGENT_MESSAGEML_VERSION2);
-
-    MessageMLVersionUpdatedEventData updatedEvent = publisher.getEvent();
-    assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
-  }
-
-  @Test
-  public void testMessageMLVersionUpdatedEventV2SnapshotVersion() {
-    indicator.fireUpdatedServiceVersionEvent(AGENT_MESSAGEML_VERSION2_SNAPSHOT);
-
-    MessageMLVersionUpdatedEventData updatedEvent = publisher.getEvent();
-    assertEquals(MessageMLVersion.V2, updatedEvent.getVersion());
-  }
-
-  @Test
   public void testServiceBaseUrl() {
     assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
   }
