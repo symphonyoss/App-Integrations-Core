@@ -294,22 +294,22 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
   @Override
   public void registerUser(String userId, KeyStore keyStore, String keyStorePass) {
     authContexts.put(userId, new UserAuthenticationContext(userId, keyStore, keyStorePass,
-        properties.getHttpClientConfig()));
+        properties.getHttpClientConfig(), properties));
   }
 
   /**
    * Retrieves a client build with the proper SSL context for the user.
    */
   @Override
-  public Client httpClientForUser(String userId) {
-    return contextForUser(userId).httpClientForContext();
+  public Client httpClientForUser(String userId, String serviceName) {
+    return contextForUser(userId).httpClientForContext(serviceName);
   }
 
   /**
    * Retrieves a client build with the proper SSL context for the user.
    */
   @Override
-  public Client httpClientForSessionToken(String sessionToken) {
-    return contextForSessionToken(sessionToken).httpClientForContext();
+  public Client httpClientForSessionToken(String sessionToken, String serviceName) {
+    return contextForSessionToken(sessionToken).httpClientForContext(serviceName);
   }
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 /**
  * Low-level HTTP client to query Integration API.
@@ -36,9 +37,6 @@ public class IntegrationHttpApiClient extends SymphonyApiClient {
 
   private static final String API_PATH = "integrationapi";
 
-  @Autowired
-  private IntegrationProperties properties;
-
   public IntegrationHttpApiClient() {
     super(SERVICE_NAME);
   }
@@ -52,6 +50,11 @@ public class IntegrationHttpApiClient extends SymphonyApiClient {
     }
 
     return String.format("%s/%s", url, API_PATH);
+  }
+
+  @Override
+  protected ProxyConnectionInfo getProxy() {
+    return this.properties.getPod().getProxy();
   }
 
 }

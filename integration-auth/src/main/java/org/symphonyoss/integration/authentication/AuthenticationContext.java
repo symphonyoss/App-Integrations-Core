@@ -29,9 +29,15 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.symphonyoss.integration.model.yaml.ConnectionInfo;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
+import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -43,33 +49,44 @@ import javax.ws.rs.client.ClientBuilder;
  */
 public abstract class AuthenticationContext {
 
-  private final Client client;
+  private final Map<String, Client> serviceClients = new HashMap<>();
+
+  private final Client defaultClient;
 
   /**
    * Initializes HTTP client with the SSL Context according to the keystore received.
-   *
    * @param keyStore Keystore object
    * @param keyStorePassword Keystore password
    * @param httpClientConfig API client settings
    */
   public AuthenticationContext(KeyStore keyStore, String keyStorePassword, HttpClientConfig
-      httpClientConfig) {
+      httpClientConfig, IntegrationProperties properties) {
     if (httpClientConfig == null) {
       httpClientConfig = new HttpClientConfig();
     }
 
-    this.client = buildClient(keyStore, keyStorePassword, httpClientConfig);
+    Map<String, ConnectionInfo> services = properties.getServices();
+
+    for (Map.Entry<String, ConnectionInfo> entry : services.entrySet()) {
+      String service = entry.getKey();
+      ConnectionInfo serviceInfo = entry.getValue();
+
+      this.serviceClients.put(service,
+          buildClient(keyStore, keyStorePassword, httpClientConfig, serviceInfo.getProxy()));
+    }
+
+    this.defaultClient = buildClient(keyStore, keyStorePassword, httpClientConfig, null);
   }
 
   /**
    * Builds HTTP client with the SSL Context according to the keystore received.
-   *
    * @param keyStore Keystore object
    * @param keyStorePassword Keystore password
    * @param httpClientConfig API client settings
    * @return HTTP client
    */
-  private Client buildClient(KeyStore keyStore, String keyStorePassword, HttpClientConfig httpClientConfig) {
+  private Client buildClient(KeyStore keyStore, String keyStorePassword,
+      HttpClientConfig httpClientConfig, ProxyConnectionInfo proxyConnectionInfo) {
     final ClientConfig clientConfig = new ClientConfig();
     clientConfig.register(MultiPartFeature.class);
 
@@ -90,21 +107,44 @@ public abstract class AuthenticationContext {
       sslSocketFactory = new SSLConnectionSocketFactory(sslConfigurator.createSSLContext());
     }
 
-    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-        .register("http", PlainConnectionSocketFactory.getSocketFactory())
-        .register("https", sslSocketFactory)
-        .build();
+    Registry<ConnectionSocketFactory> socketFactoryRegistry =
+        RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", sslSocketFactory)
+            .build();
 
     // Connection pool setup with custom socket factory and max connections
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+    PoolingHttpClientConnectionManager connectionManager =
+        new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     connectionManager.setMaxTotal(httpClientConfig.getMaxConnections());
     connectionManager.setDefaultMaxPerRoute(httpClientConfig.getMaxConnectionsPerRoute());
 
-    // Sets the connector provider and connection manager (as shared to avoid the client runtime to shut it down)
+    // Sets the connector provider and connection manager (as shared to avoid the client runtime
+    // to shut it down)
     clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
     clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER_SHARED, true);
     ApacheConnectorProvider connectorProvider = new ApacheConnectorProvider();
     clientConfig.connectorProvider(connectorProvider);
+
+    // Adds proxy info if there is any
+    if (proxyConnectionInfo != null) {
+
+      String uri = proxyConnectionInfo.getURI();
+      String user = proxyConnectionInfo.getUser();
+      String password = proxyConnectionInfo.getPassword();
+
+      if (uri != null) {
+        clientConfig.property(ClientProperties.PROXY_URI, uri);
+      }
+
+      if (user != null) {
+        clientConfig.property(ClientProperties.PROXY_USERNAME, user);
+      }
+
+      if (password != null) {
+        clientConfig.property(ClientProperties.PROXY_PASSWORD, password);
+      }
+    }
 
     // Build the client with the above configurations
     final ClientBuilder clientBuilder = ClientBuilder.newBuilder().withConfig(clientConfig);
@@ -116,8 +156,11 @@ public abstract class AuthenticationContext {
    * Get HTTP client
    * @return HTTP client
    */
-  public Client httpClientForContext() {
-    return client;
+  public Client httpClientForContext(String serviceName) {
+    if (serviceClients.containsKey(serviceName)) {
+      return serviceClients.get(serviceName);
+    } else {
+      return defaultClient;
+    }
   }
-
 }

@@ -97,8 +97,8 @@ public class ServiceHealthIndicatorTest {
     WebTarget target = mock(WebTarget.class);
     invocationBuilder = mock(Invocation.Builder.class);
 
-    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE);
-    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE);
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE, MOCK_SERVICE_NAME);
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE, MOCK_SERVICE_NAME);
     doReturn(target).when(client)
         .target("https://nexus.symphony.com:443/webcontroller/HealthCheck/version");
     doReturn(target).when(target).property(anyString(), any());
@@ -112,7 +112,7 @@ public class ServiceHealthIndicatorTest {
 
   @Test
   public void testNullClient() {
-    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy).httpClientForUser(anyString());
+    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy).httpClientForUser(anyString(), anyString());
 
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);

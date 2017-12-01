@@ -34,6 +34,7 @@ import org.symphonyoss.integration.authentication.api.AppAuthenticationProxy;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 /**
  * Low-level HTTP client to query App Authentication API used to authenticate application on the POD.
@@ -87,7 +88,7 @@ public class PodAuthAppHttpApiClient extends SymphonyApiClient {
   @Override
   protected HttpApiClient buildHttpClient(String basePath) {
     AppAuthenticationProxyApiClient simpleClient =
-        new AppAuthenticationProxyApiClient(new JsonEntitySerializer(), proxy);
+        new AppAuthenticationProxyApiClient(new JsonEntitySerializer(), proxy, SERVICE_NAME);
     simpleClient.setBasePath(basePath);
 
     ConnectivityApiClientDecorator connectivityApiClient =
@@ -96,6 +97,11 @@ public class PodAuthAppHttpApiClient extends SymphonyApiClient {
     TraceLoggingApiClient traceLoggingApiClient = new TraceLoggingApiClient(connectivityApiClient);
 
     return new MetricsHttpApiClient(metricsController, traceLoggingApiClient);
+  }
+
+  @Override
+  protected ProxyConnectionInfo getProxy() {
+    return this.properties.getPodSessionManager().getProxy();
   }
 
 }
