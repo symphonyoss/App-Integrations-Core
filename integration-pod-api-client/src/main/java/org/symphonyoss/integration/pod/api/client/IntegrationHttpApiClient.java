@@ -37,9 +37,6 @@ public class IntegrationHttpApiClient extends SymphonyApiClient {
 
   private static final String API_PATH = "integrationapi";
 
-  @Autowired
-  private IntegrationProperties properties;
-
   public IntegrationHttpApiClient() {
     super(SERVICE_NAME);
   }
@@ -57,7 +54,7 @@ public class IntegrationHttpApiClient extends SymphonyApiClient {
 
   @Override
   protected ProxyConnectionInfo getProxy() {
-    return null;
+    return this.properties.getPod().getProxy();
   }
 
 }

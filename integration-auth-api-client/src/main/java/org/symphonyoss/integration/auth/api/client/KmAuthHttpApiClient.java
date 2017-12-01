@@ -62,7 +62,7 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
 
   @Override
   protected ProxyConnectionInfo getProxy() {
-    return this.properties.getKeyManager().getProxy();
+    return this.properties.getKeyManagerAuth().getProxy();
   }
 
 }

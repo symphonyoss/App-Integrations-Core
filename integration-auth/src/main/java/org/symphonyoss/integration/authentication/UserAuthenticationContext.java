@@ -18,7 +18,6 @@ package org.symphonyoss.integration.authentication;
 
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
-import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 import java.security.KeyStore;
 

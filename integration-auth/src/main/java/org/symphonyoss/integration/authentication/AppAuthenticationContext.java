@@ -16,7 +16,6 @@
 
 package org.symphonyoss.integration.authentication;
 
-import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 

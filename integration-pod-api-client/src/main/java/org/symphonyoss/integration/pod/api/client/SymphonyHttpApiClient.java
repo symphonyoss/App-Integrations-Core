@@ -35,9 +35,6 @@ public class SymphonyHttpApiClient extends SymphonyApiClient {
 
   private static final String REQUIRED_KEY = "pod.host";
 
-  @Autowired
-  private IntegrationProperties properties;
-
   public SymphonyHttpApiClient() {
     super(SERVICE_NAME);
   }
@@ -55,7 +52,7 @@ public class SymphonyHttpApiClient extends SymphonyApiClient {
 
   @Override
   protected ProxyConnectionInfo getProxy() {
-    return null;
+    return this.properties.getPod().getProxy();
   }
 
 }

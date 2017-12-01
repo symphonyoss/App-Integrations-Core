@@ -49,7 +49,7 @@ import javax.ws.rs.client.ClientBuilder;
  */
 public abstract class AuthenticationContext {
 
-  private final Map<String, Client> serviceClients;
+  private final Map<String, Client> serviceClients = new HashMap<>();
 
   private final Client defaultClient;
 
@@ -65,9 +65,7 @@ public abstract class AuthenticationContext {
       httpClientConfig = new HttpClientConfig();
     }
 
-    this.serviceClients = new HashMap<>();
-
-    HashMap<String, ConnectionInfo> services = (HashMap) properties.getServices();
+    Map<String, ConnectionInfo> services = properties.getServices();
 
     for (Map.Entry<String, ConnectionInfo> entry : services.entrySet()) {
       String service = entry.getKey();
@@ -159,7 +157,7 @@ public abstract class AuthenticationContext {
    * @return HTTP client
    */
   public Client httpClientForContext(String serviceName) {
-    if(serviceClients.containsKey(serviceName)) {
+    if (serviceClients.containsKey(serviceName)) {
       return serviceClients.get(serviceName);
     } else {
       return defaultClient;
