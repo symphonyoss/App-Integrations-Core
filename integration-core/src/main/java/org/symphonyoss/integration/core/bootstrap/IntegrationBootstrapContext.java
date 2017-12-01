@@ -43,6 +43,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
@@ -94,10 +95,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   public static final String BOOTSTRAP_DELAY_KEY = "bootstrap.delay";
 
-  public static final String AGENT_SERVICE_NAME = "Agent";
-
-  public static final Long HEALTH_CHECK_INITAL_DELAY = TimeUnit.SECONDS.toMillis(20);
-
   @Autowired
   private ApplicationContext context;
 
@@ -133,6 +130,9 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   @Autowired
   private LogMessageSource logMessage;
+
+  @Autowired
+  private Environment environment;
 
   /**
    * Atomic  Integer used to control when the application should log its health.
@@ -177,31 +177,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       // deals with unknown apps.
       initUnknownApps();
 
-      // Start health check polling
-      healthCheckAgentServicePolling();
-
     }
 
-  }
-
-  /**
-   * Schedule to dispatch health-check service event to monitor the Agent version.
-   *
-   * This allows the Integration Bridge to detect if the Agent is upgraded while the Integration
-   * Bridge is running.
-   */
-  private void healthCheckAgentServicePolling() {
-    scheduler.scheduleWithFixedDelay(new Runnable() {
-
-      @Override
-      public void run() {
-        LOGGER.debug(logMessage.getMessage(POLLING_AGENT_HEALTH_CHECK));
-
-        HealthCheckEventData event = new HealthCheckEventData(AGENT_SERVICE_NAME);
-        publisher.publishEvent(event);
-      }
-
-    }, HEALTH_CHECK_INITAL_DELAY, Long.valueOf(DEFAULT_DELAY), TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -226,7 +203,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
         NullIntegration integration =
             new NullIntegration(applicationsHealthIndicator, application, utils,
-                authenticationProxy, logMessage);
+                authenticationProxy, logMessage, environment);
 
         try {
           integration.onCreate(appId);
