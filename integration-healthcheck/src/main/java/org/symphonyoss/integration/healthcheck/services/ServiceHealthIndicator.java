@@ -261,13 +261,17 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
       Response response = invocationBuilder.get();
-      Response.Status status = Response.Status.fromStatusCode(response.getStatus());
 
-      return OK.equals(status) ? response.readEntity(String.class) : null;
+      return retrieveHealthResponse(response);
     } catch (ProcessingException e) {
       LOG.error(logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()), e);
       return null;
     }
+  }
+
+  protected String retrieveHealthResponse(Response response) {
+    Response.Status status = Response.Status.fromStatusCode(response.getStatus());
+    return OK.equals(status) ? response.readEntity(String.class) : null;
   }
 
   /**

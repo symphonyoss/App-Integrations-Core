@@ -28,6 +28,8 @@ import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;
 
+import javax.ws.rs.core.Response;
+
 /**
  * Abstract class that holds common methods to all authentication service health indicators.
  *
@@ -49,6 +51,11 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   @Override
   protected String retrieveCurrentVersion(String healthResponse) {
     return currentVersion;
+  }
+
+  @Override
+  protected String retrieveHealthResponse(Response response) {
+    return response.readEntity(String.class);
   }
 
   @Override
