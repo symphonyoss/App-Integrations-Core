@@ -1,0 +1,1068 @@
+2017-11-21 16:51:21,117 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@159aa99f; line: 1, column: 336469]
+ at [Source: java.io.StringReader@159aa99f; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@159aa99f; line: 1, column: 336469]
+ at [Source: java.io.StringReader@159aa99f; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:13,890 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@5cb65f51; line: 1, column: 336469]
+ at [Source: java.io.StringReader@5cb65f51; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@5cb65f51; line: 1, column: 336469]
+ at [Source: java.io.StringReader@5cb65f51; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:15,191 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: trello. 
+Component: Application Provisioning
+Message: Failed to configure application: trello. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@4e1ba9a0; line: 1, column: 336469]
+ at [Source: java.io.StringReader@4e1ba9a0; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@4e1ba9a0; line: 1, column: 336469]
+ at [Source: java.io.StringReader@4e1ba9a0; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:16,447 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Application Provisioning
+Message: Failed to configure application: zapier. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@7d02e533; line: 1, column: 336469]
+ at [Source: java.io.StringReader@7d02e533; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@7d02e533; line: 1, column: 336469]
+ at [Source: java.io.StringReader@7d02e533; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:17,725 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: salesforce. 
+Component: Application Provisioning
+Message: Failed to configure application: salesforce. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@5586c00; line: 1, column: 336469]
+ at [Source: java.io.StringReader@5586c00; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@5586c00; line: 1, column: 336469]
+ at [Source: java.io.StringReader@5586c00; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:19,016 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: universal. 
+Component: Application Provisioning
+Message: Failed to configure application: universal. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@76aceae9; line: 1, column: 336469]
+ at [Source: java.io.StringReader@76aceae9; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@76aceae9; line: 1, column: 336469]
+ at [Source: java.io.StringReader@76aceae9; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:00:20,320 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: github. 
+Component: Application Provisioning
+Message: Failed to configure application: github. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@430cb16; line: 1, column: 336469]
+ at [Source: java.io.StringReader@430cb16; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@430cb16; line: 1, column: 336469]
+ at [Source: java.io.StringReader@430cb16; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:02:26,588 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@31af22ca; line: 1, column: 336469]
+ at [Source: java.io.StringReader@31af22ca; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@31af22ca; line: 1, column: 336469]
+ at [Source: java.io.StringReader@31af22ca; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:03:18,577 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@745ef9f2; line: 1, column: 336469]
+ at [Source: java.io.StringReader@745ef9f2; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@745ef9f2; line: 1, column: 336469]
+ at [Source: java.io.StringReader@745ef9f2; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:03:54,342 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@2f924b3f; line: 1, column: 336469]
+ at [Source: java.io.StringReader@2f924b3f; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@2f924b3f; line: 1, column: 336469]
+ at [Source: java.io.StringReader@2f924b3f; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:32,573 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@2b2e352d; line: 1, column: 336469]
+ at [Source: java.io.StringReader@2b2e352d; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@2b2e352d; line: 1, column: 336469]
+ at [Source: java.io.StringReader@2b2e352d; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:33,859 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: trello. 
+Component: Application Provisioning
+Message: Failed to configure application: trello. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@6e7057a6; line: 1, column: 336469]
+ at [Source: java.io.StringReader@6e7057a6; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@6e7057a6; line: 1, column: 336469]
+ at [Source: java.io.StringReader@6e7057a6; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:35,289 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Application Provisioning
+Message: Failed to configure application: zapier. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@3f5d1b15; line: 1, column: 336469]
+ at [Source: java.io.StringReader@3f5d1b15; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@3f5d1b15; line: 1, column: 336469]
+ at [Source: java.io.StringReader@3f5d1b15; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:36,601 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: salesforce. 
+Component: Application Provisioning
+Message: Failed to configure application: salesforce. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@288d88a2; line: 1, column: 336469]
+ at [Source: java.io.StringReader@288d88a2; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@288d88a2; line: 1, column: 336469]
+ at [Source: java.io.StringReader@288d88a2; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:37,876 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: universal. 
+Component: Application Provisioning
+Message: Failed to configure application: universal. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@6ca2a729; line: 1, column: 336469]
+ at [Source: java.io.StringReader@6ca2a729; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@6ca2a729; line: 1, column: 336469]
+ at [Source: java.io.StringReader@6ca2a729; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-11-21 17:05:39,190 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: github. 
+Component: Application Provisioning
+Message: Failed to configure application: github. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to retrieve available apps due to an error calling the server: 500 
+Component: Commons
+Message: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@45b38961; line: 1, column: 336469]
+ at [Source: java.io.StringReader@45b38961; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+Stack trace: Unexpected end-of-input: was expecting closing quote for a string value
+ at [Source: java.io.StringReader@45b38961; line: 1, column: 336469]
+ at [Source: java.io.StringReader@45b38961; line: 1, column: 336193] (through reference chain: org.symphonyoss.integration.pod.api.model.Envelope["data"])
+
+
+2017-12-04 17:49:31,753 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapierzinho. 
+java.lang.NullPointerException
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.getAppByAppGroupId(AppRepositoryClient.java:102) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.updateAppSettings(ApplicationService.java:144) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.setupApplication(ApplicationService.java:123) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.provisioningApplication(IntegrationProvisioningService.java:181) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.configure(IntegrationProvisioningService.java:132) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.execute(IntegrationProvisioningApp.java:108) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:83) ~[classes/:?]
+2017-12-04 18:03:48,761 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapierzinho. 
+Component: Configuration Provisioning
+Message: Failed to save configuration from null component
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: 
+Component: Configuration Service
+Message: Invalid integration settings
+Solutions: 
+Make sure your integration settings is valid
+Stack trace: 
+Component: Commons
+Message: {"code":400,"message":"Configuration null already exists"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+
+2017-12-04 18:06:17,163 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Company Certificate Provisioning
+Message: Failed to read certificate file /home/campidelli/springboot/ssf-dev/certs/zapier.pem
+Solutions: 
+Check if the file /home/campidelli/springboot/ssf-dev/certs/zapier.pem is a valid certificate
+
+2018-01-05 14:45:56,959 ERROR [org.apache.tomcat.util.net.SSLUtilBase] (main) Failed to load keystore type [JKS] with path [file:/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore] due to [/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)]
+java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:45:56,959 ERROR [org.apache.coyote.http11.Http11NioProtocol] (main) Failed to start end point associated with ProtocolHandler [https-jsse-nio-127.0.0.1-8186]
+java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 17 more
+2018-01-05 14:45:56,960 ERROR [org.apache.catalina.core.StandardService] (main) Failed to start connector [Connector[HTTP/1.1-8186]]
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8186]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: org.apache.catalina.LifecycleException: service.getName(): "Tomcat";  Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1000) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+2018-01-05 14:45:56,981 ERROR [org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter] (main) 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8186 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8186, or configure this application to listen on another port.
+
+2018-01-05 14:45:56,986 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningApp] (main) Failed to bootstrap the provisioning tool.
+org.springframework.boot.context.embedded.tomcat.ConnectorStartFailedException: Connector configured to listen on port 8186 failed to start
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.checkThatConnectorsHaveStarted(TomcatEmbeddedServletContainer.java:213) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:189) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:54:12,058 ERROR [org.apache.tomcat.util.net.SSLUtilBase] (main) Failed to load keystore type [JKS] with path [file:/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore] due to [/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)]
+java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:54:12,058 ERROR [org.apache.coyote.http11.Http11NioProtocol] (main) Failed to start end point associated with ProtocolHandler [https-jsse-nio-127.0.0.1-8186]
+java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 17 more
+2018-01-05 14:54:12,059 ERROR [org.apache.catalina.core.StandardService] (main) Failed to start connector [Connector[HTTP/1.1-8186]]
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8186]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: org.apache.catalina.LifecycleException: service.getName(): "Tomcat";  Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1000) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+2018-01-05 14:54:12,080 ERROR [org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter] (main) 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8186 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8186, or configure this application to listen on another port.
+
+2018-01-05 14:54:12,086 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningApp] (main) Failed to bootstrap the provisioning tool.
+org.springframework.boot.context.embedded.tomcat.ConnectorStartFailedException: Connector configured to listen on port 8186 failed to start
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.checkThatConnectorsHaveStarted(TomcatEmbeddedServletContainer.java:213) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:189) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:54:48,022 ERROR [org.apache.tomcat.util.net.SSLUtilBase] (main) Failed to load keystore type [JKS] with path [file:/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore] due to [/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)]
+java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:54:48,022 ERROR [org.apache.coyote.http11.Http11NioProtocol] (main) Failed to start end point associated with ProtocolHandler [https-jsse-nio-127.0.0.1-8187]
+java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 17 more
+2018-01-05 14:54:48,023 ERROR [org.apache.catalina.core.StandardService] (main) Failed to start connector [Connector[HTTP/1.1-8187]]
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8187]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: org.apache.catalina.LifecycleException: service.getName(): "Tomcat";  Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1000) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+2018-01-05 14:54:48,040 ERROR [org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter] (main) 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8187 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8187, or configure this application to listen on another port.
+
+2018-01-05 14:54:48,045 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningApp] (main) Failed to bootstrap the provisioning tool.
+org.springframework.boot.context.embedded.tomcat.ConnectorStartFailedException: Connector configured to listen on port 8187 failed to start
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.checkThatConnectorsHaveStarted(TomcatEmbeddedServletContainer.java:213) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:189) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:56:42,887 ERROR [org.apache.tomcat.util.net.SSLUtilBase] (main) Failed to load keystore type [JKS] with path [file:/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore] due to [/home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)]
+java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:56:42,888 ERROR [org.apache.coyote.http11.Http11NioProtocol] (main) Failed to start end point associated with ProtocolHandler [https-jsse-nio-127.0.0.1-8187]
+java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 17 more
+2018-01-05 14:56:42,889 ERROR [org.apache.catalina.core.StandardService] (main) Failed to start connector [Connector[HTTP/1.1-8187]]
+org.apache.catalina.LifecycleException: Failed to start component [Connector[HTTP/1.1-8187]]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:167) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.core.StandardService.addConnector(StandardService.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.addPreviouslyRemovedConnectors(TomcatEmbeddedServletContainer.java:241) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:184) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+Caused by: org.apache.catalina.LifecycleException: service.getName(): "Tomcat";  Protocol handler start failed
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:1000) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:107) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+Caused by: java.io.FileNotFoundException: /home/campidelli/projects/symphonyoss/App-Integrations-Core/tomcat.keystore (No such file or directory)
+	at java.io.FileInputStream.open(Native Method) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:146) ~[?:1.7.0_80]
+	at java.io.FileInputStream.<init>(FileInputStream.java:101) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:90) ~[?:1.7.0_80]
+	at sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188) ~[?:1.7.0_80]
+	at org.apache.tomcat.util.file.ConfigFileLoader.getInputStream(ConfigFileLoader.java:96) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLUtilBase.getStore(SSLUtilBase.java:129) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.SSLHostConfigCertificate.getCertificateKeystore(SSLHostConfigCertificate.java:187) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.jsse.JSSEUtil.getKeyManagers(JSSEUtil.java:185) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.createSSLContext(AbstractJsseEndpoint.java:105) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractJsseEndpoint.initialiseSsl(AbstractJsseEndpoint.java:85) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.NioEndpoint.bind(NioEndpoint.java:225) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.tomcat.util.net.AbstractEndpoint.start(AbstractEndpoint.java:980) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.coyote.AbstractProtocol.start(AbstractProtocol.java:573) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.connector.Connector.startInternal(Connector.java:993) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150) ~[tomcat-embed-core-8.5.11.jar:8.5.11]
+	... 11 more
+2018-01-05 14:56:42,909 ERROR [org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter] (main) 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The Tomcat connector configured to listen on port 8187 failed to start. The port may already be in use or the connector may be misconfigured.
+
+Action:
+
+Verify the connector's configuration, identify and stop any process that's listening on port 8187, or configure this application to listen on another port.
+
+2018-01-05 14:56:42,916 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningApp] (main) Failed to bootstrap the provisioning tool.
+org.springframework.boot.context.embedded.tomcat.ConnectorStartFailedException: Connector configured to listen on port 8187 failed to start
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.checkThatConnectorsHaveStarted(TomcatEmbeddedServletContainer.java:213) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer.start(TomcatEmbeddedServletContainer.java:189) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.startEmbeddedServletContainer(EmbeddedWebApplicationContext.java:297) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.finishRefresh(EmbeddedWebApplicationContext.java:145) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:545) ~[spring-context-4.3.6.RELEASE.jar:4.3.6.RELEASE]
+	at org.springframework.boot.context.embedded.EmbeddedWebApplicationContext.refresh(EmbeddedWebApplicationContext.java:122) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:737) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:370) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:314) ~[spring-boot-1.5.1.RELEASE.jar:1.5.1.RELEASE]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:80) ~[classes/:?]
+2018-01-05 14:58:39,105 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningApp] (main) 
+Component: Auth Provisioning
+Message: Failed to authenticate admin user.
+Solutions: 
+Check if the user defined in the admin certificate already exists in the POD
+Stack trace: 
+Component: Authentication Proxy
+Message: Certificate authentication is unauthorized for the requested user - Integration: admin
+Solutions: 
+Check if the username on provided certificate for integration admin is activated on POD.
+Stack trace: 
+Component: Commons
+Message: {"code":401,"message":"Certificate authentication failed - no active user found with username matching common name of provided certificate."}
+
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+
+2018-01-05 15:11:17,983 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 401 
+Component: Commons
+Message: {"message":"Can't retrieve session from ID a06e438f7438e47c064afbc8901e71c3303c012d17f9cd9ad9102b67f7fad365"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:11:34,339 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: trello. 
+Component: Application Provisioning
+Message: Failed to configure application: trello. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 401 
+Component: Commons
+Message: {"message":"Can't retrieve session from ID a06e438f7438e47c064afbc8901e71c3303c012d17f9cd9ad9102b67f7fad365"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:33:44,304 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 401 
+Component: Commons
+Message: {"message":"Can't retrieve session from ID dff87207981c165a0326338eb073900170f1ef144de5c0fb1d7150836ce9158c"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:40:59,730 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 500 
+Component: Commons
+Message: {"code":0,"message":"Unexpected Error. Server log message ID : a0a1c8b0-f1dc-4c37-aec3-df24c68f3261; Trace ID: muzo6D"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:41:01,680 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: trello. 
+Component: Application Provisioning
+Message: Failed to configure application: trello. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 500 
+Component: Commons
+Message: {"code":0,"message":"Unexpected Error. Server log message ID : 00224e18-674d-4b36-a8bd-ecffc4a9296b; Trace ID: JXZajD"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:41:03,161 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Application Provisioning
+Message: Failed to configure application: zapier. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 500 
+Component: Commons
+Message: {"code":0,"message":"Unexpected Error. Server log message ID : 5fd940f0-87b5-4ad1-81f6-b36da2519111; Trace ID: nnytnm"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:47:34,262 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: salesforce. 
+Component: Application Provisioning
+Message: Failed to configure application: salesforce. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 500 
+Component: Commons
+Message: {"code":0,"message":"Unexpected Error. Server log message ID : ddb4e83c-a233-47d4-a16d-acd39c6f2445; Trace ID: XxSt3r"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:49:48,799 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 400 
+Component: Commons
+Message: {"code":400,"message":"App description exceeds limit of 300 characters."}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 15:56:04,670 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 400 
+Component: Commons
+Message: {"code":400,"message":"Domain must match app url domain."}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 16:07:16,483 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+java.lang.RuntimeException: Domain must match app url domain.
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.validateDomain(AppRepositoryClient.java:312) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.updateApp(AppRepositoryClient.java:190) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.setupApplication(ApplicationService.java:122) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.provisioningApplication(IntegrationProvisioningService.java:181) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.configure(IntegrationProvisioningService.java:132) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.execute(IntegrationProvisioningApp.java:108) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:83) ~[classes/:?]
+2018-01-05 16:08:55,040 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: trello. 
+java.lang.RuntimeException: Domain must match app url domain.
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.validateDomain(AppRepositoryClient.java:312) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.updateApp(AppRepositoryClient.java:190) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.setupApplication(ApplicationService.java:122) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.provisioningApplication(IntegrationProvisioningService.java:181) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.configure(IntegrationProvisioningService.java:132) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.execute(IntegrationProvisioningApp.java:108) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:83) ~[classes/:?]
+2018-01-05 16:09:22,655 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Application Provisioning
+Message: Failed to configure application: zapier. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 400 
+Component: Commons
+Message: {"code":400,"message":"Domain must match app url domain."}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 16:09:27,116 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: salesforce. 
+java.lang.RuntimeException: Domain must match app url domain.
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.validateDomain(AppRepositoryClient.java:312) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.updateApp(AppRepositoryClient.java:190) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.setupApplication(ApplicationService.java:122) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.provisioningApplication(IntegrationProvisioningService.java:181) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.configure(IntegrationProvisioningService.java:132) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.execute(IntegrationProvisioningApp.java:108) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:83) ~[classes/:?]
+2018-01-05 16:45:11,267 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 500 
+Component: Commons
+Message: {"code":500,"message":"Internal Error"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-05 16:54:36,840 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+java.lang.RuntimeException: Domain must match app url domain.
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.validateDomain(AppRepositoryClient.java:312) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.client.AppRepositoryClient.updateApp(AppRepositoryClient.java:190) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.service.ApplicationService.setupApplication(ApplicationService.java:122) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.provisioningApplication(IntegrationProvisioningService.java:181) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningService.configure(IntegrationProvisioningService.java:132) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.execute(IntegrationProvisioningApp.java:108) ~[classes/:?]
+	at org.symphonyoss.integration.provisioning.IntegrationProvisioningApp.main(IntegrationProvisioningApp.java:83) ~[classes/:?]
+2018-01-05 17:01:18,965 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: zapier. 
+Component: Company Certificate Provisioning
+Message: Failed to read certificate file /home/campidelli/springboot/ssf-dev/certs/zapier.pem
+Solutions: 
+Check if the file /home/campidelli/springboot/ssf-dev/certs/zapier.pem is a valid certificate
+
+2018-01-08 14:00:54,879 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Application Provisioning
+Message: Failed to configure application: jira. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to update the application null due to an error calling the server: 404 
+Component: Commons
+Message: <!doctype html><html lang="en"><head><title>HTTP Status 404 – Not Found</title><style type="text/css">h1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} h2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} h3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} body {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} b {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} p {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;} a {color:black;} a.name {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 404 – Not Found</h1><hr class="line" /><p><b>Type</b> Status Report</p><p><b>Message</b> Not Found</p><p><b>Description</b> The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.</p><hr class="line" /><h3>Symphony</h3></body></html>
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-08 14:02:04,367 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira_2. 
+Component: Application Provisioning
+Message: Failed to configure application: jira_2. 
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: Failed to create a new app due to an error calling the server: 500 
+Component: Commons
+Message: {"code":0,"message":"Unexpected Error. Server log message ID : 9b26bd30-91d1-4ad0-9855-6ad4e1c5232b; Trace ID: iQS135"}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+2018-01-08 14:39:47,121 ERROR [org.symphonyoss.integration.provisioning.IntegrationProvisioningService] (main) Failed to configure application: jira. 
+Component: Configuration Provisioning
+Message: Failed to save configuration from null component
+Solutions: 
+Make sure the POD you are reaching on is healthy
+Stack trace: 
+Component: Configuration Service
+Message: Integration API is not healthy
+Solutions: 
+Make sure the Integration API you are reaching on is healthy
+Stack trace: 
+Component: Commons
+Message: {"code":0}
+Solutions: 
+No solution has been cataloged for troubleshooting this problem.
+
+
+
