@@ -22,14 +22,19 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
-import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.pod.api.model.Envelope;
+import org.symphonyoss.integration.provisioning.client.model.AdminApplicationDetailWrapper;
+import org.symphonyoss.integration.provisioning.client.model.AdminApplicationWrapper;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreAssetsWrapper;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * App Repository Client, interfacing all calls to it.
@@ -50,11 +55,21 @@ public class AppRepositoryClient {
   private static final String APP_REPOSITORY_APP_UPDATE =
       APP_REPOSITORY_PATH + "/apps/%s";
 
+  private static final String ADMIN_APP_PATH = "/pod/v1/admin/app";
+
+  private static final String ADMIN_APP_CREATE_PATH = ADMIN_APP_PATH + "/create";
+
+  private static final String ADMIN_APP_UPDATE_PATH = ADMIN_APP_PATH + "/%s/update";
+
   private static final String SKEY_HEADER = "skey";
 
   private static final String USER_SESSION_HEADER = "userSession";
 
+  private static final String SESSION_TOKEN_HEADER = "sessionToken";
+
   private static final String APPS_REP_APP_GROUP_ID_PATH = "appGroupId";
+
+  private static final int DESCRIPTION_MAX_LENGTH = 300;
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -115,17 +130,44 @@ public class AppRepositoryClient {
    */
   public void createNewApp(AppStoreWrapper appStoreApp, String userId)
       throws AppRepositoryClientException {
+    Map<String, String> headers = getRequiredHeader(userId);
+
+    // Trying to call the new API
+    AdminApplicationWrapper wrapper = parseWrapper(appStoreApp);
+    try {
+      client.doPost(ADMIN_APP_CREATE_PATH, headers, Collections.<String, String>emptyMap(),
+          wrapper, AdminApplicationWrapper.class);
+
+    } catch (RemoteApiException e) {
+      if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
+        // API not found, calling the older one
+        createNewAppFallback(appStoreApp, userId);
+      } else {
+        throw new AppRepositoryClientException(
+            "Failed to create a new app due to an error calling the server: "
+                + e.getCode() + " " + e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Creates a new application (to be deprecated).
+   * @param appStoreApp Application object to be created
+   * @param userId User identifier
+   * @throws AppRepositoryClientException Failed to create a new application
+   */
+  private void createNewAppFallback(AppStoreWrapper appStoreApp, String userId)
+      throws AppRepositoryClientException {
     Map<String, String> headers = getRequiredHeaders(userId);
 
     Envelope<AppStoreWrapper> envelope = new Envelope<>(appStoreApp);
-
     try {
       client.doPost(APP_REPOSITORY_APP_CREATE, headers, Collections.<String, String>emptyMap(),
           envelope, Envelope.class);
     } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
-          "Failed to create a new app due to an error calling the server: " + e.getCode() + " "
-              + e.getMessage());
+          "Failed to create a new app due to an error calling the server: "
+              + e.getCode() + " " + e.getMessage());
     }
   }
 
@@ -134,17 +176,50 @@ public class AppRepositoryClient {
    * @param appStoreApp Application object to override the current application attributes
    * @param userId User identifier
    * @param appId Application identifier
+   * @param appGroupId Application group identifier
    * @throws AppRepositoryClientException Failed to update the application
    */
-  public void updateApp(AppStoreWrapper appStoreApp, String userId, String appId)
+  public void updateApp(AppStoreWrapper appStoreApp, String userId, String appId, String appGroupId)
       throws AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeaders(userId);
+    Map<String, String> headers = getRequiredHeader(userId);
 
+    // Trying to call the new API
+    String path = String.format(ADMIN_APP_UPDATE_PATH, appGroupId);
+    AdminApplicationWrapper wrapper = parseWrapper(appStoreApp);
+    try {
+      client.doPost(path, headers, Collections.<String, String>emptyMap(), wrapper,
+          AdminApplicationWrapper.class);
+    } catch (RemoteApiException e) {
+      if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
+        // API not found, calling the older one
+        updateAppFallback(appStoreApp, userId, appId);
+      } else {
+        throw new AppRepositoryClientException(
+            "Failed to update the application " + appId + " due to an error calling the server: "
+                + e.getCode() + " " + e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Updates an existing application (to be deprecated).
+   * @param appStoreApp Application object to override the current application attributes
+   * @param userId User identifier
+   * @param appId Application identifier
+   * @throws AppRepositoryClientException Failed to update the application
+   */
+  private void updateAppFallback(AppStoreWrapper appStoreApp, String userId, String appId)
+      throws AppRepositoryClientException {
+    if (appId == null) {
+      throw new AppRepositoryClientException("A valid appId must be informed.");
+    }
+    Map<String, String> headers = getRequiredHeaders(userId);
     String path = String.format(APP_REPOSITORY_APP_UPDATE, appId);
     Envelope<AppStoreWrapper> envelope = new Envelope<>(appStoreApp);
 
     try {
-      client.doPost(path, headers, Collections.<String, String>emptyMap(), envelope, Envelope.class);
+      client.doPost(path, headers, Collections.<String, String>emptyMap(), envelope,
+          Envelope.class);
     } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
           "Failed to update the application " + appId + " due to an error calling the server: "
@@ -153,7 +228,7 @@ public class AppRepositoryClient {
   }
 
   /**
-   * Get the required headers to be used by the HTTP requests.
+   * Get the required headers to be used by the HTTP requests (will be deprecated).
    * @param userId User identifier
    * @return Required headers
    */
@@ -168,4 +243,48 @@ public class AppRepositoryClient {
     return headers;
   }
 
+  /**
+   * Get the required headers to be used by the HTTP requests.
+   * @param userId User identifier
+   * @return Required headers
+   */
+  private Map<String, String> getRequiredHeader(String userId) {
+    AuthenticationToken token = authenticationProxy.getToken(userId);
+    String sessionToken = token.getSessionToken();
+
+    Map<String, String> headers = new HashMap<>();
+    headers.put(SESSION_TOKEN_HEADER, sessionToken);
+
+    return headers;
+  }
+
+  /**
+   * Parse a AppStoreWrapper into a AdminApplicationWrapper
+   * @param appStoreWrapper {@link AppStoreWrapper } to be parsed.
+   * @return Parsed {@link AdminApplicationWrapper}.
+   */
+  private AdminApplicationWrapper parseWrapper(AppStoreWrapper appStoreWrapper) {
+    AdminApplicationDetailWrapper adminDetailWrapper = new AdminApplicationDetailWrapper();
+    adminDetailWrapper.setAppId(appStoreWrapper.getAppGroupId());
+    adminDetailWrapper.setDomain(appStoreWrapper.getDomain());
+    adminDetailWrapper.setName(appStoreWrapper.getName());
+    adminDetailWrapper.setPublisher(appStoreWrapper.getPublisher());
+
+    AdminApplicationWrapper adminWrapper = new AdminApplicationWrapper();
+    // Description length cannot exceed 300 characters (otherwise will be truncated)
+    String description = appStoreWrapper.getDescription();
+    if (description != null && description.length() > DESCRIPTION_MAX_LENGTH) {
+      description = description.substring(0, DESCRIPTION_MAX_LENGTH);
+    }
+    adminWrapper.setDescription(description);
+
+    AppStoreAssetsWrapper appStoreAssetsWrapper = appStoreWrapper.getAssets();
+    if (appStoreAssetsWrapper != null) {
+      adminDetailWrapper.setAppUrl(appStoreAssetsWrapper.getLoadUrl());
+      adminWrapper.setIconUrl(appStoreAssetsWrapper.getIconUrl());
+    }
+
+    adminWrapper.setApplicationInfo(adminDetailWrapper);
+    return adminWrapper;
+  }
 }

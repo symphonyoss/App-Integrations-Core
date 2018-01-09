@@ -61,6 +61,8 @@ public class ApplicationService {
 
   private static final String APP_ID = "id";
 
+  private static final String APP_GROUP_ID = "appGroupId";
+
   @Autowired
   private UserService userService;
 
@@ -117,7 +119,7 @@ public class ApplicationService {
 
       Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
       if (app != null) {
-        client.updateApp(wrapper, DEFAULT_USER_ID, app.get(APP_ID));
+        client.updateApp(wrapper, DEFAULT_USER_ID, app.get(APP_ID), app.get(APP_GROUP_ID));
       } else {
         client.createNewApp(wrapper, DEFAULT_USER_ID);
         updateAppSettings(application);

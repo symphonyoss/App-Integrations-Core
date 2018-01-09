@@ -72,6 +72,8 @@ public class ApplicationServiceTest {
 
   private static final String APP_ID = "id";
 
+  private static final String APP_GROUP_ID = "appGroupId";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
@@ -182,11 +184,12 @@ public class ApplicationServiceTest {
 
     Map<String, String> app = new HashMap<>();
     app.put(APP_ID, MOCK_APP_TYPE);
+    app.put(APP_GROUP_ID, APP_GROUP_ID);
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    doThrow(AppRepositoryClientException.class).when(client)
-        .updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE));
+    doThrow(AppRepositoryClientException.class).when(client).updateApp(any(AppStoreWrapper.class),
+        eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE), eq(APP_GROUP_ID));
 
     service.setupApplication(settings, application);
   }
@@ -219,11 +222,13 @@ public class ApplicationServiceTest {
 
     Map<String, String> app = new HashMap<>();
     app.put(APP_ID, MOCK_APP_TYPE);
+    app.put(APP_GROUP_ID, APP_GROUP_ID);
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
     service.setupApplication(new IntegrationSettings(), application);
 
-    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE));
+    verify(client, times(1)).updateApp(any(AppStoreWrapper.class),
+        eq(DEFAULT_USER_ID), eq(MOCK_APP_TYPE), eq(APP_GROUP_ID));
   }
 }
