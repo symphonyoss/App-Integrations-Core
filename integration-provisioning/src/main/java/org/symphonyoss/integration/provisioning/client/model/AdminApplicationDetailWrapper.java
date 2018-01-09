@@ -30,11 +30,11 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AdminApplicationDetailWrapper {
 
-  private String appId = null;
-  private String name = null;
-  private String appUrl = null;
-  private String domain = null;
-  private String publisher = null;
+  private String appId;
+  private String name;
+  private String appUrl;
+  private String domain;
+  private String publisher;
 
   public String getAppId() {
     return appId;

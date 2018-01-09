@@ -30,9 +30,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AdminApplicationWrapper {
 
-  private AdminApplicationDetailWrapper applicationInfo = null;
-  private String iconUrl = null;
-  private String description = null;
+  private AdminApplicationDetailWrapper applicationInfo;
+  private String iconUrl;
+  private String description;
 
   public AdminApplicationDetailWrapper getApplicationInfo() {
     return applicationInfo;
