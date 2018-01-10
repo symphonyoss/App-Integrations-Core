@@ -24,6 +24,7 @@ import static org.symphonyoss.integration.auth.api.properties.AuthApiClientPrope
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -36,7 +37,7 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 @Component
 public class KmAuthHttpApiClient extends SymphonyApiClient {
 
-  private static final String SERVICE_NAME = "Key Manager Auth";
+  private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER_AUTH;
 
   private static final String REQUIRED_KEY = "key_manager_auth.host";
 
@@ -52,7 +53,7 @@ public class KmAuthHttpApiClient extends SymphonyApiClient {
     String url = properties.getKeyManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME,
+      throw new MissingConfigurationException(SERVICE_NAME.toString(),
           logMessageSource.getMessage(MISSING_CONFIG_INFO, REQUIRED_KEY),
           logMessageSource.getMessage(MISSING_CONFIG_INFO_SOLUTION, REQUIRED_KEY));
     }

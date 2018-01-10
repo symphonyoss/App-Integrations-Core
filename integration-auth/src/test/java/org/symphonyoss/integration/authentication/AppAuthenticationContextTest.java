@@ -28,8 +28,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.model.yaml.ConnectionInfo;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+
 
 import java.security.KeyStore;
 
@@ -45,9 +48,11 @@ public class AppAuthenticationContextTest {
 
   private static final String APP_ID = "jira";
 
-  private static final String SERVICE_NAME = "serviceName";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   private AppAuthenticationContext authContext;
+
+  private ConnectionInfo podConnectionInfo = new ConnectionInfo();
 
   @Mock
   private KeyStore keyStore;
@@ -55,8 +60,11 @@ public class AppAuthenticationContextTest {
   @Mock
   private IntegrationProperties properties;
 
+
   @Before
   public void initAuthenticationContext() {
+    podConnectionInfo.setHost("host");
+    properties.setPod(podConnectionInfo);
     authContext = new AppAuthenticationContext(APP_ID, null, null, null, properties);
   }
 

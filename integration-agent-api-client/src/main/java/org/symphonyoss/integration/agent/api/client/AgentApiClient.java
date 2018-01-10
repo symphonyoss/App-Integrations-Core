@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -38,7 +39,7 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AgentApiClient extends SymphonyApiClient {
 
-  private static final String SERVICE_NAME = "Agent";
+  private static final ServiceName SERVICE_NAME = ServiceName.AGENT;
 
   private static final String REQUIRED_KEY = "agent.host";
 
@@ -60,7 +61,7 @@ public class AgentApiClient extends SymphonyApiClient {
       String message = logMessage.getMessage(MISSING_CONFIG_FILE, REQUIRED_KEY);
       String solution = logMessage.getMessage(MISSING_CONFIG_FILE_SOLUTION, REQUIRED_KEY);
 
-      throw new MissingConfigurationException(SERVICE_NAME, message, solution);
+      throw new MissingConfigurationException(SERVICE_NAME.toString(), message, solution);
     }
 
     return url;

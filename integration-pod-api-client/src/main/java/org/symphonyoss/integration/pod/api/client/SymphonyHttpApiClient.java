@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.exception.MissingConfigurationException;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
@@ -31,7 +32,7 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 @Component
 public class SymphonyHttpApiClient extends SymphonyApiClient {
 
-  private static final String SERVICE_NAME = "Symphony API";
+  private static final ServiceName SERVICE_NAME = ServiceName.SYMPHONY_API;
 
   private static final String REQUIRED_KEY = "pod.host";
 
@@ -44,7 +45,7 @@ public class SymphonyHttpApiClient extends SymphonyApiClient {
     String url = properties.getSymphonyUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME, REQUIRED_KEY);
+      throw new MissingConfigurationException(SERVICE_NAME.toString(), REQUIRED_KEY);
     }
 
     return url;
