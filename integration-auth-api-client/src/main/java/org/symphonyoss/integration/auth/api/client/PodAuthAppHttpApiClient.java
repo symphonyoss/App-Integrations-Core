@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.api.client.AppAuthenticationProxyApiClient;
 import org.symphonyoss.integration.api.client.ConnectivityApiClientDecorator;
 import org.symphonyoss.integration.api.client.HttpApiClient;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.api.client.SymphonyApiClient;
 import org.symphonyoss.integration.api.client.json.JsonEntitySerializer;
 import org.symphonyoss.integration.api.client.metrics.ApiMetricsController;
@@ -44,7 +45,7 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 @Component
 public class PodAuthAppHttpApiClient extends SymphonyApiClient {
 
-  private static final String SERVICE_NAME = "POD Session Manager";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD_SESSION_MANAGER;
 
   private static final String REQUIRED_KEY = "pod_session_manager.host";
 
@@ -69,7 +70,7 @@ public class PodAuthAppHttpApiClient extends SymphonyApiClient {
     String url = properties.getSessionManagerAuthUrl();
 
     if (StringUtils.isBlank(url)) {
-      throw new MissingConfigurationException(SERVICE_NAME,
+      throw new MissingConfigurationException(SERVICE_NAME.toString(),
           logMessageSource.getMessage(MISSING_CONFIG_INFO, REQUIRED_KEY),
           logMessageSource.getMessage(MISSING_CONFIG_INFO_SOLUTION, REQUIRED_KEY));
     }

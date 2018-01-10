@@ -32,6 +32,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+
 
 import java.security.KeyStore;
 
@@ -64,7 +66,7 @@ public class UserAuthenticationContextTest {
 
   private static final String USER_ID = "jiraWebHookIntegration";
 
-  private static final String SERVICE_NAME = "serviceName";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   private UserAuthenticationContext authContext;
 

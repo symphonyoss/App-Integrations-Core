@@ -45,6 +45,7 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
 import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -301,7 +302,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * Retrieves a client build with the proper SSL context for the user.
    */
   @Override
-  public Client httpClientForUser(String userId, String serviceName) {
+  public Client httpClientForUser(String userId, ServiceName serviceName) {
     return contextForUser(userId).httpClientForContext(serviceName);
   }
 
@@ -309,7 +310,7 @@ public class AuthenticationProxyImpl implements AuthenticationProxy {
    * Retrieves a client build with the proper SSL context for the user.
    */
   @Override
-  public Client httpClientForSessionToken(String sessionToken, String serviceName) {
+  public Client httpClientForSessionToken(String sessionToken, ServiceName serviceName) {
     return contextForSessionToken(sessionToken).httpClientForContext(serviceName);
   }
 }
