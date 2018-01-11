@@ -43,6 +43,7 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
 import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -211,7 +212,7 @@ public class AuthenticationProxyImplTest {
     assertEquals(kmToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getKeyManagerToken());
 
     // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
-    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK, null).getConfiguration();
+    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK, ServiceName.POD  ).getConfiguration();
     Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
     Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)

@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
@@ -47,7 +48,7 @@ public class AgentHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.45.0-SNAPSHOT";
 
-  private static final String SERVICE_NAME = "Agent";
+  private static final ServiceName SERVICE_NAME = ServiceName.AGENT;
 
   private static final String AGENT_MESSAGEML_VERSION2 = "1.46.0";
 

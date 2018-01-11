@@ -19,6 +19,7 @@ package org.symphonyoss.integration.healthcheck.services;
 import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
 import org.symphonyoss.integration.model.message.MessageMLVersion;
 
@@ -31,15 +32,13 @@ import org.symphonyoss.integration.model.message.MessageMLVersion;
 @Lazy
 public class AgentHealthIndicator extends ServiceHealthIndicator {
 
-  private static final String SERVICE_NAME = "Agent";
-
   private static final String AGENT_URL_PATH = "/v1/HealthCheck";
 
   public static final Version AGENT_MESSAGEML_VERSION2 = Version.valueOf("1.46.0");
 
   @Override
-  protected String getServiceName() {
-    return SERVICE_NAME;
+  protected ServiceName getServiceName() {
+    return ServiceName.AGENT;
   }
 
   @Override
