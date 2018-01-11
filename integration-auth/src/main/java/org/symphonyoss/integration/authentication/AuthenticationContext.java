@@ -29,8 +29,13 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.MissingClientException;
+import org.symphonyoss.integration.authentication.exception.MissingServiceConfigurationException;
+import org.symphonyoss.integration.authentication.properties.AuthenticationContextProperties;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.logging.MessageUtils;
 import org.symphonyoss.integration.model.yaml.ConnectionInfo;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -49,6 +54,9 @@ import javax.ws.rs.client.ClientBuilder;
  * Created by ecarrenho on 8/23/16.
  */
 public abstract class AuthenticationContext {
+  private static final String COMPONENT = "Authentication Context";
+  private static final String BUNDLE_FILENAME = "integration-auth-log-messages";
+  private static final MessageUtils MSG = new MessageUtils(BUNDLE_FILENAME);
 
   private final Map<ServiceName, Client> serviceClients = new HashMap<>();
 
@@ -65,6 +73,15 @@ public abstract class AuthenticationContext {
     }
 
     Map<ServiceName, ConnectionInfo> services = properties.getServices();
+
+    // If no services where found in the properties... something is wrong
+    if (services.isEmpty()) {
+      throw new MissingServiceConfigurationException(
+          MSG.getMessage(
+              AuthenticationContextProperties.MISSING_SERVICE_CONFIGURATION_MESSAGE),
+          MSG.getMessage(
+              AuthenticationContextProperties.MISSING_SERVICE_CONFIGURATION_SOLUTION));
+    }
 
     for (Map.Entry<ServiceName, ConnectionInfo> entry : services.entrySet()) {
       ServiceName service = entry.getKey();
@@ -158,7 +175,7 @@ public abstract class AuthenticationContext {
     if (serviceClients.containsKey(serviceName)) {
       return serviceClients.get(serviceName);
     } else {
-      throw new MissingClientException(serviceName);
+      throw new MissingClientException(COMPONENT, serviceName);
     }
   }
 }

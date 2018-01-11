@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
  * Service health indicator for POD Session Manager.
@@ -28,13 +29,11 @@ import org.springframework.stereotype.Component;
 @Lazy
 public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealthIndicator {
 
-  private static final String SERVICE_NAME = "POD Authentication Service";
-
   private static final String SERVICE_FIELD = "sessionauth";
 
   @Override
-  protected String getServiceName() {
-    return SERVICE_NAME;
+  protected ServiceName getServiceName() {
+    return ServiceName.POD_SESSION_MANAGER;
   }
 
   @Override

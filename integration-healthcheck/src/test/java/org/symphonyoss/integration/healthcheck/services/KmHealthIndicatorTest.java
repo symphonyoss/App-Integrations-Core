@@ -28,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -43,7 +44,7 @@ public class KmHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.45.0";
 
-  private static final String SERVICE_NAME = "Key Manager";
+  private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER;
 
   private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443/relay";
 

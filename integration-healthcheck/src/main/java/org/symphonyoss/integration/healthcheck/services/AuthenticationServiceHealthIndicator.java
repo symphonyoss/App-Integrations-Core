@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.event.EventListener;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.json.JsonUtils;
 
@@ -36,8 +37,6 @@ import java.io.IOException;
 public abstract class AuthenticationServiceHealthIndicator extends ServiceHealthIndicator {
 
   private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceHealthIndicator.class);
-
-  private static final String POD_SERVICE_NAME = "POD";
 
   private static final String HC_AGGREGATED_URL_PATH = "/webcontroller/HealthCheck/aggregated";
 
@@ -63,7 +62,7 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
         service.setConnectivity(Status.DOWN);
       }
     } catch (IOException e) {
-      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName()));
+      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName().toString()));
       service.setConnectivity(Status.DOWN);
     }
   }
@@ -78,7 +77,7 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   @EventListener
   public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEventData event) {
     // Check the service name
-    if (POD_SERVICE_NAME.equals(event.getServiceName())) {
+    if (ServiceName.POD.toString().equals(event.getServiceName())) {
       this.currentVersion = event.getNewVersion();
     }
   }

@@ -37,6 +37,7 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
@@ -124,7 +125,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    */
   @EventListener
   public void handleHealthCheckEvent(HealthCheckEventData event) {
-    String serviceName = getServiceName();
+    String serviceName = getServiceName().toString();
 
     LOG.debug("Handle health-check event. Service name: {}", serviceName);
 
@@ -135,7 +136,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   @Override
   public Health health() {
-    String serviceName = getServiceName();
+    String serviceName = getServiceName().toString();
 
     try {
       boolean locked = lock.tryLock(LOCK_PERIOD_SECS, TimeUnit.SECONDS);
@@ -234,7 +235,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     String newSemanticVersion = getSemanticVersion(version);
 
     ServiceVersionUpdatedEventData event =
-        new ServiceVersionUpdatedEventData(getServiceName(), oldSemanticVersion, newSemanticVersion);
+        new ServiceVersionUpdatedEventData(getServiceName().toString(), oldSemanticVersion, newSemanticVersion);
     this.currentVersion = version;
 
     publisher.publishEvent(event);
@@ -296,7 +297,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * Returns the service name.
    * @return Service name
    */
-  protected abstract String getServiceName();
+  protected abstract ServiceName getServiceName();
 
   /**
    * Determines the minimum required version for this service.
@@ -320,7 +321,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
         return version;
       }
     } catch (IOException e) {
-      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName()));
+      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName().toString()));
     }
 
     return null;

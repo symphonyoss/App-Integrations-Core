@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -29,7 +30,7 @@ public class KmAuthHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final String SERVICE_NAME = "Key Manager Authentication Service";
+  private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER_AUTH;
 
   private static final String SERVICE_FIELD = "keyauth";
 
