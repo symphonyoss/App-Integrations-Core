@@ -32,7 +32,7 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 @Component
 public class SymphonyHttpApiClient extends SymphonyApiClient {
 
-  private static final ServiceName SERVICE_NAME = ServiceName.SYMPHONY_API;
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   private static final String REQUIRED_KEY = "pod.host";
 
