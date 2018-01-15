@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
  * Service health indicator for Key Manager.
@@ -28,13 +29,11 @@ import org.springframework.stereotype.Component;
 @Lazy
 public class KmHealthIndicator extends ServiceHealthIndicator {
 
-  private static final String SERVICE_NAME = "Key Manager";
-
   public static final String KM_URL_PATH = "/HealthCheck/version";
 
   @Override
-  protected String getServiceName() {
-    return SERVICE_NAME;
+  protected ServiceName getServiceName() {
+    return ServiceName.KEY_MANAGER;
   }
 
   @Override

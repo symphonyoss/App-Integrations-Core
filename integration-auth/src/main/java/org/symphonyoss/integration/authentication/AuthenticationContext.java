@@ -29,6 +29,13 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.authentication.exception.MissingClientException;
+import org.symphonyoss.integration.authentication.exception.MissingServiceConfigurationException;
+import org.symphonyoss.integration.authentication.properties.AuthenticationContextProperties;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.logging.MessageUtils;
 import org.symphonyoss.integration.model.yaml.ConnectionInfo;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -36,7 +43,6 @@ import org.symphonyoss.integration.model.yaml.ProxyConnectionInfo;
 
 import java.security.KeyStore;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
@@ -48,10 +54,11 @@ import javax.ws.rs.client.ClientBuilder;
  * Created by ecarrenho on 8/23/16.
  */
 public abstract class AuthenticationContext {
+  private static final String COMPONENT = "Authentication Context";
+  private static final String BUNDLE_FILENAME = "integration-auth-log-messages";
+  private static final MessageUtils MSG = new MessageUtils(BUNDLE_FILENAME);
 
-  private final Map<String, Client> serviceClients = new HashMap<>();
-
-  private final Client defaultClient;
+  private final Map<ServiceName, Client> serviceClients = new HashMap<>();
 
   /**
    * Initializes HTTP client with the SSL Context according to the keystore received.
@@ -65,17 +72,25 @@ public abstract class AuthenticationContext {
       httpClientConfig = new HttpClientConfig();
     }
 
-    Map<String, ConnectionInfo> services = properties.getServices();
+    Map<ServiceName, ConnectionInfo> services = properties.getServices();
 
-    for (Map.Entry<String, ConnectionInfo> entry : services.entrySet()) {
-      String service = entry.getKey();
+    // If no services where found in the properties... something is wrong
+    if (services.isEmpty()) {
+      throw new MissingServiceConfigurationException(
+          MSG.getMessage(
+              AuthenticationContextProperties.MISSING_SERVICE_CONFIGURATION_MESSAGE),
+          MSG.getMessage(
+              AuthenticationContextProperties.MISSING_SERVICE_CONFIGURATION_SOLUTION));
+    }
+
+    for (Map.Entry<ServiceName, ConnectionInfo> entry : services.entrySet()) {
+      ServiceName service = entry.getKey();
       ConnectionInfo serviceInfo = entry.getValue();
 
       this.serviceClients.put(service,
           buildClient(keyStore, keyStorePassword, httpClientConfig, serviceInfo.getProxy()));
     }
 
-    this.defaultClient = buildClient(keyStore, keyStorePassword, httpClientConfig, null);
   }
 
   /**
@@ -156,11 +171,11 @@ public abstract class AuthenticationContext {
    * Get HTTP client
    * @return HTTP client
    */
-  public Client httpClientForContext(String serviceName) {
+  public Client httpClientForContext(ServiceName serviceName) {
     if (serviceClients.containsKey(serviceName)) {
       return serviceClients.get(serviceName);
     } else {
-      return defaultClient;
+      throw new MissingClientException(COMPONENT, serviceName);
     }
   }
 }

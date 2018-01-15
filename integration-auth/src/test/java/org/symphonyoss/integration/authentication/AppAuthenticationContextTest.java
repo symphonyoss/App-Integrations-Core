@@ -23,13 +23,22 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.symphonyoss.integration.authentication.exception.MissingServiceConfigurationException;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.logging.LogMessageSource;
+import org.symphonyoss.integration.model.yaml.ConnectionInfo;
 import org.symphonyoss.integration.model.yaml.HttpClientConfig;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+
 
 import java.security.KeyStore;
 
@@ -45,24 +54,28 @@ public class AppAuthenticationContextTest {
 
   private static final String APP_ID = "jira";
 
-  private static final String SERVICE_NAME = "serviceName";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   private AppAuthenticationContext authContext;
+
+  private ConnectionInfo podConnectionInfo = new ConnectionInfo();
 
   @Mock
   private KeyStore keyStore;
 
-  @Mock
+  @Spy
   private IntegrationProperties properties;
 
   @Before
   public void initAuthenticationContext() {
+    podConnectionInfo.setHost("host");
+    properties.setPod(podConnectionInfo);
     authContext = new AppAuthenticationContext(APP_ID, null, null, null, properties);
   }
 
-  @Test (expected = IllegalStateException.class)
+  @Test (expected = MissingServiceConfigurationException.class)
   public void testInvalidKeystore() throws RemoteApiException {
-    authContext = new AppAuthenticationContext(APP_ID, keyStore, "12345", null, properties);
+    authContext = new AppAuthenticationContext(APP_ID, keyStore, "12345", null, new IntegrationProperties());
   }
 
   @Test

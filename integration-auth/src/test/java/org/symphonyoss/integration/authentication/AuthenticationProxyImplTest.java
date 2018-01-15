@@ -18,7 +18,6 @@ package org.symphonyoss.integration.authentication;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -43,6 +42,7 @@ import org.symphonyoss.integration.auth.api.client.AuthenticationApiClient;
 import org.symphonyoss.integration.auth.api.client.KmAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.client.PodAuthHttpApiClient;
 import org.symphonyoss.integration.auth.api.model.Token;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredSessionTokenException;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -210,10 +210,14 @@ public class AuthenticationProxyImplTest {
     assertEquals(sessionToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getSessionToken());
     assertEquals(kmToken2.getToken(), proxy.getToken(SIMPLEWEBHOOK).getKeyManagerToken());
 
-    // Makes sure the API client configuration has been read properly from the application.yaml file on test resources.
-    Configuration clientConfiguration = proxy.httpClientForUser(JIRAWEBHOOK, null).getConfiguration();
-    Integer clientReadTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
-    Integer clientConnectTimeout = (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
+    // Makes sure the API client configuration has been read properly from the application.yaml
+    // file on test resources.
+    Configuration clientConfiguration =
+        proxy.httpClientForUser(JIRAWEBHOOK, ServiceName.POD).getConfiguration();
+    Integer clientReadTimeout =
+        (Integer) clientConfiguration.getProperty(ClientProperties.READ_TIMEOUT);
+    Integer clientConnectTimeout =
+        (Integer) clientConfiguration.getProperty(ClientProperties.CONNECT_TIMEOUT);
     PoolingHttpClientConnectionManager connectionManager = (PoolingHttpClientConnectionManager)
         clientConfiguration.getProperty(ApacheClientProperties.CONNECTION_MANAGER);
     Integer clientTotalConn = connectionManager.getMaxTotal();
@@ -222,7 +226,8 @@ public class AuthenticationProxyImplTest {
     assertEquals(properties.getHttpClientConfig().getReadTimeout(), clientReadTimeout);
     assertEquals(properties.getHttpClientConfig().getConnectTimeout(), clientConnectTimeout);
     assertEquals(properties.getHttpClientConfig().getMaxConnections(), clientTotalConn);
-    assertEquals(properties.getHttpClientConfig().getMaxConnectionsPerRoute(), clientTotalConnPerRoute);
+    assertEquals(properties.getHttpClientConfig().getMaxConnectionsPerRoute(),
+        clientTotalConnPerRoute);
 
   }
 
@@ -248,12 +253,14 @@ public class AuthenticationProxyImplTest {
 
   @Test(expected = RemoteApiException.class)
   public void testReAuthThrowRemoteApiException() throws RemoteApiException {
-    proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "message"));
+    proxy.reAuthOrThrow(JIRAWEBHOOK,
+        new RemoteApiException(HttpStatus.SC_INTERNAL_SERVER_ERROR, "message"));
   }
 
   @Test(expected = UnexpectedAuthException.class)
   public void testReAuthFailed() throws RemoteApiException {
-    doThrow(new RemoteApiException(500, new RuntimeException())).when(sbeAuthApi).authenticate(JIRAWEBHOOK);
+    doThrow(new RemoteApiException(500, new RuntimeException())).when(sbeAuthApi)
+        .authenticate(JIRAWEBHOOK);
     proxy.reAuthOrThrow(JIRAWEBHOOK, new RemoteApiException(HttpStatus.SC_UNAUTHORIZED, "message"));
   }
 

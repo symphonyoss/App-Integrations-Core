@@ -30,6 +30,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -46,7 +47,7 @@ public class PodSessionManagerHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final String SERVICE_NAME = "POD Authentication Service";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD_SESSION_MANAGER;
 
   private static final String POD_SERVICE_NAME = "POD";
 
@@ -101,7 +102,7 @@ public class PodSessionManagerHealthIndicatorTest {
   public void testCurrentVersion() {
     assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
 
-    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(SERVICE_NAME, null, MOCK_VERSION));
+    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(SERVICE_NAME.toString(), null, MOCK_VERSION));
 
     assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
 

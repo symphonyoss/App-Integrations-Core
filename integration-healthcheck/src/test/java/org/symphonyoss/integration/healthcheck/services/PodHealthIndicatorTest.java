@@ -27,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -42,7 +43,7 @@ public class PodHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.44.0";
 
-  private static final String SERVICE_NAME = "POD";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443";
 

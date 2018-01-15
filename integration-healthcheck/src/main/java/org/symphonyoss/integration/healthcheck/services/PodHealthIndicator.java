@@ -18,6 +18,7 @@ package org.symphonyoss.integration.healthcheck.services;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
  * Service health indicator for POD.
@@ -28,13 +29,11 @@ import org.springframework.stereotype.Component;
 @Lazy
 public class PodHealthIndicator extends ServiceHealthIndicator {
 
-  private static final String SERVICE_NAME = "POD";
-
   private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
 
   @Override
-  protected String getServiceName() {
-    return SERVICE_NAME;
+  protected ServiceName getServiceName() {
+    return ServiceName.POD;
   }
 
   @Override

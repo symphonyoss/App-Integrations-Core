@@ -40,6 +40,8 @@ import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthE
 import org.symphonyoss.integration.exception.ExceptionMessageFormatter;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+
 
 import java.security.KeyStore;
 
@@ -57,7 +59,7 @@ public class AppAuthenticationProxyImplTest {
 
   private static final String JIRA = "jira";
 
-  private static final String SERVICE_NAME = "serviceName";
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
   @Autowired
   private IntegrationProperties properties;

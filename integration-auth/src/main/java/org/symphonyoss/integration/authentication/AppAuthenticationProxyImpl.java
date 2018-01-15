@@ -31,6 +31,8 @@ import org.symphonyoss.integration.authentication.api.model.PodCertificate;
 import org.symphonyoss.integration.authentication.exception.UnregisteredAppAuthException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+
 
 import java.security.KeyStore;
 import java.util.HashMap;
@@ -78,7 +80,7 @@ public class AppAuthenticationProxyImpl implements AppAuthenticationProxy {
   }
 
   @Override
-  public Client httpClientForApplication(String applicationId, String serviceName) {
+  public Client httpClientForApplication(String applicationId, ServiceName serviceName) {
     return contextForApplication(applicationId).httpClientForContext(serviceName);
   }
 
