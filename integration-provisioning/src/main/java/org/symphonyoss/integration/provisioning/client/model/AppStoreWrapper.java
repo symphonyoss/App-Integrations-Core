@@ -46,6 +46,8 @@ public class AppStoreWrapper {
 
   private AppStoreAssetsWrapper assets;
 
+  private AppStoreSettingsWrapper settings;
+
   private Boolean enabled;
 
   private String domain;
@@ -138,4 +140,12 @@ public class AppStoreWrapper {
     return assets;
   }
 
+  public AppStoreSettingsWrapper getSettings() {
+    return settings;
+  }
+
+  public void setSettings(
+      AppStoreSettingsWrapper settings) {
+    this.settings = settings;
+  }
 }

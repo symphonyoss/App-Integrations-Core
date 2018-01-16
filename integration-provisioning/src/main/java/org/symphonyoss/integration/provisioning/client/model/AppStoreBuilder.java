@@ -37,6 +37,7 @@ public class AppStoreBuilder {
   public static AppStoreWrapper build(Application application, String domain, String configurationId,
       String botUserId) throws MalformedURLException {
     AppStoreWrapper app = new AppStoreWrapper();
+    app.setId(application.getId());
     app.setAppGroupId(application.getComponent());
     app.setName(application.getName());
     app.setType(INTEGRATION_TYPE);

@@ -277,7 +277,7 @@ public class AppRepositoryClientTest {
 
     String path = String.format(ADMIN_APP_UPDATE_PATH, MOCK_APP_GROUP_ID);
 
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_ID, MOCK_APP_GROUP_ID);
+    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
 
     verify(client, times(1)).doPost(eq(path), eq(headers),
         eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(AdminApplicationWrapper.class));
@@ -293,7 +293,7 @@ public class AppRepositoryClientTest {
     doThrow(RemoteApiException.class).when(client).doPost(eq(path), eq(headers),
         eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(AdminApplicationWrapper.class));
 
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_ID, MOCK_APP_GROUP_ID);
+    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
   }
 
   @Test
@@ -309,9 +309,9 @@ public class AppRepositoryClientTest {
     doThrow(rae).when(client).doPost(eq(path), eq(headers), eq(Collections.<String, String>emptyMap()),
         any(AdminApplicationWrapper.class), eq(AdminApplicationWrapper.class));
 
-    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_ID;
+    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_GROUP_ID;
 
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_ID, MOCK_APP_GROUP_ID);
+    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
 
     Map<String, String> oldHeaders = getRequiredHeaders();
 
@@ -333,13 +333,13 @@ public class AppRepositoryClientTest {
     doThrow(rae).when(client).doPost(eq(path), eq(headers), eq(Collections.<String, String>emptyMap()),
         any(AdminApplicationWrapper.class), eq(AdminApplicationWrapper.class));
 
-    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_ID;
+    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_GROUP_ID;
     Map<String, String> oldHeaders = getRequiredHeaders();
 
     doThrow(RemoteApiException.class).when(client).doPost(eq(oldPath), eq(oldHeaders),
         eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
 
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_ID, MOCK_APP_GROUP_ID);
+    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
   }
 
   private Map<String, String> getRequiredHeaders() {

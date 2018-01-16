@@ -177,6 +177,9 @@ public class IntegrationProvisioningService {
   private void provisioningApplication(Application application) {
     LOGGER.info("Provisioning application: {}", application.getId());
 
+    application.setEnabled(Boolean.TRUE);
+    application.setVisible(Boolean.TRUE);
+
     IntegrationSettings settings = configurationService.setupConfiguration(application);
     applicationService.setupApplication(settings, application);
 
@@ -200,7 +203,8 @@ public class IntegrationProvisioningService {
     application.setEnabled(Boolean.FALSE);
     application.setVisible(Boolean.FALSE);
 
-    boolean updated = applicationService.updateAppSettings(application);
+    IntegrationSettings settings = configurationService.setupConfiguration(application);
+    boolean updated = applicationService.updateAppSettings(settings, application);
 
     if (updated) {
       application.setState(ApplicationState.REMOVED);

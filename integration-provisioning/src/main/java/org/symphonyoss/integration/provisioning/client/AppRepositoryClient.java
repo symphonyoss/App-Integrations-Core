@@ -175,11 +175,10 @@ public class AppRepositoryClient {
    * Updates an existing application.
    * @param appStoreApp Application object to override the current application attributes
    * @param userId User identifier
-   * @param appId Application identifier
    * @param appGroupId Application group identifier
    * @throws AppRepositoryClientException Failed to update the application
    */
-  public void updateApp(AppStoreWrapper appStoreApp, String userId, String appId, String appGroupId)
+  public void updateApp(AppStoreWrapper appStoreApp, String userId, String appGroupId)
       throws AppRepositoryClientException {
     Map<String, String> headers = getRequiredHeader(userId);
 
@@ -192,11 +191,11 @@ public class AppRepositoryClient {
     } catch (RemoteApiException e) {
       if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
         // API not found, calling the older one
-        updateAppFallback(appStoreApp, userId, appId);
+        updateAppFallback(appStoreApp, userId, appGroupId);
       } else {
         throw new AppRepositoryClientException(
-            "Failed to update the application " + appId + " due to an error calling the server: "
-                + e.getCode() + " " + e.getMessage());
+            "Failed to update the application " + appGroupId
+                + " due to an error calling the server: " + e.getCode() + " " + e.getMessage());
       }
     }
   }
@@ -205,16 +204,16 @@ public class AppRepositoryClient {
    * Updates an existing application (to be deprecated).
    * @param appStoreApp Application object to override the current application attributes
    * @param userId User identifier
-   * @param appId Application identifier
+   * @param appGroupId Application group identifier
    * @throws AppRepositoryClientException Failed to update the application
    */
-  private void updateAppFallback(AppStoreWrapper appStoreApp, String userId, String appId)
+  public void updateAppFallback(AppStoreWrapper appStoreApp, String userId, String appGroupId)
       throws AppRepositoryClientException {
-    if (appId == null) {
-      throw new AppRepositoryClientException("A valid appId must be informed.");
+    if (appGroupId == null) {
+      throw new AppRepositoryClientException("A valid app group ID must be informed.");
     }
     Map<String, String> headers = getRequiredHeaders(userId);
-    String path = String.format(APP_REPOSITORY_APP_UPDATE, appId);
+    String path = String.format(APP_REPOSITORY_APP_UPDATE, appGroupId);
     Envelope<AppStoreWrapper> envelope = new Envelope<>(appStoreApp);
 
     try {
@@ -222,8 +221,8 @@ public class AppRepositoryClient {
           Envelope.class);
     } catch (RemoteApiException e) {
       throw new AppRepositoryClientException(
-          "Failed to update the application " + appId + " due to an error calling the server: "
-              + e.getCode() + " " + e.getMessage());
+          "Failed to update the application " + appGroupId
+              + " due to an error calling the server: " + e.getCode() + " " + e.getMessage());
     }
   }
 
