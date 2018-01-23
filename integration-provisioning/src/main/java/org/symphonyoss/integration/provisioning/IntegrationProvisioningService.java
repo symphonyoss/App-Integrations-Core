@@ -200,7 +200,8 @@ public class IntegrationProvisioningService {
     application.setEnabled(Boolean.FALSE);
     application.setVisible(Boolean.FALSE);
 
-    boolean updated = applicationService.updateAppSettings(application);
+    IntegrationSettings settings = configurationService.setupConfiguration(application);
+    boolean updated = applicationService.updateAppSettings(settings, application);
 
     if (updated) {
       application.setState(ApplicationState.REMOVED);

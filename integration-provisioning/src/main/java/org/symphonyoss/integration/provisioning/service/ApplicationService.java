@@ -39,6 +39,7 @@ import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.model.AppEntitlement;
 import org.symphonyoss.integration.provisioning.client.AppRepositoryClient;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreBuilder;
+import org.symphonyoss.integration.provisioning.client.model.AppStoreSettingsWrapper;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
@@ -59,18 +60,17 @@ public class ApplicationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
 
-  private static final String APP_ID = "id";
-
   private static final String APP_GROUP_ID = "appGroupId";
+
+  private static final String APP_SETTINGS = "settings";
+
+  private static final String APP_TYPE = "appType";
 
   @Autowired
   private UserService userService;
 
   @Autowired
   private AppRepositoryClient client;
-
-  @Autowired
-  private AuthenticationProxy authenticationProxy;
 
   @Autowired
   private PodHttpApiClient podApiClient;
@@ -119,11 +119,12 @@ public class ApplicationService {
 
       Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
       if (app != null) {
-        client.updateApp(wrapper, DEFAULT_USER_ID, app.get(APP_ID), app.get(APP_GROUP_ID));
+        client.updateApp(wrapper, DEFAULT_USER_ID, app.get(APP_GROUP_ID));
       } else {
         client.createNewApp(wrapper, DEFAULT_USER_ID);
-        updateAppSettings(application);
       }
+      updateAppSettings(settings, application);
+
     } catch (AppRepositoryClientException | MalformedURLException e) {
       String message = logMessage.getMessage(FAIL_SAVE_APP, application.getId(), StringUtils.EMPTY);
       String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
@@ -133,33 +134,43 @@ public class ApplicationService {
 
   /**
    * Update application settings on Symphony store.
+   * @param settings Integration settings associated with the application.
    * @param application Application object
    * @return true if the application was updated or false otherwise.
    */
-  public boolean updateAppSettings(Application application) {
+  public boolean updateAppSettings(IntegrationSettings settings, Application application) {
     String appType = application.getComponent();
     LOGGER.info("Updating application settings: {}", appType);
 
-    String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
-
     try {
-      Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
+      Map<String, ?> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
 
       if (app != null) {
-        AppEntitlement appEntitlement = new AppEntitlement();
-        appEntitlement.setAppId(appType);
-        appEntitlement.setAppName(application.getName());
-        appEntitlement.setEnable(application.isEnabled());
-        appEntitlement.setListed(application.isVisible());
-        appEntitlement.setInstall(Boolean.FALSE);
+        String domain = properties.getIntegrationBridge().getDomain();
+        String botUserId = settings.getOwner().toString();
 
-        appEntitlementApi.updateAppEntitlement(sessionToken, appEntitlement);
+        AppStoreWrapper wrapper =
+            AppStoreBuilder.build(application, domain, settings.getConfigurationId(), botUserId);
+        wrapper.setEnabled(application.isEnabled());
+
+        AppStoreSettingsWrapper settingsWrapper = new AppStoreSettingsWrapper();
+        settingsWrapper.setInstall(application.isAutoInstall());
+        settingsWrapper.setEnabled(application.isEnabled());
+        settingsWrapper.setVisible(application.isVisible());
+
+        if (app.containsKey(APP_SETTINGS)) {
+          Map<String, String> appSettings = (Map<String, String>) app.get(APP_SETTINGS);
+          settingsWrapper.setAppType(appSettings.get(APP_TYPE));
+        }
+        wrapper.setSettings(settingsWrapper);
+
+        client.updateAppFallback(wrapper, DEFAULT_USER_ID, app.get(APP_GROUP_ID).toString());
 
         return true;
       } else {
         return false;
       }
-    } catch (AppRepositoryClientException | RemoteApiException e) {
+    } catch (AppRepositoryClientException | MalformedURLException e) {
       String message = logMessage.getMessage(FAIL_UPDATE_APP_SETTINGS, appType);
       String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
       throw new ApplicationProvisioningException(message, e, solution);
