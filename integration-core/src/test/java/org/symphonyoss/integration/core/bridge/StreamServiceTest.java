@@ -31,15 +31,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.symphonyoss.integration.agent.api.client.AgentApiClient;
 import org.symphonyoss.integration.agent.api.client.MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V4MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -53,7 +52,6 @@ import org.symphonyoss.integration.pod.api.client.StreamApiClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test class responsible to test the flows in the Stream Service.
@@ -69,7 +67,7 @@ public class StreamServiceTest {
 
   private static final Long USER_ID = 268745369L;
 
-  private static final String AGENT_SERVICE_NAME = "Agent";
+  private static final String AGENT_SERVICE_NAME = ServiceName.AGENT.toString();
 
   private static final String AGENT_API_V2 = "1.45.0";
 
@@ -244,7 +242,8 @@ public class StreamServiceTest {
   @Test
   public void testHandleServiceVersionUpdatedWithoutServiceName() {
     streamService.handleServiceVersionUpdatedEvent(
-        new ServiceVersionUpdatedEventData(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY));
+        new ServiceVersionUpdatedEventData(StringUtils.EMPTY, StringUtils.EMPTY,
+            StringUtils.EMPTY));
 
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V1));
     assertEquals(messageApiClient, apiResolver.get(MessageMLVersion.V2));

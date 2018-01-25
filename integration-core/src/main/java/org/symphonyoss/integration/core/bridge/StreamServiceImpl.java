@@ -24,7 +24,8 @@ import static org.symphonyoss.integration.core.properties.StreamServiceImplPrope
     .ERROR_GET_STREAM_JSON;
 import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
     .ERROR_GET_STREAM_JSON_SOLUTION;
-import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator.AGENT_MESSAGEML_VERSION2;
+import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator
+    .AGENT_MESSAGEML_VERSION2;
 
 import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import org.symphonyoss.integration.agent.api.client.V2MessageApiClient;
 import org.symphonyoss.integration.agent.api.client.V4MessageApiClient;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.AuthenticationToken;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.logging.LogMessageSource;
@@ -68,8 +70,6 @@ import javax.annotation.PostConstruct;
 public class StreamServiceImpl implements StreamService {
 
   private static final Logger LOG = LoggerFactory.getLogger(StreamServiceImpl.class);
-
-  private static final String AGENT_SERVICE_NAME = "Agent";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -121,7 +121,8 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreams(optionalProperties);
     } catch (IOException e) {
-      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_JSON,optionalProperties), e, ERROR_GET_STREAM_JSON_SOLUTION);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_JSON, optionalProperties), e,
+          ERROR_GET_STREAM_JSON_SOLUTION);
       return Collections.emptyList();
     }
   }
@@ -131,7 +132,8 @@ public class StreamServiceImpl implements StreamService {
     try {
       return WebHookConfigurationUtils.getStreamType(instance.getOptionalProperties());
     } catch (IOException e) {
-      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_INSTANCE ,instance.getInstanceId()), e, ERROR_GET_STREAM_INSTANCE_SOLUTION);
+      LOG.warn(logMessage.getMessage(ERROR_GET_STREAM_INSTANCE, instance.getInstanceId()), e,
+          ERROR_GET_STREAM_INSTANCE_SOLUTION);
       return StreamType.NONE;
     }
   }
@@ -163,13 +165,12 @@ public class StreamServiceImpl implements StreamService {
    * Handle service version updated event to switch the Agent Message API version. If the Agent
    * version is greater than or equal to '1.46.0' this service should use the API v3, otherwise it
    * should use the API v2.
-   *
    * @param event Service version updated event
    */
   @EventListener
   public void handleServiceVersionUpdatedEvent(ServiceVersionUpdatedEventData event) {
     // Check the service name
-    if (AGENT_SERVICE_NAME.equals(event.getServiceName())) {
+    if (ServiceName.AGENT.toString().equals(event.getServiceName())) {
 
       // Get the current version
       Version version = Version.valueOf(event.getNewVersion());
