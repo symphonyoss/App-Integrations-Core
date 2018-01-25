@@ -42,20 +42,22 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodSessionManagerHealthIndicator.class})
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, PodSessionManagerHealthIndicator.class})
 public class PodSessionManagerHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
   private static final ServiceName SERVICE_NAME = ServiceName.POD_SESSION_MANAGER;
 
-  private static final String POD_SERVICE_NAME = "POD";
+  private static final String POD_SERVICE_NAME = ServiceName.POD.toString();
 
   private static final String SERVICE_FIELD = "sessionauth";
 
   private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:8444/sessionauth";
 
-  private static final String MOCK_HC_URL = "https://nexus.symphony.com:443/webcontroller/HealthCheck/aggregated";
+  private static final String MOCK_HC_URL =
+      "https://nexus.symphony.com:443/webcontroller/HealthCheck/aggregated";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -69,7 +71,8 @@ public class PodSessionManagerHealthIndicatorTest {
   @Before
   public void init() {
     // Cleanup POD version
-    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, null));
+    indicator.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, null));
   }
 
   @Test
@@ -89,7 +92,8 @@ public class PodSessionManagerHealthIndicatorTest {
 
   @Test
   public void testMinVersion() {
-    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
+    indicator.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
     assertEquals(MOCK_VERSION, indicator.getMinVersion());
   }
 
@@ -102,11 +106,13 @@ public class PodSessionManagerHealthIndicatorTest {
   public void testCurrentVersion() {
     assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
 
-    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(SERVICE_NAME.toString(), null, MOCK_VERSION));
+    indicator.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(SERVICE_NAME.toString(), null, MOCK_VERSION));
 
     assertNull(indicator.retrieveCurrentVersion(StringUtils.EMPTY));
 
-    indicator.handleServiceVersionUpdatedEvent(new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
+    indicator.handleServiceVersionUpdatedEvent(
+        new ServiceVersionUpdatedEventData(POD_SERVICE_NAME, null, MOCK_VERSION));
 
     assertEquals(MOCK_VERSION, indicator.retrieveCurrentVersion(StringUtils.EMPTY));
   }

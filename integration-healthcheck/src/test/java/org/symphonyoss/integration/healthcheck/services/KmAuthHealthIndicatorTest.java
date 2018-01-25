@@ -34,7 +34,7 @@ public class KmAuthHealthIndicatorTest {
 
   private static final String SERVICE_FIELD = "keyauth";
 
-  private static final String POD_SERVICE_NAME = "POD";
+  private static final String POD_SERVICE_NAME = ServiceName.POD.toString();
 
   private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443/";
 
