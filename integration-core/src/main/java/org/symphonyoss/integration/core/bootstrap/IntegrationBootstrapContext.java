@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
+import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
 import org.symphonyoss.integration.event.HealthCheckEventData;
@@ -93,8 +94,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   public static final String BOOTSTRAP_INITIAL_DELAY_KEY = "bootstrap.init.delay";
 
   public static final String BOOTSTRAP_DELAY_KEY = "bootstrap.delay";
-
-  public static final String AGENT_SERVICE_NAME = "Agent";
 
   public static final Long HEALTH_CHECK_INITAL_DELAY = TimeUnit.SECONDS.toMillis(20);
 
@@ -197,7 +196,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       public void run() {
         LOGGER.debug(logMessage.getMessage(POLLING_AGENT_HEALTH_CHECK));
 
-        HealthCheckEventData event = new HealthCheckEventData(AGENT_SERVICE_NAME);
+        HealthCheckEventData event = new HealthCheckEventData(ServiceName.AGENT.toString());
         publisher.publishEvent(event);
       }
 
