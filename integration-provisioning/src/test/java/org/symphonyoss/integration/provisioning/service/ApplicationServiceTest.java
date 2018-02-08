@@ -72,8 +72,6 @@ public class ApplicationServiceTest {
 
   private static final String APP_ID = "id";
 
-  private static final String APP_GROUP_ID = "appGroupId";
-
   @Mock
   private AuthenticationProxy authenticationProxy;
 
@@ -111,10 +109,7 @@ public class ApplicationServiceTest {
 
     Application application = mockApplication();
 
-    IntegrationSettings settings = new IntegrationSettings();
-    settings.setOwner(MOCK_USER);
-
-    service.updateAppSettings(settings, application);
+    service.updateAppSettings(application);
   }
 
   private Application mockApplication() {
@@ -123,7 +118,6 @@ public class ApplicationServiceTest {
     application.setName(MOCK_APP_NAME);
     application.setEnabled(Boolean.TRUE);
     application.setVisible(Boolean.TRUE);
-    application.setAutoInstall(Boolean.FALSE);
     application.setUrl(MOCK_HOST);
 
     return application;
@@ -135,10 +129,7 @@ public class ApplicationServiceTest {
 
     doReturn(null).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    IntegrationSettings settings = new IntegrationSettings();
-    settings.setOwner(MOCK_USER);
-
-    boolean result = service.updateAppSettings(settings, application);
+    boolean result = service.updateAppSettings(application);
     assertFalse(result);
   }
 
@@ -147,35 +138,17 @@ public class ApplicationServiceTest {
       throws AppRepositoryClientException, RemoteApiException {
     Application application = mockApplication();
 
-    IntegrationSettings settings = new IntegrationSettings();
-    settings.setOwner(MOCK_USER);
+    doThrow(RemoteApiException.class).when(appEntitlementApi)
+        .updateAppEntitlement(eq(MOCK_SESSION_ID), any(AppEntitlement.class));
 
-    Map<String, String> app = new HashMap<>();
-    app.put(APP_ID, MOCK_APP_TYPE);
-    app.put(APP_GROUP_ID, APP_GROUP_ID);
-
-    doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
-
-    doThrow(ApplicationProvisioningException.class).when(client)
-        .updateAppFallback(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID), eq(APP_GROUP_ID));
-
-    service.updateAppSettings(settings, application);
+    service.updateAppSettings(application);
   }
 
   @Test
   public void testUpdateAppSettings() throws AppRepositoryClientException {
     Application application = mockApplication();
 
-    IntegrationSettings settings = new IntegrationSettings();
-    settings.setOwner(MOCK_USER);
-
-    Map<String, String> app = new HashMap<>();
-    app.put(APP_ID, MOCK_APP_TYPE);
-    app.put(APP_GROUP_ID, APP_GROUP_ID);
-
-    doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
-
-    boolean result = service.updateAppSettings(settings, application);
+    boolean result = service.updateAppSettings(application);
     assertTrue(result);
   }
 
@@ -209,12 +182,11 @@ public class ApplicationServiceTest {
 
     Map<String, String> app = new HashMap<>();
     app.put(APP_ID, MOCK_APP_TYPE);
-    app.put(APP_GROUP_ID, APP_GROUP_ID);
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    doThrow(AppRepositoryClientException.class).when(client).updateApp(any(AppStoreWrapper.class),
-        eq(DEFAULT_USER_ID), eq(APP_GROUP_ID));
+    doThrow(AppRepositoryClientException.class).when(client)
+        .updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
 
     service.setupApplication(settings, application);
   }
@@ -247,13 +219,11 @@ public class ApplicationServiceTest {
 
     Map<String, String> app = new HashMap<>();
     app.put(APP_ID, MOCK_APP_TYPE);
-    app.put(APP_GROUP_ID, APP_GROUP_ID);
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
     service.setupApplication(new IntegrationSettings(), application);
 
-    verify(client, times(1)).updateApp(any(AppStoreWrapper.class),
-        eq(DEFAULT_USER_ID), eq(APP_GROUP_ID));
+    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
   }
 }
