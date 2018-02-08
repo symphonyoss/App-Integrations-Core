@@ -34,10 +34,11 @@ public class AppStoreBuilder {
 
   private static final String VERSION = "1.0.0";
 
+  public static final String BUILT_IN = "Built-in";
+
   public static AppStoreWrapper build(Application application, String domain, String configurationId,
       String botUserId) throws MalformedURLException {
     AppStoreWrapper app = new AppStoreWrapper();
-    app.setId(application.getId());
     app.setAppGroupId(application.getComponent());
     app.setName(application.getName());
     app.setType(INTEGRATION_TYPE);
@@ -48,6 +49,14 @@ public class AppStoreBuilder {
     app.setVersion(VERSION);
     app.setEnabled(true);
     app.setSymphonyManaged(true);
+
+    AppStoreSettingsWrapper settingsWrapper = new AppStoreSettingsWrapper();
+    settingsWrapper.setInstall(application.isAutoInstall());
+    settingsWrapper.setEnabled(application.isEnabled());
+    settingsWrapper.setVisible(application.isVisible());
+    settingsWrapper.setAppType(BUILT_IN);
+    app.setSettings(settingsWrapper);
+
     return app;
   }
 

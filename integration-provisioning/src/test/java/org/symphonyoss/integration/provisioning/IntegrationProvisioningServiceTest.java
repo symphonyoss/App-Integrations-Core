@@ -98,8 +98,7 @@ public class IntegrationProvisioningServiceTest {
     settings.setConfigurationId(MOCK_CONFIGURATION_ID);
 
     doReturn(settings).when(configurationService).setupConfiguration(any(Application.class));
-    doReturn(Boolean.TRUE).when(applicationService).updateAppSettings(
-        any(IntegrationSettings.class), any(Application.class));
+    doReturn(Boolean.TRUE).when(applicationService).updateAppSettings(any(Application.class));
   }
 
   @Test
@@ -110,8 +109,7 @@ public class IntegrationProvisioningServiceTest {
 
   @Test
   public void testSkippedApplication() {
-    doReturn(Boolean.FALSE).when(applicationService).updateAppSettings(
-        any(IntegrationSettings.class), any(Application.class));
+    doReturn(Boolean.FALSE).when(applicationService).updateAppSettings(any(Application.class));
     assertFalse(service.configure());
   }
 
@@ -137,7 +135,7 @@ public class IntegrationProvisioningServiceTest {
   @Test
   public void testFailRemoved() {
     doThrow(ApplicationProvisioningException.class).when(applicationService)
-        .updateAppSettings(any(IntegrationSettings.class), any(Application.class));
+        .updateAppSettings(any(Application.class));
     assertFalse(service.configure());
   }
 

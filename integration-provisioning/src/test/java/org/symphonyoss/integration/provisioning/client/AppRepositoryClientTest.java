@@ -41,7 +41,6 @@ import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.pod.api.client.SymphonyHttpApiClient;
 import org.symphonyoss.integration.pod.api.model.Envelope;
-import org.symphonyoss.integration.provisioning.client.model.AdminApplicationWrapper;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreBuilder;
 import org.symphonyoss.integration.provisioning.client.model.AppStoreWrapper;
 import org.symphonyoss.integration.provisioning.exception.AppRepositoryClientException;
@@ -52,8 +51,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Unit test for {@link AppRepositoryClient}
@@ -68,13 +65,11 @@ public class AppRepositoryClientTest {
 
   private static final String SKEY_HEADER = "skey";
 
-  private static final String SESSION_TOKEN_HEADER = "sessionToken";
-
   private static final String USER_SESSION_HEADER = "userSession";
 
-  private static final String MOCK_APP_ID = "appId";
+  private static final String SESSION_TOKEN_HEADER = "sessionToken";
 
-  private static final String MOCK_APP_GROUP_ID = "appGroupId";
+  private static final String MOCK_APP_ID = "appId";
 
   private static final String MOCK_SESSION_ID = "e91687763fda309d461d5e2fc6ebcc908a6bcfe221557";
 
@@ -91,12 +86,6 @@ public class AppRepositoryClientTest {
   private static final String MOCK_DOMAIN = ".symphony.com";
 
   private static final String MOCK_HOST = "https://test" + MOCK_DOMAIN;
-
-  private static final String ADMIN_APP_PATH = "/pod/v1/admin/app";
-
-  private static final String ADMIN_APP_CREATE_PATH = ADMIN_APP_PATH + "/create";
-
-  private static final String ADMIN_APP_UPDATE_PATH = ADMIN_APP_PATH + "/%s/update";
 
   private JsonUtils jsonUtils = new JsonUtils();
 
@@ -208,138 +197,58 @@ public class AppRepositoryClientTest {
     assertEquals(expected, result);
   }
 
+  @Test(expected = AppRepositoryClientException.class)
+  public void testCreateAppRemoteApiException()
+      throws RemoteApiException, AppRepositoryClientException {
+
+    doThrow(RemoteApiException.class).when(client).doPost(eq(APP_REPOSITORY_APPS),
+        eq(getRequiredHeader()), eq(Collections.<String, String>emptyMap()), any(Envelope.class),
+        eq(Envelope.class));
+
+    doThrow(RemoteApiException.class).when(client).doPost(eq(APP_REPOSITORY_APPS),
+        eq(getRequiredHeaders()), eq(Collections.<String, String>emptyMap()), any(Envelope.class),
+        eq(Envelope.class));
+
+    repository.createNewApp(new AppStoreWrapper(), DEFAULT_USER_ID);
+  }
+
   @Test
   public void testCreateApp() throws AppRepositoryClientException, RemoteApiException {
     Map<String, String> headers = getRequiredHeader();
 
     repository.createNewApp(new AppStoreWrapper(), DEFAULT_USER_ID);
 
-    verify(client, times(1)).doPost(eq(ADMIN_APP_CREATE_PATH), eq(headers),
-        eq(Collections.<String, String>emptyMap()), any(AdminApplicationWrapper.class),
-        eq(AdminApplicationWrapper.class));
-  }
-
-  @Test(expected = AppRepositoryClientException.class)
-  public void testCreateAppRemoteApiException()
-      throws RemoteApiException, AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
-
-    doThrow(RemoteApiException.class).when(client).doPost(eq(ADMIN_APP_CREATE_PATH),
-        eq(headers), eq(Collections.<String, String>emptyMap()), any(AdminApplicationWrapper.class),
-        eq(AdminApplicationWrapper.class));
-
-    repository.createNewApp(new AppStoreWrapper(), DEFAULT_USER_ID);
-  }
-
-  @Test
-  public void testCreateAppFallbackApi() throws RemoteApiException,
-      AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
-
-    RemoteApiException rae = new RemoteApiException(
-        HttpServletResponse.SC_NOT_FOUND, "API not found.");
-
-    doThrow(rae).when(client).doPost(eq(ADMIN_APP_CREATE_PATH), eq(headers),
-        eq(Collections.<String, String>emptyMap()), any(AdminApplicationWrapper.class),
-        eq(AdminApplicationWrapper.class));
-
-    repository.createNewApp(new AppStoreWrapper(), DEFAULT_USER_ID);
-
-    Map<String, String> oldHeaders = getRequiredHeaders();
-
-    verify(client, times(1)).doPost(eq(APP_REPOSITORY_APPS), eq(oldHeaders),
+    verify(client, times(1)).doPost(eq(APP_REPOSITORY_APPS), eq(headers),
         eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
-  }
-
-  @Test(expected = AppRepositoryClientException.class)
-  public void testCreateAppFallbackApiRemoteApiException()
-      throws RemoteApiException, AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
-
-    RemoteApiException rae = new RemoteApiException(
-        HttpServletResponse.SC_NOT_FOUND, "API not found.");
-
-    doThrow(rae).when(client).doPost(eq(ADMIN_APP_CREATE_PATH), eq(headers),
-        eq(Collections.<String, String>emptyMap()), any(AdminApplicationWrapper.class),
-        eq(AdminApplicationWrapper.class));
-
-    Map<String, String> oldHeaders = getRequiredHeaders();
-
-    doThrow(RemoteApiException.class).when(client).doPost(eq(APP_REPOSITORY_APPS), eq(oldHeaders),
-        eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
-
-    repository.createNewApp(new AppStoreWrapper(), DEFAULT_USER_ID);
-  }
-
-  @Test
-  public void testUpdateApp() throws RemoteApiException, AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
-
-    String path = String.format(ADMIN_APP_UPDATE_PATH, MOCK_APP_GROUP_ID);
-
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
-
-    verify(client, times(1)).doPost(eq(path), eq(headers),
-        eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(AdminApplicationWrapper.class));
   }
 
   @Test(expected = AppRepositoryClientException.class)
   public void testUpdateAppRemoteApiException()
       throws RemoteApiException, AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
+    Map<String, String> headers = getRequiredHeaders();
 
-    String path = String.format(ADMIN_APP_UPDATE_PATH, MOCK_APP_GROUP_ID);
+    String path = APP_REPOSITORY_APPS + "/" + MOCK_APP_ID;
 
     doThrow(RemoteApiException.class).when(client).doPost(eq(path), eq(headers),
-        eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(AdminApplicationWrapper.class));
+        eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
 
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
+    AppStoreWrapper wrapper = new AppStoreWrapper();
+    wrapper.setId(MOCK_APP_ID);
+    repository.updateApp(wrapper, DEFAULT_USER_ID);
   }
 
   @Test
-  public void testUpdateAppFallbackApi() throws RemoteApiException,
-      AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
+  public void testUpdateApp() throws RemoteApiException, AppRepositoryClientException {
+    Map<String, String> headers = getRequiredHeaders();
 
-    RemoteApiException rae = new RemoteApiException(
-        HttpServletResponse.SC_NOT_FOUND, "API not found.");
+    String path = APP_REPOSITORY_APPS + "/" + MOCK_APP_ID;
 
-    String path = String.format(ADMIN_APP_UPDATE_PATH, MOCK_APP_GROUP_ID);
+    AppStoreWrapper wrapper = new AppStoreWrapper();
+    wrapper.setId(MOCK_APP_ID);
+    repository.updateApp(wrapper, DEFAULT_USER_ID);
 
-    doThrow(rae).when(client).doPost(eq(path), eq(headers), eq(Collections.<String, String>emptyMap()),
-        any(AdminApplicationWrapper.class), eq(AdminApplicationWrapper.class));
-
-    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_GROUP_ID;
-
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
-
-    Map<String, String> oldHeaders = getRequiredHeaders();
-
-    verify(client, times(1)).doPost(eq(oldPath), eq(oldHeaders),
+    verify(client, times(1)).doPost(eq(path), eq(headers),
         eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
-  }
-
-
-  @Test(expected = AppRepositoryClientException.class)
-  public void testUpdateAppFallbackApiRemoteApiException()
-      throws RemoteApiException, AppRepositoryClientException {
-    Map<String, String> headers = getRequiredHeader();
-
-    RemoteApiException rae = new RemoteApiException(
-        HttpServletResponse.SC_NOT_FOUND, "API not found.");
-
-    String path = String.format(ADMIN_APP_UPDATE_PATH, MOCK_APP_GROUP_ID);
-
-    doThrow(rae).when(client).doPost(eq(path), eq(headers), eq(Collections.<String, String>emptyMap()),
-        any(AdminApplicationWrapper.class), eq(AdminApplicationWrapper.class));
-
-    String oldPath = APP_REPOSITORY_APPS + "/" + MOCK_APP_GROUP_ID;
-    Map<String, String> oldHeaders = getRequiredHeaders();
-
-    doThrow(RemoteApiException.class).when(client).doPost(eq(oldPath), eq(oldHeaders),
-        eq(Collections.<String, String>emptyMap()), any(Envelope.class), eq(Envelope.class));
-
-    repository.updateApp(new AppStoreWrapper(), DEFAULT_USER_ID, MOCK_APP_GROUP_ID);
   }
 
   private Map<String, String> getRequiredHeaders() {
