@@ -125,7 +125,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    */
   @EventListener
   public void handleHealthCheckEvent(HealthCheckEventData event) {
-    String serviceName = getServiceName().toString();
+    String serviceName = mountUserFriendlyServiceName();
 
     LOG.debug("Handle health-check event. Service name: {}", serviceName);
 
@@ -136,7 +136,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   @Override
   public Health health() {
-    String serviceName = getServiceName().toString();
+    String serviceName = mountUserFriendlyServiceName();
 
     try {
       boolean locked = lock.tryLock(LOCK_PERIOD_SECS, TimeUnit.SECONDS);
@@ -163,8 +163,20 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   }
 
   /**
+   * Returns the friendly name when it exists, or else, return the toString method for the
+   * Service Name
+   * @return
+   */
+  protected String mountUserFriendlyServiceName() {
+    String friendlyServiceName = getFriendlyServiceName();
+    if (StringUtils.isEmpty(friendlyServiceName)) {
+      friendlyServiceName = getServiceName().toString();
+    }
+    return friendlyServiceName;
+  }
+
+  /**
    * Returns the service health
-   *
    * @param serviceName Service name
    * @param service Service response
    * @return Service health
@@ -182,7 +194,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   private IntegrationBridgeService retrieveServiceInfo() {
     LOG.debug("Retrieve service info: {}", getServiceName());
 
-    IntegrationBridgeService service = new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
+    IntegrationBridgeService service =
+        new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
 
     String healthResponse = getHealthResponse();
 
@@ -205,7 +218,6 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   /**
    * Handle health check response.
-   *
    * @param service Service information
    * @param healthResponse Health check response
    */
@@ -235,7 +247,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     String newSemanticVersion = getSemanticVersion(version);
 
     ServiceVersionUpdatedEventData event =
-        new ServiceVersionUpdatedEventData(getServiceName().toString(), oldSemanticVersion, newSemanticVersion);
+        new ServiceVersionUpdatedEventData(mountUserFriendlyServiceName(), oldSemanticVersion,
+            newSemanticVersion);
     this.currentVersion = version;
 
     publisher.publishEvent(event);
@@ -265,7 +278,9 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
       return retrieveHealthResponse(response);
     } catch (ProcessingException e) {
-      LOG.error(logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()), e);
+      LOG.error(
+          logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()),
+          e);
       return null;
     }
   }
@@ -304,6 +319,17 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   protected abstract ServiceName getServiceName();
 
   /**
+   * Returns the service name to be displayed to a user.
+   * @return Friendly service name
+   */
+  protected String getFriendlyServiceName() {
+    String serviceName = getServiceName().toString();
+    serviceName = StringUtils.lowerCase(serviceName);
+    serviceName = StringUtils.replace(serviceName, "_", " ");
+    return  StringUtils.capitalize(serviceName);
+  }
+
+  /**
    * Determines the minimum required version for this service.
    * @return Minimum required version for this service.
    */
@@ -325,7 +351,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
         return version;
       }
     } catch (IOException e) {
-      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, getServiceName().toString()));
+      LOG.error(logMessageSource.getMessage(IO_EXCEPTION, mountUserFriendlyServiceName()));
     }
 
     return null;

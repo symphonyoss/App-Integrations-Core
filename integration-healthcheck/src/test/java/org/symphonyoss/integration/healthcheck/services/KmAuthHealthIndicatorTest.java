@@ -30,7 +30,7 @@ public class KmAuthHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER_AUTH;
+  private static final String SERVICE_NAME = "Key Manager Auth";
 
   private static final String SERVICE_FIELD = "keyauth";
 
@@ -64,7 +64,7 @@ public class KmAuthHealthIndicatorTest {
 
   @Test
   public void testServiceName() {
-    assertEquals(SERVICE_NAME, indicator.getServiceName());
+    assertEquals(SERVICE_NAME, indicator.mountUserFriendlyServiceName());
   }
 
   @Test

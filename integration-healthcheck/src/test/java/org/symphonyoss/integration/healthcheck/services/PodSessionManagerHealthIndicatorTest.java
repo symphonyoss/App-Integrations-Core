@@ -48,7 +48,7 @@ public class PodSessionManagerHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final ServiceName SERVICE_NAME = ServiceName.POD_SESSION_MANAGER;
+  private static final String SERVICE_NAME = "Pod Session Manager";
 
   private static final String POD_SERVICE_NAME = ServiceName.POD.toString();
 
@@ -82,7 +82,7 @@ public class PodSessionManagerHealthIndicatorTest {
 
   @Test
   public void testServiceName() {
-    assertEquals(SERVICE_NAME, indicator.getServiceName());
+    assertEquals(SERVICE_NAME, indicator.mountUserFriendlyServiceName());
   }
 
   @Test

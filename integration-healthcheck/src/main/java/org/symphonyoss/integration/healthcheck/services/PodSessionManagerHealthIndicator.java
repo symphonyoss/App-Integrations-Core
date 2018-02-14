@@ -30,11 +30,15 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealthIndicator {
 
   private static final String SERVICE_FIELD = "sessionauth";
+  public static final String FRIENDLY_SERVICE_NAME = "Pod Session Manager";
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.POD_SESSION_MANAGER;
+    return ServiceName.POD;
   }
+
+  @Override
+  protected String getFriendlyServiceName() { return FRIENDLY_SERVICE_NAME; }
 
   @Override
   protected String getMinVersion() {
