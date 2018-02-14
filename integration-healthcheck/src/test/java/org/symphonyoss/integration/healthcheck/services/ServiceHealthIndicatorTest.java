@@ -90,7 +90,8 @@ public class ServiceHealthIndicatorTest {
 
   private Invocation.Builder invocationBuilder;
 
-  private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher = new MockApplicationPublisher<>();
+  private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher =
+      new MockApplicationPublisher<>();
 
   @Before
   public void init() {
@@ -113,12 +114,14 @@ public class ServiceHealthIndicatorTest {
 
   @Test
   public void testNullClient() {
-    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy).httpClientForUser(anyString(), any(ServiceName.class));
+    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy)
+        .httpClientForUser(anyString(), any(ServiceName.class));
 
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
-    Health expected = Health.down().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.down().withDetail(healthIndicator.mountUserFriendlyServiceName().toString(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
@@ -141,7 +144,8 @@ public class ServiceHealthIndicatorTest {
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
-    Health expected = Health.down().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.down().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
@@ -155,7 +159,8 @@ public class ServiceHealthIndicatorTest {
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
-    Health expected = Health.down().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.down().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
@@ -165,11 +170,15 @@ public class ServiceHealthIndicatorTest {
   public void testServiceUp() {
     mockServiceUp();
 
+    String expectedServiceName = StringUtils.lowerCase(MOCK_SERVICE_NAME.toString());
+    expectedServiceName = StringUtils.capitalize(expectedServiceName);
+
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
 
-    Health expected = Health.up().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.up().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
@@ -179,7 +188,7 @@ public class ServiceHealthIndicatorTest {
 
     ServiceVersionUpdatedEventData event = publisher.getEvent();
     assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
-    assertEquals(MOCK_SERVICE_NAME.toString(), event.getServiceName());
+    assertEquals(expectedServiceName, event.getServiceName());
     assertTrue(StringUtils.isEmpty(event.getOldVersion()));
   }
 
@@ -202,7 +211,8 @@ public class ServiceHealthIndicatorTest {
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
 
-    Health expected = Health.up().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.up().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
@@ -245,7 +255,8 @@ public class ServiceHealthIndicatorTest {
     ReflectionTestUtils.setField(healthIndicator, "serviceInfoCache", service);
     ReflectionTestUtils.setField(healthIndicator, "lastExecution", System.currentTimeMillis());
 
-    Health expected = Health.up().withDetail(healthIndicator.getServiceName().toString(), service).build();
+    Health expected =
+        Health.up().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);

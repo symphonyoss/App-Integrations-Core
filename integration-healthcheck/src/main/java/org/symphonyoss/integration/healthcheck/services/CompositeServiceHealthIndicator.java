@@ -45,7 +45,7 @@ public class CompositeServiceHealthIndicator extends CompositeHealthIndicator {
   @PostConstruct
   public void init() {
     for (ServiceHealthIndicator indicator : serviceHealthIndicators) {
-      addHealthIndicator(indicator.getServiceName().toString(), indicator);
+      addHealthIndicator(indicator.mountUserFriendlyServiceName(), indicator);
     }
   }
 
