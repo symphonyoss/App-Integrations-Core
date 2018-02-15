@@ -14,7 +14,6 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 public class KmAuthHealthIndicator extends AuthenticationServiceHealthIndicator {
 
   private static final String SERVICE_FIELD = "keyauth";
-  public static final String FRIENDLY_SERVICE_NAME = "Key Manager Auth";
 
   @Override
   protected ServiceName getServiceName() {
@@ -23,7 +22,7 @@ public class KmAuthHealthIndicator extends AuthenticationServiceHealthIndicator 
 
   @Override
   protected String getFriendlyServiceName() {
-    return FRIENDLY_SERVICE_NAME;
+    return ServiceName.KEY_MANAGER_AUTH.toString();
   }
 
   @Override

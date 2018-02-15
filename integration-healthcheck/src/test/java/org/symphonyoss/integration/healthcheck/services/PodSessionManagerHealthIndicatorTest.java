@@ -48,7 +48,7 @@ public class PodSessionManagerHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final String SERVICE_NAME = "Pod Session Manager";
+  private static final String SERVICE_NAME = ServiceName.POD_SESSION_MANAGER.toString();
 
   private static final String POD_SERVICE_NAME = ServiceName.POD.toString();
 
