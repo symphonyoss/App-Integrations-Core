@@ -319,10 +319,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Friendly service name
    */
   protected String getFriendlyServiceName() {
-    String serviceName = getServiceName().toString();
-    serviceName = StringUtils.lowerCase(serviceName);
-    serviceName = StringUtils.replace(serviceName, "_", " ");
-    return  StringUtils.capitalize(serviceName);
+    return getServiceName().toString();
   }
 
   /**

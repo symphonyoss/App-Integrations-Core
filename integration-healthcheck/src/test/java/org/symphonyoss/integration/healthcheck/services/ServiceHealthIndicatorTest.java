@@ -170,9 +170,6 @@ public class ServiceHealthIndicatorTest {
   public void testServiceUp() {
     mockServiceUp();
 
-    String expectedServiceName = StringUtils.lowerCase(MOCK_SERVICE_NAME.toString());
-    expectedServiceName = StringUtils.capitalize(expectedServiceName);
-
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
@@ -188,7 +185,7 @@ public class ServiceHealthIndicatorTest {
 
     ServiceVersionUpdatedEventData event = publisher.getEvent();
     assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
-    assertEquals(expectedServiceName, event.getServiceName());
+    assertEquals(ServiceName.POD.toString(), event.getServiceName());
     assertTrue(StringUtils.isEmpty(event.getOldVersion()));
   }
 

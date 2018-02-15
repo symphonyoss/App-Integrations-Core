@@ -30,7 +30,7 @@ public class KmAuthHealthIndicatorTest {
 
   private static final String MOCK_VERSION = "1.48.0";
 
-  private static final String SERVICE_NAME = "Key Manager Auth";
+  private static final String SERVICE_NAME = ServiceName.KEY_MANAGER_AUTH.toString();
 
   private static final String SERVICE_FIELD = "keyauth";
 
