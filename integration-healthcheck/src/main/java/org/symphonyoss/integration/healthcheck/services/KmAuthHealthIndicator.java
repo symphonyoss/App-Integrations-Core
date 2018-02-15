@@ -17,7 +17,12 @@ public class KmAuthHealthIndicator extends AuthenticationServiceHealthIndicator 
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.KEY_MANAGER_AUTH;
+    return ServiceName.POD;
+  }
+
+  @Override
+  protected String getFriendlyServiceName() {
+    return ServiceName.KEY_MANAGER_AUTH.toString();
   }
 
   @Override

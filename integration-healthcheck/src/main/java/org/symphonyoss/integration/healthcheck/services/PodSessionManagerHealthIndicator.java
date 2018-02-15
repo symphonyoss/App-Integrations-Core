@@ -33,7 +33,12 @@ public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealt
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.POD_SESSION_MANAGER;
+    return ServiceName.POD;
+  }
+
+  @Override
+  protected String getFriendlyServiceName() {
+    return ServiceName.POD_SESSION_MANAGER.toString();
   }
 
   @Override

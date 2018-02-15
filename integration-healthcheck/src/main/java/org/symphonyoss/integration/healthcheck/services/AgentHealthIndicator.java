@@ -20,8 +20,6 @@ import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
-import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
-import org.symphonyoss.integration.model.message.MessageMLVersion;
 
 /**
  * Service health indicator for Agent.
