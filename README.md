@@ -39,3 +39,100 @@ If you add a new integration, to get it up and running you also need to add it t
 * Node 6.10
 * Gulp (globally installed)
 * Webpack (globally installed)
+
+# 2-Way Integrations
+In addition to receiving notifications through webhooks, some integrations (Apps) can also be used to perform actions within their associated third-party services. Currently, only the [JIRA integration](github.com/symphonyoss/App-Integrations-Jira) supports this functionality.
+
+It is important to understand two concepts related to the integrations: the bot user and the app itself.
+
+## The bot user
+The bot user is the user on your pod from which all webhook notifications will be sent. Once you have completed the provisioning process, you will see a pair of certificate files inside the certs directory (/data/symphony/ib/certs). Using JIRA as an example, they are ```jira.p12``` and ```jira.pem```. These files are used to authenticate/authorize the bot user for JIRA on your pod.
+
+## The App on Symphony Market
+In order to use our JIRA App in Symphony to perform actions within a JIRA instance, we must also authenticate and authorize the App itself. To do this, we will need an extra pair of certificates, which we can generate by following these steps (replace the ```$variable``` with appropriate values):
+
+1. Create a private key:
+```
+openssl genrsa -out $podCertsDir/${app_name}_app_key.pem 1024
+```
+2. Generate a certificate request:
+```
+openssl req -new -key $podCertsDir/${app_name}_app_key.pem \
+       -subj "/CN=$username/O=Symphony Communications LLC/OU=NOT FOR PRODUCTION USE/C=US" \
+       -out $podCertsDir/${app_name}_app_req.pem -days 3650
+```
+3. Generate the certificate:
+```
+openssl x509 -req -sha256 -days 3650 -in $podCertsDir/${app_name}_app_req.pem \
+        -CA $caCert -CAkey $caKey -passin pass:$_param_pass \
+        -out $podCertsDir/${app_name}_app.pem -set_serial 0x1
+```
+4. Generate the p12 keystore file:
+```
+openssl pkcs12 -export -out $podCertsDir/${app_name}_app.p12 \
+        -in $podCertsDir/${app_name}_app.pem -inkey $podCertsDir/${app_name}_app_key.pem \
+        -passout pass:$_param_pass
+```
+
+Now, we have generated the same kinds of certificates used by the bot users. Next, we will generate the necessary keys from them. These keys will be used to enable communication between the JIRA App in Symphony and any configured JIRA instance using OAuth.
+
+## The OAuth 1.0 authorization
+In order to call JIRA's APIs, you must be logged into your JIRA account and have allowed Symphony to call these APIs on your behalf. This is possible using the [OAuth](https://en.wikipedia.org/wiki/OAuth) mechanism, which uses [RSA Keys](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) to establish a secure channel. Using the previously generated certificates, we can create these keys by performing the following steps:
+
+1. Generate the PKCS8 private key:
+```
+openssl pkcs8 -topk8 -nocrypt -in $podCertsDir/${app_name}_app_key.pem \
+        -out $podCertsDir/${app_name}_app.pkcs8
+```
+2. Generate the public key:
+```
+openssl x509 -pubkey -noout -in $podCertsDir/${app_name}_app.pem > $podCertsDir/${app_name}_app_pub.pem
+```
+
+**IMPORTANT: All of these files must be named according to the pattern outlined in the previous steps, otherwise your OAuth *dance* will not work properly.**
+
+## Keys and certificates final result
+Using jira as our "app_name", we will have generated the following six files:
+* ```jira_app.p12```
+* ```jira_app.pem```
+* ```jira_app.pkcs8```
+* ```jira_app_key.pem```
+* ```jira_app_pub.pem```
+* ```jira_app_req.pem```
+
+Only three of these files will be used by the Integration Bridge, the others being intermediary files used to generate the necessary three. We can remove ```jira_app.pem```, ```jira_app_key.pem``` and ```jira_app_req.pem```. The remaining files are described as follows:
+
+* Authenticate/authorize the app on our Pod:
+  * ```jira_app.p12```
+* Private key used by the OAuth mechanism in order to authorize the JIRA App to call JIRA APIs (this file is recognized by naming convention and is not specified inside our ```application.yaml```):
+  * ```jira_app.pkcs8```
+* Public key used to configure the [JIRA application link](https://integrations.symphony.com/v1.0/docs/jira-application-link-configuration#section-installation-and-configuration-on-jira). This file's content is shown in the AC Portal (also recognized by naming convention and is not specified inside our ```application.yaml```):
+  * ```jira_app_pub.pem```
+
+## Update Integration Bridge Config File
+Finally, we can locate this section in our ```application.yaml``` file:
+```
+applications:
+  jira:
+    state: PROVISIONED
+    keystore: 
+      file: jira.p12 
+      password: some_password
+      type: pkcs12
+```
+We can enable our 2-Way configuration within the Integration Bridge by adding a few lines, so that the end result looks like this:
+```
+applications:
+  jira:
+    state: PROVISIONED
+    keystore: 
+      file: jira.p12 
+      password: some_password
+      type: pkcs12
+    app_keystore:
+      file: jira_app.p12 
+      password: some_password
+      type: pkcs12
+```
+
+We must now enable the 2-Way configuration within JIRA as well. Refer to [these steps](https://integrations.symphony.com/v1.0/docs/jira-application-link-configuration#section-installation-and-configuration-on-jira) for the remaining setup.
