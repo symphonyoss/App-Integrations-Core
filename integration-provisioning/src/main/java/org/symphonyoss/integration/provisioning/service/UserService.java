@@ -88,32 +88,30 @@ public class UserService {
   /**
    * Setup a bot user on the SBE according to the application info provided in the YAML file. If
    * the user already exists, this process should update the user attributes and avatar.
-   * @param settings Integration settings associated with the application.
-   * @param app Application details
+   * @param application Application details
    */
-  public void setupBotUser(IntegrationSettings settings, Application app) {
-    LOGGER.info("Setup new user: {}", app.getComponent());
+  public void setupBotUser(Application application) {
+    LOGGER.info("Setup new user: {}", application.getComponent());
 
-    Long userId = settings.getOwner();
+    String userName = getUsername(application);
 
-    if (userId == null) {
+    if (userName == null) {
       String message = logMessage.getMessage(USER_UNDEFINED_MESSAGE);
       throw new UserSearchException(message);
     }
 
-    User user = getUser(settings.getOwner());
+    User user = getUser(userName);
 
-    String name = app.getName();
-    String avatar = app.getAvatar();
+    String name = application.getName();
+    String avatar = application.getAvatar();
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     if (user == null) {
-      String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
+      String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userName);
       throw new UserSearchException(message);
     } else {
-      String emailAddress = getEmail(app, user.getUsername());
+      String emailAddress = getEmail(application, user.getUsername());
       updateUser(sessionToken, user, name, avatar, emailAddress);
-      settings.setUsername(user.getUsername());
     }
   }
 
