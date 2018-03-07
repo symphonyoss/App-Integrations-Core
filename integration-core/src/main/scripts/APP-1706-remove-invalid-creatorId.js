@@ -5,7 +5,8 @@ function removeInvalidFieldValues() {
       { "creatorId": null },
       { "creatorId": {$exists: 0} }
     ]},
-    { $set: {"creatorId": "0"} }
+    { $set: {"creatorId": "0"} },
+    { multi: true }
   )
 }
 
