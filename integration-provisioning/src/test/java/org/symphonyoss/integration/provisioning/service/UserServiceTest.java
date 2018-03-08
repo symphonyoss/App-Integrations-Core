@@ -102,16 +102,7 @@ public class UserServiceTest {
     user.setUserName(MOCK_USERNAME);
 
     doReturn(user).when(userApiClient).getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
-
-    Application application = mockApplication();
-    doAnswer(new Answer() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Assert.assertEquals(MOCK_SESSION_ID, invocationOnMock.getArguments()[0].toString());
-        Assert.assertEquals(MOCK_USER_ID, invocationOnMock.getArguments()[1].toString());
-        return user;
-      }
-    }).when(userApiClient).getUserByUsername(anyString(), eq(application.getComponent()));
+    doReturn(user).when(userApiClient).getUserByUsername(MOCK_SESSION_ID, MOCK_USERNAME);
 
     this.settings = new IntegrationSettings();
     this.settings.setOwner(MOCK_USER_ID);
@@ -141,18 +132,12 @@ public class UserServiceTest {
   }
 
   @Test(expected = UserSearchException.class)
-  public void testUserUndefined() throws RemoteApiException {
-    Application application = mockApplication();
-    userService.setupBotUser(new IntegrationSettings(), application);
-  }
-
-  @Test(expected = UserSearchException.class)
   public void testUserNotFound() throws RemoteApiException {
-    doReturn(null).when(userApiClient).getUserById(MOCK_SESSION_ID, MOCK_USER_ID);
+    doReturn(null).when(userApiClient).getUserByUsername(MOCK_SESSION_ID, MOCK_USERNAME);
 
     Application application = mockApplication();
 
-    userService.setupBotUser(settings, application);
+    userService.setupBotUser(application);
   }
 
   private Application mockApplication() {
@@ -178,7 +163,7 @@ public class UserServiceTest {
 
     Application application = mockApplication();
 
-    userService.setupBotUser(settings, application);
+    userService.setupBotUser(application);
   }
 
   @Test(expected = UpdateUserException.class)
@@ -194,7 +179,7 @@ public class UserServiceTest {
 
     Application application = mockApplication();
 
-    userService.setupBotUser(settings, application);
+    userService.setupBotUser(application);
   }
 
   @Test(expected = UsernameMismatchException.class)
@@ -228,8 +213,8 @@ public class UserServiceTest {
   @Test
   public void testSuccessfulSetup() {
     Application application = mockApplication();
-    userService.setupBotUser(settings, application);
-    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
+    userService.setupBotUser(application);
+    Assert.assertEquals(MOCK_USERNAME, userService.getUsername(application));
   }
 
   @Test
@@ -247,9 +232,9 @@ public class UserServiceTest {
       }
     }).when(userApiClient).updateUser(eq(MOCK_SESSION_ID), eq(MOCK_USER_ID), any(UserAttributes.class));
 
-    userService.setupBotUser(settings, application);
+    userService.setupBotUser(application);
 
-    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
+    Assert.assertEquals(MOCK_USERNAME, userService.getUsername(application));
   }
 
   @Test
@@ -266,8 +251,10 @@ public class UserServiceTest {
       }
     }).when(userApiClient).updateUser(anyString(), anyLong(), any(UserAttributes.class));;
 
-    userService.setupBotUser(settings, application);
+    userService.setupBotUser(application);
 
-    Assert.assertEquals(MOCK_USERNAME, settings.getUsername());
+
+
+    Assert.assertEquals(MOCK_USERNAME, userService.getUsername(application));
   }
 }
