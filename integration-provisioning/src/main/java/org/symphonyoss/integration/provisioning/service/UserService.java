@@ -229,7 +229,8 @@ public class UserService {
   }
 
   /**
-   * Retrieve the integration username based on the application certificate or
+   * Retrieve the integration username based on the application certificate or application
+   * user name.
    * @param application
    * @return
    */
