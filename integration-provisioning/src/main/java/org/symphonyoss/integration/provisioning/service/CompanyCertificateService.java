@@ -271,6 +271,10 @@ public class CompanyCertificateService {
    * @return Certificate filename if the file exists or empty string otherwise
    */
   private String getApplicationCertificateFileName(Application application) {
+    if (application.getKeystore() == null) {
+      return StringUtils.EMPTY;
+    }
+
     String locationFile = application.getKeystore().getFile();
     if (StringUtils.isBlank(locationFile)) {
       locationFile = application.getId() + DEFAULT_KEYSTORE_TYPE_SUFFIX;

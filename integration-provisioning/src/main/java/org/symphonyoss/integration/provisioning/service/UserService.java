@@ -42,10 +42,13 @@ import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserCreate;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +68,8 @@ public class UserService {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
+
+  private static final String ROLE_INDIVIDUAL = "INDIVIDUAL";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -107,8 +112,7 @@ public class UserService {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     if (user == null) {
-      String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userName);
-      throw new UserSearchException(message);
+      createUser(sessionToken, userName, avatar, userName + EMAIL_DOMAIN);
     } else {
       String emailAddress = getEmail(application, user.getUsername());
       updateUser(sessionToken, user, name, avatar, emailAddress);
@@ -247,6 +251,39 @@ public class UserService {
     }
 
     return StringUtils.isNotEmpty(username) ? username : cname;
+  }
+
+  /**
+   * Create user
+   * @param sessionToken Token to access the User API.
+   * @param userName User  name
+   * @param avatar User avatar (Base64 encoded)
+   * @param emailAddress Email Address
+   */
+  private void createUser(String sessionToken, String userName, String avatar, String emailAddress) {
+    UserDetail user = null;
+
+    try {
+      UserAttributes userAttributes = createUserAttributes(userName, userName, emailAddress);
+      UserCreate userCreate = buildUserCreate(userAttributes);
+
+      user = userApiClient.createUser(sessionToken, userCreate);
+    } catch (RemoteApiException e) {
+      String message = logMessage.getMessage(FAIL_UPDATE_ATTRIBUTES);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UpdateUserException(message, e, solution);
+    }
+
+    updateUserAvatar(sessionToken, user.getUserSystemInfo().getId(), avatar);
+  }
+
+  private UserCreate buildUserCreate(UserAttributes userAttributes) {
+    UserCreate userCreate = new UserCreate();
+
+    userCreate.setUserAttributes(userAttributes);
+    userCreate.setRoles(Arrays.asList(ROLE_INDIVIDUAL));
+
+    return userCreate;
   }
 
 }
