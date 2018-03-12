@@ -112,7 +112,8 @@ public class UserService {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     if (user == null) {
-      createUser(sessionToken, userName, avatar, getEmail(application, userName));
+      String emailAddress = getEmail(application, userName);
+      createUser(sessionToken, userName, avatar, emailAddress);
     } else {
       String emailAddress = getEmail(application, user.getUsername());
       updateUser(sessionToken, user, name, avatar, emailAddress);
