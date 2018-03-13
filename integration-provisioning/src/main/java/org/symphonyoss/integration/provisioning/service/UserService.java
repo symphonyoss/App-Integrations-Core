@@ -100,9 +100,8 @@ public class UserService {
 
     String userName = getUsername(application);
 
-    if (userName == null) {
-      String message = logMessage.getMessage(USER_UNDEFINED_MESSAGE);
-      throw new UserSearchException(message);
+    if (StringUtils.isEmpty(userName)) {
+      userName = application.getComponent();
     }
 
     User user = getUser(userName);
