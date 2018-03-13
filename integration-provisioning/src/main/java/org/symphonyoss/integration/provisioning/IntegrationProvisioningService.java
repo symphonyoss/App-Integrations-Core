@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -177,10 +178,13 @@ public class IntegrationProvisioningService {
   private void provisioningApplication(Application application) {
     LOGGER.info("Provisioning application: {}", application.getId());
 
+    userService.setupBotUser(application);
+
     IntegrationSettings settings = configurationService.setupConfiguration(application);
     applicationService.setupApplication(settings, application);
 
-    userService.setupBotUser(settings, application);
+    User user = userService.getUser(settings.getOwner());
+    settings.setUsername(user.getUsername());
 
     userKeyPairService.exportCertificate(settings, application);
     appKeyPairService.exportCertificate(application);

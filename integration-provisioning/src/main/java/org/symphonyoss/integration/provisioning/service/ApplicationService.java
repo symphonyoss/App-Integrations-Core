@@ -104,15 +104,9 @@ public class ApplicationService {
     LOGGER.info("Provisioning Symphony store data for application: {}", appType);
 
     if (settings.getOwner() == null) {
-      User user = userService.getUser(appType);
-
-      if (user == null) {
-        String message = logMessage.getMessage(FAIL_GET_USER_BY_USERNAME, appType);
-        String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
-        throw new UserSearchException(message, solution);
-      }
-
-      settings.setOwner(user.getId());
+      String message = logMessage.getMessage(FAIL_GET_USER_BY_USERNAME, appType);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UserSearchException(message, solution);
     }
 
     try {

@@ -33,18 +33,20 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
+import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.yaml.Application;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
+import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.provisioning.exception.ApplicationProvisioningException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.service.AppKeyPairService;
 import org.symphonyoss.integration.provisioning.service.ApplicationService;
 import org.symphonyoss.integration.provisioning.service.CompanyCertificateService;
 import org.symphonyoss.integration.provisioning.service.ConfigurationProvisioningService;
-import org.symphonyoss.integration.provisioning.service.KeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserKeyPairService;
 import org.symphonyoss.integration.provisioning.service.UserService;
 
@@ -61,6 +63,12 @@ import java.util.Collections;
 public class IntegrationProvisioningServiceTest {
 
   private static final String MOCK_CONFIGURATION_ID = "57e82afce4b07fea0651e8ac";
+
+  private static final String MOCK_SESSION_ID = "e91687763fda309d461d5e2fc6e";
+
+  private static final String MOCK_USERNAME = "testuser";
+
+  private static final Long MOCK_USER_ID = 123456L;
 
   @Autowired
   private ApplicationContext context;
@@ -87,18 +95,28 @@ public class IntegrationProvisioningServiceTest {
   private UserService userService;
 
   @MockBean
+  private UserApiClient userApiClient;
+
+  @MockBean
   private LogMessageSource logMessage;
 
   @Autowired
   private IntegrationProvisioningService service;
 
   @Before
-  public void init() {
+  public void init() throws RemoteApiException {
     IntegrationSettings settings = new IntegrationSettings();
     settings.setConfigurationId(MOCK_CONFIGURATION_ID);
+    settings.setOwner(MOCK_USER_ID);
 
     doReturn(settings).when(configurationService).setupConfiguration(any(Application.class));
     doReturn(Boolean.TRUE).when(applicationService).updateAppSettings(any(Application.class));
+
+    User user = new User();
+    user.setId(MOCK_USER_ID);
+    user.setUserName(MOCK_USERNAME);
+
+    doReturn(user).when(userService).getUser(MOCK_USER_ID);
   }
 
   @Test
@@ -128,7 +146,7 @@ public class IntegrationProvisioningServiceTest {
   @Test
   public void testFailProvisioning() {
     doThrow(UserSearchException.class).when(userService)
-        .setupBotUser(any(IntegrationSettings.class), any(Application.class));
+        .setupBotUser(any(Application.class));
     assertFalse(service.configure());
   }
 

@@ -222,7 +222,10 @@ public class ApplicationServiceTest {
 
     doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
 
-    service.setupApplication(new IntegrationSettings(), application);
+    IntegrationSettings integrationSettings = new IntegrationSettings();
+    integrationSettings.setOwner(MOCK_USER);
+
+    service.setupApplication(integrationSettings, application);
 
     verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
   }

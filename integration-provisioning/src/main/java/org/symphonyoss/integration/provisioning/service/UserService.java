@@ -42,10 +42,13 @@ import org.symphonyoss.integration.pod.api.client.PodHttpApiClient;
 import org.symphonyoss.integration.pod.api.client.UserApiClient;
 import org.symphonyoss.integration.pod.api.model.AvatarUpdate;
 import org.symphonyoss.integration.pod.api.model.UserAttributes;
+import org.symphonyoss.integration.pod.api.model.UserCreate;
+import org.symphonyoss.integration.pod.api.model.UserDetail;
 import org.symphonyoss.integration.provisioning.exception.UpdateUserException;
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 import org.symphonyoss.integration.provisioning.exception.UsernameMismatchException;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +68,8 @@ public class UserService {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
   private static final String EMAIL_DOMAIN = "@symphony.com";
+
+  private static final String ROLE_INDIVIDUAL = "INDIVIDUAL";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -88,32 +93,29 @@ public class UserService {
   /**
    * Setup a bot user on the SBE according to the application info provided in the YAML file. If
    * the user already exists, this process should update the user attributes and avatar.
-   * @param settings Integration settings associated with the application.
-   * @param app Application details
+   * @param application Application details
    */
-  public void setupBotUser(IntegrationSettings settings, Application app) {
-    LOGGER.info("Setup new user: {}", app.getComponent());
+  public void setupBotUser(Application application) {
+    LOGGER.info("Setup new user: {}", application.getComponent());
 
-    Long userId = settings.getOwner();
+    String userName = getUsername(application);
 
-    if (userId == null) {
-      String message = logMessage.getMessage(USER_UNDEFINED_MESSAGE);
-      throw new UserSearchException(message);
+    if (StringUtils.isEmpty(userName)) {
+      userName = application.getComponent();
     }
 
-    User user = getUser(settings.getOwner());
+    User user = getUser(userName);
 
-    String name = app.getName();
-    String avatar = app.getAvatar();
+    String name = application.getName();
+    String avatar = application.getAvatar();
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     if (user == null) {
-      String message = logMessage.getMessage(USER_NOT_FOUND_MESSAGE, userId.toString());
-      throw new UserSearchException(message);
+      String emailAddress = getEmail(application, userName);
+      createUser(sessionToken, userName, avatar, emailAddress);
     } else {
-      String emailAddress = getEmail(app, user.getUsername());
+      String emailAddress = getEmail(application, user.getUsername());
       updateUser(sessionToken, user, name, avatar, emailAddress);
-      settings.setUsername(user.getUsername());
     }
   }
 
@@ -231,7 +233,8 @@ public class UserService {
   }
 
   /**
-   * Retrieve the integration username based on the application certificate or
+   * Retrieve the integration username based on the application certificate or application
+   * user name.
    * @param application
    * @return
    */
@@ -248,6 +251,39 @@ public class UserService {
     }
 
     return StringUtils.isNotEmpty(username) ? username : cname;
+  }
+
+  /**
+   * Create user
+   * @param sessionToken Token to access the User API.
+   * @param userName User  name
+   * @param avatar User avatar (Base64 encoded)
+   * @param emailAddress Email Address
+   */
+  private void createUser(String sessionToken, String userName, String avatar, String emailAddress) {
+    UserDetail user = null;
+
+    try {
+      UserAttributes userAttributes = createUserAttributes(userName, userName, emailAddress);
+      UserCreate userCreate = buildUserCreate(userAttributes);
+
+      user = userApiClient.createUser(sessionToken, userCreate);
+    } catch (RemoteApiException e) {
+      String message = logMessage.getMessage(FAIL_UPDATE_ATTRIBUTES);
+      String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
+      throw new UpdateUserException(message, e, solution);
+    }
+
+    updateUserAvatar(sessionToken, user.getUserSystemInfo().getId(), avatar);
+  }
+
+  private UserCreate buildUserCreate(UserAttributes userAttributes) {
+    UserCreate userCreate = new UserCreate();
+
+    userCreate.setUserAttributes(userAttributes);
+    userCreate.setRoles(Arrays.asList(ROLE_INDIVIDUAL));
+
+    return userCreate;
   }
 
 }
