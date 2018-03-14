@@ -24,7 +24,7 @@
                         <configuration>
                             <tasks>
                                 <echo message="Preparing Symphony CryptoLib..." />
-                                <unzip src="${project.build.outputDirectory}/lib/crypto-1.48.2.1.jar"
+                                <unzip src="${project.build.outputDirectory}/lib/crypto-1.51.2.jar"
                                        dest="${project.build.outputDirectory}" />
                                 <delete dir="${project.build.outputDirectory}/lib"/>
                             </tasks>
@@ -62,9 +62,9 @@
         <dependency>
             <groupId>com.symphony</groupId>
             <artifactId>crypto</artifactId>
-            <version>1.48.2.1</version>
+            <version>1.51.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.48.2.1.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.51.2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
