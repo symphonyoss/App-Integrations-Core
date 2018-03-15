@@ -202,7 +202,13 @@ public class CompanyCertificateService {
     }
   }
 
-  public String getPemFromPKCS12(String fileName, char[] password) {
+  /**
+   * Get a signature from X509 certificate.
+   * @param fileName path to certificate pkcs12
+   * @param password password to open certificate
+   * @return Signature of certificate
+   */
+  private String getPemFromPKCS12(String fileName, char[] password) {
     X509Certificate certificate = getX509Certificate(fileName, password);
 
     StringWriter sw = new StringWriter();
@@ -284,6 +290,12 @@ public class CompanyCertificateService {
     return getX509Certificate(fileName, password);
   }
 
+  /**
+   * Read the X509 certificate from the file name.
+   * @param fileName X509 certificate file path
+   * @param password Password to open certificate
+   * @return X509 certificate object
+   */
   private X509Certificate getX509Certificate(String fileName, char[] password) {
     try (FileInputStream inputStream = new FileInputStream(fileName)) {
       final KeyStore ks = KeyStore.getInstance(PKCS_12);
