@@ -115,11 +115,16 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isEmpty(pem)) {
-      fileName = application.getKeystore().getFile().toString();
+    if (StringUtils.isEmpty(pem) && application.getKeystore() != null) {
+      fileName = utils.getCertsDirectory() + application.getKeystore().getFile().toString();
       char[] password = application.getKeystore().getPassword().toCharArray();
 
       pem = getPemFromPKCS12(fileName, password);
+    }
+
+    if (StringUtils.isEmpty(pem)) {
+      LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+      return;
     }
 
     LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
@@ -138,11 +143,16 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isBlank(pem)) {
-      fileName = application.getAppKeystore().getFile().toString();
+    if (StringUtils.isEmpty(pem) && application.getAppKeystore() != null) {
+      fileName = utils.getCertsDirectory() + application.getAppKeystore().getFile().toString();
       char[] password = application.getAppKeystore().getPassword().toCharArray();
 
       pem = getPemFromPKCS12(fileName, password);
+    }
+
+    if (StringUtils.isEmpty(pem)) {
+      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
+      return;
     }
 
     LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
