@@ -48,11 +48,14 @@ import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -71,6 +74,8 @@ import javax.annotation.PostConstruct;
 public class CompanyCertificateService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CompanyCertificateService.class);
+
+  private static final String PKCS_12 = "pkcs12";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -110,14 +115,17 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isBlank(pem)) {
-      LOGGER.info("Skipping user certificate importing for: {}. File: {}", application.getComponent(), fileName);
-    } else {
-      LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+    if (StringUtils.isEmpty(pem)) {
+      fileName = application.getKeystore().getFile().toString();
+      char[] password = application.getKeystore().getPassword().toCharArray();
 
-      CompanyCert companyCert = buildCompanyCertificate(application.getId(), pem, CompanyCertStatus.TypeEnum.KNOWN);
-      importCertificate(companyCert);
+      pem = getPemFromPKCS12(fileName, password);
     }
+
+    LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+
+    CompanyCert companyCert = buildCompanyCertificate(application.getId(), pem, CompanyCertStatus.TypeEnum.KNOWN);
+    importCertificate(companyCert);
   }
 
   /**
@@ -131,13 +139,16 @@ public class CompanyCertificateService {
     String pem = getPem(fileName);
 
     if (StringUtils.isBlank(pem)) {
-      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
-    } else {
-      LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
+      fileName = application.getAppKeystore().getFile().toString();
+      char[] password = application.getAppKeystore().getPassword().toCharArray();
 
-      CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
-      importCertificate(companyCert);
+      pem = getPemFromPKCS12(fileName, password);
     }
+
+    LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
+
+    CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
+    importCertificate(companyCert);
   }
 
   /**
@@ -179,6 +190,21 @@ public class CompanyCertificateService {
             logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
       }
     }
+  }
+
+  public String getPemFromPKCS12(String fileName, char[] password) {
+    X509Certificate certificate = getX509Certificate(fileName, password);
+
+    StringWriter sw = new StringWriter();
+    try (JcaPEMWriter pemWriter = new JcaPEMWriter(sw)) {
+      pemWriter.writeObject(certificate);
+      pemWriter.flush();
+    } catch (IOException e) {
+      throw new CompanyCertificateException(logMessage.getMessage(FAIL_READ_CERT, fileName),
+          logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
+    }
+
+    return sw.toString();
   }
 
   /**
@@ -243,11 +269,15 @@ public class CompanyCertificateService {
       return null;
     }
 
-    String password = application.getKeystore().getPassword();
+    char[] password = application.getKeystore().getPassword().toCharArray();
 
+    return getX509Certificate(fileName, password);
+  }
+
+  private X509Certificate getX509Certificate(String fileName, char[] password) {
     try (FileInputStream inputStream = new FileInputStream(fileName)) {
-      final KeyStore ks = KeyStore.getInstance("pkcs12");
-      ks.load(inputStream, password.toCharArray());
+      final KeyStore ks = KeyStore.getInstance(PKCS_12);
+      ks.load(inputStream, password);
 
       Enumeration<String> aliases = ks.aliases();
       if (aliases.hasMoreElements()) {
