@@ -51,8 +51,10 @@ import org.symphonyoss.integration.pod.api.model.CompanyCertType;
 import org.symphonyoss.integration.provisioning.exception.CompanyCertificateException;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -129,7 +131,41 @@ public class CompanyCertificateServiceTest {
       + "aJfiCzgWhDz1fRbMjGFu9ebL91DStwoC+xRryw==\n"
       + "-----END CERTIFICATE-----\n";
 
+  private static final String EXPECTED_P12 = "-----BEGIN CERTIFICATE-----\n"
+      + "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\n"
+      + "-----END CERTIFICATE-----\n";
+
   private static final String APP_ID = "jira";
+
+  private static final String INVALID_APP_ID = "symphony";
 
   private static final String APP_TYPE = "jiraWebHookIntegration";
 
@@ -312,6 +348,36 @@ public class CompanyCertificateServiceTest {
     service.importUserCertificate(application);
   }
 
+  @Test
+  public void testUserImportCertificateFromKeystore() throws RemoteApiException {
+    application.setId(INVALID_APP_ID);
+    Keystore userKeystore = new Keystore();
+    userKeystore.setFile(MOCK_KEYSTORE_FILE);
+    userKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    application.setKeystore(userKeystore);
+
+    doAnswer(new Answer<CompanyCertDetail>() {
+      @Override
+      public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
+        CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
+
+        CompanyCertAttributes attributes = cert.getAttributes();
+
+        assertEquals(EXPECTED_P12, cert.getPem());
+        assertEquals(application.getId(), attributes.getName());
+        assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
+        assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
+
+        CompanyCertDetail result = new CompanyCertDetail();
+        result.setCompanyCertAttributes(cert.getAttributes());
+
+        return result;
+      }
+    }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
+
+    service.importUserCertificate(application);
+  }
+
   private void checkUserImportedCertificate(CompanyCert cert) {
     CompanyCertAttributes attributes = cert.getAttributes();
 
@@ -337,6 +403,35 @@ public class CompanyCertificateServiceTest {
         CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
 
         checkAppImportedCertificate(cert);
+
+        CompanyCertDetail result = new CompanyCertDetail();
+        result.setCompanyCertAttributes(cert.getAttributes());
+
+        return result;
+      }
+    }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
+
+    service.importAppCertificate(application);
+  }
+
+  @Test
+  public void testAppImportCertificateFromKeystore() throws RemoteApiException {
+    application.setId(INVALID_APP_ID);
+    Keystore appKeystore = new Keystore();
+    appKeystore.setFile(MOCK_KEYSTORE_FILE);
+    appKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    application.setAppKeystore(appKeystore);
+
+    doAnswer(new Answer<CompanyCertDetail>() {
+      @Override
+      public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
+        CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
+
+        CompanyCertAttributes attributes = cert.getAttributes();
+
+        assertEquals(EXPECTED_P12, cert.getPem());
+        assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
+        assertEquals(CompanyCertStatus.TypeEnum.TRUSTED, attributes.getStatus().getType());
 
         CompanyCertDetail result = new CompanyCertDetail();
         result.setCompanyCertAttributes(cert.getAttributes());

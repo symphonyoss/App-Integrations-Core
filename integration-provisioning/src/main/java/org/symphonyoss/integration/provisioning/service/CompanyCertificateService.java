@@ -123,7 +123,7 @@ public class CompanyCertificateService {
     }
 
     if (StringUtils.isEmpty(pem)) {
-      LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
       return;
     }
 
