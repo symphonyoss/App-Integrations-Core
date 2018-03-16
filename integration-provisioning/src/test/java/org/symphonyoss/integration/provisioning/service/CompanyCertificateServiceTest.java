@@ -24,6 +24,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .DEFAULT_USER_ID;
@@ -176,6 +177,8 @@ public class CompanyCertificateServiceTest {
   private static final String INVALID_KEYSTORE_PASSWORD = "invalidPassword";
 
   private static final String MOCK_KEYSTORE_FILE = "mock.p12";
+
+  private static final String MOCK_KEYSTORE_FILE_INVALID = "mockInvalid.p12";
 
   private static final String MOCK_WITH_EMAIL_ADDRESS_KEYSTORE_FILE = "mock-with-email_address.p12";
 
@@ -372,6 +375,20 @@ public class CompanyCertificateServiceTest {
     assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
   }
 
+  @Test
+  public void testUserImportCertificateFromKeystoreNotExists() throws RemoteApiException {
+    application.setId(INVALID_APP_ID);
+    Keystore userKeystore = new Keystore();
+    userKeystore.setFile(MOCK_KEYSTORE_FILE_INVALID);
+    userKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    application.setKeystore(userKeystore);
+
+    service.importUserCertificate(application);
+
+    ArgumentCaptor<CompanyCert> companyCert = ArgumentCaptor.forClass(CompanyCert.class);
+    verify(securityApi, times(0)).createCompanyCert(eq(MOCK_SESSION_ID), companyCert.capture());
+  }
+
   private void checkUserImportedCertificate(CompanyCert cert) {
     CompanyCertAttributes attributes = cert.getAttributes();
 
@@ -427,6 +444,20 @@ public class CompanyCertificateServiceTest {
     CompanyCertAttributes attributes = cert.getAttributes();
     assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
     assertEquals(CompanyCertStatus.TypeEnum.TRUSTED, attributes.getStatus().getType());
+  }
+
+  @Test
+  public void testAppImportCertificateFromKeyStoreNotExists() throws RemoteApiException {
+    application.setId(INVALID_APP_ID);
+    Keystore appKeystore = new Keystore();
+    appKeystore.setFile(MOCK_KEYSTORE_FILE_INVALID);
+    appKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
+    application.setAppKeystore(appKeystore);
+
+    service.importAppCertificate(application);
+
+    ArgumentCaptor<CompanyCert> companyCert = ArgumentCaptor.forClass(CompanyCert.class);
+    verify(securityApi, times(0)).createCompanyCert(eq(MOCK_SESSION_ID), companyCert.capture());
   }
 
   private void checkAppImportedCertificate(CompanyCert cert) {
