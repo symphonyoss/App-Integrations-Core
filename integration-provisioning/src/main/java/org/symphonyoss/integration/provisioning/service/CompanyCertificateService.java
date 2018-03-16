@@ -181,7 +181,7 @@ public class CompanyCertificateService {
     return application.getKeystore() != null &&
         StringUtils.isNotEmpty(application.getKeystore().getFile()) &&
         StringUtils.isNotEmpty(application.getKeystore().getPassword()) &&
-        Files.exists(Paths.get(utils.getCertsDirectory()+ application.getKeystore().getFile()));
+        Files.exists(Paths.get(utils.getCertsDirectory() + application.getKeystore().getFile()));
   }
 
   /**
