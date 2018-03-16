@@ -115,8 +115,10 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isEmpty(pem) && application.getKeystore() != null) {
-      fileName = utils.getCertsDirectory() + application.getKeystore().getFile().toString();
+    if (StringUtils.isEmpty(pem) && application.getKeystore() != null &&
+        StringUtils.isNotEmpty(application.getKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getKeystore().getPassword())) {
+      fileName = utils.getCertsDirectory() + application.getKeystore().getFile();
       char[] password = application.getKeystore().getPassword().toCharArray();
 
       pem = getPemFromPKCS12(fileName, password);
@@ -143,8 +145,10 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isEmpty(pem) && application.getAppKeystore() != null) {
-      fileName = utils.getCertsDirectory() + application.getAppKeystore().getFile().toString();
+    if (StringUtils.isEmpty(pem) && application.getAppKeystore() != null &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getPassword())) {
+      fileName = utils.getCertsDirectory() + application.getAppKeystore().getFile();
       char[] password = application.getAppKeystore().getPassword().toCharArray();
 
       pem = getPemFromPKCS12(fileName, password);
