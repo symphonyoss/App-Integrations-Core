@@ -24,6 +24,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
     .DEFAULT_USER_ID;
 
@@ -31,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -356,26 +358,18 @@ public class CompanyCertificateServiceTest {
     userKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
     application.setKeystore(userKeystore);
 
-    doAnswer(new Answer<CompanyCertDetail>() {
-      @Override
-      public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
-        CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
-
-        CompanyCertAttributes attributes = cert.getAttributes();
-
-        assertEquals(EXPECTED_P12, cert.getPem());
-        assertEquals(application.getId(), attributes.getName());
-        assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
-        assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
-
-        CompanyCertDetail result = new CompanyCertDetail();
-        result.setCompanyCertAttributes(cert.getAttributes());
-
-        return result;
-      }
-    }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
-
     service.importUserCertificate(application);
+
+    ArgumentCaptor<CompanyCert> companyCert = ArgumentCaptor.forClass(CompanyCert.class);
+    verify(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), companyCert.capture());
+
+    CompanyCert cert = companyCert.getValue();
+    assertEquals(EXPECTED_P12, cert.getPem());
+
+    CompanyCertAttributes attributes = cert.getAttributes();
+    assertEquals(application.getId(), attributes.getName());
+    assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
+    assertEquals(CompanyCertStatus.TypeEnum.KNOWN, attributes.getStatus().getType());
   }
 
   private void checkUserImportedCertificate(CompanyCert cert) {
@@ -422,25 +416,17 @@ public class CompanyCertificateServiceTest {
     appKeystore.setPassword(DEFAULT_KEYSTORE_PASSWORD);
     application.setAppKeystore(appKeystore);
 
-    doAnswer(new Answer<CompanyCertDetail>() {
-      @Override
-      public CompanyCertDetail answer(InvocationOnMock invocationOnMock) throws Throwable {
-        CompanyCert cert = invocationOnMock.getArgumentAt(1, CompanyCert.class);
-
-        CompanyCertAttributes attributes = cert.getAttributes();
-
-        assertEquals(EXPECTED_P12, cert.getPem());
-        assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
-        assertEquals(CompanyCertStatus.TypeEnum.TRUSTED, attributes.getStatus().getType());
-
-        CompanyCertDetail result = new CompanyCertDetail();
-        result.setCompanyCertAttributes(cert.getAttributes());
-
-        return result;
-      }
-    }).when(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), any(CompanyCert.class));
-
     service.importAppCertificate(application);
+
+    ArgumentCaptor<CompanyCert> companyCert = ArgumentCaptor.forClass(CompanyCert.class);
+    verify(securityApi).createCompanyCert(eq(MOCK_SESSION_ID), companyCert.capture());
+
+    CompanyCert cert = companyCert.getValue();
+    assertEquals(EXPECTED_P12, cert.getPem());
+
+    CompanyCertAttributes attributes = cert.getAttributes();
+    assertEquals(CompanyCertType.TypeEnum.USER, attributes.getType().getType());
+    assertEquals(CompanyCertStatus.TypeEnum.TRUSTED, attributes.getStatus().getType());
   }
 
   private void checkAppImportedCertificate(CompanyCert cert) {
