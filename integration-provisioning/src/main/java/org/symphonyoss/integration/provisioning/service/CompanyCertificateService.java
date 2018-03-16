@@ -48,14 +48,13 @@ import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -115,9 +114,7 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isEmpty(pem) && application.getKeystore() != null &&
-        StringUtils.isNotEmpty(application.getKeystore().getFile()) &&
-        StringUtils.isNotEmpty(application.getKeystore().getPassword())) {
+    if (StringUtils.isEmpty(pem) && shouldImportUserCertificate(application)) {
       fileName = utils.getCertsDirectory() + application.getKeystore().getFile();
       char[] password = application.getKeystore().getPassword().toCharArray();
 
@@ -145,9 +142,7 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isEmpty(pem) && application.getAppKeystore() != null &&
-        StringUtils.isNotEmpty(application.getAppKeystore().getFile()) &&
-        StringUtils.isNotEmpty(application.getAppKeystore().getPassword())) {
+    if (StringUtils.isEmpty(pem) && shouldImportAppCertificate(application)) {
       fileName = utils.getCertsDirectory() + application.getAppKeystore().getFile();
       char[] password = application.getAppKeystore().getPassword().toCharArray();
 
@@ -163,6 +158,30 @@ public class CompanyCertificateService {
 
     CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
     importCertificate(companyCert);
+  }
+
+  /**
+   * Method responsible to validate if application certificate was provided and the file exists.
+   * @param application Application settings
+   * @return boolean
+   */
+  private boolean shouldImportAppCertificate(Application application) {
+    return application.getAppKeystore() != null &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getPassword()) &&
+        Files.exists(Paths.get(utils.getCertsDirectory() + application.getAppKeystore().getFile()));
+  }
+
+  /**
+   * Method responsible to validate if user certificate was provided and the file exists.
+   * @param application Application settings
+   * @return boolean
+   */
+  private boolean shouldImportUserCertificate(Application application) {
+    return application.getKeystore() != null &&
+        StringUtils.isNotEmpty(application.getKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getKeystore().getPassword()) &&
+        Files.exists(Paths.get(utils.getCertsDirectory() + application.getKeystore().getFile()));
   }
 
   /**
