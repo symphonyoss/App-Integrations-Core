@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.symphony</groupId>
             <artifactId>crypto</artifactId>
-            <version>1.51.2</version>
+            <version>1.51.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/lib/crypto-1.51.4.jar</systemPath>
         </dependency>
