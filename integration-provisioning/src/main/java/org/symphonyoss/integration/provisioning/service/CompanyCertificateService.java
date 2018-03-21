@@ -51,6 +51,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.Principal;
@@ -71,6 +73,8 @@ import javax.annotation.PostConstruct;
 public class CompanyCertificateService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CompanyCertificateService.class);
+
+  private static final String PKCS_12 = "pkcs12";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -110,14 +114,22 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isBlank(pem)) {
-      LOGGER.info("Skipping user certificate importing for: {}. File: {}", application.getComponent(), fileName);
-    } else {
-      LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+    if (StringUtils.isEmpty(pem) && shouldImportUserCertificate(application)) {
+      fileName = utils.getCertsDirectory() + application.getKeystore().getFile();
+      char[] password = application.getKeystore().getPassword().toCharArray();
 
-      CompanyCert companyCert = buildCompanyCertificate(application.getId(), pem, CompanyCertStatus.TypeEnum.KNOWN);
-      importCertificate(companyCert);
+      pem = getPemFromPKCS12(fileName, password);
     }
+
+    if (StringUtils.isEmpty(pem)) {
+      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
+      return;
+    }
+
+    LOGGER.info("Importing user company certificate for: {}. File: {}", application.getComponent(), fileName);
+
+    CompanyCert companyCert = buildCompanyCertificate(application.getId(), pem, CompanyCertStatus.TypeEnum.KNOWN);
+    importCertificate(companyCert);
   }
 
   /**
@@ -130,14 +142,46 @@ public class CompanyCertificateService {
 
     String pem = getPem(fileName);
 
-    if (StringUtils.isBlank(pem)) {
-      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
-    } else {
-      LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
+    if (StringUtils.isEmpty(pem) && shouldImportAppCertificate(application)) {
+      fileName = utils.getCertsDirectory() + application.getAppKeystore().getFile();
+      char[] password = application.getAppKeystore().getPassword().toCharArray();
 
-      CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
-      importCertificate(companyCert);
+      pem = getPemFromPKCS12(fileName, password);
     }
+
+    if (StringUtils.isEmpty(pem)) {
+      LOGGER.info("Skipping app certificate importing for: {}. File: {}", application.getComponent(), fileName);
+      return;
+    }
+
+    LOGGER.info("Importing app certificate for: {}. File: {}", application.getComponent(), fileName);
+
+    CompanyCert companyCert = buildCompanyCertificate(certName, pem, CompanyCertStatus.TypeEnum.TRUSTED);
+    importCertificate(companyCert);
+  }
+
+  /**
+   * Method responsible to validate if application certificate was provided and the file exists.
+   * @param application Application settings
+   * @return boolean
+   */
+  private boolean shouldImportAppCertificate(Application application) {
+    return application.getAppKeystore() != null &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getAppKeystore().getPassword()) &&
+        Files.exists(Paths.get(utils.getCertsDirectory() + application.getAppKeystore().getFile()));
+  }
+
+  /**
+   * Method responsible to validate if user certificate was provided and the file exists.
+   * @param application Application settings
+   * @return boolean
+   */
+  private boolean shouldImportUserCertificate(Application application) {
+    return application.getKeystore() != null &&
+        StringUtils.isNotEmpty(application.getKeystore().getFile()) &&
+        StringUtils.isNotEmpty(application.getKeystore().getPassword()) &&
+        Files.exists(Paths.get(utils.getCertsDirectory() + application.getKeystore().getFile()));
   }
 
   /**
@@ -179,6 +223,27 @@ public class CompanyCertificateService {
             logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
       }
     }
+  }
+
+  /**
+   * Get a signature from X509 certificate.
+   * @param fileName path to certificate pkcs12
+   * @param password password to open certificate
+   * @return Signature of certificate
+   */
+  private String getPemFromPKCS12(String fileName, char[] password) {
+    X509Certificate certificate = getX509Certificate(fileName, password);
+
+    StringWriter sw = new StringWriter();
+    try (JcaPEMWriter pemWriter = new JcaPEMWriter(sw)) {
+      pemWriter.writeObject(certificate);
+      pemWriter.flush();
+    } catch (IOException e) {
+      throw new CompanyCertificateException(logMessage.getMessage(FAIL_READ_CERT, fileName),
+          logMessage.getMessage(FAIL_READ_CERT_INVALID_FILE, fileName));
+    }
+
+    return sw.toString();
   }
 
   /**
@@ -243,11 +308,21 @@ public class CompanyCertificateService {
       return null;
     }
 
-    String password = application.getKeystore().getPassword();
+    char[] password = application.getKeystore().getPassword().toCharArray();
 
+    return getX509Certificate(fileName, password);
+  }
+
+  /**
+   * Read the X509 certificate from the file name.
+   * @param fileName X509 certificate file path
+   * @param password Password to open certificate
+   * @return X509 certificate object
+   */
+  private X509Certificate getX509Certificate(String fileName, char[] password) {
     try (FileInputStream inputStream = new FileInputStream(fileName)) {
-      final KeyStore ks = KeyStore.getInstance("pkcs12");
-      ks.load(inputStream, password.toCharArray());
+      final KeyStore ks = KeyStore.getInstance(PKCS_12);
+      ks.load(inputStream, password);
 
       Enumeration<String> aliases = ks.aliases();
       if (aliases.hasMoreElements()) {
