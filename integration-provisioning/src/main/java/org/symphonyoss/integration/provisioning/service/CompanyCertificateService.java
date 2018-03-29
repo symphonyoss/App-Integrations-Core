@@ -17,12 +17,18 @@
 package org.symphonyoss.integration.provisioning.service;
 
 import static org.symphonyoss.integration.model.yaml.Keystore.DEFAULT_KEYSTORE_TYPE_SUFFIX;
-import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
-import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_IMPORT_CERT;
-import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT;
-import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT_INVALID_FILE;
-import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties.FAIL_READ_CERT_PERMISSION;
-import static org.symphonyoss.integration.provisioning.properties.IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
+import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties
+    .DEFAULT_USER_ID;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties
+    .FAIL_IMPORT_CERT;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties
+    .FAIL_READ_CERT;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties
+    .FAIL_READ_CERT_INVALID_FILE;
+import static org.symphonyoss.integration.provisioning.properties.CompanyCertificateProperties
+    .FAIL_READ_CERT_PERMISSION;
+import static org.symphonyoss.integration.provisioning.properties
+    .IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -60,6 +66,8 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +83,8 @@ public class CompanyCertificateService {
   private static final Logger LOGGER = LoggerFactory.getLogger(CompanyCertificateService.class);
 
   private static final String PKCS_12 = "pkcs12";
+
+  private static final String EMAIL_ADDRESS = "EMAILADDRESS";
 
   @Autowired
   private AuthenticationProxy authenticationProxy;
@@ -281,16 +291,15 @@ public class CompanyCertificateService {
     if (certificate != null) {
 
       String subjectDNName = certificate.getSubjectDN().getName();
-      if (!subjectDNName.contains("EMAILADDRESS")) {
-        return StringUtils.EMPTY;
+      if (subjectDNName.contains(EMAIL_ADDRESS)) {
+        Map<String, String> subjectMap = parseSubjectToMap(subjectDNName);
+
+        String emailAddress = subjectMap.get(EMAIL_ADDRESS);
+
+        if (StringUtils.isNotEmpty(emailAddress)) {
+          return emailAddress;
+        }
       }
-
-      Pattern p = Pattern.compile("(^|,)EMAILADDRESS=([^,]*)(,|$)");
-      Matcher m = p.matcher(subjectDNName);
-
-      m.find();
-
-      return m.group(2);
     }
 
     return StringUtils.EMPTY;
@@ -418,4 +427,21 @@ public class CompanyCertificateService {
     companyCert.setAttributes(attributes);
     return companyCert;
   }
+
+  /**
+   * Parse string subject to map
+   * @param subject String containing subject
+   * @return map with key and value
+   */
+  private Map<String, String> parseSubjectToMap(String subject) {
+    final Map<String, String> map = new HashMap<>();
+
+    for (String pair : subject.split(",")) {
+      String[] kv = pair.split("=");
+      map.put(StringUtils.upperCase(kv[0].trim()), kv[1].trim());
+    }
+
+    return map;
+  }
+
 }
