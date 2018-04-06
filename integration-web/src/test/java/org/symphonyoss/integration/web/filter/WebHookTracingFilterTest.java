@@ -57,8 +57,8 @@ public class WebHookTracingFilterTest {
   @Test
   public void testDoFilterNoHeaderDefaultBehavior() throws IOException, ServletException {
     webHookTracingFilter.init(null);
-    webHookTracingFilter.doFilter(mock(HttpServletRequest.class), mock(ServletResponse.class), mock(
-        FilterChain.class));
+    webHookTracingFilter.doFilter(mock(HttpServletRequest.class), mock(HttpServletResponse.class),
+        mock(FilterChain.class));
     // should have already cleared MDC after filter is done
     assertNull(MDC.get(TRACE_ID));
     webHookTracingFilter.destroy();
@@ -74,7 +74,7 @@ public class WebHookTracingFilterTest {
   @Test
   public void testDoFilterNoHeaderClearMocked() throws Exception {
     ServletRequest request = mock(HttpServletRequest.class);
-    ServletResponse response = mock(ServletResponse.class);
+    ServletResponse response = mock(HttpServletResponse.class);
     FilterChain filterChain = mock(FilterChain.class);
 
     doAnswer(new Answer<Void>() {
@@ -117,7 +117,7 @@ public class WebHookTracingFilterTest {
       }
     }).when(filterChain).doFilter(request, response);
 
-    webHookTracingFilter.doFilter(request, mock(ServletResponse.class), mock(FilterChain.class));
+    webHookTracingFilter.doFilter(request, mock(HttpServletResponse.class), mock(FilterChain.class));
   }
 
 }
