@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,8 @@ public class KmAuthHealthIndicatorTest {
 
   private static final String MOCK_AGGREGATED_URL = MOCK_SERVICE_URL + "webcontroller/HealthCheck/aggregated";
 
+  private static final String MOCK_HC_RESPONSE = "{\"keyauth\": \"true\"}";
+
   @MockBean
   private AuthenticationProxy authenticationProxy;
 
@@ -67,23 +70,26 @@ public class KmAuthHealthIndicatorTest {
   @Autowired
   private KmAuthHealthIndicator indicator;
 
-  private Invocation.Builder invocationBuilder;
+  private static Invocation.Builder invocationBuilder;
 
-  private Client client;
+  private static Client client;
 
-  private WebTarget target;
+  @BeforeClass
+  public static void setup() {
+    WebTarget target = mock(WebTarget.class);
 
-  @Before
-  public void init() {
     client = mock(Client.class);
-    target = mock(WebTarget.class);
     invocationBuilder = mock(Invocation.Builder.class);
 
-    doReturn(client).when(authenticationProxy).httpClientForUser(anyString(), eq(ServiceName.KEY_MANAGER));
     doReturn(target).when(client).target(MOCK_AGGREGATED_URL);
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
+  }
+
+  @Before
+  public void init() {
+    doReturn(client).when(authenticationProxy).httpClientForUser(anyString(), eq(ServiceName.KEY_MANAGER));
 
     // Cleanup POD version
     indicator.handleServiceVersionUpdatedEvent(
@@ -120,7 +126,6 @@ public class KmAuthHealthIndicatorTest {
     indicator.handleHealthResponse(service, "invalid");
 
     assertEquals(Status.DOWN.getCode(), service.getConnectivity());
-    verify(client, times(1)).target(MOCK_AGGREGATED_URL);
   }
 
   @Test
@@ -129,7 +134,7 @@ public class KmAuthHealthIndicatorTest {
 
     doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
-    doReturn("{\"keyauth\": \"true\"}").when(mockResponse).readEntity(String.class);
+    doReturn(MOCK_HC_RESPONSE).when(mockResponse).readEntity(String.class);
 
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
@@ -137,7 +142,6 @@ public class KmAuthHealthIndicatorTest {
     indicator.handleHealthResponse(service, "invalid");
 
     assertEquals(Status.UP.getCode(), service.getConnectivity());
-    verify(client, times(1)).target(MOCK_AGGREGATED_URL);
   }
 
   @Test
@@ -145,10 +149,9 @@ public class KmAuthHealthIndicatorTest {
     IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
-    indicator.handleHealthResponse(service, "{\"keyauth\": \"true\"}");
+    indicator.handleHealthResponse(service, MOCK_HC_RESPONSE);
 
     assertEquals(Status.UP.getCode(), service.getConnectivity());
-    verify(client, never()).target(MOCK_AGGREGATED_URL);
   }
 
   @Test
