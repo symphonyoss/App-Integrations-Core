@@ -32,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Add trace id to every request received by the integration bridge.
@@ -54,11 +55,17 @@ public class WebHookTracingFilter implements Filter {
 
     if (isBlank(xTraceInHeader)) {
       DistributedTracingUtils.setMDC();
+      xTraceInHeader = DistributedTracingUtils.getMDC();
       LOG.info("Starting trace for request {}", request.getRequestURL());
     } else {
       DistributedTracingUtils.setMDC(xTraceInHeader);
       LOG.info("Continuing trace for request {}", request.getRequestURL());
     }
+
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
+    response.setHeader(TRACE_ID, xTraceInHeader);
+    LOG.info("Trace {} added to response.", xTraceInHeader);
+
     filterChain.doFilter(servletRequest, servletResponse);
     DistributedTracingUtils.clearMDC();
   }
