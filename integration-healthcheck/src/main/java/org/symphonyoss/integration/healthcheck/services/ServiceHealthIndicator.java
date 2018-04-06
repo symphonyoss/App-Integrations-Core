@@ -197,7 +197,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
     IntegrationBridgeService service =
         new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
 
-    String healthResponse = getHealthResponse();
+    String healthCheckUrl = getHealthCheckUrl();
+    String healthResponse = getHealthResponse(healthCheckUrl);
 
     if (healthResponse == null) {
       service.setConnectivity(Status.DOWN);
@@ -256,9 +257,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   /**
    * Hits the built URL to the corresponding service.
+   * @param healthCheckUrl Health-check URL
    * @return Service health check response.
    */
-  private String getHealthResponse() {
+  protected String getHealthResponse(String healthCheckUrl) {
     Client client = getHttpClient();
 
     if (client == null) {
@@ -268,7 +270,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
     try {
       HttpClientConfig timeouts = properties.getHttpClientConfig();
-      Invocation.Builder invocationBuilder = client.target(getHealthCheckUrl())
+      Invocation.Builder invocationBuilder = client.target(healthCheckUrl)
           .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeout())
           .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeout())
           .request()
