@@ -99,7 +99,6 @@ public class NullIntegrationTest extends MockKeystore {
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
     assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
@@ -117,7 +116,6 @@ public class NullIntegrationTest extends MockKeystore {
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
     assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
@@ -138,7 +136,6 @@ public class NullIntegrationTest extends MockKeystore {
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
     assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
@@ -162,7 +159,6 @@ public class NullIntegrationTest extends MockKeystore {
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
     assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
@@ -185,7 +181,6 @@ public class NullIntegrationTest extends MockKeystore {
     IntegrationFlags flags = health.getFlags();
 
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getParserInstalled());
-    assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getConfiguratorInstalled());
     assertEquals(IntegrationFlags.ValueEnum.OK, flags.getUserCertificateInstalled());
     assertEquals(IntegrationFlags.ValueEnum.NOK, flags.getUserAuthenticated());
     assertEquals(IntegrationFlags.ValueEnum.NOT_APPLICABLE, flags.getAppCertificateInstalled());
