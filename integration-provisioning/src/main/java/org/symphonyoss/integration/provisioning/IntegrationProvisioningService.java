@@ -226,7 +226,7 @@ public class IntegrationProvisioningService {
    * @param application Application object to be filled in with pre-defined information.
    */
   private void fillInApplicationInfo(String appId, Application application) {
-    LOGGER.debug("Filling in application data for: {}", appId);
+    LOGGER.info("Filling in application data for: {}", appId);
 
     application.setId(appId);
 

@@ -127,7 +127,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   public void handleHealthCheckEvent(HealthCheckEventData event) {
     String serviceName = mountUserFriendlyServiceName();
 
-    LOG.debug("Handle health-check event. Service name: {}", serviceName);
+    LOG.info("Handle health-check event. Service name: {}", serviceName);
 
     if (serviceName.equals(event.getServiceName())) {
       retrieveServiceInfo();
@@ -192,7 +192,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Service information
    */
   private IntegrationBridgeService retrieveServiceInfo() {
-    LOG.debug("Retrieve service info: {}", getServiceName());
+    LOG.info("Retrieve service info: {}", getServiceName());
 
     IntegrationBridgeService service =
         new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
@@ -276,6 +276,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
           .request()
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
+      LOG.info("Health Check URL: ", healthCheckUrl);
       Response response = invocationBuilder.get();
 
       return retrieveHealthResponse(response);
