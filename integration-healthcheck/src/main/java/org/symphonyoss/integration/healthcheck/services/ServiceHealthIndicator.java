@@ -192,7 +192,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Service information
    */
   private IntegrationBridgeService retrieveServiceInfo() {
-    LOG.info("Retrieve service info: {}", getServiceName());
+    String serviceName = mountUserFriendlyServiceName();
+    LOG.info("Retrieve service info: {}", serviceName);
 
     IntegrationBridgeService service =
         new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
