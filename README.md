@@ -135,4 +135,23 @@ applications:
       type: pkcs12
 ```
 
+If you want to check the webhook origin, you can add the allowed_origins
+section as the example bellow and define the list of trusted origins. You can define a local whitelist for each application.
+
+The whitelist may have the origin host name, IP address or both. The IP address can be a range using CIDR notation.
+```
+applications:
+  jira:
+    state: PROVISIONED
+    keystore: 
+      file: jira.p12 
+      password: some_password
+      type: pkcs12
+      allowedOrigins:
+        - host: ec2-107-23-104-115.compute-1.amazonaws.com
+          address: 107.23.104.115
+        - address: 192.30.252.0/22
+```
+P.S. You must include a character '-' for each new entry in the list.
+
 We must now enable the 2-Way configuration within JIRA as well. Refer to [these steps](https://integrations.symphony.com/v1.0/docs/jira-application-link-configuration#section-installation-and-configuration-on-jira) for the remaining setup.
