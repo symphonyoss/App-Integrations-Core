@@ -135,8 +135,8 @@ applications:
       type: pkcs12
 ```
 
-If you want to check for the origination of webhook you should uncomment the allowed_origins
-section and define the list of trusted origins. You can define a local whitelist for each application.
+If you want to check the webhook origin, you can add the allowed_origins
+section as the example bellow and define the list of trusted origins. You can define a local whitelist for each application.
 
 The whitelist may have the origin host name, IP address or both. The IP address can be a range using CIDR notation.
 ```
