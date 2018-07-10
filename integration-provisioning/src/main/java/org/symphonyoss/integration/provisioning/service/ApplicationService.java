@@ -27,13 +27,14 @@ import static org.symphonyoss.integration.provisioning.properties.Authentication
 import static org.symphonyoss.integration.provisioning.properties
     .IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
-import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
@@ -50,6 +51,8 @@ import org.symphonyoss.integration.provisioning.exception.ApplicationProvisionin
 import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -66,7 +69,13 @@ public class ApplicationService {
 
   private static final String APP_ID = "id";
 
-  private static final String APP_GROUP_ID = "appGroupId";
+  private static final String APP_SETTINGS = "settings";
+
+  private static final String ENABLED = "enabled";
+
+  private static final String VISIBLE = "visible";
+
+  private static final String INSTALL = "install";
 
   @Autowired
   private UserService userService;
@@ -116,10 +125,28 @@ public class ApplicationService {
       AppStoreWrapper wrapper =
           AppStoreBuilder.build(application, domain, settings.getConfigurationId(), botUserId);
 
-      Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
+      Map<String, Object> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
 
       if (app != null) {
-        wrapper.setId(app.get(APP_ID));
+        if (app.get(APP_ID) != null) {
+          wrapper.setId(app.get(APP_ID).toString());
+        }
+
+        if (app.containsKey(APP_SETTINGS)) {
+          HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
+
+          if (appSettings.containsKey(ENABLED)) {
+            wrapper.getSettings().setEnabled((Boolean) appSettings.get(ENABLED));
+          }
+
+          if (appSettings.containsKey(VISIBLE)) {
+            wrapper.getSettings().setVisible((Boolean) appSettings.get(VISIBLE));
+          }
+
+          if (appSettings.containsKey(INSTALL)) {
+            wrapper.getSettings().setInstall((Boolean) appSettings.get(INSTALL));
+          }
+        }
         client.updateApp(wrapper, DEFAULT_USER_ID);
       } else {
         client.createNewApp(wrapper, DEFAULT_USER_ID);
@@ -149,15 +176,32 @@ public class ApplicationService {
     String sessionToken = authenticationProxy.getSessionToken(DEFAULT_USER_ID);
 
     try {
-      Map<String, String> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
+      Map<String, Object> app = client.getAppByAppGroupId(appType, DEFAULT_USER_ID);
 
       if (app != null) {
         AppEntitlement appEntitlement = new AppEntitlement();
         appEntitlement.setAppId(appType);
         appEntitlement.setAppName(application.getName());
-        appEntitlement.setEnable(application.isEnabled());
-        appEntitlement.setListed(application.isVisible());
-        appEntitlement.setInstall(application.isAutoInstall());
+
+        if (app.containsKey(APP_SETTINGS)) {
+          HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
+
+          if (appSettings.containsKey(ENABLED)) {
+            appEntitlement.setEnable((Boolean) appSettings.get(ENABLED));
+          }
+
+          if (appSettings.containsKey(VISIBLE)) {
+            appEntitlement.setListed((Boolean) appSettings.get(VISIBLE));
+          }
+
+          if (appSettings.containsKey(INSTALL)) {
+            appEntitlement.setInstall((Boolean) appSettings.get(INSTALL));
+          }
+        } else {
+          appEntitlement.setEnable(application.isEnabled());
+          appEntitlement.setListed(application.isVisible());
+          appEntitlement.setInstall(application.isAutoInstall());
+        }
 
         appEntitlementApi.updateAppEntitlement(sessionToken, appEntitlement);
 
