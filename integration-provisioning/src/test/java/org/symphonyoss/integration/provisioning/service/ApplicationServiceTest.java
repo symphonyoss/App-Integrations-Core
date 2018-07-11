@@ -80,6 +80,14 @@ public class ApplicationServiceTest {
 
   private static final String APP_ID = "id";
 
+  private static final String APP_SETTINGS = "settings";
+
+  private static final String ENABLED = "enabled";
+
+  private static final String VISIBLE = "visible";
+
+  private static final String INSTALL = "install";
+
   @Mock
   private AuthenticationProxy authenticationProxy;
 
@@ -170,8 +178,7 @@ public class ApplicationServiceTest {
   }
 
   @Test
-  public void testUpdateAppSettingsWithoutEnabledAndVisible()
-      throws AppRepositoryClientException, RemoteApiException {
+  public void testUpdateAppSettingsWithoutEnabledAndVisible() throws RemoteApiException {
     Application application = mockApplicationWithoutEnabledAndVisible();
 
     when(appEntitlementApi.updateAppEntitlement(anyString(), any(AppEntitlement.class))).then(new Answer<Object>() {
@@ -274,6 +281,48 @@ public class ApplicationServiceTest {
 
     IntegrationSettings integrationSettings = new IntegrationSettings();
     integrationSettings.setOwner(MOCK_USER);
+
+    service.setupApplication(integrationSettings, application);
+
+    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
+  }
+
+  @Test
+  public void testUpdateApplicationWithEnabledAndVisible()
+      throws AppRepositoryClientException, RemoteApiException {
+    User user = new User();
+    user.setId(MOCK_USER);
+
+    doReturn(user).when(userService).getUser(MOCK_APP_TYPE);
+
+    Application application = mockApplication();
+
+    Map<String, Object> app = new HashMap<>();
+    app.put(APP_ID, MOCK_APP_TYPE);
+
+    Map<String, Object> settings = new HashMap<>();
+    settings.put(ENABLED, Boolean.TRUE);
+    settings.put(INSTALL, Boolean.TRUE);
+    settings.put(VISIBLE, Boolean.TRUE);
+    app.put(APP_SETTINGS, settings);
+
+    doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
+
+    IntegrationSettings integrationSettings = new IntegrationSettings();
+    integrationSettings.setOwner(MOCK_USER);
+
+    when(appEntitlementApi.updateAppEntitlement(anyString(), any(AppEntitlement.class))).then(new Answer<Object>() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        AppEntitlement appEntitlement = (AppEntitlement) invocationOnMock.getArguments()[1];
+
+        assertEquals(Boolean.TRUE, appEntitlement.getEnable());
+        assertEquals(Boolean.TRUE, appEntitlement.getListed());
+        assertEquals(Boolean.TRUE, appEntitlement.getInstall());
+
+        return appEntitlement;
+      }
+    });
 
     service.setupApplication(integrationSettings, application);
 
