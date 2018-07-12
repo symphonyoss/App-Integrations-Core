@@ -132,7 +132,7 @@ public class ApplicationService {
           wrapper.setId((String) app.get(APP_ID));
         }
 
-        if (app.containsKey(APP_SETTINGS) && app.get(APP_SETTINGS) instanceof HashMap) {
+        if (existsAppSettings(app)) {
           HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
 
           if (appSettings.containsKey(ENABLED)) {
@@ -164,6 +164,10 @@ public class ApplicationService {
     }
   }
 
+  private boolean existsAppSettings(Map<String, Object> app) {
+    return app.containsKey(APP_SETTINGS) && app.get(APP_SETTINGS) instanceof HashMap;
+  }
+
   /**
    * Update application settings on Symphony store.
    * @param application Application object
@@ -183,7 +187,7 @@ public class ApplicationService {
         appEntitlement.setAppId(appType);
         appEntitlement.setAppName(application.getName());
 
-        if (app.containsKey(APP_SETTINGS)) {
+        if (existsAppSettings(app)) {
           HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
 
           if (appSettings.containsKey(ENABLED)) {
