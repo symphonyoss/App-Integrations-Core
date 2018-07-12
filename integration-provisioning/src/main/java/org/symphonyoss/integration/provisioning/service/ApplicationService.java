@@ -129,10 +129,10 @@ public class ApplicationService {
 
       if (app != null) {
         if (app.get(APP_ID) != null) {
-          wrapper.setId(app.get(APP_ID).toString());
+          wrapper.setId((String) app.get(APP_ID));
         }
 
-        if (app.containsKey(APP_SETTINGS)) {
+        if (app.containsKey(APP_SETTINGS) && app.get(APP_SETTINGS) instanceof HashMap) {
           HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
 
           if (appSettings.containsKey(ENABLED)) {
