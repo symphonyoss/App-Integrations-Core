@@ -121,7 +121,7 @@ public class AppRepositoryClientTest {
     Map<String, String> headers = getRequiredHeaders();
 
     AppStoreWrapper wrapper = mockAppStoreWrapper();
-    Map<String, String> expected = mockAppStoreResult(wrapper);
+    Map<String, Object> expected = mockAppStoreResult(wrapper);
 
     List data = new ArrayList();
     data.add(expected);
@@ -153,7 +153,7 @@ public class AppRepositoryClientTest {
     return result;
   }
 
-  private Map<String, String> mockAppStoreResult(AppStoreWrapper wrapper)
+  private Map<String, Object> mockAppStoreResult(AppStoreWrapper wrapper)
       throws RemoteApiException {
     String json = jsonUtils.serialize(wrapper);
     return jsonUtils.deserialize(json, Map.class);
@@ -190,9 +190,9 @@ public class AppRepositoryClientTest {
     testAppsAvailable();
 
     AppStoreWrapper wrapper = mockAppStoreWrapper();
-    Map<String, String> expected = mockAppStoreResult(wrapper);
+    Map<String, Object> expected = mockAppStoreResult(wrapper);
 
-    Map<String, String> result = repository.getAppByAppGroupId(MOCK_APP_ID, DEFAULT_USER_ID);
+    Map<String, Object> result = repository.getAppByAppGroupId(MOCK_APP_ID, DEFAULT_USER_ID);
 
     assertEquals(expected, result);
   }

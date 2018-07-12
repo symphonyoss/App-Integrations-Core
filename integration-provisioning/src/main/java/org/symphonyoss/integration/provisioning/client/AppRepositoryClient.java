@@ -93,13 +93,14 @@ public class AppRepositoryClient {
    * @return Map of the application attributes or null if have no found the application.
    * @throws AppRepositoryClientException Failed to retrieve available applications
    */
-  public Map<String, String> getAppByAppGroupId(String appGroupId, String userId) throws
+  public Map<String, Object> getAppByAppGroupId(String appGroupId, String userId) throws
       AppRepositoryClientException {
     List appsAvailable = getAppsAvailable(userId);
 
     for (Object app : appsAvailable) {
-      Map<String, String> appData = (Map<String, String>) app;
-      String currentAppGroupId = appData.get(APPS_REP_APP_GROUP_ID_PATH);
+      Map<String, Object> appData = (Map<String, Object>) app;
+
+      String currentAppGroupId = (String) appData.get(APPS_REP_APP_GROUP_ID_PATH);
 
       if (currentAppGroupId.equals(appGroupId)) {
         return appData;

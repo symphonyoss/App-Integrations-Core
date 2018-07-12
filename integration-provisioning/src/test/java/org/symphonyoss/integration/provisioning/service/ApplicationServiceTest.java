@@ -18,12 +18,17 @@ package org.symphonyoss.integration.provisioning.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.symphonyoss.integration.provisioning.properties.AuthenticationProperties.DEFAULT_USER_ID;
 
 import org.junit.Before;
@@ -31,7 +36,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.omg.CORBA.Any;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.entity.model.User;
 import org.symphonyoss.integration.exception.RemoteApiException;
@@ -71,6 +79,14 @@ public class ApplicationServiceTest {
   private static final Long MOCK_USER = 123456L;
 
   private static final String APP_ID = "id";
+
+  private static final String APP_SETTINGS = "settings";
+
+  private static final String ENABLED = "enabled";
+
+  private static final String VISIBLE = "visible";
+
+  private static final String INSTALL = "install";
 
   @Mock
   private AuthenticationProxy authenticationProxy;
@@ -123,6 +139,15 @@ public class ApplicationServiceTest {
     return application;
   }
 
+  private Application mockApplicationWithoutEnabledAndVisible() {
+    Application application = new Application();
+    application.setComponent(MOCK_APP_TYPE);
+    application.setName(MOCK_APP_NAME);
+    application.setUrl(MOCK_HOST);
+
+    return application;
+  }
+
   @Test
   public void testUpdateAppSettingsNotFound() throws AppRepositoryClientException {
     Application application = mockApplication();
@@ -150,6 +175,38 @@ public class ApplicationServiceTest {
 
     boolean result = service.updateAppSettings(application);
     assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateAppSettingsWithoutEnabledAndVisible() throws RemoteApiException {
+    Application application = mockApplicationWithoutEnabledAndVisible();
+
+    when(appEntitlementApi.updateAppEntitlement(anyString(), any(AppEntitlement.class))).then(new Answer<Object>() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        AppEntitlement appEntitlement = (AppEntitlement) invocationOnMock.getArguments()[1];
+
+        assertEquals(mockAppEntitlement().getEnable(), appEntitlement.getEnable());
+        assertEquals(mockAppEntitlement().getListed(), appEntitlement.getListed());
+        assertEquals(mockAppEntitlement().getInstall(), appEntitlement.getInstall());
+
+        return appEntitlement;
+      }
+    });
+
+    boolean result = service.updateAppSettings(application);
+    assertTrue(result);
+  }
+
+  private AppEntitlement mockAppEntitlement() {
+    AppEntitlement appEntitlement = new AppEntitlement();
+    appEntitlement.setAppId(MOCK_APP_TYPE);
+    appEntitlement.setAppName(MOCK_APP_NAME);
+    appEntitlement.setEnable(Boolean.FALSE);
+    appEntitlement.setListed(Boolean.FALSE);
+    appEntitlement.setInstall(Boolean.FALSE);
+
+    return appEntitlement;
   }
 
   @Test(expected = UserSearchException.class)
@@ -224,6 +281,48 @@ public class ApplicationServiceTest {
 
     IntegrationSettings integrationSettings = new IntegrationSettings();
     integrationSettings.setOwner(MOCK_USER);
+
+    service.setupApplication(integrationSettings, application);
+
+    verify(client, times(1)).updateApp(any(AppStoreWrapper.class), eq(DEFAULT_USER_ID));
+  }
+
+  @Test
+  public void testUpdateApplicationWithEnabledAndVisible()
+      throws AppRepositoryClientException, RemoteApiException {
+    User user = new User();
+    user.setId(MOCK_USER);
+
+    doReturn(user).when(userService).getUser(MOCK_APP_TYPE);
+
+    Application application = mockApplication();
+
+    Map<String, Object> app = new HashMap<>();
+    app.put(APP_ID, MOCK_APP_TYPE);
+
+    Map<String, Object> settings = new HashMap<>();
+    settings.put(ENABLED, Boolean.TRUE);
+    settings.put(INSTALL, Boolean.TRUE);
+    settings.put(VISIBLE, Boolean.TRUE);
+    app.put(APP_SETTINGS, settings);
+
+    doReturn(app).when(client).getAppByAppGroupId(MOCK_APP_TYPE, DEFAULT_USER_ID);
+
+    IntegrationSettings integrationSettings = new IntegrationSettings();
+    integrationSettings.setOwner(MOCK_USER);
+
+    when(appEntitlementApi.updateAppEntitlement(anyString(), any(AppEntitlement.class))).then(new Answer<Object>() {
+      @Override
+      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+        AppEntitlement appEntitlement = (AppEntitlement) invocationOnMock.getArguments()[1];
+
+        assertEquals(Boolean.TRUE, appEntitlement.getEnable());
+        assertEquals(Boolean.TRUE, appEntitlement.getListed());
+        assertEquals(Boolean.TRUE, appEntitlement.getInstall());
+
+        return appEntitlement;
+      }
+    });
 
     service.setupApplication(integrationSettings, application);
 

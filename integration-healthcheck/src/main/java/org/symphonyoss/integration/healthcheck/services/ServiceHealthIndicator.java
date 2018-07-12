@@ -277,7 +277,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
           .request()
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
-      LOG.info("Health Check URL: ", healthCheckUrl);
+      LOG.info("Health Check URL: " + healthCheckUrl);
       Response response = invocationBuilder.get();
 
       return retrieveHealthResponse(response);
