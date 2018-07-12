@@ -27,8 +27,6 @@ import static org.symphonyoss.integration.provisioning.properties.Authentication
 import static org.symphonyoss.integration.provisioning.properties
     .IntegrationProvisioningProperties.FAIL_POD_API_SOLUTION;
 
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +50,6 @@ import org.symphonyoss.integration.provisioning.exception.UserSearchException;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -133,7 +130,7 @@ public class ApplicationService {
         }
 
         if (existsAppSettings(app)) {
-          HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
+          HashMap<String, Object> appSettings = createMapToAppSettings(app);
 
           if (appSettings.containsKey(ENABLED)) {
             wrapper.getSettings().setEnabled((Boolean) appSettings.get(ENABLED));
@@ -188,7 +185,7 @@ public class ApplicationService {
         appEntitlement.setAppName(application.getName());
 
         if (existsAppSettings(app)) {
-          HashMap<String, Object> appSettings = ((HashMap<String, Object>) app.get(APP_SETTINGS));
+          HashMap<String, Object> appSettings = createMapToAppSettings(app);
 
           if (appSettings.containsKey(ENABLED)) {
             appEntitlement.setEnable((Boolean) appSettings.get(ENABLED));
@@ -218,5 +215,9 @@ public class ApplicationService {
       String solution = logMessage.getMessage(FAIL_POD_API_SOLUTION);
       throw new ApplicationProvisioningException(message, e, solution);
     }
+  }
+
+  private HashMap<String, Object> createMapToAppSettings(Map<String, Object> app) {
+    return ((HashMap<String, Object>) app.get(APP_SETTINGS));
   }
 }
