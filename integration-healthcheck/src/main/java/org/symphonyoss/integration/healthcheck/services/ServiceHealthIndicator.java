@@ -269,6 +269,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       return null;
     }
 
+    Response response = null;
     try {
       HttpClientConfig timeouts = properties.getHttpClientConfig();
       Invocation.Builder invocationBuilder = client.target(healthCheckUrl)
@@ -278,7 +279,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
           .accept(MediaType.APPLICATION_JSON_TYPE);
 
       LOG.info("Health Check URL: " + healthCheckUrl);
-      Response response = invocationBuilder.get();
+      response = invocationBuilder.get();
 
       return retrieveHealthResponse(response);
     } catch (ProcessingException e) {
@@ -286,6 +287,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
           logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()),
           e);
       return null;
+    } finally {
+      if (response != null) {
+        response.close();
+      }
     }
   }
 
