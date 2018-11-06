@@ -36,11 +36,6 @@
         </dependency>
         <dependency>
             <groupId>org.symphonyoss.symphony.integrations</groupId>
-            <artifactId>integration-trello</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.symphonyoss.symphony.integrations</groupId>
             <artifactId>integration-salesforce</artifactId>
             <version>${project.version}</version>
         </dependency>
