@@ -386,7 +386,7 @@ public class UserApiClientTest {
     expected.setUserSystemInfo(userSystemInfo);
 
     doReturn(expected).when(httpClient)
-        .doPost("/v1/admin/user/create", headerParams, Collections.<String, String>emptyMap(),
+        .doPost("/v2/admin/user/create", headerParams, Collections.<String, String>emptyMap(),
             userInfo, UserDetail.class);
 
     UserDetail result = apiClient.createUser(MOCK_SESSION, userInfo);
@@ -471,7 +471,7 @@ public class UserApiClientTest {
     UserDetail expected = new UserDetail();
     expected.setUserAttributes(userAttributes);
 
-    String path = "/v1/admin/user/" + MOCK_USER_ID + "/update";
+    String path = "/v2/admin/user/" + MOCK_USER_ID + "/update";
 
     doReturn(expected).when(httpClient)
         .doPost(path, headerParams, Collections.<String, String>emptyMap(),
