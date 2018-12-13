@@ -151,7 +151,7 @@ public class UserApiClient extends BasePodApiClient {
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
-    String path = "/v1/admin/user/create";
+    String path = "/v2/admin/user/create";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
@@ -176,7 +176,7 @@ public class UserApiClient extends BasePodApiClient {
       throw new RemoteApiException(HTTP_BAD_REQUEST_ERROR, reason, solution);
     }
 
-    String path = "/v1/admin/user/" + uid + "/update";
+    String path = "/v2/admin/user/" + uid + "/update";
 
     Map<String, String> headerParams = new HashMap<>();
     headerParams.put(SESSION_TOKEN_HEADER_PARAM, sessionToken);
