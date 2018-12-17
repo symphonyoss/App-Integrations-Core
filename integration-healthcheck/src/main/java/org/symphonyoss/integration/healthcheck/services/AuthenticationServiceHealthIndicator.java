@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.json.JsonUtils;
@@ -53,8 +54,8 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   }
 
   @Override
-  protected String retrieveHealthResponse(Response response) {
-    return response.readEntity(String.class);
+  protected String retrieveHealthResponse(ResponseEntity response) {
+    return (String) response.getBody();
   }
 
   @Override

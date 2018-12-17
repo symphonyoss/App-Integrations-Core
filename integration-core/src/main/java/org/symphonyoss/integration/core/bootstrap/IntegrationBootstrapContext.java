@@ -25,8 +25,6 @@ import static org.symphonyoss.integration.core.properties.IntegrationBootstrapCo
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .NO_INTEGRATION_FOR_BOOTSTRAP;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .POLLING_AGENT_HEALTH_CHECK;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .POLLING_STOPPED;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .POLLING_STOPPED_SOLUTION;
@@ -49,7 +47,6 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
-import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -167,7 +164,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         Integration integration = integrations.get(configurationType);
         IntegrationBootstrapInfo info =
             new IntegrationBootstrapInfo(configurationType, integration);
-        integrationsToRegister.offer(info);
+        try {
+          integrationsToRegister.offer(info, 10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+          LOGGER.warn("It's not possible to add the Integration.");
+        }
       }
 
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
@@ -302,7 +303,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       logging.logIntegration(integration);
     } catch (ConnectivityException e) {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING, integrationUser), e);
-      integrationsToRegister.offer(info);
+      try {
+        integrationsToRegister.offer(info, 10, TimeUnit.SECONDS);
+      } catch (InterruptedException e1) {
+        LOGGER.warn("It's not possible to add the Integration.");
+      }
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
@@ -318,7 +323,11 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING,
           integrationInfo.getConfigurationType()), e);
-      integrationsToRegister.offer(integrationInfo);
+      try {
+        integrationsToRegister.offer(integrationInfo,10, TimeUnit.SECONDS);
+      } catch (InterruptedException e1) {
+        LOGGER.warn("It's not possible to add the Integration.");
+      }
     } else {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
           integrationInfo.getConfigurationType()), e);

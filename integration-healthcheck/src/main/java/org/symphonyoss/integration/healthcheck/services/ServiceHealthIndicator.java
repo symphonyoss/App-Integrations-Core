@@ -27,15 +27,19 @@ import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProp
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.client.ClientProperties;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
@@ -54,9 +58,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Abstract class that holds common methods to all service health indicators.
@@ -142,8 +143,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       boolean locked = lock.tryLock(LOCK_PERIOD_SECS, TimeUnit.SECONDS);
 
       if (!locked) {
-        IntegrationBridgeService service = retrieveServiceInfo();
-        return reportServiceHealth(serviceName, service);
+        return reportServiceHealth(serviceName, serviceInfoCache);
       }
 
       long nextExecution = lastExecution + TimeUnit.SECONDS.toMillis(SERVICE_CACHE_PERIOD_SECS);
@@ -269,34 +269,32 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
       return null;
     }
 
-    Response response = null;
     try {
       HttpClientConfig timeouts = properties.getHttpClientConfig();
-      Invocation.Builder invocationBuilder = client.target(healthCheckUrl)
-          .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeout())
-          .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeout())
-          .request()
-          .accept(MediaType.APPLICATION_JSON_TYPE);
+
+      RestTemplate restTemplate = new RestTemplateBuilder()
+          .setConnectTimeout(timeouts.getConnectTimeout())
+          .setReadTimeout(timeouts.getReadTimeout())
+          .build();
 
       LOG.info("Health Check URL: " + healthCheckUrl);
-      response = invocationBuilder.get();
+      ResponseEntity response = restTemplate.getForEntity(healthCheckUrl, String.class);
 
       return retrieveHealthResponse(response);
-    } catch (ProcessingException e) {
+    } catch (Exception e) {
       LOG.error(
           logMessageSource.getMessage(PROCESSING_EXCEPTION, getHealthCheckUrl(), e.getMessage()),
           e);
       return null;
     } finally {
-      if (response != null) {
-        response.close();
+      if (client != null) {
+        client.close();
       }
     }
   }
 
-  protected String retrieveHealthResponse(Response response) {
-    Response.Status status = Response.Status.fromStatusCode(response.getStatus());
-    return OK.equals(status) ? response.readEntity(String.class) : null;
+  protected String retrieveHealthResponse(ResponseEntity response) {
+    return OK.getStatusCode() == response.getStatusCodeValue() ? (String) response.getBody() : null;
   }
 
   /**
