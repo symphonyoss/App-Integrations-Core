@@ -54,6 +54,7 @@ import org.symphonyoss.integration.webhook.exception.WebHookDisabledException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnavailableException;
 import org.symphonyoss.integration.webhook.exception.WebHookUnprocessableEntityException;
 
+import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -260,7 +261,7 @@ public abstract class WebHookResource {
   @ResponseBody
   @ExceptionHandler(
       {IntegrationBridgeUnavailableException.class, WebHookUnavailableException.class,
-          IntegrationUnavailableException.class})
+          IntegrationUnavailableException.class, ConnectException.class})
   public ResponseEntity<String> handleServiceUnavailableException(Exception ex) {
     String message = ex.getMessage();
     LOGGER.error(message);
