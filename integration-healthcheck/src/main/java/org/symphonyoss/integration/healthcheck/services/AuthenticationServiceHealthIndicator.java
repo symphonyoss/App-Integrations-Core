@@ -30,8 +30,6 @@ import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;
 
-import javax.ws.rs.core.Response;
-
 /**
  * Abstract class that holds common methods to all authentication service health indicators.
  *
