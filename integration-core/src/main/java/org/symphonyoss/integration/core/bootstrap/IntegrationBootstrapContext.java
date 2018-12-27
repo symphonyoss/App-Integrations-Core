@@ -167,7 +167,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
         Integration integration = integrations.get(configurationType);
         IntegrationBootstrapInfo info =
             new IntegrationBootstrapInfo(configurationType, integration);
-        integrationsToRegister.offer(info);
+        try {
+          integrationsToRegister.offer(info, 10, TimeUnit.SECONDS);
+        } catch (InterruptedException e1) {
+          LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
+              info.getConfigurationType()), e1);
+        }
       }
 
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
@@ -302,7 +307,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       logging.logIntegration(integration);
     } catch (ConnectivityException e) {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING, integrationUser), e);
-      integrationsToRegister.offer(info);
+      try {
+        integrationsToRegister.offer(info, 10, TimeUnit.SECONDS);
+      } catch (InterruptedException e1) {
+        LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
+            info.getConfigurationType()), e1);
+      }
     } catch (RetryLifecycleException e) {
       checkRetryAttempt(info, e);
     } catch (IntegrationRuntimeException e) {
@@ -318,7 +328,12 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     if (retryAttempts <= MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION) {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION_RETRYING,
           integrationInfo.getConfigurationType()), e);
-      integrationsToRegister.offer(integrationInfo);
+      try {
+        integrationsToRegister.offer(integrationInfo,10, TimeUnit.SECONDS);
+      } catch (InterruptedException e1) {
+        LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
+            integrationInfo.getConfigurationType()), e);
+      }
     } else {
       LOGGER.error(logMessage.getMessage(FAIL_BOOTSTRAP_INTEGRATION,
           integrationInfo.getConfigurationType()), e);

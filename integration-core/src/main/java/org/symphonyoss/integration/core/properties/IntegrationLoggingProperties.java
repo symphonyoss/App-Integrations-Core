@@ -25,6 +25,7 @@ import org.symphonyoss.integration.core.bootstrap.IntegrationLogging;
 public class IntegrationLoggingProperties {
   public static final String INTEGRATION_HEALTH_STATUS  = "core.integrationlogging.integration.health.status";
   public static final String FAIL_LOG_INTEGRATION_HEALTH = "core.integrationlogging.fail.log.integration.health";
+  public static final String FAIL_TO_ADD_INTEGRATION_ON_QUEUE = "core.integrationlogging.fail.log.integration.health.add.queue";
   public static final String APPLICATION_HEALTH_CORE = "core.integrationlogging.application.health.status";
   public static final String FAIL_LOG_APPLICATION_HEALTH = "core.integrationlogging.fail.log.application.health";
   public static final String PERFORM_HEALTH_LOGGING = "core.integrationlogging.fail.perform.health.logging";
