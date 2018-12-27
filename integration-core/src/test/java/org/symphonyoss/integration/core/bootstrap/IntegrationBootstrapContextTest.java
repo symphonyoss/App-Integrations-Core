@@ -325,7 +325,7 @@ public class IntegrationBootstrapContextTest {
     verify(metricsController, times(1)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
     verify(integration, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 2)).onCreate(TEST_USER);
     verify(integrationsToRegister, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 2))
-        .offer(any(IntegrationBootstrapInfo.class));
+        .offer(any(IntegrationBootstrapInfo.class), any(Integer.class), any(TimeUnit.class));
   }
 
   /**
@@ -349,7 +349,7 @@ public class IntegrationBootstrapContextTest {
     verify(metricsController, times(0)).addIntegrationTimer(WEBHOOKINTEGRATION_TYPE_JIRA);
     verify(this.integration, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 1)).onCreate(TEST_USER);
     verify(integrationsToRegister, times(MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION + 1))
-        .offer(any(IntegrationBootstrapInfo.class));
+        .offer(any(IntegrationBootstrapInfo.class), any(Integer.class), any(TimeUnit.class));
   }
 
   /**
