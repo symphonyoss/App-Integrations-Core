@@ -23,6 +23,8 @@ import static org.symphonyoss.integration.core.properties.IntegrationLoggingProp
 import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
     .FAIL_LOG_INTEGRATION_HEALTH;
 import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
+    .FAIL_TO_ADD_INTEGRATION_ON_QUEUE;
+import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
     .INTEGRATION_HEALTH_STATUS;
 import static org.symphonyoss.integration.core.properties.IntegrationLoggingProperties
     .PERFORM_HEALTH_LOGGING;
@@ -82,7 +84,12 @@ public class IntegrationLogging {
     if (ready.get()) {
       logIntegrationHealthCheck(integration);
     } else {
-      queue.offer(integration);
+      try {
+        queue.offer(integration, 10, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        LOGGER.error(
+            logMessage.getMessage(FAIL_TO_ADD_INTEGRATION_ON_QUEUE, integration.getSettings().getName()), e);
+      }
     }
   }
 
