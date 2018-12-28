@@ -182,6 +182,10 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Service health
    */
   private Health reportServiceHealth(String serviceName, IntegrationBridgeService service) {
+    if (service == null) {
+      service = new IntegrationBridgeService(getMinVersion(), getServiceBaseUrl());
+    }
+
     return Health.status(service.getConnectivity())
         .withDetail(serviceName, service)
         .build();
