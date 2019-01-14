@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,28 +27,36 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.healthcheck.services.indicators.AgentHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link PodHealthIndicator}
+ * Test class to validate {@link AgentHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodHealthIndicator.class})
-public class PodHealthIndicatorTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, AgentHealthIndicator.class})
+public class AgentHealthIndicatorTest {
 
-  private static final String MOCK_VERSION = "1.44.0";
+  private static final String MOCK_VERSION = "1.45.0-SNAPSHOT";
 
-  private static final ServiceName SERVICE_NAME = ServiceName.POD;
+  private static final ServiceName SERVICE_NAME = ServiceName.AGENT;
 
-  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443";
+  private static final String AGENT_MESSAGEML_VERSION2 = "1.46.0";
 
-  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/webcontroller/HealthCheck/version";
+  private static final String AGENT_MESSAGEML_VERSION2_SNAPSHOT = "1.46.0-SNAPSHOT";
+
+  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:8444/agent";
+
+  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/v1/HealthCheck";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -56,7 +65,14 @@ public class PodHealthIndicatorTest {
   private LogMessageSource logMessageSource;
 
   @Autowired
-  private PodHealthIndicator indicator;
+  private AgentHealthIndicator indicator;
+
+  private MockApplicationPublisher<MessageMLVersionUpdatedEventData> publisher = new MockApplicationPublisher<>();
+
+  @Before
+  public void init() {
+    ReflectionTestUtils.setField(indicator, "publisher", publisher);
+  }
 
   @Test
   public void testHealthCheckUrl() {
@@ -77,4 +93,5 @@ public class PodHealthIndicatorTest {
   public void testServiceBaseUrl() {
     assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
   }
+
 }

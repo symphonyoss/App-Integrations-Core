@@ -27,7 +27,7 @@ import org.springframework.boot.actuate.health.Status;
  *
  * Created by rsanchez on 27/01/17.
  */
-public class IntegrationBridgeService {
+public class IntegrationBridgeServiceInfo {
 
   /**
    * Current version not available
@@ -48,7 +48,7 @@ public class IntegrationBridgeService {
 
   private String url;
 
-  public IntegrationBridgeService(String minVersion, String url) {
+  public IntegrationBridgeServiceInfo(String minVersion, String url) {
     this.minVersion = minVersion;
     this.url = url;
   }
@@ -118,7 +118,7 @@ public class IntegrationBridgeService {
       return false;
     }
 
-    IntegrationBridgeService service = (IntegrationBridgeService) o;
+    IntegrationBridgeServiceInfo service = (IntegrationBridgeServiceInfo) o;
 
     if (connectivity != null ? !connectivity.equals(service.connectivity) : service.connectivity != null) {
       return false;
@@ -141,7 +141,7 @@ public class IntegrationBridgeService {
 
   @Override
   public String toString() {
-    return "IntegrationBridgeService{" +
+    return "IntegrationBridgeServiceInfo{" +
         "connectivity=" + connectivity +
         ", currentVersion='" + currentVersion + '\'' +
         ", minVersion='" + minVersion + '\'' +

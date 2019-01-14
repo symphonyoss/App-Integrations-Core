@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -44,6 +44,10 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodHealthIndicator;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -117,7 +121,8 @@ public class ServiceHealthIndicatorTest {
     doThrow(UnregisteredUserAuthException.class).when(authenticationProxy)
         .httpClientForUser(anyString(), any(ServiceName.class));
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected =
@@ -141,7 +146,8 @@ public class ServiceHealthIndicatorTest {
   public void testConnectivityException() {
     doThrow(ProcessingException.class).when(invocationBuilder).get();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected =
@@ -156,7 +162,8 @@ public class ServiceHealthIndicatorTest {
     Response responseError = Response.serverError().build();
     doReturn(responseError).when(invocationBuilder).get();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
 
     Health expected =
@@ -170,7 +177,8 @@ public class ServiceHealthIndicatorTest {
   public void testServiceUp() {
     mockServiceUp();
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
 
@@ -205,7 +213,8 @@ public class ServiceHealthIndicatorTest {
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{}").when(mockResponse).readEntity(String.class);
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
 
     Health expected =
@@ -245,7 +254,8 @@ public class ServiceHealthIndicatorTest {
 
   @Test
   public void testCachedResult() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
 

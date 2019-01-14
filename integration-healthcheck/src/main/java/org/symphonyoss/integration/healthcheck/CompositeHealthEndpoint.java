@@ -29,7 +29,6 @@ import org.symphonyoss.integration.healthcheck.application.ApplicationsHealthInd
 import org.symphonyoss.integration.healthcheck.services.CompositeServiceHealthIndicator;
 
 import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * Customized health endpoint to aggregate the information about the current deployed

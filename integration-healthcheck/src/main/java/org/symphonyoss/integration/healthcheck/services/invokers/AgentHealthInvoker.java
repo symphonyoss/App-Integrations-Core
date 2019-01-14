@@ -14,41 +14,43 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
+import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for Key Manager.
+ * Service health indicator for Agent.
  *
  * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class KmHealthIndicator extends ServiceHealthIndicator {
+public class AgentHealthInvoker extends ServiceHealthInvoker {
 
-  public static final String KM_URL_PATH = "/HealthCheck/version";
+  private static final String AGENT_URL_PATH = "/v1/HealthCheck";
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.KEY_MANAGER;
+    return ServiceName.AGENT;
   }
 
   @Override
   protected String getMinVersion() {
-    return properties.getKeyManager().getMinVersion();
+    return properties.getAgent().getMinVersion();
   }
 
   @Override
   protected String getHealthCheckUrl() {
-    return getServiceBaseUrl() + KM_URL_PATH;
+    return getServiceBaseUrl() + AGENT_URL_PATH;
   }
 
   @Override
   protected String getServiceBaseUrl() {
-    return properties.getKeyManagerUrl();
+    return properties.getAgentUrl();
   }
 
 }

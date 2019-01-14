@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.healthcheck.services.invocations;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.IO_EXCEPTION;
@@ -13,10 +13,12 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -34,23 +36,24 @@ import javax.ws.rs.core.Response;
 public abstract class ServiceHealthInvoker {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHealthInvoker.class);
 
-  @Autowired
-  private IntegrationProperties properties;
+  /**
+   * Version field
+   */
+  private static final String VERSION = "version";
 
   @Autowired
-  private AuthenticationProxy authenticationProxy;
+  protected IntegrationProperties properties;
 
   @Autowired
-  private ApplicationEventPublisher publisher;
+  protected AuthenticationProxy authenticationProxy;
 
   @Autowired
-  private LogMessageSource logMessageSource;
+  protected ApplicationEventPublisher publisher;
 
-  private ServiceName serviceName;
+  @Autowired
+  protected LogMessageSource logMessageSource;
 
-  public ServiceHealthInvoker(ServiceName serviceName) {
-    this.serviceName = serviceName;
-  }
+  protected String currentVersion;
 
   /**
    * Gets the HTTP client to be used on health checks, looking on the YAML file for a
@@ -65,7 +68,7 @@ public abstract class ServiceHealthInvoker {
       }
 
       try {
-        return authenticationProxy.httpClientForUser(app.getComponent(), this.serviceName);
+        return authenticationProxy.httpClientForUser(app.getComponent(), getServiceName());
       } catch (UnregisteredUserAuthException e) {
         LOG.warn(logMessageSource.getMessage(UNREGISTERED_USER, app.getComponent()));
       }
@@ -152,6 +155,19 @@ public abstract class ServiceHealthInvoker {
   }
 
   /**
+   * Handle health check response.
+   * @param service Service information
+   * @param healthResponse Health check response
+   */
+  protected void handleHealthResponse(IntegrationBridgeServiceInfo service, String healthResponse) {
+    service.setConnectivity(Status.UP);
+  }
+
+  public String getCurrentVersion() {
+    return currentVersion;
+  }
+
+  /**
    * Returns the service name.
    * @return Service name
    */
@@ -170,6 +186,12 @@ public abstract class ServiceHealthInvoker {
    * @return Minimum required version for this service.
    */
   protected abstract String getMinVersion();
+
+  /**
+   * Build the base URL for the service.
+   * @return the base URL for the service.
+   */
+  protected abstract String getServiceBaseUrl();
 
   /**
    * Build the specific health check URL for the component which compatibility will be checked for.

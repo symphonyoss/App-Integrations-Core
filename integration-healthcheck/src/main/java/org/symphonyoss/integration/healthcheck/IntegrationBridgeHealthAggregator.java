@@ -23,7 +23,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
-import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeService;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
     Health.Builder builder = retrieveIntegrationBridgeStatus(healthApplications, healthServices);
 
     List<IntegrationHealth> appsHealth = getApplicationsHealth(healthApplications);
-    Map<String, IntegrationBridgeService> services = getServicesHealth(healthServices);
+    Map<String, IntegrationBridgeServiceInfo> services = getServicesHealth(healthServices);
 
     return builder.withDetail(VERSION, bridgeVersion)
         .withDetail(SERVICES, services)
@@ -141,12 +141,12 @@ public class IntegrationBridgeHealthAggregator implements HealthAggregator {
    * @param healthServices Health aggregator from all the services
    * @return Services statuses.
    */
-  private Map<String, IntegrationBridgeService> getServicesHealth(Health healthServices) {
-    Map<String, IntegrationBridgeService> services = new LinkedHashMap<>();
+  private Map<String, IntegrationBridgeServiceInfo> getServicesHealth(Health healthServices) {
+    Map<String, IntegrationBridgeServiceInfo> services = new LinkedHashMap<>();
     Map<String, Object> details = healthServices.getDetails();
 
     for (Map.Entry<String, Object> entry : details.entrySet()) {
-      IntegrationBridgeService service = (IntegrationBridgeService) entry.getValue();
+      IntegrationBridgeServiceInfo service = (IntegrationBridgeServiceInfo) entry.getValue();
       services.put(entry.getKey(), service);
     }
 

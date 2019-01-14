@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,26 +28,27 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link KmHealthIndicator}
+ * Test class to validate {@link PodHealthIndicator}
  * Created by rsanchez on 23/11/16.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, KmHealthIndicator.class})
-public class KmHealthIndicatorTest {
+@ContextConfiguration(classes = {IntegrationProperties.class, PodHealthIndicator.class})
+public class PodHealthIndicatorTest {
 
-  private static final String MOCK_VERSION = "1.45.0";
+  private static final String MOCK_VERSION = "1.44.0";
 
-  private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER;
+  private static final ServiceName SERVICE_NAME = ServiceName.POD;
 
-  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443/relay";
+  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443";
 
-  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/HealthCheck/version";
+  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/webcontroller/HealthCheck/version";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -57,7 +57,7 @@ public class KmHealthIndicatorTest {
   private LogMessageSource logMessageSource;
 
   @Autowired
-  private KmHealthIndicator indicator;
+  private PodHealthIndicator indicator;
 
   @Test
   public void testHealthCheckUrl() {

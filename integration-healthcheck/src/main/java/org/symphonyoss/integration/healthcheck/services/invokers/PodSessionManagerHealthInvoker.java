@@ -14,44 +14,50 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
-import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for Agent.
+ * Service health indicator for POD Session Manager.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by rsanchez on 30/10/17.
  */
 @Component
 @Lazy
-public class AgentHealthIndicator extends ServiceHealthIndicator {
+public class PodSessionManagerHealthInvoker extends AuthenticationServiceHealthInvoker {
 
-  private static final String AGENT_URL_PATH = "/v1/HealthCheck";
-
-  public static final Version AGENT_MESSAGEML_VERSION2 = Version.valueOf("1.46.0");
+  private static final String SERVICE_FIELD = "sessionauth";
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.AGENT;
+    return ServiceName.POD;
+  }
+
+  @Override
+  protected String getFriendlyServiceName() {
+    return ServiceName.POD_SESSION_MANAGER.toString();
   }
 
   @Override
   protected String getMinVersion() {
-    return properties.getAgent().getMinVersion();
-  }
+    if (currentVersion != null) {
+      return properties.getPodSessionManager().getMinVersion();
+    }
 
-  @Override
-  protected String getHealthCheckUrl() {
-    return getServiceBaseUrl() + AGENT_URL_PATH;
+    return null;
   }
 
   @Override
   protected String getServiceBaseUrl() {
-    return properties.getAgentUrl();
+    return properties.getSessionManagerAuthUrl();
   }
 
+  @Override
+  protected String getServiceField() {
+    return SERVICE_FIELD;
+  }
 }

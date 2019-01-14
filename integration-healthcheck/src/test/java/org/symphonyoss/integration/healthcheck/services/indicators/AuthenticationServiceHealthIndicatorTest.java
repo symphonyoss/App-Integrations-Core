@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
 /**
@@ -50,7 +51,8 @@ public class AuthenticationServiceHealthIndicatorTest {
 
   @Test
   public void testInvalidHealthResponse() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "invalid");
@@ -60,7 +62,8 @@ public class AuthenticationServiceHealthIndicatorTest {
 
   @Test
   public void testUnknownHealthResponse() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "{ \"pod\":true }");
@@ -70,7 +73,8 @@ public class AuthenticationServiceHealthIndicatorTest {
 
   @Test
   public void testDown() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "{ \"sessionauth\": false }");
@@ -80,7 +84,8 @@ public class AuthenticationServiceHealthIndicatorTest {
 
   @Test
   public void testUp() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "{ \"sessionauth\": true }");

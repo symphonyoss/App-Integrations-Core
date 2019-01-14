@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -32,6 +32,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodHealthIndicator;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodSessionManagerHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 

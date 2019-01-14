@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.IO_EXCEPTION;
 
@@ -25,6 +25,8 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;
@@ -36,9 +38,9 @@ import javax.ws.rs.core.Response;
  *
  * Created by rsanchez on 30/10/17.
  */
-public abstract class AuthenticationServiceHealthIndicator extends ServiceHealthIndicator {
+public abstract class AuthenticationServiceHealthInvoker extends ServiceHealthInvoker {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceHealthIndicator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceHealthInvoker.class);
 
   private static final String HC_AGGREGATED_URL_PATH = "/webcontroller/HealthCheck/aggregated";
 
@@ -58,7 +60,7 @@ public abstract class AuthenticationServiceHealthIndicator extends ServiceHealth
   }
 
   @Override
-  protected void handleHealthResponse(IntegrationBridgeService service, String healthResponse) {
+  protected void handleHealthResponse(IntegrationBridgeServiceInfo service, String healthResponse) {
     try {
       JsonNode node = JsonUtils.readTree(healthResponse);
       boolean serviceField = node.path(getServiceField()).asBoolean();

@@ -14,49 +14,42 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for POD Session Manager.
+ * Service health indicator for Key Manager.
  *
- * Created by rsanchez on 30/10/17.
+ * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class PodSessionManagerHealthIndicator extends AuthenticationServiceHealthIndicator {
+public class KmHealthInvoker extends ServiceHealthInvoker {
 
-  private static final String SERVICE_FIELD = "sessionauth";
+  public static final String KM_URL_PATH = "/HealthCheck/version";
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.POD;
-  }
-
-  @Override
-  protected String getFriendlyServiceName() {
-    return ServiceName.POD_SESSION_MANAGER.toString();
+    return ServiceName.KEY_MANAGER;
   }
 
   @Override
   protected String getMinVersion() {
-    if (currentVersion != null) {
-      return properties.getPodSessionManager().getMinVersion();
-    }
+    return properties.getKeyManager().getMinVersion();
+  }
 
-    return null;
+  @Override
+  protected String getHealthCheckUrl() {
+    return getServiceBaseUrl() + KM_URL_PATH;
   }
 
   @Override
   protected String getServiceBaseUrl() {
-    return properties.getSessionManagerAuthUrl();
+    return properties.getKeyManagerUrl();
   }
 
-  @Override
-  protected String getServiceField() {
-    return SERVICE_FIELD;
-  }
 }

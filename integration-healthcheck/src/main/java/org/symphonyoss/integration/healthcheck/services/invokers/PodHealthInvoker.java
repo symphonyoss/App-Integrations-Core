@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
  */
 @Component
 @Lazy
-public class PodHealthIndicator extends ServiceHealthIndicator {
+public class PodHealthInvoker extends ServiceHealthInvoker {
 
   private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
 

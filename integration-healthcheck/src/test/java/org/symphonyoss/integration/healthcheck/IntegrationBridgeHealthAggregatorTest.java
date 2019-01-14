@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeService;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class IntegrationBridgeHealthAggregatorTest {
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.DOWN, appsHealth);
 
-    Map<String, IntegrationBridgeService> services = mockServices();
+    Map<String, IntegrationBridgeServiceInfo> services = mockServices();
     Health healthServices = mockServicesHealth(Status.UP, services);
 
     Map<String, Health> healths = new HashMap<>();
@@ -94,7 +94,7 @@ public class IntegrationBridgeHealthAggregatorTest {
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.UP, appsHealth);
 
-    Map<String, IntegrationBridgeService> services = mockServices();
+    Map<String, IntegrationBridgeServiceInfo> services = mockServices();
     Health healthServices = mockServicesHealth(Status.DOWN, services);
 
     Map<String, Health> healths = new HashMap<>();
@@ -115,7 +115,7 @@ public class IntegrationBridgeHealthAggregatorTest {
     List<IntegrationHealth> appsHealth = mockApplications();
     Health healthApplications = mockAppsHealth(Status.UP, appsHealth);
 
-    Map<String, IntegrationBridgeService> services = mockServices();
+    Map<String, IntegrationBridgeServiceInfo> services = mockServices();
     Health healthServices = mockServicesHealth(Status.UP, services);
 
     Map<String, Health> healths = new HashMap<>();
@@ -156,20 +156,20 @@ public class IntegrationBridgeHealthAggregatorTest {
     return builder.build();
   }
 
-  private Map<String, IntegrationBridgeService> mockServices() {
-    Map<String, IntegrationBridgeService> services = new LinkedHashMap<>();
+  private Map<String, IntegrationBridgeServiceInfo> mockServices() {
+    Map<String, IntegrationBridgeServiceInfo> services = new LinkedHashMap<>();
 
-    services.put(AGENT_SERVICE, new IntegrationBridgeService(MOCK_VERSION, AGENT_URL));
-    services.put(KM_SERVICE, new IntegrationBridgeService(MOCK_VERSION, KM_URL));
-    services.put(POD_SERVICE, new IntegrationBridgeService(MOCK_VERSION, POD_URL));
+    services.put(AGENT_SERVICE, new IntegrationBridgeServiceInfo(MOCK_VERSION, AGENT_URL));
+    services.put(KM_SERVICE, new IntegrationBridgeServiceInfo(MOCK_VERSION, KM_URL));
+    services.put(POD_SERVICE, new IntegrationBridgeServiceInfo(MOCK_VERSION, POD_URL));
 
     return services;
   }
 
-  private Health mockServicesHealth(Status status, Map<String, IntegrationBridgeService> services) {
+  private Health mockServicesHealth(Status status, Map<String, IntegrationBridgeServiceInfo> services) {
     Health.Builder builder = Health.status(status);
 
-    for (Map.Entry<String, IntegrationBridgeService> entry : services.entrySet()) {
+    for (Map.Entry<String, IntegrationBridgeServiceInfo> entry : services.entrySet()) {
       builder = builder.withDetail(entry.getKey(), entry.getValue());
     }
 

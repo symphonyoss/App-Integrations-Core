@@ -1,4 +1,4 @@
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -7,8 +7,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
@@ -22,10 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.indicators.KmAuthHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -104,7 +103,8 @@ public class KmAuthHealthIndicatorTest {
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("invalid").when(mockResponse).readEntity(String.class);
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "invalid");
@@ -120,7 +120,8 @@ public class KmAuthHealthIndicatorTest {
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{\"pod\": \"true\"}").when(mockResponse).readEntity(String.class);
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "invalid");
@@ -136,7 +137,8 @@ public class KmAuthHealthIndicatorTest {
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn(MOCK_HC_RESPONSE).when(mockResponse).readEntity(String.class);
 
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, "invalid");
@@ -146,7 +148,8 @@ public class KmAuthHealthIndicatorTest {
 
   @Test
   public void testServiceUp() {
-    IntegrationBridgeService service = new IntegrationBridgeService(MOCK_VERSION, MOCK_SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_URL);
     assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
 
     indicator.handleHealthResponse(service, MOCK_HC_RESPONSE);
