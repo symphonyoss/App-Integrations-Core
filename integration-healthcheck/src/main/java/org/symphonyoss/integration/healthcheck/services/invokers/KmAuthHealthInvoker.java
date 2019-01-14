@@ -6,12 +6,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;
 
+/**
+ * Service health invoker for Key Manager Authentication.
+ *
+ * Created by luanapp on 14/01/19.
+ */
+@Component
+@Lazy
 public class KmAuthHealthInvoker extends AuthenticationServiceHealthInvoker {
 
   private static final Logger LOG = LoggerFactory.getLogger(KmAuthHealthInvoker.class);

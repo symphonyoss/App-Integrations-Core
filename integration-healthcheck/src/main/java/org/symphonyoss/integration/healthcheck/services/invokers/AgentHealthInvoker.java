@@ -16,16 +16,14 @@
 
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
-import com.github.zafarkhaja.semver.Version;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
-import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for Agent.
+ * Service health invoker for Agent.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by luanapp on 14/01/2019.
  */
 @Component
 @Lazy

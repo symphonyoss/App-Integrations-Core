@@ -21,9 +21,9 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
- * Service health indicator for POD.
+ * Service health invoker for POD.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by luanapp on 14/01/2019.
  */
 @Component
 @Lazy

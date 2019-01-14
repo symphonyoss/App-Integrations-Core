@@ -22,9 +22,9 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for Key Manager.
+ * Service health invoker for Key Manager.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by luanapp on 14/01/19..
  */
 @Component
 @Lazy

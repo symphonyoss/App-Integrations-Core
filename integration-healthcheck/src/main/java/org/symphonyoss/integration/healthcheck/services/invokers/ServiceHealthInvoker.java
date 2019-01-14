@@ -33,6 +33,11 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * Abstract class that holds common methods to all service health invokers.
+ *
+ * Created by luanapp on 14/01/19.
+ */
 public abstract class ServiceHealthInvoker {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHealthInvoker.class);
 
