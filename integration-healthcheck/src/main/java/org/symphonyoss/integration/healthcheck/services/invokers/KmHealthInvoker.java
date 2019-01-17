@@ -16,6 +16,8 @@
 
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
@@ -27,10 +29,13 @@ import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealth
  * Created by luanapp on 14/01/19..
  */
 @Component
-@Lazy
 public class KmHealthInvoker extends ServiceHealthInvoker {
 
   public static final String KM_URL_PATH = "/HealthCheck/version";
+
+  @Autowired
+  @Qualifier("kmHealthIndicator")
+  private ServiceHealthIndicator healthIndicator;
 
   @Override
   protected ServiceName getServiceName() {
@@ -45,6 +50,11 @@ public class KmHealthInvoker extends ServiceHealthInvoker {
   @Override
   protected String getHealthCheckUrl() {
     return getServiceBaseUrl() + KM_URL_PATH;
+  }
+
+  @Override
+  protected ServiceHealthIndicator getHealthIndicator() {
+    return healthIndicator;
   }
 
   @Override

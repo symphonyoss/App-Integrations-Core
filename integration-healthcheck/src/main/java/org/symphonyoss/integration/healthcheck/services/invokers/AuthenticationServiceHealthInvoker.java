@@ -26,7 +26,6 @@ import org.springframework.context.event.EventListener;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
-import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;

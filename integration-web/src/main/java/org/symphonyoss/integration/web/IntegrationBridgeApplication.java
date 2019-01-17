@@ -18,6 +18,7 @@ package org.symphonyoss.integration.web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.symphonyoss.integration.web.listener.ApplicationReadyListener;
 import org.symphonyoss.integration.web.listener.BootstrapApplicationListener;
 

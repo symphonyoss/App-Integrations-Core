@@ -5,11 +5,14 @@ import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProp
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.json.JsonUtils;
 
 import java.io.IOException;
@@ -20,7 +23,6 @@ import java.io.IOException;
  * Created by luanapp on 14/01/19.
  */
 @Component
-@Lazy
 public class KmAuthHealthInvoker extends AuthenticationServiceHealthInvoker {
 
   private static final Logger LOG = LoggerFactory.getLogger(KmAuthHealthInvoker.class);
@@ -28,10 +30,18 @@ public class KmAuthHealthInvoker extends AuthenticationServiceHealthInvoker {
   private static final String HC_AGGREGATED_URL_PATH = "/webcontroller/HealthCheck/aggregated";
   private static final String HC_URL_PATH = "/HealthCheck/aggregated";
 
+  @Autowired
+  @Qualifier("kmAuthHealthIndicator")
+  private ServiceHealthIndicator healthIndicator;
 
   @Override
   protected String getHealthCheckUrl() {
     return properties.getKeyManagerUrl() + HC_URL_PATH;
+  }
+
+  @Override
+  protected ServiceHealthIndicator getHealthIndicator() {
+    return healthIndicator;
   }
 
   @Override

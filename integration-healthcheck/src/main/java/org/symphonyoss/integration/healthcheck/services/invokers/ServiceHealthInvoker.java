@@ -15,10 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.json.JsonUtils;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.Application;
@@ -85,6 +87,43 @@ public abstract class ServiceHealthInvoker {
   protected String retrieveHealthResponse(Response response) {
     Response.Status status = Response.Status.fromStatusCode(response.getStatus());
     return OK.equals(status) ? response.readEntity(String.class) : null;
+  }
+
+  @Scheduled(initialDelay = 1000, fixedDelay = 1000)
+  public void getServiceHealth() {
+    IntegrationBridgeServiceInfo serviceInfo = retrieveServiceInfo();
+    System.out.println(serviceInfo);
+  }
+
+  /**
+   * Retrieves the service information like connectivity, current version, and compatibility.
+   * @return Service information
+   */
+  private IntegrationBridgeServiceInfo retrieveServiceInfo() {
+    String serviceName = mountUserFriendlyServiceName();
+    LOG.info("Retrieve service info: {}", serviceName);
+
+    IntegrationBridgeServiceInfo service =
+        new IntegrationBridgeServiceInfo(getMinVersion(), getServiceBaseUrl());
+
+    String healthCheckUrl = getHealthCheckUrl();
+    String healthResponse = getHealthResponse(healthCheckUrl);
+
+    if (healthResponse == null) {
+      service.setConnectivity(Status.DOWN);
+    } else {
+      handleHealthResponse(service, healthResponse);
+
+      String version = retrieveCurrentVersion(healthResponse);
+
+//      if (StringUtils.isNotEmpty(version)) {
+//        fireUpdatedServiceVersionEvent(version);
+//      }
+
+      service.setCurrentVersion(version);
+    }
+
+    return service;
   }
 
   /**
@@ -203,4 +242,10 @@ public abstract class ServiceHealthInvoker {
    * @return the built health check URL.
    */
   protected abstract String getHealthCheckUrl();
+
+  /**
+   * Retrieve the health indicator which has the information to be displayed in the health check
+   * @return {@link ServiceHealthIndicator indicator for this hea}
+   */
+  protected abstract ServiceHealthIndicator getHealthIndicator();
 }

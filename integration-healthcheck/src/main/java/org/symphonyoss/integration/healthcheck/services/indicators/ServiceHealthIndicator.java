@@ -25,8 +25,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.config.CachingConfiguration;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -57,15 +60,13 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   @Autowired
   protected LogMessageSource logMessageSource;
 
-  protected String currentVersion;
-
   @Override
   public Health health() {
     String serviceName = mountUserFriendlyServiceName();
 
     try {
       // Get the concurrent map values and put it in the service info
-      return reportServiceHealth(serviceName, serviceInfo);
+      return reportServiceHealth(serviceName, getServiceInfo());
     } catch (Exception e) {
       LOG.error(logMessageSource.getMessage(CACHE_IS_NOT_LOADED, serviceName), e);
       return Health.unknown().build();
@@ -79,15 +80,20 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Service health
    */
   private Health reportServiceHealth(String serviceName, IntegrationBridgeServiceInfo service) {
-    // TODO Put a intermediate concurrent map with the current values
-    // TODO should the service be always updated of create a timed task for that?
-    if (service == null) {
-      //service = new IntegrationBridgeServiceInfo(getMinVersion(), getServiceBaseUrl());
-    }
 
     return Health.status(service.getConnectivity())
         .withDetail(serviceName, service)
         .build();
+  }
+
+  @Cacheable(cacheResolver = CachingConfiguration.CACHE_RESOLVER_NAME)
+  public IntegrationBridgeServiceInfo getServiceInfo() {
+    return serviceInfo;
+  }
+
+  @CacheEvict(cacheResolver = CachingConfiguration.CACHE_RESOLVER_NAME)
+  public void setServiceInfo(IntegrationBridgeServiceInfo serviceInfo) {
+    this.serviceInfo = serviceInfo;
   }
 
   /**
@@ -108,7 +114,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * Service Name
    * @return
    */
-  protected String mountUserFriendlyServiceName() {
+  public String mountUserFriendlyServiceName() {
     String friendlyServiceName = getFriendlyServiceName();
     if (StringUtils.isEmpty(friendlyServiceName)) {
       friendlyServiceName = getServiceName().toString();

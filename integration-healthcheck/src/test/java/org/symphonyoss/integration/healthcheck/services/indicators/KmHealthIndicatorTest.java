@@ -23,13 +23,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
-import org.symphonyoss.integration.healthcheck.services.indicators.KmHealthIndicator;
-import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -42,40 +38,13 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @ContextConfiguration(classes = {IntegrationProperties.class, KmHealthIndicator.class})
 public class KmHealthIndicatorTest {
 
-  private static final String MOCK_VERSION = "1.45.0";
-
   private static final ServiceName SERVICE_NAME = ServiceName.KEY_MANAGER;
-
-  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443/relay";
-
-  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/HealthCheck/version";
-
-  @MockBean
-  private AuthenticationProxy authenticationProxy;
-
-  @MockBean
-  private LogMessageSource logMessageSource;
 
   @Autowired
   private KmHealthIndicator indicator;
 
   @Test
-  public void testHealthCheckUrl() {
-    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
-  }
-
-  @Test
   public void testServiceName() {
     assertEquals(SERVICE_NAME, indicator.getServiceName());
-  }
-
-  @Test
-  public void testMinVersion() {
-    assertEquals(MOCK_VERSION, indicator.getMinVersion());
-  }
-
-  @Test
-  public void testServiceBaseUrl() {
-    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
   }
 }

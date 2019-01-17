@@ -16,9 +16,12 @@
 
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
  * Service health invoker for POD.
@@ -26,10 +29,13 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
  * Created by luanapp on 14/01/2019.
  */
 @Component
-@Lazy
 public class PodHealthInvoker extends ServiceHealthInvoker {
 
   private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
+
+  @Autowired
+  @Qualifier("podHealthIndicator")
+  private ServiceHealthIndicator healthIndicator;
 
   @Override
   protected ServiceName getServiceName() {
@@ -44,6 +50,11 @@ public class PodHealthInvoker extends ServiceHealthInvoker {
   @Override
   protected String getHealthCheckUrl() {
     return getServiceBaseUrl() + POD_URL_PATH;
+  }
+
+  @Override
+  protected ServiceHealthIndicator getHealthIndicator() {
+    return healthIndicator;
   }
 
   @Override

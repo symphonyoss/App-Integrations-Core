@@ -30,8 +30,6 @@ import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 @Lazy
 public class AgentHealthIndicator extends ServiceHealthIndicator {
 
-  private static final String AGENT_URL_PATH = "/v1/HealthCheck";
-
   public static final Version AGENT_MESSAGEML_VERSION2 = Version.valueOf("1.46.0");
 
   @Override
