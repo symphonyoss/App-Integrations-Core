@@ -19,10 +19,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.authentication.exception.UnregisteredUserAuthException;
+import org.symphonyoss.integration.event.HealthCheckEventData;
+import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.json.JsonUtils;
@@ -37,7 +40,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -53,9 +55,15 @@ public abstract class ServiceHealthInvoker {
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHealthInvoker.class);
 
   /**
+   * String that should be replaced to retrieve the semantic version
+   */
+  private static final String SNAPSHOT_VERSION = "-SNAPSHOT";
+
+  /**
    * Version field
    */
   private static final String VERSION = "version";
+  private static final int SERVICE_INFO_UPDATE_RATE = 30000;
 
   @Autowired
   protected IntegrationProperties properties;
@@ -98,7 +106,22 @@ public abstract class ServiceHealthInvoker {
     return OK.equals(status) ? response.readEntity(String.class) : null;
   }
 
-  @Scheduled(fixedRate = 30000)
+  /**
+   * Trigger the health check process on the required service defined in the event.
+   * @param event Health check event
+   */
+  @EventListener
+  public void handleHealthCheckEvent(HealthCheckEventData event) {
+    String serviceName = mountUserFriendlyServiceName();
+
+    LOG.info("Handle health-check event. Service name: {}", serviceName);
+
+    if (serviceName.equals(event.getServiceName())) {
+      updateServiceHealth();
+    }
+  }
+
+  @Scheduled(fixedRate = SERVICE_INFO_UPDATE_RATE)
   public void updateServiceHealth() {
     IntegrationBridgeServiceInfo serviceInfo = retrieveServiceInfo();
     getHealthIndicator().setServiceInfo(serviceInfo);
@@ -125,9 +148,9 @@ public abstract class ServiceHealthInvoker {
 
       String version = retrieveCurrentVersion(healthResponse);
 
-//      if (StringUtils.isNotEmpty(version)) {
-//        fireUpdatedServiceVersionEvent(version);
-//      }
+      if (StringUtils.isNotEmpty(version)) {
+        fireUpdatedServiceVersionEvent(version);
+      }
 
       service.setCurrentVersion(version);
     }
@@ -225,6 +248,35 @@ public abstract class ServiceHealthInvoker {
    */
   protected void handleHealthResponse(IntegrationBridgeServiceInfo service, String healthResponse) {
     service.setConnectivity(Status.UP);
+  }
+
+  /**
+   * Retrieves the semantic version. This method replaces the SNAPSHOT from a version.
+   * @param version Version to be evaluated
+   * @return Semantic version
+   */
+  protected String getSemanticVersion(String version) {
+    if (StringUtils.isEmpty(version)) {
+      return StringUtils.EMPTY;
+    }
+
+    return version.replace(SNAPSHOT_VERSION, StringUtils.EMPTY);
+  }
+
+  /**
+   * Raise an updated service version event.
+   * @param version Service version
+   */
+  protected void fireUpdatedServiceVersionEvent(String version) {
+    String oldSemanticVersion = getSemanticVersion(currentVersion);
+    String newSemanticVersion = getSemanticVersion(version);
+
+    ServiceVersionUpdatedEventData event =
+        new ServiceVersionUpdatedEventData(mountUserFriendlyServiceName(), oldSemanticVersion,
+            newSemanticVersion);
+    this.currentVersion = version;
+
+    publisher.publishEvent(event);
   }
 
   public String getCurrentVersion() {

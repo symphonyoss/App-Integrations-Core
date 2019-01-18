@@ -43,11 +43,6 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
 
   private static final Logger LOG = LoggerFactory.getLogger(ServiceHealthIndicator.class);
 
-  /**
-   * String that should be replaced to retrieve the semantic version
-   */
-  private static final String SNAPSHOT_VERSION = "-SNAPSHOT";
-
   private IntegrationBridgeServiceInfo serviceInfo;
 
 
@@ -94,19 +89,6 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   @CacheEvict(cacheResolver = CachingConfiguration.CACHE_RESOLVER_NAME)
   public void setServiceInfo(IntegrationBridgeServiceInfo serviceInfo) {
     this.serviceInfo = serviceInfo;
-  }
-
-  /**
-   * Retrieves the semantic version. This method replaces the SNAPSHOT from a version.
-   * @param version Version to be evaluated
-   * @return Semantic version
-   */
-  protected String getSemanticVersion(String version) {
-    if (StringUtils.isEmpty(version)) {
-      return StringUtils.EMPTY;
-    }
-
-    return version.replace(SNAPSHOT_VERSION, StringUtils.EMPTY);
   }
 
   /**
