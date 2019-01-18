@@ -13,6 +13,8 @@ public class HealthCheckProperties {
 
   public static final String PROCESSING_EXCEPTION =  "health.check.exception.processingexception";
 
+  public static final String TIMEOUT_EXCEPTION =  "health.check.exception.timeoutexception";
+
   public static final String IO_EXCEPTION =  "health.check.exception.ioexception";
 
   public static final String EXECUTION_EXCEPTION = "health.check.exception.executionexception";
