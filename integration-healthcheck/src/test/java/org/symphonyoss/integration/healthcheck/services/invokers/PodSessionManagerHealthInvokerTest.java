@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.healthcheck.services.indicators.PodSessionManagerHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -59,8 +61,12 @@ public class PodSessionManagerHealthInvokerTest {
 
   private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:8444/sessionauth";
 
-  private static final String MOCK_HC_URL =
-      "https://nexus.symphony.com:443/webcontroller/HealthCheck/aggregated";
+  private static final String MOCK_SERVICE_BASE_URL = "https://nexus.symphony.com:443/";
+
+  private static final String MOCK_AGGREGATED_URL =
+      MOCK_SERVICE_BASE_URL + "webcontroller/HealthCheck/aggregated";
+
+  private static final String MOCK_HC_RESPONSE = "{\"sessionauth\": \"true\"}";
 
   @MockBean
   private AuthenticationProxy authenticationProxy;
@@ -83,12 +89,51 @@ public class PodSessionManagerHealthInvokerTest {
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals(MOCK_HC_URL, invoker.getHealthCheckUrl());
+    assertEquals(MOCK_AGGREGATED_URL, invoker.getHealthCheckUrl());
+  }
+
+  @Test
+  public void testFriendlyServiceName() {
+    assertEquals(SERVICE_NAME, invoker.mountUserFriendlyServiceName());
   }
 
   @Test
   public void testServiceName() {
-    assertEquals(SERVICE_NAME, invoker.mountUserFriendlyServiceName());
+    assertEquals(ServiceName.POD, invoker.getServiceName());
+  }
+
+  @Test
+  public void testInvalidHealthResponse() {
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_BASE_URL);
+    assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
+
+    invoker.handleHealthResponse(service, "\"invalid");
+
+    assertEquals(Status.DOWN.getCode(), service.getConnectivity());
+  }
+
+  @Test
+  public void testAggregatedHCResponseDown() {
+
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_BASE_URL);
+    assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
+
+    invoker.handleHealthResponse(service, "{\"sessionauth\": \"false\"}");
+
+    assertEquals(Status.DOWN.getCode(), service.getConnectivity());
+  }
+
+  @Test
+  public void testAggregatedHCResponseUp() {
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, MOCK_SERVICE_BASE_URL);
+    assertEquals(Status.UNKNOWN.getCode(), service.getConnectivity());
+
+    invoker.handleHealthResponse(service, MOCK_HC_RESPONSE);
+
+    assertEquals(Status.UP.getCode(), service.getConnectivity());
   }
 
   @Test

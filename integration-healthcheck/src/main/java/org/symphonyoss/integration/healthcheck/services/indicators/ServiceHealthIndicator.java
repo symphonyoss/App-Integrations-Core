@@ -16,9 +16,6 @@
 
 package org.symphonyoss.integration.healthcheck.services.indicators;
 
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .CACHE_IS_NOT_LOADED;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

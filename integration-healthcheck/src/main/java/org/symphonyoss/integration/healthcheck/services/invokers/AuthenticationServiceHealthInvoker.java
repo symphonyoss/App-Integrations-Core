@@ -39,7 +39,8 @@ import javax.ws.rs.core.Response;
  */
 public abstract class AuthenticationServiceHealthInvoker extends ServiceHealthInvoker {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceHealthInvoker.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(AuthenticationServiceHealthInvoker.class);
 
   private static final String HC_AGGREGATED_URL_PATH = "/webcontroller/HealthCheck/aggregated";
 
@@ -79,7 +80,6 @@ public abstract class AuthenticationServiceHealthInvoker extends ServiceHealthIn
    * Handle POD version updated event to determine authentication service version. This
    * implementation uses the same version to POD and authentication services once we don't have
    * health check implemented for those service for a while.
-   *
    * @param event Service version updated event
    */
   @EventListener

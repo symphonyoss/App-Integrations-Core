@@ -17,11 +17,6 @@
 package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +31,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
@@ -96,7 +90,9 @@ public class ServiceHealthIndicatorTest {
     healthIndicator.setServiceInfo(service);
 
     Health expected =
-        Health.down().withDetail(healthIndicator.mountUserFriendlyServiceName().toString(), service).build();
+        Health.down()
+            .withDetail(healthIndicator.mountUserFriendlyServiceName().toString(), service)
+            .build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
