@@ -22,10 +22,10 @@ import org.junit.Test;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Unit test for {@link IntegrationBridgeService}
+ * Unit test for {@link IntegrationBridgeServiceInfo}
  * Created by rsanchez on 16/02/17.
  */
-public class IntegrationBridgeServiceTest {
+public class IntegrationBridgeServiceInfoTest {
 
   private static final String OLD_VERSION = "1.44.0";
 
@@ -41,90 +41,93 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testNullVersion() {
-    assertEquals(IntegrationBridgeService.Compability.UNKNOWN,
-        new IntegrationBridgeService(null, SERVICE_URL).getCompatibility());
-    assertEquals(IntegrationBridgeService.Compability.NOK,
-        new IntegrationBridgeService(NEW_VERSION, SERVICE_URL).getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.UNKNOWN,
+        new IntegrationBridgeServiceInfo(null, SERVICE_URL).getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK,
+        new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL).getCompatibility());
   }
 
   @Test
   public void testInvalidVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(INVALID_VERSION);
 
-    assertEquals(IntegrationBridgeService.Compability.NOK, service.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service.getCompatibility());
   }
 
   @Test
   public void testCompare() {
-    IntegrationBridgeService service1 = new IntegrationBridgeService(OLD_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service1 = new IntegrationBridgeServiceInfo(OLD_VERSION, SERVICE_URL);
     service1.setCurrentVersion(OLD_VERSION);
-    assertEquals(IntegrationBridgeService.Compability.OK, service1.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.OK, service1.getCompatibility());
 
     service1.setCurrentVersion(OLD_VERSION + SNAPSHOT_SUFFIX);
-    assertEquals(IntegrationBridgeService.Compability.NOK, service1.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service1.getCompatibility());
 
     service1.setCurrentVersion(NEW_VERSION);
-    assertEquals(IntegrationBridgeService.Compability.OK, service1.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.OK, service1.getCompatibility());
 
     service1.setCurrentVersion(NEW_VERSION + SNAPSHOT_SUFFIX);
-    assertEquals(IntegrationBridgeService.Compability.OK, service1.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.OK, service1.getCompatibility());
 
-    IntegrationBridgeService service2 = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service2 = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service2.setCurrentVersion(OLD_VERSION);
-    assertEquals(IntegrationBridgeService.Compability.NOK, service2.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service2.getCompatibility());
 
     service2.setCurrentVersion(OLD_VERSION + SNAPSHOT_SUFFIX);
-    assertEquals(IntegrationBridgeService.Compability.NOK, service2.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service2.getCompatibility());
 
     service2.setCurrentVersion(NEW_VERSION);
-    assertEquals(IntegrationBridgeService.Compability.OK, service2.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.OK, service2.getCompatibility());
 
     service2.setCurrentVersion(NEW_VERSION + SNAPSHOT_SUFFIX);
-    assertEquals(IntegrationBridgeService.Compability.NOK, service2.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service2.getCompatibility());
   }
 
   @Test
   public void testEquals() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
-    assertEquals(IntegrationBridgeService.Compability.OK, service.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.OK, service.getCompatibility());
 
     service.setCurrentVersion(NEW_VERSION + SNAPSHOT_SUFFIX);
-    assertEquals(IntegrationBridgeService.Compability.NOK, service.getCompatibility());
+    assertEquals(IntegrationBridgeServiceInfo.Compability.NOK, service.getCompatibility());
   }
 
   @Test
   public void testGetCurrentVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
     assertEquals(NEW_VERSION, service.getCurrentVersion());
   }
 
   @Test
   public void testGetCurrentVersionNA() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(StringUtils.EMPTY);
     assertEquals(NOT_AVAILABLE, service.getCurrentVersion());
   }
 
   @Test
   public void testGetMinVersionNA() {
-    IntegrationBridgeService service = new IntegrationBridgeService(StringUtils.EMPTY, SERVICE_URL);
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(StringUtils.EMPTY, SERVICE_URL);
     assertEquals(NOT_AVAILABLE, service.getMinVersion());
   }
 
   @Test
   public void testGetMinVersion() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     assertEquals(NEW_VERSION, service.getMinVersion());
   }
 
   @Test
   public void testToString() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
-    String expected = "IntegrationBridgeService{" +
+    String expected = "IntegrationBridgeServiceInfo{" +
         "connectivity=" + service.getConnectivity() +
         ", currentVersion='" + service.getCurrentVersion() + '\'' +
         ", minVersion='" + service.getMinVersion() + '\'' + '}';
@@ -133,7 +136,7 @@ public class IntegrationBridgeServiceTest {
 
   @Test
   public void testHashCode() {
-    IntegrationBridgeService service = new IntegrationBridgeService(NEW_VERSION, SERVICE_URL);
+    IntegrationBridgeServiceInfo service = new IntegrationBridgeServiceInfo(NEW_VERSION, SERVICE_URL);
     service.setCurrentVersion(NEW_VERSION);
 
     int expected = service.getConnectivity().hashCode();

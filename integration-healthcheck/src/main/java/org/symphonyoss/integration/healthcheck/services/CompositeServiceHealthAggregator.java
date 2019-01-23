@@ -19,7 +19,7 @@ package org.symphonyoss.integration.healthcheck.services;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.Status;
-import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeService.Compability;
+import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo.Compability;
 
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class CompositeServiceHealthAggregator implements HealthAggregator {
       String serviceName = entry.getKey();
       Health health = entry.getValue();
 
-      IntegrationBridgeService service = (IntegrationBridgeService) health.getDetails().get(serviceName);
+      IntegrationBridgeServiceInfo service = (IntegrationBridgeServiceInfo) health.getDetails().get(serviceName);
 
       if (service != null) {
         builder = builder.withDetail(serviceName, service);
@@ -65,7 +65,7 @@ public class CompositeServiceHealthAggregator implements HealthAggregator {
    * @return true if the service is not running or version is not compatible with the Integration
    * Bridge.
    */
-  private boolean isServiceDown(Status status, IntegrationBridgeService service) {
+  private boolean isServiceDown(Status status, IntegrationBridgeServiceInfo service) {
     if (service == null) {
       return true;
     }

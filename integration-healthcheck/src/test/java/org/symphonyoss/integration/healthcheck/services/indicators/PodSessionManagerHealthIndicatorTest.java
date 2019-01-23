@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,7 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
@@ -38,43 +37,26 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodHealthIndicator.class})
-public class PodHealthIndicatorTest {
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, PodSessionManagerHealthIndicator.class})
+public class PodSessionManagerHealthIndicatorTest {
 
-  private static final String MOCK_VERSION = "1.44.0";
-
-  private static final ServiceName SERVICE_NAME = ServiceName.POD;
-
-  private static final String MOCK_SERVICE_URL = "https://nexus.symphony.com:443";
-
-  private static final String MOCK_HC_URL = MOCK_SERVICE_URL + "/webcontroller/HealthCheck/version";
-
-  @MockBean
-  private AuthenticationProxy authenticationProxy;
+  private static final String SERVICE_NAME = ServiceName.POD_SESSION_MANAGER.toString();
 
   @MockBean
   private LogMessageSource logMessageSource;
 
   @Autowired
-  private PodHealthIndicator indicator;
+  private PodSessionManagerHealthIndicator indicator;
 
   @Test
-  public void testHealthCheckUrl() {
-    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
+  public void testFriendlyServiceName() {
+    assertEquals(SERVICE_NAME, indicator.mountUserFriendlyServiceName());
   }
 
   @Test
   public void testServiceName() {
-    assertEquals(SERVICE_NAME, indicator.getServiceName());
+    assertEquals(ServiceName.POD, indicator.getServiceName());
   }
 
-  @Test
-  public void testMinVersion() {
-    assertEquals(MOCK_VERSION, indicator.getMinVersion());
-  }
-
-  @Test
-  public void testServiceBaseUrl() {
-    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
-  }
 }

@@ -38,8 +38,10 @@ import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
+import org.symphonyoss.integration.healthcheck.services.invokers.ServiceHealthInvoker;
 import org.symphonyoss.integration.logging.LogMessageSource;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +61,9 @@ public class IntegrationLogging {
 
   @Autowired
   private LogMessageSource logMessage;
+
+  @Autowired
+  private List<ServiceHealthInvoker> serviceHealthInvokers;
 
   /**
    * Ready to perform the health-check
@@ -88,7 +93,8 @@ public class IntegrationLogging {
         queue.offer(integration, 10, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
         LOGGER.error(
-            logMessage.getMessage(FAIL_TO_ADD_INTEGRATION_ON_QUEUE, integration.getSettings().getName()), e);
+            logMessage.getMessage(FAIL_TO_ADD_INTEGRATION_ON_QUEUE,
+                integration.getSettings().getName()), e);
       }
     }
   }
@@ -121,7 +127,8 @@ public class IntegrationLogging {
       LOGGER.info(integrationHealthLog);
     } catch (RemoteApiException e) {
       LOGGER.error(
-          logMessage.getMessage(FAIL_LOG_INTEGRATION_HEALTH, integration.getSettings().getName()), e);
+          logMessage.getMessage(FAIL_LOG_INTEGRATION_HEALTH, integration.getSettings().getName()),
+          e);
     }
   }
 
@@ -134,6 +141,12 @@ public class IntegrationLogging {
    */
   private void logHealthCheck() {
     try {
+
+      // This must be called as the services health check are standalone calls
+      for (ServiceHealthInvoker invoker : serviceHealthInvokers) {
+        invoker.updateServiceHealth();
+      }
+
       Health health = healthEndpoint.invoke();
       String applicationHealthString = jsonUtils.serialize(health);
       String applicationHealthLog =

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
- * Service health indicator for POD.
+ * Service health indicator for POD Session Manager.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by rsanchez on 30/10/17.
  */
 @Component
 @Lazy
-public class PodHealthIndicator extends ServiceHealthIndicator {
-
-  private static final String POD_URL_PATH = "/webcontroller/HealthCheck/version";
+public class PodSessionManagerHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected ServiceName getServiceName() {
@@ -37,18 +35,7 @@ public class PodHealthIndicator extends ServiceHealthIndicator {
   }
 
   @Override
-  protected String getMinVersion() {
-    return properties.getPod().getMinVersion();
+  protected String getFriendlyServiceName() {
+    return ServiceName.POD_SESSION_MANAGER.toString();
   }
-
-  @Override
-  protected String getHealthCheckUrl() {
-    return getServiceBaseUrl() + POD_URL_PATH;
-  }
-
-  @Override
-  protected String getServiceBaseUrl() {
-    return properties.getSymphonyUrl();
-  }
-
 }

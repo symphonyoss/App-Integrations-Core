@@ -24,7 +24,7 @@ import static org.symphonyoss.integration.core.properties.StreamServiceImplPrope
     .ERROR_GET_STREAM_JSON;
 import static org.symphonyoss.integration.core.properties.StreamServiceImplProperties
     .ERROR_GET_STREAM_JSON_SOLUTION;
-import static org.symphonyoss.integration.healthcheck.services.AgentHealthIndicator
+import static org.symphonyoss.integration.healthcheck.services.indicators.AgentHealthIndicator
     .AGENT_MESSAGEML_VERSION2;
 
 import com.github.zafarkhaja.semver.Version;

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,19 +33,21 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.healthcheck.services.indicators.AgentHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
-import org.symphonyoss.integration.model.message.MessageMLVersion;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
- * Test class to validate {@link AgentHealthIndicator}
- * Created by rsanchez on 23/11/16.
+ * Test class to validate {@link AgentHealthInvoker}
+ * Created by luanapp on 15/01/19.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, AgentHealthIndicator.class})
-public class AgentHealthIndicatorTest {
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, AgentHealthInvoker.class, AgentHealthIndicator.class})
+public class AgentHealthInvokerTest {
 
   private static final String MOCK_VERSION = "1.45.0-SNAPSHOT";
 
@@ -64,34 +67,45 @@ public class AgentHealthIndicatorTest {
   @MockBean
   private LogMessageSource logMessageSource;
 
-  @Autowired
-  private AgentHealthIndicator indicator;
+  @MockBean(name = "agentHealthIndicator")
+  private AgentHealthIndicator healthIndicator;
 
-  private MockApplicationPublisher<MessageMLVersionUpdatedEventData> publisher = new MockApplicationPublisher<>();
+  @Autowired
+  private AgentHealthInvoker invoker;
+
+  private MockApplicationPublisher<MessageMLVersionUpdatedEventData> publisher =
+      new MockApplicationPublisher<>();
 
   @Before
   public void init() {
-    ReflectionTestUtils.setField(indicator, "publisher", publisher);
+    ReflectionTestUtils.setField(invoker, "publisher", publisher);
   }
 
   @Test
   public void testHealthCheckUrl() {
-    assertEquals(MOCK_HC_URL, indicator.getHealthCheckUrl());
+    assertEquals(MOCK_HC_URL, invoker.getHealthCheckUrl());
   }
 
   @Test
   public void testServiceName() {
-    assertEquals(SERVICE_NAME, indicator.getServiceName());
+    assertEquals(SERVICE_NAME, invoker.getServiceName());
   }
 
   @Test
   public void testMinVersion() {
-    assertEquals(MOCK_VERSION, indicator.getMinVersion());
+    assertEquals(MOCK_VERSION, invoker.getMinVersion());
   }
 
   @Test
   public void testServiceBaseUrl() {
-    assertEquals(MOCK_SERVICE_URL, indicator.getServiceBaseUrl());
+    assertEquals(MOCK_SERVICE_URL, invoker.getServiceBaseUrl());
+  }
+
+  @Test
+  public void testHealthIndicator() {
+    assertNotNull(invoker.getHealthIndicator());
+    assertTrue(
+        AgentHealthIndicator.class.isAssignableFrom(invoker.getHealthIndicator().getClass()));
   }
 
 }

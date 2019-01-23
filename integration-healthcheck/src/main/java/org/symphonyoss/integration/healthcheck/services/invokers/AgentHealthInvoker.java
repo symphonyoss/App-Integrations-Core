@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.invokers;
 
-import com.github.zafarkhaja.semver.Version;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 
 /**
- * Service health indicator for Agent.
+ * Service health invoker for Agent.
  *
- * Created by rsanchez on 30/01/17.
+ * Created by luanapp on 14/01/2019.
  */
 @Component
-@Lazy
-public class AgentHealthIndicator extends ServiceHealthIndicator {
+public class AgentHealthInvoker extends ServiceHealthInvoker {
 
   private static final String AGENT_URL_PATH = "/v1/HealthCheck";
 
-  public static final Version AGENT_MESSAGEML_VERSION2 = Version.valueOf("1.46.0");
+  @Autowired
+  @Qualifier("agentHealthIndicator")
+  private ServiceHealthIndicator healthIndicator;
 
   @Override
   protected ServiceName getServiceName() {
@@ -47,6 +49,11 @@ public class AgentHealthIndicator extends ServiceHealthIndicator {
   @Override
   protected String getHealthCheckUrl() {
     return getServiceBaseUrl() + AGENT_URL_PATH;
+  }
+
+  @Override
+  protected ServiceHealthIndicator getHealthIndicator() {
+    return healthIndicator;
   }
 
   @Override

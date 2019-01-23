@@ -14,41 +14,24 @@
  * limitations under the License.
  */
 
-package org.symphonyoss.integration.healthcheck.services;
+package org.symphonyoss.integration.healthcheck.services.indicators;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 
 /**
- * Service health indicator for Key Manager.
+ * Service health indicator for POD.
  *
  * Created by rsanchez on 30/01/17.
  */
 @Component
 @Lazy
-public class KmHealthIndicator extends ServiceHealthIndicator {
-
-  public static final String KM_URL_PATH = "/HealthCheck/version";
+public class PodHealthIndicator extends ServiceHealthIndicator {
 
   @Override
   protected ServiceName getServiceName() {
-    return ServiceName.KEY_MANAGER;
-  }
-
-  @Override
-  protected String getMinVersion() {
-    return properties.getKeyManager().getMinVersion();
-  }
-
-  @Override
-  protected String getHealthCheckUrl() {
-    return getServiceBaseUrl() + KM_URL_PATH;
-  }
-
-  @Override
-  protected String getServiceBaseUrl() {
-    return properties.getKeyManagerUrl();
+    return ServiceName.POD;
   }
 
 }
