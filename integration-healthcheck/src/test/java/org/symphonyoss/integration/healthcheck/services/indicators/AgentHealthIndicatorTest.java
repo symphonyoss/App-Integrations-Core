@@ -21,15 +21,18 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -43,6 +46,9 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 public class AgentHealthIndicatorTest {
 
   private static final ServiceName SERVICE_NAME = ServiceName.AGENT;
+
+  @MockBean
+  private LogMessageSource logMessageSource;
 
   @Autowired
   private AgentHealthIndicator indicator;

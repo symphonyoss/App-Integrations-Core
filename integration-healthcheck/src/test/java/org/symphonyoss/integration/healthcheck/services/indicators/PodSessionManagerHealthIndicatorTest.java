@@ -23,9 +23,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
 /**
@@ -41,12 +43,20 @@ public class PodSessionManagerHealthIndicatorTest {
 
   private static final String SERVICE_NAME = ServiceName.POD_SESSION_MANAGER.toString();
 
+  @MockBean
+  private LogMessageSource logMessageSource;
+
   @Autowired
   private PodSessionManagerHealthIndicator indicator;
 
   @Test
-  public void testServiceName() {
+  public void testFriendlyServiceName() {
     assertEquals(SERVICE_NAME, indicator.mountUserFriendlyServiceName());
+  }
+
+  @Test
+  public void testServiceName() {
+    assertEquals(ServiceName.POD, indicator.getServiceName());
   }
 
 }

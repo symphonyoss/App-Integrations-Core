@@ -17,6 +17,8 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.KmHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -55,6 +58,9 @@ public class KmHealthInvokerTest {
   @MockBean
   private LogMessageSource logMessageSource;
 
+  @MockBean(name = "kmHealthIndicator")
+  private KmHealthIndicator healthIndicator;
+
   @Autowired
   private KmHealthInvoker invoker;
 
@@ -76,5 +82,11 @@ public class KmHealthInvokerTest {
   @Test
   public void testServiceBaseUrl() {
     assertEquals(MOCK_SERVICE_URL, invoker.getServiceBaseUrl());
+  }
+
+  @Test
+  public void testHealthIndicator() {
+    assertNotNull(invoker.getHealthIndicator());
+    assertTrue(KmHealthIndicator.class.isAssignableFrom(invoker.getHealthIndicator().getClass()));
   }
 }

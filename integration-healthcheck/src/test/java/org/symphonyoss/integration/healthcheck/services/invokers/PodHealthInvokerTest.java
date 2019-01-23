@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -54,6 +55,9 @@ public class PodHealthInvokerTest {
 
   @MockBean
   private LogMessageSource logMessageSource;
+
+  @MockBean(name = "podHealthIndicator")
+  private PodHealthIndicator healthIndicator;
 
   @Autowired
   private PodHealthInvoker invoker;

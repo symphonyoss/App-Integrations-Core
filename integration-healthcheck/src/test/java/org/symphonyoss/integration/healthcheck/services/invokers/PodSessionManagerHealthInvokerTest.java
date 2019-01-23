@@ -17,7 +17,9 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -32,6 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodSessionManagerHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -64,6 +67,9 @@ public class PodSessionManagerHealthInvokerTest {
 
   @MockBean
   private LogMessageSource logMessageSource;
+
+  @MockBean(name = "podSessionManagerHealthIndicator")
+  private PodSessionManagerHealthIndicator healthIndicator;
 
   @Autowired
   private PodSessionManagerHealthInvoker invoker;
@@ -120,6 +126,13 @@ public class PodSessionManagerHealthInvokerTest {
   @Test
   public void testServiceField() {
     assertEquals(SERVICE_FIELD, invoker.getServiceField());
+  }
+
+  @Test
+  public void testHealthIndicator() {
+    assertNotNull(invoker.getHealthIndicator());
+    assertTrue(PodSessionManagerHealthIndicator.class.isAssignableFrom(
+        invoker.getHealthIndicator().getClass()));
   }
 
 }

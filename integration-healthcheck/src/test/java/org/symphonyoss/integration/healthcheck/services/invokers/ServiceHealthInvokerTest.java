@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -31,11 +32,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -46,10 +47,17 @@ import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
 import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.healthcheck.services.indicators.PodHealthIndicator;
+import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import javax.ws.rs.ProcessingException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -63,7 +71,8 @@ import javax.ws.rs.core.Response;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, PodHealthInvoker.class})
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, PodHealthInvoker.class, PodHealthIndicator.class})
 public class ServiceHealthInvokerTest {
 
   private static final String MOCK_VERSION = "1.44.0";
@@ -86,187 +95,205 @@ public class ServiceHealthInvokerTest {
   @MockBean
   private LogMessageSource logMessageSource;
 
+  @SpyBean(name = "podHealthIndicator")
+  private ServiceHealthIndicator healthIndicator;
+
   @Autowired
   @Qualifier("podHealthInvoker")
   private ServiceHealthInvoker healthInvoker;
 
   private Invocation.Builder invocationBuilder;
+  private static Client client;
+  private static AsyncInvoker asyncInvoker;
+  private static Future<Response> future;
 
   private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher =
       new MockApplicationPublisher<>();
 
-//  @Before
-//  public void init() {
-//    Client client = mock(Client.class);
-//    WebTarget target = mock(WebTarget.class);
-//    invocationBuilder = mock(Invocation.Builder.class);
-//
-//    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE, MOCK_SERVICE_NAME);
-//    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE, MOCK_SERVICE_NAME);
-//    doReturn(target).when(client)
-//        .target("https://nexus.symphony.com:443/webcontroller/HealthCheck/version");
-//    doReturn(target).when(target).property(anyString(), any());
-//    doReturn(invocationBuilder).when(target).request();
-//    doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
-//
-//    ReflectionTestUtils.setField(healthInvoker, "publisher", publisher);
-//    ReflectionTestUtils.setField(healthInvoker, "serviceInfoCache", null);
-//    ReflectionTestUtils.setField(healthInvoker, "lastExecution", 0);
-//  }
-//
-//  @Test
-//  public void testNullClient() {
-//    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy)
-//        .httpClientForUser(anyString(), any(ServiceName.class));
-//
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.DOWN);
-//
-//    Health expected =
-//        Health.down()
-//            .withDetail(healthInvoker.mountUserFriendlyServiceName().toString(), service)
-//            .build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//  }
-//
-//  @Test
-//  public void testRuntimeException() {
-//    doThrow(RuntimeException.class).when(invocationBuilder).get();
-//
-//    Health expected = Health.unknown().build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//  }
-//
-//  @Test
-//  public void testConnectivityException() {
-//    doThrow(ProcessingException.class).when(invocationBuilder).get();
-//
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.DOWN);
-//
-//    Health expected =
-//        Health.down().withDetail(healthInvoker.mountUserFriendlyServiceName(), service).build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//  }
-//
-//  @Test
-//  public void testServiceDown() {
-//    Response responseError = Response.serverError().build();
-//    doReturn(responseError).when(invocationBuilder).get();
-//
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.DOWN);
-//
-//    Health expected =
-//        Health.down().withDetail(healthInvoker.mountUserFriendlyServiceName(), service).build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//  }
-//
-//  @Test
-//  public void testServiceUp() {
-//    mockServiceUp();
-//
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.UP);
-//    service.setCurrentVersion(MOCK_CURRENT_VERSION);
-//
-//    Health expected =
-//        Health.up().withDetail(healthInvoker.mountUserFriendlyServiceName(), service).build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//
-//    String currentVersion = healthInvoker.getCurrentVersion();
-//    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
-//
-//    ServiceVersionUpdatedEventData event = publisher.getEvent();
-//    assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
-//    assertEquals(ServiceName.POD.toString(), event.getServiceName());
-//    assertTrue(StringUtils.isEmpty(event.getOldVersion()));
-//  }
-//
-//  private void mockServiceUp() {
-//    Response mockResponse = mock(Response.class);
-//
-//    doReturn(mockResponse).when(invocationBuilder).get();
-//    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
-//    doReturn("{\"version\": \"1.45.0-SNAPSHOT\"}").when(mockResponse).readEntity(String.class);
-//  }
-//
-//  @Test
-//  public void testServiceUpWithoutVersion() {
-//    Response mockResponse = mock(Response.class);
-//
-//    doReturn(mockResponse).when(invocationBuilder).get();
-//    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
-//    doReturn("{}").when(mockResponse).readEntity(String.class);
-//
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.UP);
-//
-//    Health expected =
-//        Health.up().withDetail(healthInvoker.mountUserFriendlyServiceName(), service).build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//
-//    String currentVersion = healthInvoker.getCurrentVersion();
-//    assertNull(currentVersion);
-//
-//    assertNull(publisher.getEvent());
-//  }
-//
-//  @Test
-//  public void testHandleHealthCheckEventWithoutServiceName() {
-//    mockServiceUp();
-//
-//    HealthCheckEventData event = new HealthCheckEventData(StringUtils.EMPTY);
-//    healthInvoker.handleHealthCheckEvent(event);
-//
-//    assertNull(healthInvoker.getCurrentVersion());
-//  }
-//
-//  @Test
-//  public void testHandleHealthCheckEventServiceUp() {
-//    mockServiceUp();
-//
-//    String serviceName = healthInvoker.getServiceName().toString();
-//    HealthCheckEventData event = new HealthCheckEventData(serviceName);
-//
-//    healthInvoker.handleHealthCheckEvent(event);
-//
-//    String currentVersion = healthInvoker.getCurrentVersion();
-//    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
-//  }
-//
-//  @Test
-//  public void testCachedResult() {
-//    IntegrationBridgeServiceInfo
-//        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
-//    service.setConnectivity(Status.UP);
-//    service.setCurrentVersion(MOCK_CURRENT_VERSION);
-//
-//    ReflectionTestUtils.setField(healthInvoker, "serviceInfoCache", service);
-//    ReflectionTestUtils.setField(healthInvoker, "lastExecution", System.currentTimeMillis());
-//
-//    Health expected =
-//        Health.up().withDetail(healthInvoker.mountUserFriendlyServiceName(), service).build();
-//    Health result = healthInvoker.health();
-//
-//    assertEquals(expected, result);
-//  }
+  @Before
+  public void init() {
+    WebTarget target = mock(WebTarget.class);
+    client = mock(Client.class);
+    invocationBuilder = mock(Invocation.Builder.class);
+    asyncInvoker = mock(AsyncInvoker.class);
+    future = mock(Future.class);
+
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE, MOCK_SERVICE_NAME);
+    doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE, MOCK_SERVICE_NAME);
+    doReturn(target).when(client)
+        .target("https://nexus.symphony.com:443/webcontroller/HealthCheck/version");
+    doReturn(target).when(target).property(anyString(), any());
+    doReturn(invocationBuilder).when(target).request();
+    doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
+    doReturn(asyncInvoker).when(invocationBuilder).async();
+    doReturn(future).when(asyncInvoker).get();
+
+    ReflectionTestUtils.setField(healthInvoker, "publisher", publisher);
+    healthIndicator.setServiceInfo(null);
+  }
+
+  @Test
+  public void testNullClient() {
+    doThrow(UnregisteredUserAuthException.class).when(authenticationProxy)
+        .httpClientForUser(anyString(), any(ServiceName.class));
+
+    healthInvoker.updateServiceHealth();
+
+    IntegrationBridgeServiceInfo expectedInfo = mockServiceDown();
+    assertEquals(expectedInfo, healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testRuntimeException()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    doThrow(RuntimeException.class).when(future).get(anyLong(), any(TimeUnit.class));
+
+    healthInvoker.updateServiceHealth();
+
+    IntegrationBridgeServiceInfo expectedInfo = mockServiceDown();
+    assertEquals(expectedInfo, healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test
+  public void testInterruptedException()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    doThrow(InterruptedException.class).when(future).get(anyLong(), any(TimeUnit.class));
+
+    assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test
+  public void testExecutionException()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    doThrow(ExecutionException.class).when(future).get(anyLong(), any(TimeUnit.class));
+
+    assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test
+  public void testTimeoutException()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    doThrow(TimeoutException.class).when(future).get(anyLong(), any(TimeUnit.class));
+
+    assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test
+  public void testServiceDown() throws InterruptedException, ExecutionException, TimeoutException {
+    Response responseError = Response.serverError().build();
+    doReturn(responseError).when(future).get(anyLong(), any(TimeUnit.class));
+
+    assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
+  }
+
+  @Test
+  public void testServiceUp() throws InterruptedException, ExecutionException, TimeoutException {
+    mockServiceUp();
+
+    IntegrationBridgeServiceInfo
+        expectedService = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
+    expectedService.setConnectivity(Status.UP);
+    expectedService.setCurrentVersion(MOCK_CURRENT_VERSION);
+
+    healthInvoker.updateServiceHealth();
+
+    assertEquals(expectedService, healthInvoker.getHealthIndicator().getServiceInfo());
+
+    String currentVersion = healthInvoker.getCurrentVersion();
+    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+
+    ServiceVersionUpdatedEventData event = publisher.getEvent();
+    assertEquals(MOCK_CURRENT_SEMANTIC_VERSION, event.getNewVersion());
+    assertEquals(ServiceName.POD.toString(), event.getServiceName());
+    assertTrue(StringUtils.isEmpty(event.getOldVersion()));
+  }
+
+
+  @Test
+  public void testServiceUpWithoutVersion()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    Response mockResponse = mock(Response.class);
+
+    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
+    doReturn("{}").when(mockResponse).readEntity(String.class);
+
+    healthInvoker.updateServiceHealth();
+
+    IntegrationBridgeServiceInfo
+        expectedService = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
+    expectedService.setConnectivity(Status.UP);
+
+    assertEquals(expectedService, healthInvoker.getHealthIndicator().getServiceInfo());
+
+    String currentVersion = healthInvoker.getCurrentVersion();
+    assertNull(currentVersion);
+
+    assertNull(publisher.getEvent());
+  }
+
+  @Test
+  public void testServiceUnprocessableVersion()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    Response mockResponse = mock(Response.class);
+
+    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
+    doReturn("{\" invalid").when(mockResponse).readEntity(String.class);
+
+    healthInvoker.updateServiceHealth();
+
+    IntegrationBridgeServiceInfo
+        expectedService = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
+    expectedService.setConnectivity(Status.UP);
+
+    assertEquals(expectedService, healthInvoker.getHealthIndicator().getServiceInfo());
+
+    String currentVersion = healthInvoker.getCurrentVersion();
+    assertNull(currentVersion);
+
+    assertNull(publisher.getEvent());
+  }
+
+  @Test
+  public void testHandleHealthCheckEventWithoutServiceName()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    mockServiceUp();
+
+    HealthCheckEventData event = new HealthCheckEventData(StringUtils.EMPTY);
+    healthInvoker.handleHealthCheckEvent(event);
+
+    assertNull(healthInvoker.getCurrentVersion());
+  }
+
+  @Test
+  public void testHandleHealthCheckEventServiceUp()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    mockServiceUp();
+
+    String serviceName = healthInvoker.getServiceName().toString();
+    HealthCheckEventData event = new HealthCheckEventData(serviceName);
+
+    healthInvoker.handleHealthCheckEvent(event);
+
+    String currentVersion = healthInvoker.getCurrentVersion();
+    assertEquals(MOCK_CURRENT_VERSION, currentVersion);
+  }
+
+  private IntegrationBridgeServiceInfo mockServiceDown() {
+    IntegrationBridgeServiceInfo expectedInfo =
+        new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
+    expectedInfo.setConnectivity(Status.DOWN);
+    return expectedInfo;
+  }
+
+  private void mockServiceUp() throws InterruptedException, ExecutionException, TimeoutException {
+    Response mockResponse = mock(Response.class);
+    String responseText = String.format("{\"version\": \"%s\"}", MOCK_CURRENT_VERSION);
+
+    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
+    doReturn(responseText).when(mockResponse).readEntity(String.class);
+  }
 
 }

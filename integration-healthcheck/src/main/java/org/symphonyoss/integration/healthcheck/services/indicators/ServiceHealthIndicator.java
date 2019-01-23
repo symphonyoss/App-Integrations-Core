@@ -59,13 +59,8 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
   public Health health() {
     String serviceName = mountUserFriendlyServiceName();
 
-    try {
-      // Get the concurrent map values and put it in the service info
-      return reportServiceHealth(serviceName, getServiceInfo());
-    } catch (Exception e) {
-      LOG.error(logMessageSource.getMessage(CACHE_IS_NOT_LOADED, serviceName), e);
-      return Health.unknown().build();
-    }
+    // Get the concurrent map values and put it in the service info
+    return reportServiceHealth(serviceName, getServiceInfo());
   }
 
   /**
@@ -75,10 +70,17 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Service health
    */
   private Health reportServiceHealth(String serviceName, IntegrationBridgeServiceInfo service) {
+    Health health;
 
-    return Health.status(service.getConnectivity())
-        .withDetail(serviceName, service)
-        .build();
+    if (service == null) {
+      health = Health.down().build();
+    } else {
+
+      health = Health.status(service.getConnectivity())
+          .withDetail(serviceName, service)
+          .build();
+    }
+    return health;
   }
 
   @Cacheable(cacheResolver = CachingConfiguration.CACHE_RESOLVER_NAME)
@@ -115,7 +117,7 @@ public abstract class ServiceHealthIndicator implements HealthIndicator {
    * @return Friendly service name
    */
   protected String getFriendlyServiceName() {
-    return getServiceName().toString();
+    return getServiceName() != null ? getServiceName().toString() : "No name";
   }
 
 }

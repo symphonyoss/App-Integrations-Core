@@ -58,18 +58,7 @@ public class ServiceHealthIndicatorTest {
 
   private static final String MOCK_CURRENT_VERSION = "1.45.0-SNAPSHOT";
 
-  private static final String MOCK_CURRENT_SEMANTIC_VERSION = "1.45.0";
-
-  private static final String MOCK_APP_TYPE = "testWebHookIntegration";
-
-  private static final String MOCK_APP2_TYPE = "test2WebHookIntegration";
-
-  private static final ServiceName MOCK_SERVICE_NAME = ServiceName.POD;
-
   private static final String SERVICE_URL = "https://test.symphony.com";
-
-  @MockBean
-  private AuthenticationProxy authenticationProxy;
 
   @MockBean
   private LogMessageSource logMessageSource;
@@ -77,6 +66,7 @@ public class ServiceHealthIndicatorTest {
   @Autowired
   @Qualifier("podHealthIndicator")
   private ServiceHealthIndicator healthIndicator;
+  private MockServiceHealthIndicator mockServiceHealthIndicator = new MockServiceHealthIndicator();
 
   private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher =
       new MockApplicationPublisher<>();
@@ -84,16 +74,26 @@ public class ServiceHealthIndicatorTest {
   @Before
   public void init() {
     ReflectionTestUtils.setField(healthIndicator, "publisher", publisher);
-    ReflectionTestUtils.setField(healthIndicator, "serviceInfoCache", null);
-    ReflectionTestUtils.setField(healthIndicator, "lastExecution", 0);
+    ReflectionTestUtils.setField(healthIndicator, "serviceInfo", null);
   }
 
   @Test
   public void testEmptyCache() {
 
+    Health expected =
+        Health.down().build();
+    Health result = healthIndicator.health();
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testServiceDown() {
+
     IntegrationBridgeServiceInfo
         service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.DOWN);
+    healthIndicator.setServiceInfo(service);
 
     Health expected =
         Health.down().withDetail(healthIndicator.mountUserFriendlyServiceName().toString(), service).build();
@@ -109,11 +109,33 @@ public class ServiceHealthIndicatorTest {
         service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
     service.setConnectivity(Status.UP);
     service.setCurrentVersion(MOCK_CURRENT_VERSION);
+    healthIndicator.setServiceInfo(service);
 
     Health expected =
         Health.up().withDetail(healthIndicator.mountUserFriendlyServiceName(), service).build();
     Health result = healthIndicator.health();
 
     assertEquals(expected, result);
+  }
+
+  @Test
+  public void testServiceException() {
+
+    IntegrationBridgeServiceInfo
+        service = new IntegrationBridgeServiceInfo(MOCK_VERSION, SERVICE_URL);
+    service.setConnectivity(Status.UP);
+    service.setCurrentVersion(MOCK_CURRENT_VERSION);
+    mockServiceHealthIndicator.setServiceInfo(service);
+
+    Health result = mockServiceHealthIndicator.health();
+
+  }
+
+  private static class MockServiceHealthIndicator extends ServiceHealthIndicator {
+
+    @Override
+    protected ServiceName getServiceName() {
+      return null;
+    }
   }
 }

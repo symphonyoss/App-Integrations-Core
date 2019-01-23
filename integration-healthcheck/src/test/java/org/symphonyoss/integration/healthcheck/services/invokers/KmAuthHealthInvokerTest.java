@@ -1,7 +1,9 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -13,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,9 +26,16 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.healthcheck.event.ServiceVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.IntegrationBridgeServiceInfo;
+import org.symphonyoss.integration.healthcheck.services.indicators.KmAuthHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -39,7 +49,8 @@ import javax.ws.rs.core.Response;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, KmAuthHealthInvoker.class})
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, KmAuthHealthInvoker.class, KmAuthHealthIndicator.class})
 public class KmAuthHealthInvokerTest {
 
   private static final String MOCK_VERSION = "1.48.0";
@@ -65,12 +76,17 @@ public class KmAuthHealthInvokerTest {
   @MockBean
   private LogMessageSource logMessageSource;
 
+  @MockBean(name = "kmAuthHealthIndicator")
+  private KmAuthHealthIndicator healthIndicator;
+
   @Autowired
+  @Qualifier("kmAuthHealthInvoker")
   private KmAuthHealthInvoker invoker;
 
   private static Invocation.Builder invocationBuilder;
-
   private static Client client;
+  private static AsyncInvoker asyncInvoker;
+  private static Future<Response> future;
 
   @BeforeClass
   public static void setup() {
@@ -78,11 +94,15 @@ public class KmAuthHealthInvokerTest {
 
     client = mock(Client.class);
     invocationBuilder = mock(Invocation.Builder.class);
+    asyncInvoker = mock(AsyncInvoker.class);
+    future = mock(Future.class);
 
     doReturn(target).when(client).target(MOCK_AGGREGATED_URL);
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
+    doReturn(asyncInvoker).when(invocationBuilder).async();
+    doReturn(future).when(asyncInvoker).get();
   }
 
   @Before
@@ -96,10 +116,11 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testInvalidHealthResponse() {
+  public void testInvalidHealthResponse()
+      throws InterruptedException, ExecutionException, TimeoutException {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(invocationBuilder).get();
+    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("invalid").when(mockResponse).readEntity(String.class);
 
@@ -113,10 +134,11 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testAggregatedHCResponseDown() {
+  public void testAggregatedHCResponseDown()
+      throws InterruptedException, ExecutionException, TimeoutException {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(invocationBuilder).get();
+    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{\"pod\": \"true\"}").when(mockResponse).readEntity(String.class);
 
@@ -130,10 +152,11 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testAggregatedHCResponseUp() {
+  public void testAggregatedHCResponseUp()
+      throws InterruptedException, ExecutionException, TimeoutException {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(invocationBuilder).get();
+    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn(MOCK_HC_RESPONSE).when(mockResponse).readEntity(String.class);
 
@@ -187,6 +210,13 @@ public class KmAuthHealthInvokerTest {
   @Test
   public void testServiceField() {
     assertEquals(SERVICE_FIELD, invoker.getServiceField());
+  }
+
+  @Test
+  public void testHealthIndicator() {
+    assertNotNull(invoker.getHealthIndicator());
+    assertTrue(
+        KmAuthHealthIndicator.class.isAssignableFrom(invoker.getHealthIndicator().getClass()));
   }
 
 }

@@ -17,6 +17,8 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +34,7 @@ import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.authentication.api.enums.ServiceName;
 import org.symphonyoss.integration.event.MessageMLVersionUpdatedEventData;
 import org.symphonyoss.integration.healthcheck.services.MockApplicationPublisher;
+import org.symphonyoss.integration.healthcheck.services.indicators.AgentHealthIndicator;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
@@ -42,7 +45,8 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @EnableConfigurationProperties
-@ContextConfiguration(classes = {IntegrationProperties.class, AgentHealthInvoker.class})
+@ContextConfiguration(
+    classes = {IntegrationProperties.class, AgentHealthInvoker.class, AgentHealthIndicator.class})
 public class AgentHealthInvokerTest {
 
   private static final String MOCK_VERSION = "1.45.0-SNAPSHOT";
@@ -62,6 +66,9 @@ public class AgentHealthInvokerTest {
 
   @MockBean
   private LogMessageSource logMessageSource;
+
+  @MockBean(name = "agentHealthIndicator")
+  private AgentHealthIndicator healthIndicator;
 
   @Autowired
   private AgentHealthInvoker invoker;
@@ -92,6 +99,13 @@ public class AgentHealthInvokerTest {
   @Test
   public void testServiceBaseUrl() {
     assertEquals(MOCK_SERVICE_URL, invoker.getServiceBaseUrl());
+  }
+
+  @Test
+  public void testHealthIndicator() {
+    assertNotNull(invoker.getHealthIndicator());
+    assertTrue(
+        AgentHealthIndicator.class.isAssignableFrom(invoker.getHealthIndicator().getClass()));
   }
 
 }
