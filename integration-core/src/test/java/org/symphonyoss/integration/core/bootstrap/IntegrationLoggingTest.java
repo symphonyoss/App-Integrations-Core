@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.symphonyoss.integration.Integration;
@@ -37,10 +38,13 @@ import org.symphonyoss.integration.IntegrationStatus;
 import org.symphonyoss.integration.api.client.json.JsonUtils;
 import org.symphonyoss.integration.exception.RemoteApiException;
 import org.symphonyoss.integration.healthcheck.CompositeHealthEndpoint;
+import org.symphonyoss.integration.healthcheck.services.invokers.ServiceHealthInvoker;
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.config.IntegrationSettings;
 import org.symphonyoss.integration.model.healthcheck.IntegrationHealth;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,6 +65,9 @@ public class IntegrationLoggingTest {
 
   @Mock
   private Integration integration;
+
+  @Spy
+  private List<ServiceHealthInvoker> serviceHealthInvokers = new ArrayList<>();
 
   @InjectMocks
   private IntegrationLogging integrationLogging =
@@ -83,6 +90,8 @@ public class IntegrationLoggingTest {
 
   @Before
   public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
+
     // Mocking configuration
     IntegrationSettings settings = new IntegrationSettings();
     settings.setConfigurationId(CONFIGURATION_ID);
