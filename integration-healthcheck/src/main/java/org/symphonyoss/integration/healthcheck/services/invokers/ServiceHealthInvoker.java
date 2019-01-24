@@ -63,7 +63,6 @@ public abstract class ServiceHealthInvoker {
    * Version field
    */
   private static final String VERSION = "version";
-  private static final int SERVICE_INFO_UPDATE_RATE = 30000;
 
   @Autowired
   protected IntegrationProperties properties;
@@ -121,7 +120,7 @@ public abstract class ServiceHealthInvoker {
     }
   }
 
-  @Scheduled(fixedRate = SERVICE_INFO_UPDATE_RATE)
+  @Scheduled(fixedRateString = "${integration_bridge.health-check.service-scheduler-update-rate:30000}")
   public void updateServiceHealth() {
     IntegrationBridgeServiceInfo serviceInfo = retrieveServiceInfo();
     getHealthIndicator().setServiceInfo(serviceInfo);
