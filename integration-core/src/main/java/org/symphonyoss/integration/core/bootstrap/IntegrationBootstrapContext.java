@@ -25,8 +25,6 @@ import static org.symphonyoss.integration.core.properties.IntegrationBootstrapCo
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .NO_INTEGRATION_FOR_BOOTSTRAP;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .POLLING_AGENT_HEALTH_CHECK;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .POLLING_STOPPED;
 import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
     .POLLING_STOPPED_SOLUTION;
@@ -49,7 +47,6 @@ import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.authentication.AuthenticationProxy;
 import org.symphonyoss.integration.core.NullIntegration;
 import org.symphonyoss.integration.core.runnable.IntegrationAbstractRunnable;
-import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -64,13 +61,7 @@ import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 import org.symphonyoss.integration.utils.IntegrationUtils;
 
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -87,7 +78,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   public static final Integer DEFAULT_POOL_SIZE = 10;
 
-  public static final String INITAL_DELAY = "50";
+  public static final String INITIAL_DELAY = "50";
 
   public static final String DEFAULT_DELAY = "60000";
 
@@ -109,7 +100,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private BlockingQueue<IntegrationBootstrapInfo> integrationsToRegister =
       new LinkedTransferQueue<>();
 
-  private ExecutorService servicePool;
+  //private ExecutorService servicePool;
 
   private ScheduledExecutorService scheduler;
 
@@ -145,11 +136,10 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   @Override
   public void startup() {
     DistributedTracingUtils.setMDC();
-    this.scheduler = Executors.newScheduledThreadPool(DEFAULT_POOL_SIZE);
-    this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
+    this.scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Retrier", false));
+    //this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE, new NamedThreadFactory("Service", false));
 
     initIntegrations();
-
   }
 
   /**
@@ -176,7 +166,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       }
 
       String delay = System.getProperty(BOOTSTRAP_DELAY_KEY, DEFAULT_DELAY);
-      String initialDelay = System.getProperty(BOOTSTRAP_INITIAL_DELAY_KEY, INITAL_DELAY);
+      String initialDelay = System.getProperty(BOOTSTRAP_INITIAL_DELAY_KEY, INITIAL_DELAY);
       scheduleHandleIntegrations(Long.valueOf(initialDelay), Long.valueOf(delay),
           TimeUnit.MILLISECONDS);
       // deals with unknown apps.
@@ -255,7 +245,8 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
           if ((application != null) && (ApplicationState.PROVISIONED.equals(
               application.getState()))) {
-            submitPoolTask(info);
+            //submitPoolTask(info);
+            setupIntegration(info);
           }
         }
       }
@@ -264,14 +255,14 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     }
   }
 
-  private void submitPoolTask(final IntegrationBootstrapInfo info) {
-    this.servicePool.submit(new IntegrationAbstractRunnable(MDC.get(TRACE_ID)) {
-      @Override
-      protected void execute() {
-        setupIntegration(info);
-      }
-    });
-  }
+//  private void submitPoolTask(final IntegrationBootstrapInfo info) {
+//    this.servicePool.submit(new IntegrationAbstractRunnable(MDC.get(TRACE_ID)) {
+//      @Override
+//      protected void execute() {
+//        setupIntegration(info);
+//      }
+//    });
+//  }
 
   /**
    * Logs the application health, however the logging should only happen on these occasions: after
@@ -345,7 +336,7 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
     destroyIntegrations();
 
     this.scheduler.shutdown();
-    this.servicePool.shutdown();
+//    this.servicePool.shutdown();
   }
 
   private void destroyIntegrations() {

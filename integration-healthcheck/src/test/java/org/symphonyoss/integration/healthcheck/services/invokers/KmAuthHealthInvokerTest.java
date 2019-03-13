@@ -1,15 +1,5 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,17 +20,16 @@ import org.symphonyoss.integration.healthcheck.services.indicators.KmAuthHealthI
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test class to validate {@link KmAuthHealthInvoker}
@@ -85,8 +74,6 @@ public class KmAuthHealthInvokerTest {
 
   private static Invocation.Builder invocationBuilder;
   private static Client client;
-  private static AsyncInvoker asyncInvoker;
-  private static Future<Response> future;
 
   @BeforeClass
   public static void setup() {
@@ -94,15 +81,11 @@ public class KmAuthHealthInvokerTest {
 
     client = mock(Client.class);
     invocationBuilder = mock(Invocation.Builder.class);
-    asyncInvoker = mock(AsyncInvoker.class);
-    future = mock(Future.class);
 
     doReturn(target).when(client).target(MOCK_AGGREGATED_URL);
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
-    doReturn(asyncInvoker).when(invocationBuilder).async();
-    doReturn(future).when(asyncInvoker).get();
   }
 
   @Before
@@ -116,11 +99,10 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testInvalidHealthResponse()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testInvalidHealthResponse() {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("invalid").when(mockResponse).readEntity(String.class);
 
@@ -134,11 +116,10 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testAggregatedHCResponseDown()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testAggregatedHCResponseDown() {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{\"pod\": \"true\"}").when(mockResponse).readEntity(String.class);
 
@@ -152,11 +133,10 @@ public class KmAuthHealthInvokerTest {
   }
 
   @Test
-  public void testAggregatedHCResponseUp()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testAggregatedHCResponseUp() {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(future).get(any(Long.class), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn(MOCK_HC_RESPONSE).when(mockResponse).readEntity(String.class);
 

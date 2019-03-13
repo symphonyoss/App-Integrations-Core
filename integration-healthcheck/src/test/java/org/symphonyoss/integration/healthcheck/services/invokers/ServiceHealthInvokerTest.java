@@ -16,16 +16,6 @@
 
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,17 +42,18 @@ import org.symphonyoss.integration.healthcheck.services.indicators.ServiceHealth
 import org.symphonyoss.integration.logging.LogMessageSource;
 import org.symphonyoss.integration.model.yaml.IntegrationProperties;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit test for {@link ServiceHealthInvoker}
@@ -104,8 +95,6 @@ public class ServiceHealthInvokerTest {
 
   private Invocation.Builder invocationBuilder;
   private static Client client;
-  private static AsyncInvoker asyncInvoker;
-  private static Future<Response> future;
 
   private MockApplicationPublisher<ServiceVersionUpdatedEventData> publisher =
       new MockApplicationPublisher<>();
@@ -115,8 +104,6 @@ public class ServiceHealthInvokerTest {
     WebTarget target = mock(WebTarget.class);
     client = mock(Client.class);
     invocationBuilder = mock(Invocation.Builder.class);
-    asyncInvoker = mock(AsyncInvoker.class);
-    future = mock(Future.class);
 
     doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP_TYPE, MOCK_SERVICE_NAME);
     doReturn(client).when(authenticationProxy).httpClientForUser(MOCK_APP2_TYPE, MOCK_SERVICE_NAME);
@@ -125,8 +112,6 @@ public class ServiceHealthInvokerTest {
     doReturn(target).when(target).property(anyString(), any());
     doReturn(invocationBuilder).when(target).request();
     doReturn(invocationBuilder).when(invocationBuilder).accept(MediaType.APPLICATION_JSON_TYPE);
-    doReturn(asyncInvoker).when(invocationBuilder).async();
-    doReturn(future).when(asyncInvoker).get();
 
     ReflectionTestUtils.setField(healthInvoker, "publisher", publisher);
     healthIndicator.setServiceInfo(null);
@@ -144,9 +129,8 @@ public class ServiceHealthInvokerTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testRuntimeException()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    doThrow(RuntimeException.class).when(future).get(anyLong(), any(TimeUnit.class));
+  public void testRuntimeException() {
+    doThrow(RuntimeException.class).when(invocationBuilder).get();
 
     healthInvoker.updateServiceHealth();
 
@@ -155,39 +139,36 @@ public class ServiceHealthInvokerTest {
   }
 
   @Test
-  public void testInterruptedException()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    doThrow(InterruptedException.class).when(future).get(anyLong(), any(TimeUnit.class));
+  public void testInterruptedException() {
+    doThrow(InterruptedException.class).when(invocationBuilder).get();
 
     assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
   }
 
   @Test
-  public void testExecutionException()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    doThrow(ExecutionException.class).when(future).get(anyLong(), any(TimeUnit.class));
+  public void testExecutionException() {
+    doThrow(ExecutionException.class).when(invocationBuilder).get();
 
     assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
   }
 
   @Test
-  public void testTimeoutException()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    doThrow(TimeoutException.class).when(future).get(anyLong(), any(TimeUnit.class));
+  public void testTimeoutException() {
+    doThrow(TimeoutException.class).when(invocationBuilder).get();
 
     assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
   }
 
   @Test
-  public void testServiceDown() throws InterruptedException, ExecutionException, TimeoutException {
+  public void testServiceDown() {
     Response responseError = Response.serverError().build();
-    doReturn(responseError).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(responseError).when(invocationBuilder).get();
 
     assertNull(healthInvoker.getHealthIndicator().getServiceInfo());
   }
 
   @Test
-  public void testServiceUp() throws InterruptedException, ExecutionException, TimeoutException {
+  public void testServiceUp() {
     mockServiceUp();
 
     IntegrationBridgeServiceInfo
@@ -210,11 +191,10 @@ public class ServiceHealthInvokerTest {
 
 
   @Test
-  public void testServiceUpWithoutVersion()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testServiceUpWithoutVersion() {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{}").when(mockResponse).readEntity(String.class);
 
@@ -233,11 +213,10 @@ public class ServiceHealthInvokerTest {
   }
 
   @Test
-  public void testServiceUnprocessableVersion()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testServiceUnprocessableVersion() {
     Response mockResponse = mock(Response.class);
 
-    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn("{\" invalid").when(mockResponse).readEntity(String.class);
 
@@ -256,8 +235,7 @@ public class ServiceHealthInvokerTest {
   }
 
   @Test
-  public void testHandleHealthCheckEventWithoutServiceName()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testHandleHealthCheckEventWithoutServiceName() {
     mockServiceUp();
 
     HealthCheckEventData event = new HealthCheckEventData(StringUtils.EMPTY);
@@ -267,8 +245,7 @@ public class ServiceHealthInvokerTest {
   }
 
   @Test
-  public void testHandleHealthCheckEventServiceUp()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testHandleHealthCheckEventServiceUp() {
     mockServiceUp();
 
     String serviceName = healthInvoker.getServiceName().toString();
@@ -287,11 +264,11 @@ public class ServiceHealthInvokerTest {
     return expectedInfo;
   }
 
-  private void mockServiceUp() throws InterruptedException, ExecutionException, TimeoutException {
+  private void mockServiceUp() {
     Response mockResponse = mock(Response.class);
     String responseText = String.format("{\"version\": \"%s\"}", MOCK_CURRENT_VERSION);
 
-    doReturn(mockResponse).when(future).get(anyLong(), any(TimeUnit.class));
+    doReturn(mockResponse).when(invocationBuilder).get();
     doReturn(Response.Status.OK.getStatusCode()).when(mockResponse).getStatus();
     doReturn(responseText).when(mockResponse).readEntity(String.class);
   }

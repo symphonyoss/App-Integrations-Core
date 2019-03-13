@@ -1,15 +1,7 @@
 package org.symphonyoss.integration.healthcheck.services.invokers;
 
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .EXECUTION_EXCEPTION;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .INTERRUPTED_EXCEPTION;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.IO_EXCEPTION;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .TIMEOUT_EXCEPTION;
-import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties
-    .UNREGISTERED_USER;
+import static org.symphonyoss.integration.healthcheck.properties.HealthCheckProperties.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -173,36 +166,24 @@ public abstract class ServiceHealthInvoker {
     try {
       HttpClientConfig timeouts = properties.getHttpClientConfig();
       Invocation.Builder invocationBuilder = client.target(healthCheckUrl)
-          .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeout())
-          .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeout())
-          .request()
-          .accept(MediaType.APPLICATION_JSON_TYPE);
+              .property(ClientProperties.CONNECT_TIMEOUT, timeouts.getConnectTimeout())
+              .property(ClientProperties.READ_TIMEOUT, timeouts.getReadTimeout())
+              .request()
+              .accept(MediaType.APPLICATION_JSON_TYPE);
 
       LOG.info("Health Check URL: " + healthCheckUrl);
 
-      AsyncInvoker asyncInvoker = invocationBuilder.async();
-      Future<Response> future = asyncInvoker.get();
-
-      // This should fail before the read timeout, to avoid hanging threads
-      // due to a response not being finished
-      response = future.get(timeouts.getReadTimeout() / 2, TimeUnit.MILLISECONDS);
-
+      response = invocationBuilder.get();
       return retrieveHealthResponse(response);
-    } catch (InterruptedException e) {
-      LOG.error(logMessageSource.getMessage(INTERRUPTED_EXCEPTION), e);
-      return null;
-    } catch (ExecutionException e) {
-      LOG.error(logMessageSource.getMessage(EXECUTION_EXCEPTION), e);
-      return null;
-    } catch (TimeoutException e) {
-      LOG.error(
-          logMessageSource.getMessage(TIMEOUT_EXCEPTION, getHealthCheckUrl(), e.getMessage()), e);
-      return null;
+    } catch (ProcessingException ex) {
+      LOG.error(logMessageSource.getMessage(PROCESSING_EXCEPTION, healthCheckUrl, ex.getMessage()));
     } finally {
       if (response != null) {
         response.close();
       }
     }
+
+    return null;
   }
 
   /**
