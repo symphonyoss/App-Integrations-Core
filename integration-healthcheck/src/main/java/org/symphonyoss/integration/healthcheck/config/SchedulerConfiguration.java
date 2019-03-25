@@ -9,11 +9,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ * Configures and register an {@link Executor} to be used system wide by Spring's scheduling subsystem.
+ */
 @Configuration
 @EnableScheduling
 public class SchedulerConfiguration implements SchedulingConfigurer {
-
-    public static final int CORE_POOL_SIZE = 2;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {

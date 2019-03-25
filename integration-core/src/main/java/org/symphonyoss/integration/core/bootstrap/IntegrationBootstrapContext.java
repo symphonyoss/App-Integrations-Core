@@ -16,24 +16,6 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .FAIL_BOOTSTRAP_INTEGRATION;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .FAIL_BOOTSTRAP_INTEGRATION_RETRYING;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .INTEGRATION_SUCCESSFULLY_BOOTSTRAPPED;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .NO_INTEGRATION_FOR_BOOTSTRAP;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .POLLING_STOPPED;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .POLLING_STOPPED_SOLUTION;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .SHUTTING_DOWN_INTEGRATION;
-import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties
-    .VERIFY_NEW_INTEGRATIONS;
-import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +46,9 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.symphonyoss.integration.core.properties.IntegrationBootstrapContextProperties.*;
+import static org.symphonyoss.integration.logging.DistributedTracingUtils.TRACE_ID;
+
 /**
  * Bootstraps all {@link Integration} that exists on the Spring context.
  *
@@ -75,8 +60,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationBootstrapContext.class);
 
   private static final int MAX_RETRY_ATTEMPTS_FOR_LIFECYCLE_EXCEPTION = 5;
-
-  public static final Integer DEFAULT_POOL_SIZE = 10;
 
   public static final String INITIAL_DELAY = "50";
 
@@ -99,8 +82,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
 
   private BlockingQueue<IntegrationBootstrapInfo> integrationsToRegister =
       new LinkedTransferQueue<>();
-
-  //private ExecutorService servicePool;
 
   private ScheduledExecutorService scheduler;
 
@@ -137,7 +118,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
   public void startup() {
     DistributedTracingUtils.setMDC();
     this.scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Retrier", false));
-    //this.servicePool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE, new NamedThreadFactory("Service", false));
 
     initIntegrations();
   }
@@ -254,15 +234,6 @@ public class IntegrationBootstrapContext implements IntegrationBootstrap {
       LOGGER.error(logMessage.getMessage(POLLING_STOPPED), e, POLLING_STOPPED_SOLUTION);
     }
   }
-
-//  private void submitPoolTask(final IntegrationBootstrapInfo info) {
-//    this.servicePool.submit(new IntegrationAbstractRunnable(MDC.get(TRACE_ID)) {
-//      @Override
-//      protected void execute() {
-//        setupIntegration(info);
-//      }
-//    });
-//  }
 
   /**
    * Logs the application health, however the logging should only happen on these occasions: after
