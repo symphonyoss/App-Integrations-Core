@@ -16,18 +16,6 @@
 
 package org.symphonyoss.integration.core.bootstrap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.symphonyoss.integration.Integration;
 import org.symphonyoss.integration.IntegrationStatus;
-import org.symphonyoss.integration.event.HealthCheckEventData;
 import org.symphonyoss.integration.exception.IntegrationRuntimeException;
 import org.symphonyoss.integration.exception.authentication.ConnectivityException;
 import org.symphonyoss.integration.exception.bootstrap.RetryLifecycleException;
@@ -61,13 +48,13 @@ import org.symphonyoss.integration.utils.IntegrationUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link IntegrationBootstrapContext}.

@@ -2,11 +2,15 @@
 <Configuration>
 
     <Properties>
-        <Property name="LOG4J2_BASE_DIR">/data/symphony/ib</Property>
+        <Property name="LOG4J2_BASE_DIR">/tmp/data/symphony/ib</Property>
         <Property name="LOG4J2_LEVEL">INFO</Property>
         <Property name="LOG4J2_FILE_LEVEL">INFO</Property>
         <Property name="LOG4J2_FILE_ERROR_LEVEL">WARN</Property>
-        <Property name="LOG4J2_OUTPUT_CONSOLE">false</Property>
+        <Property name="LOG4J2_OUTPUT_CONSOLE">true</Property>
+
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
 
         <Property name="symphony.maxLogsPerBulkRequest">10</Property>
         <Property name="symphony.maxPayloadSize">100000</Property>
@@ -16,7 +20,8 @@
 
         <Console name="console" target="SYSTEM_OUT">
             <ThresholdFilter level="${env:LOG4J2_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %20c{1} %M [Trace ID: %X{X-Trace-Id}] - %m%n"/>
+            <PatternLayout
+                    pattern="%clr{%d{${LOG_DATEFORMAT_PATTERN}}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} [%X{X-Trace-Id}] %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}" />
         </Console>
 
         <RollingFile name="error-rolling-file"
@@ -43,40 +48,41 @@
             </Policies>
         </RollingFile>
 
-        <SymphonyOnPremHttpsAppender name="OnPremHttpsAppender" url="${sys:cloudLogHarvesterURL}"
-                                     maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"
-                                     maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"
-                                     maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5"
-                                     sinkFlushingInterval="5"
-                                     sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration." instanceId="integration-bridge"
-                                     sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">
-            <PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>
-        </SymphonyOnPremHttpsAppender>
+        <!--<SymphonyOnPremHttpsAppender name="OnPremHttpsAppender" url="${sys:cloudLogHarvesterURL}"-->
+                                     <!--maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"-->
+                                     <!--maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"-->
+                                     <!--maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5"-->
+                                     <!--sinkFlushingInterval="5"-->
+                                     <!--sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration." instanceId="integration-bridge"-->
+                                     <!--sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">-->
+            <!--<PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>-->
+        <!--</SymphonyOnPremHttpsAppender>-->
 
-        <SymphonyOnPremHttpsAppender name="OnPremHttpsAppenderError" url="${sys:cloudLogHarvesterURL}"
-                                     maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"
-                                     maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"
-                                     maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5" sinkFlushingInterval="5"
-                                     sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration-error." instanceId="integration-bridge"
-                                     sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">
-            <PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>
-            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
-        </SymphonyOnPremHttpsAppender>
+        <!--<SymphonyOnPremHttpsAppender name="OnPremHttpsAppenderError" url="${sys:cloudLogHarvesterURL}"-->
+                                     <!--maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"-->
+                                     <!--maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"-->
+                                     <!--maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5" sinkFlushingInterval="5"-->
+                                     <!--sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration-error." instanceId="integration-bridge"-->
+                                     <!--sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">-->
+            <!--<PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>-->
+            <!--<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>-->
+        <!--</SymphonyOnPremHttpsAppender>-->
 
     </Appenders>
 
     <Loggers>
 
-        <AsyncLogger name="org.symphonyoss" level="${env:LOG4J2_LEVEL}" additivity="${env:LOG4J2_OUTPUT_CONSOLE}">
-            <AppenderRef ref="rolling-file"/>
-            <AppenderRef ref="error-rolling-file"/>
-            <AppenderRef ref="OnPremHttpsAppender" />
-        </AsyncLogger>
+        <!--<AsyncLogger name="org.symphonyoss" level="${env:LOG4J2_LEVEL}" additivity="${env:LOG4J2_OUTPUT_CONSOLE}">-->
+            <!--<AppenderRef ref="rolling-file"/>-->
+            <!--<AppenderRef ref="error-rolling-file"/>-->
+            <!--<AppenderRef ref="OnPremHttpsAppender" />-->
+            <!--<AppenderRef ref="console" />-->
+        <!--</AsyncLogger>-->
 
         <AsyncRoot level="${env:LOG4J2_LEVEL}">
             <AppenderRef ref="console"/>
             <AppenderRef ref="error-rolling-file"/>
-            <AppenderRef ref="OnPremHttpsAppenderError" />
+            <!--<AppenderRef ref="OnPremHttpsAppenderError" />-->
         </AsyncRoot>
 
     </Loggers>
