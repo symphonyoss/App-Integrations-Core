@@ -2,7 +2,7 @@
 <Configuration>
 
     <Properties>
-        <Property name="LOG4J2_BASE_DIR">/tmp/data/symphony/ib</Property>
+        <Property name="LOG4J2_BASE_DIR">/data/symphony/ib</Property>
         <Property name="LOG4J2_LEVEL">INFO</Property>
         <Property name="LOG4J2_FILE_LEVEL">INFO</Property>
         <Property name="LOG4J2_FILE_ERROR_LEVEL">WARN</Property>
@@ -47,44 +47,14 @@
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
-
-        <!--<SymphonyOnPremHttpsAppender name="OnPremHttpsAppender" url="${sys:cloudLogHarvesterURL}"-->
-                                     <!--maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"-->
-                                     <!--maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"-->
-                                     <!--maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5"-->
-                                     <!--sinkFlushingInterval="5"-->
-                                     <!--sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration." instanceId="integration-bridge"-->
-                                     <!--sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">-->
-            <!--<PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>-->
-        <!--</SymphonyOnPremHttpsAppender>-->
-
-        <!--<SymphonyOnPremHttpsAppender name="OnPremHttpsAppenderError" url="${sys:cloudLogHarvesterURL}"-->
-                                     <!--maxLogsPerBulkRequest="${sys:symphony.maxLogsPerBulkRequest}"-->
-                                     <!--maxLogsPerBulkRequestFromSink="${sys:symphony.maxLogsPerBulkRequest}"-->
-                                     <!--maxPayloadSize="${sys:symphony.maxPayloadSize}" flushingInterval="5" sinkFlushingInterval="5"-->
-                                     <!--sinkFileName="${env:LOG4J2_BASE_DIR}/logs/integration-error." instanceId="integration-bridge"-->
-                                     <!--sessionProviderClassName="com.symphony.integration.logging.IntegrationBridgeSessionProvider">-->
-            <!--<PatternLayout pattern="%d %-5p [%c] (%t) [Trace ID: %X{X-Trace-Id}] %m%n"/>-->
-            <!--<ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>-->
-        <!--</SymphonyOnPremHttpsAppender>-->
-
     </Appenders>
 
     <Loggers>
-
-        <!--<AsyncLogger name="org.symphonyoss" level="${env:LOG4J2_LEVEL}" additivity="${env:LOG4J2_OUTPUT_CONSOLE}">-->
-            <!--<AppenderRef ref="rolling-file"/>-->
-            <!--<AppenderRef ref="error-rolling-file"/>-->
-            <!--<AppenderRef ref="OnPremHttpsAppender" />-->
-            <!--<AppenderRef ref="console" />-->
-        <!--</AsyncLogger>-->
-
         <AsyncRoot level="${env:LOG4J2_LEVEL}">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="rolling-file"/>
             <AppenderRef ref="error-rolling-file"/>
-            <!--<AppenderRef ref="OnPremHttpsAppenderError" />-->
         </AsyncRoot>
-
     </Loggers>
 
 </Configuration>
