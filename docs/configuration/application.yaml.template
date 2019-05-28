@@ -57,25 +57,11 @@ applications:
       password: <<GITHUB_CERT_PWD>>
       type: pkcs12
 
-  salesforce:
-    state: PROVISIONED
-    keystore:
-      file: <<SALESFORCE_CERT_FILE>>
-      password: <<SALESFORCE_CERT_PWD>>
-      type: pkcs12
-
   universal:
     state: PROVISIONED
     keystore:
       file: <<UNIVERSAL_CERT_FILE>>
       password: <<UNIVERSAL_CERT_PWD>>
-      type: pkcs12
-
-  trello:
-    state: PROVISIONED
-    keystore:
-      file: <<TRELLO_CERT_FILE>>
-      password: <<TRELLO_CERT_PWD>>
       type: pkcs12
 
   zapier:

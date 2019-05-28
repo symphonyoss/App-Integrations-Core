@@ -45,17 +45,7 @@ applications:
       password: changeit
     state: PROVISIONED
 
-  salesforce:
-    keystore:
-      password: changeit
-    state: PROVISIONED
-
   universal:
-    keystore:
-      password: changeit
-    state: PROVISIONED
-
-  trello:
     keystore:
       password: changeit
     state: PROVISIONED

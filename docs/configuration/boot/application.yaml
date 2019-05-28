@@ -54,24 +54,10 @@ applications:
       password: password
       type: pkcs12
 
-  salesforce:
-    state: PROVISIONED
-    keystore: 
-      file: salesforce.p12 
-      password: password
-      type: pkcs12
-
   universal:
     state: PROVISIONED
     keystore: 
       file: universal.p12 
-      password: password
-      type: pkcs12 
-
-  trello:
-    state: PROVISIONED
-    keystore: 
-      file: trello.p12 
       password: password
       type: pkcs12 
 
