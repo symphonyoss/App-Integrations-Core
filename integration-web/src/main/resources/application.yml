@@ -32,7 +32,7 @@ spring:
       load-on-startup: 1
     static-path-pattern: /apps/**
   profiles:
-    active: jira, github, salesforce, universal, trello, zapier
+    active: jira, github, universal, zapier
 
 endpoints:
   enabled: false

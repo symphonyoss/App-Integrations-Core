@@ -12,7 +12,7 @@ server:
 
 spring:
   profiles:
-    active: jira, github, salesforce, universal, trello, zapier
+    active: jira, github, universal, zapier
 
 #
 # Time (in minutes) to persist in a local cache the pod certificate to check JWT signature

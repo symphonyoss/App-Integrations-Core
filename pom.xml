@@ -208,15 +208,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.symphonyoss.symphony.integrations</groupId>
-                                    <artifactId>integration-salesforce</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                                    <destFileName>integration-salesforce.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.symphonyoss.symphony.integrations</groupId>
                                     <artifactId>integration-universal-whi</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
